@@ -1,0 +1,269 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="postcss-and-autoprefixing-postcss-loader">
+    PostCSS and autoprefixing (postcss-loader)
+    <a class="headerlink" href="#postcss-and-autoprefixing-postcss-loader" title="Permalink to this headline">¶</a>
+</h1>
+<p><a href="https://postcss.org/" class="reference external" rel="external noopener noreferrer" target="_blank">PostCSS</a> is a CSS post-processing tool that can transform your CSS in a lot
+of cool ways, like <a href="https://github.com/postcss/autoprefixer" class="reference external" rel="external noopener noreferrer" target="_blank">autoprefixing</a>, <a href="https://stylelint.io/" class="reference external" rel="external noopener noreferrer" target="_blank">linting</a> and more!</p>
+<p>First enable it in <code translate="no" class="notranslate">webpack.config.js</code>:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">// webpack.config.js
+
+  Encore
+      // ...
+<span class="hljs-addition">+     .enablePostCssLoader()</span>
+  ;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then restart Encore. When you do, it will give you a command you can run to
+install any missing dependencies. After running that command and restarting
+Encore, you're done!</p>
+<p>Next, download any plugins you want, like <code translate="no" class="notranslate">autoprefixer</code>:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># if you use the Yarn package manager</span>
+<span class="hljs-prompt">$ </span>yarn add autoprefixer --dev
+
+<span class="hljs-comment"># if you use the npm package manager</span>
+<span class="hljs-prompt">$ </span>npm install autoprefixer --save-dev</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Next, create a <code translate="no" class="notranslate">postcss.config.js</code> file at the root of your project:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">plugins</span>: {
+        <span class="hljs-comment">// include whatever plugins you want</span>
+        <span class="hljs-comment">// but make sure you install these via yarn or npm!</span>
+
+        <span class="hljs-comment">// add browserslist config to package.json (see below)</span>
+        <span class="hljs-attr">autoprefixer</span>: {}
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! The <code translate="no" class="notranslate">postcss-loader</code> will now be used for all CSS, Sass, etc files.
+You can also pass options to the <a href="https://github.com/postcss/postcss-loader" class="reference external" rel="external noopener noreferrer" target="_blank">postcss-loader</a> by passing a callback:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">// webpack.config.js
+<span class="hljs-addition">+ const path = require('path');</span>
+
+  Encore
+      // ...
+<span class="hljs-addition">+     .enablePostCssLoader((options) =&gt; {</span>
+<span class="hljs-addition">+         options.postcssOptions = {</span>
+<span class="hljs-addition">+             // the directory where the postcss.config.js file is stored</span>
+<span class="hljs-addition">+             config: path.resolve(__dirname, 'sub-dir', 'custom.config.js'),</span>
+<span class="hljs-addition">+         };</span>
+<span class="hljs-addition">+     })</span>
+  ;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="browserslist_package_config"></span>
+<div class="section">
+<h2 id="adding-browserslist-to-package-json">
+    Adding browserslist to <code translate="no" class="notranslate">package.json</code>
+    <a class="headerlink" href="#adding-browserslist-to-package-json" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <code translate="no" class="notranslate">autoprefixer</code> (and many other tools) need to know what browsers you want to
+support. The best-practice is to configure this directly in your <code translate="no" class="notranslate">package.json</code>
+(so that all the tools can read this):</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">{
+<span class="hljs-addition">+  "browserslist": [</span>
+<span class="hljs-addition">+    "defaults"</span>
+<span class="hljs-addition">+  ]</span>
+  }</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">defaults</code> option is recommended for most users and would be equivalent
+to the following browserslist:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">{
+<span class="hljs-addition">+  "browserslist": [</span>
+<span class="hljs-addition">+    "&gt; 0.5%",</span>
+<span class="hljs-addition">+    "last 2 versions",</span>
+<span class="hljs-addition">+    "Firefox ESR",</span>
+<span class="hljs-addition">+    "not dead"</span>
+<span class="hljs-addition">+  ]</span>
+  }</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>See <a href="https://github.com/browserslist/browserslist" class="reference external" rel="external noopener noreferrer" target="_blank">browserslist</a> for more details on the syntax.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

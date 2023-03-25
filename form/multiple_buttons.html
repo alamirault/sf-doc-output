@@ -1,0 +1,164 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-submit-a-form-with-multiple-buttons">
+    How to Submit a Form with Multiple Buttons
+    <a class="headerlink" href="#how-to-submit-a-form-with-multiple-buttons" title="Permalink to this headline">¶</a>
+</h1>
+<p>When your form contains more than one submit button, you will want to check
+which of the buttons was clicked to adapt the program flow in your controller.
+To do this, add a second button with the caption &quot;Save and Add&quot; to your form:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createFormBuilder(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>)
+    <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'task'</span>, TextType<span class="hljs-operator">::</span>class)
+    <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'dueDate'</span>, DateType<span class="hljs-operator">::</span>class)
+    <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'save'</span>, SubmitType<span class="hljs-operator">::</span>class, [<span class="hljs-string">'label'</span> =&gt; <span class="hljs-string">'Create Task'</span>])
+    <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'saveAndAdd'</span>, SubmitType<span class="hljs-operator">::</span>class, [<span class="hljs-string">'label'</span> =&gt; <span class="hljs-string">'Save and Add'</span>])
+    <span class="hljs-operator">-&gt;</span>getForm();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In your controller, use the button's
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/ClickableInterface.php#method_isClicked" class="reference external" title="Symfony\Component\Form\ClickableInterface::isClicked()" rel="external noopener noreferrer" target="_blank">isClicked()</a> method for
+querying if the &quot;Save and Add&quot; button was clicked:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isSubmitted() &amp;&amp; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isValid()) {
+    <span class="hljs-comment">// ... perform some action, such as saving the task to the database</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>nextAction</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'saveAndAdd'</span>)<span class="hljs-operator">-&gt;</span>isClicked()
+        ? <span class="hljs-string">'task_new'</span>
+        : <span class="hljs-string">'task_success'</span>;
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>redirectToRoute(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>nextAction</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Or you can get the button's name by using the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Form.php#method_getClickedButton" class="reference external" title="Symfony\Component\Form\Form::getClickedButton()" rel="external noopener noreferrer" target="_blank">getClickedButton()</a> method of the form:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>getClickedButton() &amp;&amp; <span class="hljs-string">'saveAndAdd'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>getClickedButton()<span class="hljs-operator">-&gt;</span>getName()) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// when using nested forms, two or more buttons can have the same name;</span>
+<span class="hljs-comment">// in those cases, compare the button objects instead of the button names</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>getClickedButton() === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'saveAndAdd'</span>)){
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,715 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-architecture">
+    The Architecture
+    <a class="headerlink" href="#the-architecture" title="Permalink to this headline">¶</a>
+</h1>
+<p>You are my hero! Who would have thought that you would still be here after the first
+two parts? Your efforts will be well-rewarded soon. The first two parts didn't look
+too deeply at the architecture of the framework. Because it makes Symfony stand apart
+from the framework crowd, let's dive into the architecture now.</p>
+<div class="section">
+<h2 id="add-logging">
+    Add Logging
+    <a class="headerlink" href="#add-logging" title="Permalink to this headline">¶</a>
+</h2>
+<p>A new Symfony app is micro: it's basically just a routing &amp; controller system. But
+thanks to Flex, installing more features is simple.</p>
+<p>Want a logging system? No problem:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require logger</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This installs and configures (via a recipe) the powerful <a href="https://github.com/Seldaek/monolog" class="reference external" rel="external noopener noreferrer" target="_blank">Monolog</a> library. To
+use the logger in a controller, add a new argument type-hinted with <code translate="no" class="notranslate">LoggerInterface</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/DefaultController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Log</span>\<span class="hljs-title">LoggerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DefaultController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/hello/{name}', methods: ['GET'])]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>, LoggerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>logger</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>logger</span><span class="hljs-operator">-&gt;</span>info(<span class="hljs-string">"Saying hello to $name!"</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! The new log message will be written to <code translate="no" class="notranslate">var/log/dev.log</code>. The log
+file path or even a different method of logging can be configured by updating
+one of the config files added by the recipe.</p>
+</div>
+<div class="section">
+<h2 id="services-autowiring">
+    Services &amp; Autowiring
+    <a class="headerlink" href="#services-autowiring" title="Permalink to this headline">¶</a>
+</h2>
+<p>But wait! Something <em>very</em> cool just happened. Symfony read the <code translate="no" class="notranslate">LoggerInterface</code>
+type-hint and automatically figured out that it should pass us the Logger object!
+This is called <em>autowiring</em>.</p>
+<p>Every bit of work that's done in a Symfony app is done by an <em>object</em>: the Logger
+object logs things and the Twig object renders templates. These objects are called
+<em>services</em> and they are <em>tools</em> that help you build rich features.</p>
+<p>To make life awesome, you can ask Symfony to pass you a service by using a type-hint.
+What other possible classes or interfaces could you use? Find out by running:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:autowiring
+
+  <span class="hljs-comment"># this is just a *small* sample of the output...</span>
+
+  Describes a logger instance.
+  Psr\Log\LoggerInterface (monolog.logger)
+
+  Request stack that controls the lifecycle of requests.
+  Symfony\Component\HttpFoundation\RequestStack (request_stack)
+
+  RouterInterface is the interface that all Router classes must implement.
+  Symfony\Component\Routing\RouterInterface (router.default)
+
+  [...]</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This is just a short summary of the full list! And as you add more packages, this
+list of tools will grow!</p>
+</div>
+<div class="section">
+<h2 id="creating-services">
+    Creating Services
+    <a class="headerlink" href="#creating-services" title="Permalink to this headline">¶</a>
+</h2>
+<p>To keep your code organized, you can even create your own services! Suppose you
+want to generate a random greeting (e.g. &quot;Hello&quot;, &quot;Yo&quot;, etc). Instead of putting
+this code directly in your controller, create a new class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/GreetingGenerator.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetingGenerator</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRandomGreeting</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>greetings</span> = [<span class="hljs-string">'Hey'</span>, <span class="hljs-string">'Yo'</span>, <span class="hljs-string">'Aloha'</span>];
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>greeting</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>greetings</span>[array_rand(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>greetings</span>)];
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>greeting</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Great! You can use it immediately in your controller:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/DefaultController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">GreetingGenerator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Log</span>\<span class="hljs-title">LoggerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DefaultController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/hello/{name}', methods: ['GET'])]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>, LoggerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>logger</span>, GreetingGenerator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>generator</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>greeting</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>generator</span><span class="hljs-operator">-&gt;</span>getRandomGreeting();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>logger</span><span class="hljs-operator">-&gt;</span>info(<span class="hljs-string">"Saying $greeting to $name!"</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! Symfony will instantiate the <code translate="no" class="notranslate">GreetingGenerator</code> automatically and
+pass it as an argument. But, could we <em>also</em> move the logger logic to <code translate="no" class="notranslate">GreetingGenerator</code>?
+Yes! You can use autowiring inside a service to access <em>other</em> services. The only
+difference is that it's done in the constructor:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">&lt;?php
+  // src/GreetingGenerator.php
+<span class="hljs-addition">+ use Psr\Log\LoggerInterface;</span>
+
+  class GreetingGenerator
+  {
+<span class="hljs-addition">+     public function __construct(</span>
+<span class="hljs-addition">+         private LoggerInterface $logger,</span>
+<span class="hljs-addition">+     ) {</span>
+<span class="hljs-addition">+     }</span>
+
+      public function getRandomGreeting(): string
+      {
+          // ...
+
+<span class="hljs-addition">+        $this-&gt;logger-&gt;info('Using the greeting: '.$greeting);</span>
+
+           return $greeting;
+      }
+  }</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Yes! This works too: no configuration, no time wasted. Keep coding!</p>
+</div>
+<div class="section">
+<h2 id="twig-extension-autoconfiguration">
+    Twig Extension &amp; Autoconfiguration
+    <a class="headerlink" href="#twig-extension-autoconfiguration" title="Permalink to this headline">¶</a>
+</h2>
+<p>Thanks to Symfony's service handling, you can <em>extend</em> Symfony in many ways, like
+by creating an event subscriber or a security voter for complex authorization
+rules. Let's add a new filter to Twig called <code translate="no" class="notranslate">greet</code>. How? Create a class
+that extends <code translate="no" class="notranslate">AbstractExtension</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Twig/GreetExtension.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Twig</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">GreetingGenerator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">AbstractExtension</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">TwigFilter</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractExtension</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private GreetingGenerator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>greetingGenerator</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getFilters</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-keyword">new</span> TwigFilter(<span class="hljs-string">'greet'</span>, [<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>, <span class="hljs-string">'greetUser'</span>]),
+        ];
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">greetUser</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>)</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>greeting</span> =  <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>greetingGenerator<span class="hljs-operator">-&gt;</span>getRandomGreeting();
+
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"$greeting $name!"</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>After creating just <em>one</em> file, you can use this immediately:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/default/index.html.twig #}</span><span class="xml">
+</span><span class="hljs-comment">{# Will print something like "Hey Symfony!" #}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span></span><span class="hljs-template-variable">{{ name|greet }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>How does this work? Symfony notices that your class extends <code translate="no" class="notranslate">AbstractExtension</code>
+and so <em>automatically</em> registers it as a Twig extension. This is called autoconfiguration,
+and it works for <em>many</em> many things. Create a class and then extend a base class
+(or implement an interface). Symfony takes care of the rest.</p>
+</div>
+<div class="section">
+<h2 id="blazing-speed-the-cached-container">
+    Blazing Speed: The Cached Container
+    <a class="headerlink" href="#blazing-speed-the-cached-container" title="Permalink to this headline">¶</a>
+</h2>
+<p>After seeing how much Symfony handles automatically, you might be wondering: &quot;Doesn't
+this hurt performance?&quot; Actually, no! Symfony is blazing fast.</p>
+<p>How is that possible? The service system is managed by a very important object called
+the &quot;container&quot;. Most frameworks have a container, but Symfony's is unique because
+it's <em>cached</em>. When you loaded your first page, all of the service information was
+compiled and saved. This means that the autowiring and autoconfiguration features
+add <em>no</em> overhead! It also means that you get <em>great</em> errors: Symfony inspects and
+validates <em>everything</em> when the container is built.</p>
+<p>Now you might be wondering what happens when you update a file and the cache needs
+to rebuild? I like your thinking! It's smart enough to rebuild on the next page
+load. But that's really the topic of the next section.</p>
+</div>
+<div class="section">
+<h2 id="development-versus-production-environments">
+    Development Versus Production: Environments
+    <a class="headerlink" href="#development-versus-production-environments" title="Permalink to this headline">¶</a>
+</h2>
+<p>One of a framework's main jobs is to make debugging easy! And our app is <em>full</em> of
+great tools for this: the web debug toolbar displays at the bottom of the page, errors
+are big, beautiful &amp; explicit, and any configuration cache is automatically rebuilt
+whenever needed.</p>
+<p>But what about when you deploy to production? We will need to hide those tools and
+optimize for speed!</p>
+<p>This is solved by Symfony's <em>environment</em> system and there are three: <code translate="no" class="notranslate">dev</code>, <code translate="no" class="notranslate">prod</code>
+and <code translate="no" class="notranslate">test</code>. Based on the environment, Symfony loads different files in the <code translate="no" class="notranslate">config/</code>
+directory:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">config/
+├─ services.yaml
+├─ ...
+└─ packages/
+    ├─ framework.yaml
+    ├─ ...
+    ├─ **dev/**
+        ├─ monolog.yaml
+        └─ ...
+    ├─ **prod/**
+        └─ monolog.yaml
+    └─ **test/**
+        ├─ framework.yaml
+        └─ ...
+└─ routes/
+    ├─ annotations.yaml
+    └─ **dev/**
+        ├─ twig.yaml
+        └─ web_profiler.yaml</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This is a <em>powerful</em> idea: by changing one piece of configuration (the environment),
+your app is transformed from a debugging-friendly experience to one that's optimized
+for speed.</p>
+<p>Oh, how do you change the environment? Change the <code translate="no" class="notranslate">APP_ENV</code> environment variable
+from <code translate="no" class="notranslate">dev</code> to <code translate="no" class="notranslate">prod</code>:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff"># .env
+<span class="hljs-deletion">- APP_ENV=dev</span>
+<span class="hljs-addition">+ APP_ENV=prod</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>But I want to talk more about environment variables next. Change the value back
+to <code translate="no" class="notranslate">dev</code>: debugging tools are great when you're working locally.</p>
+</div>
+<div class="section">
+<h2 id="environment-variables">
+    Environment Variables
+    <a class="headerlink" href="#environment-variables" title="Permalink to this headline">¶</a>
+</h2>
+<p>Every app contains configuration that's different on each server - like database
+connection information or passwords. How should these be stored? In files? Or another way?</p>
+<p>Symfony follows the industry best practice by storing server-based configuration
+as <em>environment</em> variables. This means that Symfony works <em>perfectly</em> with
+Platform as a Service (PaaS) deployment systems as well as Docker.</p>
+<p>But setting environment variables while developing can be a pain. That's why your
+app automatically loads a <code translate="no" class="notranslate">.env</code> file. The keys in this file then become environment
+variables and are read by your app:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash"><span class="hljs-comment"># .env</span>
+<span class="hljs-comment">###&gt; symfony/framework-bundle ###</span>
+APP_ENV=dev
+APP_SECRET=cc86c7ca937636d5ddf1b754beb22a10
+<span class="hljs-comment">###&lt; symfony/framework-bundle ###</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>At first, the file doesn't contain much. But as your app grows, you'll add more
+configuration as you need it. But, actually, it gets much more interesting! Suppose
+your app needs a database ORM. Let's install the Doctrine ORM:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require doctrine</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Thanks to a new recipe installed by Flex, look at the <code translate="no" class="notranslate">.env</code> file again:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">###&gt; symfony/framework-bundle ###
+  APP_ENV=dev
+  APP_SECRET=cc86c7ca937636d5ddf1b754beb22a10
+  ###&lt; symfony/framework-bundle ###
+
+<span class="hljs-addition">+ ###&gt; doctrine/doctrine-bundle ###</span>
+<span class="hljs-addition">+ # ...</span>
+<span class="hljs-addition">+ DATABASE_URL=mysql://db_user:db_password@127.0.0.1:3306/db_name</span>
+<span class="hljs-addition">+ ###&lt; doctrine/doctrine-bundle ###</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The new <code translate="no" class="notranslate">DATABASE_URL</code> environment variable was added <em>automatically</em> and is already
+referenced by the new <code translate="no" class="notranslate">doctrine.yaml</code> configuration file. By combining environment
+variables and Flex, you're using industry best practices without any extra effort.</p>
+</div>
+<div class="section">
+<h2 id="keep-going">
+    Keep Going!
+    <a class="headerlink" href="#keep-going" title="Permalink to this headline">¶</a>
+</h2>
+<p>Call me crazy, but after reading this part, you should be comfortable with the most
+<em>important</em> parts of Symfony. Everything in Symfony is designed to get out of your
+way so you can keep coding and adding features, all with the speed and quality you
+demand.</p>
+<p>That's all for the quick tour. From authentication, to forms, to caching, there is
+so much more to discover. Ready to dig into these topics now? Look no further - go
+to the official <a href="../index.html" class="reference internal">Symfony Documentation</a> and pick any guide you want.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

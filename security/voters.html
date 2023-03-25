@@ -1,0 +1,983 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <span id="security/custom-voter"></span>
+<div class="section">
+<h1 id="how-to-use-voters-to-check-user-permissions">
+    How to Use Voters to Check User Permissions
+    <a class="headerlink" href="#how-to-use-voters-to-check-user-permissions" title="Permalink to this headline">¶</a>
+</h1>
+<p>Voters are Symfony's most powerful way of managing permissions. They allow you
+to centralize all permission logic, then reuse them in many places.</p>
+<p>However, if you don't reuse permissions or your rules are basic, you can always
+put that logic directly into your controller instead. Here's an example how
+this could look like, if you want to make a route accessible to the &quot;owner&quot; only:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/PostController.php</span>
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// inside your controller action</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span><span class="hljs-operator">-&gt;</span>getOwner() !== <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getUser()) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createAccessDeniedException();
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In that sense, the following example used throughout this page is a minimal
+example for voters.</p>
+<p>Here's how Symfony works with voters: All voters are called each time you
+use the <code translate="no" class="notranslate">isGranted()</code> method on Symfony's authorization checker or call
+<code translate="no" class="notranslate">denyAccessUnlessGranted()</code> in a controller (which uses the authorization
+checker), or by <a href="access_control.html#security-access-control-enforcement-options" class="reference internal">access controls</a>.</p>
+<p>Ultimately, Symfony takes the responses from all voters and makes the final
+decision (to allow or deny access to the resource) according to
+<a href="voters.html#security-voters-change-strategy" class="reference internal">the strategy defined in the application</a>,
+which can be: affirmative, consensus, unanimous or priority.</p>
+<div class="section">
+<h2 id="the-voter-interface">
+    The Voter Interface
+    <a class="headerlink" href="#the-voter-interface" title="Permalink to this headline">¶</a>
+</h2>
+<p>A custom voter needs to implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Core/Authorization/Voter/VoterInterface.php" class="reference external" title="Symfony\Component\Security\Core\Authorization\Voter\VoterInterface" rel="external noopener noreferrer" target="_blank">VoterInterface</a>
+or extend <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Core/Authorization/Voter/Voter.php" class="reference external" title="Symfony\Component\Security\Core\Authorization\Voter\Voter" rel="external noopener noreferrer" target="_blank">Voter</a>,
+which makes creating a voter even easier:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Authentication</span>\<span class="hljs-title">Token</span>\<span class="hljs-title">TokenInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Authorization</span>\<span class="hljs-title">Voter</span>\<span class="hljs-title">VoterInterface</span>;
+
+<span class="hljs-keyword">abstract</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Voter</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">VoterInterface</span>
+</span>{
+    <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">supports</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>attribute</span>, mixed <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span>)</span>: <span class="hljs-title">bool</span></span>;
+    <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">voteOnAttribute</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>attribute</span>, mixed <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span>, TokenInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span>)</span>: <span class="hljs-title">bool</span></span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="how-to-use-the-voter-in-a-controller"></span>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Checking each voter several times can be time consuming for applications
+that perform a lot of permission checks. To improve performance in those cases,
+you can make your voters implement the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Core/Authorization/Voter/CacheableVoterInterface.php" class="reference external" title="Symfony\Component\Security\Core\Authorization\Voter\CacheableVoterInterface" rel="external noopener noreferrer" target="_blank">CacheableVoterInterface</a>.
+This allows the access decision manager to remember the attribute and type
+of subject supported by the voter, to only call the needed voters each time.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="setup-checking-for-access-in-a-controller">
+    Setup: Checking for Access in a Controller
+    <a class="headerlink" href="#setup-checking-for-access-in-a-controller" title="Permalink to this headline">¶</a>
+</h2>
+<p>Suppose you have a <code translate="no" class="notranslate">Post</code> object and you need to decide whether or not the current
+user can <em>edit</em> or <em>view</em> the object. In your controller, you'll check access with
+code like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/PostController.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/posts/{id}', name: 'post_show')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// get a Post object - e.g. query for it</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span> = ...;
+
+        <span class="hljs-comment">// check for "view" access: calls all voters</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>denyAccessUnlessGranted(<span class="hljs-string">'view'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-comment">#[Route('/posts/{id}/edit', name: 'post_edit')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">edit</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// get a Post object - e.g. query for it</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span> = ...;
+
+        <span class="hljs-comment">// check for "edit" access: calls all voters</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>denyAccessUnlessGranted(<span class="hljs-string">'edit'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">denyAccessUnlessGranted()</code> method (and also the <code translate="no" class="notranslate">isGranted()</code> method)
+calls out to the &quot;voter&quot; system. Right now, no voters will vote on whether or not
+the user can &quot;view&quot; or &quot;edit&quot; a <code translate="no" class="notranslate">Post</code>. But you can create your <em>own</em> voter that
+decides this using whatever logic you want.</p>
+</div>
+<div class="section">
+<h2 id="creating-the-custom-voter">
+    Creating the custom Voter
+    <a class="headerlink" href="#creating-the-custom-voter" title="Permalink to this headline">¶</a>
+</h2>
+<p>Suppose the logic to decide if a user can &quot;view&quot; or &quot;edit&quot; a <code translate="no" class="notranslate">Post</code> object is
+pretty complex. For example, a <code translate="no" class="notranslate">User</code> can always edit or view a <code translate="no" class="notranslate">Post</code> they created.
+And if a <code translate="no" class="notranslate">Post</code> is marked as &quot;public&quot;, anyone can view it. A voter for this situation
+would look like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Security/PostVoter.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Post</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">User</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Authentication</span>\<span class="hljs-title">Token</span>\<span class="hljs-title">TokenInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Authorization</span>\<span class="hljs-title">Voter</span>\<span class="hljs-title">Voter</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostVoter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Voter</span>
+</span>{
+    <span class="hljs-comment">// these strings are just invented: you can use anything</span>
+    <span class="hljs-keyword">const</span> VIEW = <span class="hljs-string">'view'</span>;
+    <span class="hljs-keyword">const</span> EDIT = <span class="hljs-string">'edit'</span>;
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">supports</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>attribute</span>, mixed <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span>)</span>: <span class="hljs-title">bool</span>
+    </span>{
+        <span class="hljs-comment">// if the attribute isn't one we support, return false</span>
+        <span class="hljs-keyword">if</span> (!in_array(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>attribute</span>, [<span class="hljs-keyword">self</span><span class="hljs-operator">::</span>VIEW, <span class="hljs-keyword">self</span><span class="hljs-operator">::</span>EDIT])) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+        }
+
+        <span class="hljs-comment">// only vote on `Post` objects</span>
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span> <span class="hljs-keyword">instanceof</span> Post) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">voteOnAttribute</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>attribute</span>, mixed <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span>, TokenInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span>)</span>: <span class="hljs-title">bool</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span><span class="hljs-operator">-&gt;</span>getUser();
+
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span> <span class="hljs-keyword">instanceof</span> User) {
+            <span class="hljs-comment">// the user must be logged in; if not, deny access</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+        }
+
+        <span class="hljs-comment">// you know $subject is a Post object, thanks to `supports()`</span>
+        <span class="hljs-comment">/** <span class="hljs-doctag">@var</span> Post $post */</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span>;
+
+        <span class="hljs-keyword">return</span> match(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>attribute</span>) {
+            <span class="hljs-keyword">self</span><span class="hljs-operator">::</span>VIEW =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>canView(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>),
+            <span class="hljs-keyword">self</span><span class="hljs-operator">::</span>EDIT =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>canEdit(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>),
+            <span class="hljs-keyword">default</span> =&gt; <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> \LogicException(<span class="hljs-string">'This code should not be reached!'</span>)
+        };
+    }
+
+    <span class="hljs-keyword">private</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canView</span><span class="hljs-params">(Post <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>, User <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>)</span>: <span class="hljs-title">bool</span>
+    </span>{
+        <span class="hljs-comment">// if they can edit, they can view</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>canEdit(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+        }
+
+        <span class="hljs-comment">// the Post object could have, for example, a method `isPrivate()`</span>
+        <span class="hljs-keyword">return</span> !<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span><span class="hljs-operator">-&gt;</span>isPrivate();
+    }
+
+    <span class="hljs-keyword">private</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canEdit</span><span class="hljs-params">(Post <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>, User <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>)</span>: <span class="hljs-title">bool</span>
+    </span>{
+        <span class="hljs-comment">// this assumes that the Post object has a `getOwner()` method</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span><span class="hljs-operator">-&gt;</span>getOwner();
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! The voter is done! Next, <a href="voters.html#declaring-the-voter-as-a-service" class="reference internal">configure it</a>.</p>
+<p>To recap, here's what's expected from the two abstract methods:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">Voter::supports(string $attribute, mixed $subject)</code></dt>
+        
+        <dd>
+                            When <code translate="no" class="notranslate">isGranted()</code> (or <code translate="no" class="notranslate">denyAccessUnlessGranted()</code>) is called, the first
+argument is passed here as <code translate="no" class="notranslate">$attribute</code> (e.g. <code translate="no" class="notranslate">ROLE_USER</code>, <code translate="no" class="notranslate">edit</code>) and
+the second argument (if any) is passed as <code translate="no" class="notranslate">$subject</code> (e.g. <code translate="no" class="notranslate">null</code>, a <code translate="no" class="notranslate">Post</code>
+object). Your job is to determine if your voter should vote on the attribute/subject
+combination. If you return true, <code translate="no" class="notranslate">voteOnAttribute()</code> will be called. Otherwise,
+your voter is done: some other voter should process this. In this example, you
+return <code translate="no" class="notranslate">true</code> if the attribute is <code translate="no" class="notranslate">view</code> or <code translate="no" class="notranslate">edit</code> and if the object is
+a <code translate="no" class="notranslate">Post</code> instance.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token)</code></dt>
+        
+        <dd>
+                            If you return <code translate="no" class="notranslate">true</code> from <code translate="no" class="notranslate">supports()</code>, then this method is called. Your
+job is to return <code translate="no" class="notranslate">true</code> to allow access and <code translate="no" class="notranslate">false</code> to deny access.
+The <code translate="no" class="notranslate">$token</code> can be used to find the current user object (if any). In this
+example, all of the complex business logic is included to determine access.
+                    </dd>
+    </dl>
+<span id="declaring-the-voter-as-a-service"></span>
+</div>
+<div class="section">
+<h2 id="configuring-the-voter">
+    Configuring the Voter
+    <a class="headerlink" href="#configuring-the-voter" title="Permalink to this headline">¶</a>
+</h2>
+<p>To inject the voter into the security layer, you must declare it as a service
+and tag it with <code translate="no" class="notranslate">security.voter</code>. But if you're using the
+<a href="../service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>,
+that's done automatically for you! When you
+<a href="voters.html#how-to-use-the-voter-in-a-controller" class="reference internal">call isGranted() with view/edit and pass a Post object</a>,
+your voter will be called and you can control access.</p>
+</div>
+<div class="section">
+<h2 id="checking-for-roles-inside-a-voter">
+    Checking for Roles inside a Voter
+    <a class="headerlink" href="#checking-for-roles-inside-a-voter" title="Permalink to this headline">¶</a>
+</h2>
+<p>What if you want to call <code translate="no" class="notranslate">isGranted()</code> from <em>inside</em> your voter - e.g. you want
+to see if the current user has <code translate="no" class="notranslate">ROLE_SUPER_ADMIN</code>. That's possible by injecting
+the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Core/Security.php" class="reference external" title="Symfony\Component\Security\Core\Security" rel="external noopener noreferrer" target="_blank">Security</a>
+into your voter. You can use this to, for example, <em>always</em> allow access to a user
+with <code translate="no" class="notranslate">ROLE_SUPER_ADMIN</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Security/PostVoter.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">SecurityBundle</span>\<span class="hljs-title">Security</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostVoter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Voter</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private Security <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">voteOnAttribute</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>attribute</span>, mixed <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span>, TokenInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span>)</span>: <span class="hljs-title">bool</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-comment">// ROLE_SUPER_ADMIN can do anything! The power!</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>security<span class="hljs-operator">-&gt;</span>isGranted(<span class="hljs-string">'ROLE_SUPER_ADMIN'</span>)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+        }
+
+        <span class="hljs-comment">// ... all the normal voter logic</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you're using the <a href="../service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>,
+you're done! Symfony will automatically pass the <code translate="no" class="notranslate">security.helper</code>
+service when instantiating your voter (thanks to autowiring).</p>
+<span id="security-voters-change-strategy"></span>
+</div>
+<div class="section">
+<h2 id="changing-the-access-decision-strategy">
+    Changing the Access Decision Strategy
+    <a class="headerlink" href="#changing-the-access-decision-strategy" title="Permalink to this headline">¶</a>
+</h2>
+<p>Normally, only one voter will vote at any given time (the rest will &quot;abstain&quot;, which
+means they return <code translate="no" class="notranslate">false</code> from <code translate="no" class="notranslate">supports()</code>). But in theory, you could make multiple
+voters vote for one action and object. For instance, suppose you have one voter that
+checks if the user is a member of the site and a second one that checks if the user
+is older than 18.</p>
+<p>To handle these cases, the access decision manager uses a &quot;strategy&quot; which you can configure.
+There are four strategies available:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">affirmative</code> (default)</dt>
+        
+        <dd>
+                            This grants access as soon as there is <em>one</em> voter granting access;
+                    </dd>
+                        <dt><code translate="no" class="notranslate">consensus</code></dt>
+        
+        <dd>
+                            This grants access if there are more voters granting access than
+denying. In case of a tie the decision is based on the
+<code translate="no" class="notranslate">allow_if_equal_granted_denied</code> config option (defaulting to <code translate="no" class="notranslate">true</code>);
+                    </dd>
+                        <dt><code translate="no" class="notranslate">unanimous</code></dt>
+        
+        <dd>
+                            This only grants access if there is no voter denying access.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">priority</code></dt>
+        
+        <dd>
+                            This grants or denies access by the first voter that does not abstain,
+based on their service priority;
+                    </dd>
+    </dl>
+<p>Regardless the chosen strategy, if all voters abstained from voting, the
+decision is based on the <code translate="no" class="notranslate">allow_if_all_abstain</code> config option (which
+defaults to <code translate="no" class="notranslate">false</code>).</p>
+<p>In the above scenario, both voters should grant access in order to grant access
+to the user to read the post. In this case, the default strategy is no longer
+valid and <code translate="no" class="notranslate">unanimous</code> should be used instead. You can set this in the
+security configuration:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-917aa57d379a76a44ef9928120fe4629b6a99fd1" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-b978be28765e901c6e216fc26599e6bdc3979f50" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-a31aa370132811d6714103f735f7431ea2b2e31c" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-917aa57d379a76a44ef9928120fe4629b6a99fd1" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">access_decision_manager:</span>
+        <span class="hljs-attr">strategy:</span> <span class="hljs-string">unanimous</span>
+        <span class="hljs-attr">allow_if_all_abstain:</span> <span class="hljs-literal">false</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-b978be28765e901c6e216fc26599e6bdc3979f50" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/security
+        https://symfony.com/schema/dic/security/security-1.0.xsd"</span>
+&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">access-decision-manager</span> <span class="hljs-attr">strategy</span>=<span class="hljs-string">"unanimous"</span> <span class="hljs-attr">allow-if-all-abstain</span>=<span class="hljs-string">"false"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-a31aa370132811d6714103f735f7431ea2b2e31c" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>accessDecisionManager()
+        <span class="hljs-operator">-&gt;</span>strategy(<span class="hljs-string">'unanimous'</span>)
+        <span class="hljs-operator">-&gt;</span>allowIfAllAbstain(<span class="hljs-keyword">false</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="section">
+<h3 id="custom-access-decision-strategy">
+    Custom Access Decision Strategy
+    <a class="headerlink" href="#custom-access-decision-strategy" title="Permalink to this headline">¶</a>
+</h3>
+<p>If none of the built-in strategies fits your use case, define the <code translate="no" class="notranslate">strategy_service</code>
+option to use a custom service (your service must implement the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Core/Authorization/Strategy/AccessDecisionStrategyInterface.php" class="reference external" title="Symfony\Component\Security\Core\Authorization\Strategy\AccessDecisionStrategyInterface" rel="external noopener noreferrer" target="_blank">AccessDecisionStrategyInterface</a>):</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-cf751c215ba4d1985f669e84d8eb2105891a08a2" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-69772d985ab93dcb35b23c36b76a2151bed17a68" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-8c574a6ffd38f0d2bd168d737882cb335a378128" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-cf751c215ba4d1985f669e84d8eb2105891a08a2" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">access_decision_manager:</span>
+        <span class="hljs-attr">strategy_service:</span> <span class="hljs-string">App\Security\MyCustomAccessDecisionStrategy</span>
+        <span class="hljs-comment"># ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-69772d985ab93dcb35b23c36b76a2151bed17a68" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>
+&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">access-decision-manager</span>
+            <span class="hljs-attr">strategy-service</span>=<span class="hljs-string">"App\Security\MyCustomAccessDecisionStrategy"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-8c574a6ffd38f0d2bd168d737882cb335a378128" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">MyCustomAccessDecisionStrategy</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>accessDecisionManager()
+        <span class="hljs-operator">-&gt;</span>strategyService(MyCustomAccessDecisionStrategy<span class="hljs-operator">::</span>class)
+        <span class="hljs-comment">// ...</span>
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h3 id="custom-access-decision-manager">
+    Custom Access Decision Manager
+    <a class="headerlink" href="#custom-access-decision-manager" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you need to provide an entirely custom access decision manager, define the <code translate="no" class="notranslate">service</code>
+option to use a custom service as the Access Decision Manager (your service
+must implement the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Core/Authorization/AccessDecisionManagerInterface.php" class="reference external" title="Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface" rel="external noopener noreferrer" target="_blank">AccessDecisionManagerInterface</a>):</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-158f615e7a81a7030dcc7d2f562dfca907595650" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-db1fd74c78f42d02bd36460cce261e21de0970f9" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-88e77901951d670a2ee1cb0e0ca2b59119b2182e" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-158f615e7a81a7030dcc7d2f562dfca907595650" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">access_decision_manager:</span>
+        <span class="hljs-attr">service:</span> <span class="hljs-string">App\Security\MyCustomAccessDecisionManager</span>
+        <span class="hljs-comment"># ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-db1fd74c78f42d02bd36460cce261e21de0970f9" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>
+&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">access-decision-manager</span>
+            <span class="hljs-attr">service</span>=<span class="hljs-string">"App\Security\MyCustomAccessDecisionManager"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-88e77901951d670a2ee1cb0e0ca2b59119b2182e" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">MyCustomAccessDecisionManager</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>accessDecisionManager()
+        <span class="hljs-operator">-&gt;</span>service(MyCustomAccessDecisionManager<span class="hljs-operator">::</span>class)
+        <span class="hljs-comment">// ...</span>
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

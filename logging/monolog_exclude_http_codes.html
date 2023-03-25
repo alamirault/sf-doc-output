@@ -1,0 +1,229 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-configure-monolog-to-exclude-specific-http-codes-from-the-log">
+    How to Configure Monolog to Exclude Specific HTTP Codes from the Log
+    <a class="headerlink" href="#how-to-configure-monolog-to-exclude-specific-http-codes-from-the-log" title="Permalink to this headline">¶</a>
+</h1>
+<p>Sometimes your logs become flooded with unwanted HTTP errors, for example,
+403s and 404s. When using a <code translate="no" class="notranslate">fingers_crossed</code> handler, you can exclude
+logging these HTTP codes based on the MonologBundle configuration:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-e27da538244c858eb0067ad49cb9740092bfbff9" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-ee69633d1a04c6229ba35451fc8c947a21546784" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-9f59a26f68dc5181230cfbbfd7cb34eb6988a7c6" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-e27da538244c858eb0067ad49cb9740092bfbff9" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/prod/monolog.yaml</span>
+<span class="hljs-attr">monolog:</span>
+    <span class="hljs-attr">handlers:</span>
+        <span class="hljs-attr">main:</span>
+            <span class="hljs-comment"># ...</span>
+            <span class="hljs-attr">type:</span> <span class="hljs-string">fingers_crossed</span>
+            <span class="hljs-attr">handler:</span> <span class="hljs-string">...</span>
+            <span class="hljs-attr">excluded_http_codes:</span> <span class="hljs-string">[403,</span> <span class="hljs-number">404</span><span class="hljs-string">,</span> <span class="hljs-string">{</span> <span class="hljs-attr">400:</span> <span class="hljs-string">['^/foo',</span> <span class="hljs-string">'^/bar'</span><span class="hljs-string">]</span> <span class="hljs-string">}]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-ee69633d1a04c6229ba35451fc8c947a21546784" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/prod/monolog.xml --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:monolog</span>=<span class="hljs-string">"http://symfony.com/schema/dic/monolog"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/monolog
+        https://symfony.com/schema/dic/monolog/monolog-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">monolog:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">monolog:handler</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"fingers_crossed"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span> <span class="hljs-attr">handler</span>=<span class="hljs-string">"..."</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">monolog:excluded-http-code</span> <span class="hljs-attr">code</span>=<span class="hljs-string">"403"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">monolog:url</span>&gt;</span>^/foo<span class="hljs-tag">&lt;/<span class="hljs-name">monolog:url</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">monolog:url</span>&gt;</span>^/bar<span class="hljs-tag">&lt;/<span class="hljs-name">monolog:url</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">monolog:excluded-http-code</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">monolog:excluded-http-code</span> <span class="hljs-attr">code</span>=<span class="hljs-string">"404"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">monolog:handler</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">monolog:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-9f59a26f68dc5181230cfbbfd7cb34eb6988a7c6" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/prod/monolog.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">MonologConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(MonologConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monolog</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mainHandler</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monolog</span><span class="hljs-operator">-&gt;</span>handler(<span class="hljs-string">'main'</span>)
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-operator">-&gt;</span>type(<span class="hljs-string">'fingers_crossed'</span>)
+        <span class="hljs-operator">-&gt;</span>handler(<span class="hljs-string">'...'</span>)
+    ;
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mainHandler</span><span class="hljs-operator">-&gt;</span>excludedHttpCode()<span class="hljs-operator">-&gt;</span>code(<span class="hljs-number">403</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mainHandler</span><span class="hljs-operator">-&gt;</span>excludedHttpCode()<span class="hljs-operator">-&gt;</span>code(<span class="hljs-number">404</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Combining <code translate="no" class="notranslate">excluded_http_codes</code> with a <code translate="no" class="notranslate">passthru_level</code> lower than
+<code translate="no" class="notranslate">error</code> (i.e. <code translate="no" class="notranslate">debug</code>, <code translate="no" class="notranslate">info</code>, <code translate="no" class="notranslate">notice</code> or <code translate="no" class="notranslate">warning</code>) will not
+actually exclude log messages for those HTTP codes because they are logged
+with level of <code translate="no" class="notranslate">error</code> or higher and <code translate="no" class="notranslate">passthru_level</code> takes precedence
+over the HTTP codes being listed in <code translate="no" class="notranslate">excluded_http_codes</code>.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

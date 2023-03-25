@@ -1,0 +1,595 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-create-your-own-messenger-transport">
+    How to Create Your own Messenger Transport
+    <a class="headerlink" href="#how-to-create-your-own-messenger-transport" title="Permalink to this headline">¶</a>
+</h1>
+<p>Once you have written your transport's sender and receiver, you can register your
+transport factory to be able to use it via a DSN in the Symfony application.</p>
+<div class="section">
+<h2 id="create-your-transport-factory">
+    Create your Transport Factory
+    <a class="headerlink" href="#create-your-transport-factory" title="Permalink to this headline">¶</a>
+</h2>
+<p>You need to give FrameworkBundle the opportunity to create your transport from a
+DSN. You will need a transport factory:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">Transport</span>\<span class="hljs-title">Receiver</span>\<span class="hljs-title">ReceiverInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">Transport</span>\<span class="hljs-title">Sender</span>\<span class="hljs-title">SenderInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">Transport</span>\<span class="hljs-title">Serialization</span>\<span class="hljs-title">SerializerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">Transport</span>\<span class="hljs-title">TransportFactoryInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">Transport</span>\<span class="hljs-title">TransportInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">YourTransportFactory</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">TransportFactoryInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createTransport</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dsn</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>, SerializerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>serializer</span>)</span>: <span class="hljs-title">TransportInterface</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> YourTransport(<span class="hljs-comment">/* ... */</span>);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">supports</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dsn</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">bool</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span> === strpos(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dsn</span>, <span class="hljs-string">'my-transport://'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The transport object needs to implement the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Messenger/Transport/TransportInterface.php" class="reference external" title="Symfony\Component\Messenger\Transport\TransportInterface" rel="external noopener noreferrer" target="_blank">TransportInterface</a>
+(which combines the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Messenger/Transport/Sender/SenderInterface.php" class="reference external" title="Symfony\Component\Messenger\Transport\Sender\SenderInterface" rel="external noopener noreferrer" target="_blank">SenderInterface</a>
+and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Messenger/Transport/Receiver/ReceiverInterface.php" class="reference external" title="Symfony\Component\Messenger\Transport\Receiver\ReceiverInterface" rel="external noopener noreferrer" target="_blank">ReceiverInterface</a>).
+Here is a simplified example of a database transport:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">Envelope</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">Stamp</span>\<span class="hljs-title">TransportMessageIdStamp</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">Transport</span>\<span class="hljs-title">Serialization</span>\<span class="hljs-title">PhpSerializer</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">Transport</span>\<span class="hljs-title">Serialization</span>\<span class="hljs-title">SerializerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">Transport</span>\<span class="hljs-title">TransportInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">Uuid</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">YourTransport</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">TransportInterface</span>
+</span>{
+    <span class="hljs-keyword">private</span> SerializerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>serializer</span>;
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@param</span> FakeDatabase $db is used for demo purposes. It is not a real class.
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private FakeDatabase <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>db</span>,
+        SerializerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>serializer</span> = null,
+    )</span> </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>serializer = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>serializer</span> ?? <span class="hljs-keyword">new</span> PhpSerializer();
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span><span class="hljs-params">()</span>: <span class="hljs-title">iterable</span>
+    </span>{
+        <span class="hljs-comment">// Get a message from "my_queue"</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>row</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>db<span class="hljs-operator">-&gt;</span>createQuery(
+                <span class="hljs-string">'SELECT *
+                FROM my_queue
+                WHERE (delivered_at IS NULL OR delivered_at &lt; :redeliver_timeout)
+                AND handled = FALSE'</span>
+            )
+            <span class="hljs-operator">-&gt;</span>setParameter(<span class="hljs-string">'redeliver_timeout'</span>, <span class="hljs-keyword">new</span> DateTimeImmutable(<span class="hljs-string">'-5 minutes'</span>))
+            <span class="hljs-operator">-&gt;</span>getOneOrNullResult();
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">null</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>row</span>) {
+            <span class="hljs-keyword">return</span> [];
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>envelope</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>serializer<span class="hljs-operator">-&gt;</span>decode([
+            <span class="hljs-string">'body'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>row</span>[<span class="hljs-string">'envelope'</span>],
+        ]);
+
+        <span class="hljs-keyword">return</span> [<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>envelope</span><span class="hljs-operator">-&gt;</span>with(<span class="hljs-keyword">new</span> TransportMessageIdStamp(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>row</span>[<span class="hljs-string">'id'</span>]))];
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ack</span><span class="hljs-params">(Envelope <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>envelope</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stamp</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>envelope</span><span class="hljs-operator">-&gt;</span>last(TransportMessageIdStamp<span class="hljs-operator">::</span>class);
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stamp</span> <span class="hljs-keyword">instanceof</span> TransportMessageIdStamp) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> \LogicException(<span class="hljs-string">'No TransportMessageIdStamp found on the Envelope.'</span>);
+        }
+
+        <span class="hljs-comment">// Mark the message as "handled"</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>db<span class="hljs-operator">-&gt;</span>createQuery(<span class="hljs-string">'UPDATE my_queue SET handled = TRUE WHERE id = :id'</span>)
+            <span class="hljs-operator">-&gt;</span>setParameter(<span class="hljs-string">'id'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stamp</span><span class="hljs-operator">-&gt;</span>getId())
+            <span class="hljs-operator">-&gt;</span>execute();
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reject</span><span class="hljs-params">(Envelope <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>envelope</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stamp</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>envelope</span><span class="hljs-operator">-&gt;</span>last(TransportMessageIdStamp<span class="hljs-operator">::</span>class);
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stamp</span> <span class="hljs-keyword">instanceof</span> TransportMessageIdStamp) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> \LogicException(<span class="hljs-string">'No TransportMessageIdStamp found on the Envelope.'</span>);
+        }
+
+        <span class="hljs-comment">// Delete the message from the "my_queue" table</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>db<span class="hljs-operator">-&gt;</span>createQuery(<span class="hljs-string">'DELETE FROM my_queue WHERE id = :id'</span>)
+            <span class="hljs-operator">-&gt;</span>setParameter(<span class="hljs-string">'id'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stamp</span><span class="hljs-operator">-&gt;</span>getId())
+            <span class="hljs-operator">-&gt;</span>execute();
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">send</span><span class="hljs-params">(Envelope <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>envelope</span>)</span>: <span class="hljs-title">Envelope</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>encodedMessage</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>serializer<span class="hljs-operator">-&gt;</span>encode(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>envelope</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = (string) Uuid<span class="hljs-operator">::</span>v4();
+        <span class="hljs-comment">// Add a message to the "my_queue" table</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>db<span class="hljs-operator">-&gt;</span>createQuery(
+                <span class="hljs-string">'INSERT INTO my_queue (id, envelope, delivered_at, handled)
+                VALUES (:id, :envelope, NULL, FALSE)'</span>
+            )
+            <span class="hljs-operator">-&gt;</span>setParameters([
+                <span class="hljs-string">'id'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span>,
+                <span class="hljs-string">'envelope'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>encodedMessage</span>[<span class="hljs-string">'body'</span>],
+            ])
+            <span class="hljs-operator">-&gt;</span>execute();
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>envelope</span><span class="hljs-operator">-&gt;</span>with(<span class="hljs-keyword">new</span> TransportMessageIdStamp(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span>));
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The implementation above is not runnable code but illustrates how a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Messenger/Transport/TransportInterface.php" class="reference external" title="Symfony\Component\Messenger\Transport\TransportInterface" rel="external noopener noreferrer" target="_blank">TransportInterface</a> could
+be implemented. For real implementations see <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Messenger/Transport/InMemory/InMemoryTransport.php" class="reference external" title="Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport" rel="external noopener noreferrer" target="_blank">InMemoryTransport</a>
+and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Messenger/Bridge/Doctrine/Transport/DoctrineReceiver.php" class="reference external" title="Symfony\Component\Messenger\Bridge\Doctrine\Transport\DoctrineReceiver" rel="external noopener noreferrer" target="_blank">DoctrineReceiver</a>.</p>
+</div>
+<div class="section">
+<h2 id="register-your-factory">
+    Register your Factory
+    <a class="headerlink" href="#register-your-factory" title="Permalink to this headline">¶</a>
+</h2>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-55f33794e74e334d921597d5ef10c65507840d9f" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-1d5f96e610b9b3d777d545b0a0e06e21edfe46f7" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-9d937cc316f1ae9d7dd88d18532b176ca2a8408a" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-55f33794e74e334d921597d5ef10c65507840d9f" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">Your\Transport\YourTransportFactory:</span>
+        <span class="hljs-attr">tags:</span> <span class="hljs-string">[messenger.transport_factory]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-1d5f96e610b9b3d777d545b0a0e06e21edfe46f7" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"Your\Transport\YourTransportFactory"</span>&gt;</span>
+           <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"messenger.transport_factory"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-9d937cc316f1ae9d7dd88d18532b176ca2a8408a" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Your</span>\<span class="hljs-title">Transport</span>\<span class="hljs-title">YourTransportFactory</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>register(YourTransportFactory<span class="hljs-operator">::</span>class)
+    <span class="hljs-operator">-&gt;</span>setTags([<span class="hljs-string">'messenger.transport_factory'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h2 id="use-your-transport">
+    Use your Transport
+    <a class="headerlink" href="#use-your-transport" title="Permalink to this headline">¶</a>
+</h2>
+<p>Within the <code translate="no" class="notranslate">framework.messenger.transports.*</code> configuration, create your
+named transport using your own DSN:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-77606f9680bc4b8b113a64b8522635754706f3c7" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-ab9b814af8563dcc1b94bbffd3189059681d45b2" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-91798ff0c431ffb2421b9ab759bb4016a9c7b005" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-77606f9680bc4b8b113a64b8522635754706f3c7" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/messenger.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">messenger:</span>
+        <span class="hljs-attr">transports:</span>
+            <span class="hljs-attr">yours:</span> <span class="hljs-string">'my-transport://...'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-ab9b814af8563dcc1b94bbffd3189059681d45b2" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/messenger.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:messenger</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transport</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"yours"</span> <span class="hljs-attr">dsn</span>=<span class="hljs-string">"my-transport://..."</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:messenger</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-91798ff0c431ffb2421b9ab759bb4016a9c7b005" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/messenger.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>messenger()
+        <span class="hljs-operator">-&gt;</span>transport(<span class="hljs-string">'yours'</span>)
+            <span class="hljs-operator">-&gt;</span>dsn(<span class="hljs-string">'my-transport://...'</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>In addition of being able to route your messages to the <code translate="no" class="notranslate">yours</code> sender, this
+will give you access to the following services:</p>
+<ol class="arabic">
+    <li><code translate="no" class="notranslate">messenger.sender.yours</code>: the sender;</li>
+<li><code translate="no" class="notranslate">messenger.receiver.yours</code>: the receiver.</li>
+</ol>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

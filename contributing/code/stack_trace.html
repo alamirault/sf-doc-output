@@ -1,0 +1,339 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="getting-a-stack-trace">
+    Getting a Stack Trace
+    <a class="headerlink" href="#getting-a-stack-trace" title="Permalink to this headline">¶</a>
+</h1>
+<p>When <a href="bugs.html" class="reference internal">reporting a bug</a> for an
+exception or a wrong behavior in code, it is crucial that you provide
+one or several stack traces. To understand why, you first have to
+understand what a stack trace is, and how it can be useful to you as a
+developer, and also to library maintainers.</p>
+<div class="section">
+<h2 id="anatomy-of-a-stack-trace">
+    Anatomy of a Stack Trace
+    <a class="headerlink" href="#anatomy-of-a-stack-trace" title="Permalink to this headline">¶</a>
+</h2>
+<p>A stack trace is called that way because it allows one to see a trail of
+function calls leading to a point in code since the beginning of the
+program. That point is not necessarily an exception. For instance, you
+can use the native PHP function <code translate="no" class="notranslate">debug_print_backtrace()</code> to get such
+a trace. For each line in the trace, you get a file and a function or
+method call, and the line number for that call. This is often of great
+help for understanding the flow of your program and how it can end up in
+unexpected places, such as lines of code where exceptions are thrown.</p>
+</div>
+<div class="section">
+<h2 id="stack-traces-and-exceptions">
+    Stack Traces and Exceptions
+    <a class="headerlink" href="#stack-traces-and-exceptions" title="Permalink to this headline">¶</a>
+</h2>
+<p>In PHP, every exception comes with its own stack trace, which is
+displayed by default if the exception is not caught. When using Symfony,
+such exceptions go through a custom exception handler, which enhances
+them in various ways before displaying them according to the current
+Server API (CLI or not).
+This means a better way to get a stack trace when you do not need the
+program to continue is to throw an exception, as follows:
+<code translate="no" class="notranslate">throw new \Exception();</code></p>
+</div>
+<div class="section">
+<h2 id="nested-exceptions">
+    Nested Exceptions
+    <a class="headerlink" href="#nested-exceptions" title="Permalink to this headline">¶</a>
+</h2>
+<p>When applications get bigger, complexity is often tackled with layers of
+architecture that need to be kept separate. For instance, if you have a
+web application that makes a call to a remote API, it might be good to
+wrap exceptions thrown when making that call with exceptions that have
+special meaning in your domain, and to build appropriate HTTP exceptions
+from those. Exceptions can be nested by using the <code translate="no" class="notranslate">$previous</code>
+argument that appears in the signature of the <code translate="no" class="notranslate">Exception</code> class:
+<code translate="no" class="notranslate">public __construct ([ string $message = &quot;&quot; [, int $code = 0 [, Throwable $previous = NULL ]]] )</code>
+This means that sometimes, when you get an exception from an
+application, you might actually get several of them.</p>
+</div>
+<div class="section">
+<h2 id="what-to-look-for-in-a-stack-trace">
+    What to look for in a Stack Trace
+    <a class="headerlink" href="#what-to-look-for-in-a-stack-trace" title="Permalink to this headline">¶</a>
+</h2>
+<p>When using a library, you will call code that you did not write. When
+using a framework, it is the opposite: because you follow the
+conventions of the framework, <a href="https://en.wikipedia.org/wiki/Inversion_of_control" class="reference external" rel="external noopener noreferrer" target="_blank">the framework finds your code and calls it</a>, and does
+things for you beforehand, like routing or access control.
+Symfony being both a framework and library of components, it calls your
+code and then your code might call it. This means you will always have
+at least 2 parts, very often 3 in your stack traces when using Symfony:
+a part that starts in one of the entry points of the framework
+(<code translate="no" class="notranslate">bin/console</code> or <code translate="no" class="notranslate">public/index.php</code> in most cases), and ends when
+reaching your code, most times in a command or in a controller found under
+<code translate="no" class="notranslate">src</code>. Then, either the exception is thrown in your code or in
+libraries you call. If it is the latter, there should be a third part in
+the stack trace with calls made in files under <code translate="no" class="notranslate">vendor</code>. Before
+landing in that directory, code goes through numerous review processes
+and CI pipelines, which means it should be less likely to be the source
+of the issue than code from your application, so it is important that
+you focus first on lines starting with <code translate="no" class="notranslate">src</code>, and look for anything
+suspicious or unexpected, like method calls that are not supposed to
+happen.</p>
+<p>Next, you can have a look at what packages are involved. Files under
+<code translate="no" class="notranslate">vendor</code> are organized by Composer in the following way:
+<code translate="no" class="notranslate">vendor/acme/router</code> where <code translate="no" class="notranslate">acme</code> is the vendor, <code translate="no" class="notranslate">router</code> the
+library and <code translate="no" class="notranslate">acme/router</code> the Composer package. If you plan on
+reporting the bug, make sure to report it to the library throwing the
+exception. <code translate="no" class="notranslate">composer home acme/router</code> should lead you to the right
+place for that. As Symfony is a mono-repository, use <code translate="no" class="notranslate">composer home
+symfony/symfony</code> when reporting a bug for any component.</p>
+</div>
+<div class="section">
+<h2 id="getting-stack-traces-with-symfony">
+    Getting Stack Traces with Symfony
+    <a class="headerlink" href="#getting-stack-traces-with-symfony" title="Permalink to this headline">¶</a>
+</h2>
+<p>Now that we have all this in mind, let us see how to get a stack trace
+with Symfony.</p>
+<div class="section">
+<h3 id="stack-traces-in-your-web-browser">
+    Stack Traces in your Web Browser
+    <a class="headerlink" href="#stack-traces-in-your-web-browser" title="Permalink to this headline">¶</a>
+</h3>
+<p>Several things need to be paid attention to when picking a stack trace
+from your development environment through a web browser:</p>
+<ol class="arabic">
+    <li>Are there several exceptions? If yes, the most interesting one is
+often exception 1/n which, is shown <em>last</em> in the example below (it
+is the one marked as an exception [1/2]).</li>
+<li>Under the &quot;Stack Traces&quot; tab, you will find exceptions in plain
+text, so that you can easily share them in e.g. bug reports. Make
+sure to <strong>remove any sensitive information</strong> before doing so.</li>
+<li>You may notice there is a logs tab too; this tab does not have to do
+with stack traces, it only contains logs produced in arbitrary places
+in your application. They may or may not relate to the exception you
+are getting, but are not what the term &quot;stack trace&quot; refers to.</li>
+</ol>
+<div class="with-browser"><img src="_images/stack-trace.gif" align="center" class="with-browser" />
+</div>
+<p>Since stack traces may contain sensitive data, they should not be
+exposed in production. Getting a stack trace from your production
+environment, although more involving, is still possible with solutions
+that include but are not limited to sending them to an email address
+with Monolog.</p>
+</div>
+<div class="section">
+<h3 id="stack-traces-in-the-cli">
+    Stack Traces in the CLI
+    <a class="headerlink" href="#stack-traces-in-the-cli" title="Permalink to this headline">¶</a>
+</h3>
+<p>Exceptions might occur when running a Symfony command. By default, only
+the message is shown because it is often enough to understand what is
+going on:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:exception
+
+
+   Command <span class="hljs-string">"debug:exception"</span> is not defined.
+
+   Did you mean one of these?
+       debug:autowiring
+       debug:config
+       debug:container
+       debug:event-dispatcher
+       debug:form
+       debug:router
+       debug:translation
+       debug:twig</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If that is not the case, you can obtain a stack trace by increasing the
+<a href="../../console/verbosity.html" class="reference internal">verbosity level</a> with <code translate="no" class="notranslate">--verbose</code>:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console --verbose debug:exception
+
+ In Application.php line 644:
+
+   [Symfony\Component\Console\Exception\CommandNotFoundException]
+   Command <span class="hljs-string">"debug:exception"</span> is not defined.
+
+   Did you mean one of these?
+       debug:autowiring
+       debug:config
+       debug:container
+       debug:event-dispatcher
+       debug:form
+       debug:router
+       debug:translation
+       debug:twig
+
+
+ Exception trace:
+   at /app/vendor/symfony/console/Application.php:644
+  Symfony\Component\Console\Application-&gt;find() at /app/vendor/symfony/framework-bundle/Console/Application.php:116
+  Symfony\Bundle\FrameworkBundle\Console\Application-&gt;find() at /app/vendor/symfony/console/Application.php:228
+  Symfony\Component\Console\Application-&gt;doRun() at /app/vendor/symfony/framework-bundle/Console/Application.php:82
+  Symfony\Bundle\FrameworkBundle\Console\Application-&gt;doRun() at /app/vendor/symfony/console/Application.php:140
+  Symfony\Component\Console\Application-&gt;run() at /app/bin/console:42</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="stack-traces-and-api-calls">
+    Stack Traces and API Calls
+    <a class="headerlink" href="#stack-traces-and-api-calls" title="Permalink to this headline">¶</a>
+</h3>
+<p>When getting an exception from an API, you might not get a stack trace,
+or it might be displayed in a way that is not suitable for sharing.
+Luckily, when in the dev environment, you can obtain a plain text stack
+trace by using the profiler. To find the profile, you can have a look
+at the <code translate="no" class="notranslate">X-Debug-Token-Link</code> response headers:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>curl --head http://localhost:8000/api/posts/1
+… more headers
+X-Debug-Token: 110e1e
+X-Debug-Token-Link: http://localhost:8000/_profiler/110e1e
+X-Robots-Tag: noindex
+X-Previous-Debug-Token: 209101</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Following that link will lead you to a page very similar to the one
+described above in <a href="stack_trace.html#stack-traces-in-your-web-browser" class="reference internal">Stack Traces in your Web Browser</a>.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

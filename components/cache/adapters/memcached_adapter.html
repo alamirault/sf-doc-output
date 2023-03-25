@@ -1,0 +1,512 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <span id="memcached-adapter"></span>
+<div class="section">
+<h1 id="memcached-cache-adapter">
+    Memcached Cache Adapter
+    <a class="headerlink" href="#memcached-cache-adapter" title="Permalink to this headline">¶</a>
+</h1>
+<p>This adapter stores the values in-memory using one (or more) <a href="https://memcached.org/" class="reference external" rel="external noopener noreferrer" target="_blank">Memcached server</a>
+instances. Unlike the <a href="apcu_adapter.html#apcu-adapter" class="reference internal">APCu adapter</a>, and similarly to the
+<a href="redis_adapter.html#redis-adapter" class="reference internal">Redis adapter</a>, it is not limited to the current server's
+shared memory; you can store contents independent of your PHP environment.
+The ability to utilize a cluster of servers to provide redundancy and/or fail-over
+is also available.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p><strong>Requirements:</strong> The <a href="https://www.php.net/manual/en/book.memcached.php" class="reference external" rel="external noopener noreferrer" target="_blank">Memcached PHP extension</a> as well as a <a href="https://memcached.org/" class="reference external" rel="external noopener noreferrer" target="_blank">Memcached server</a>
+must be installed, active, and running to use this adapter. Version <code translate="no" class="notranslate">2.2</code> or
+greater of the <a href="https://www.php.net/manual/en/book.memcached.php" class="reference external" rel="external noopener noreferrer" target="_blank">Memcached PHP extension</a> is required for this adapter.</p>
+</div>
+<p>This adapter expects a <a href="https://www.php.net/manual/en/class.memcached.php" class="reference external" rel="external noopener noreferrer" target="_blank">Memcached</a> instance to be passed as the first
+parameter. A namespace and default cache lifetime can optionally be passed as
+the second and third parameters:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">MemcachedAdapter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span> = <span class="hljs-keyword">new</span> MemcachedAdapter(
+    <span class="hljs-comment">// the client object that sets options and adds the server instance(s)</span>
+    \Memcached <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span>,
+
+    <span class="hljs-comment">// a string prefixed to the keys of the items stored in this cache</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>namespace</span> = <span class="hljs-string">''</span>,
+
+    <span class="hljs-comment">// the default lifetime (in seconds) for cache items that do not define their</span>
+    <span class="hljs-comment">// own lifetime, with a value 0 causing items to be stored indefinitely (i.e.</span>
+    <span class="hljs-comment">// until MemcachedAdapter::clear() is invoked or the server(s) are restarted)</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaultLifetime</span> = <span class="hljs-number">0</span>
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h2 id="configure-the-connection">
+    Configure the Connection
+    <a class="headerlink" href="#configure-the-connection" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/MemcachedAdapter.php#method_createConnection" class="reference external" title="Symfony\Component\Cache\Adapter\MemcachedAdapter::createConnection()" rel="external noopener noreferrer" target="_blank">createConnection()</a>
+helper method allows creating and configuring a <a href="https://www.php.net/manual/en/class.memcached.php" class="reference external" rel="external noopener noreferrer" target="_blank">Memcached</a> class instance using a
+<a href="https://en.wikipedia.org/wiki/Data_source_name" class="reference external" rel="external noopener noreferrer" target="_blank">Data Source Name (DSN)</a> or an array of DSNs:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">MemcachedAdapter</span>;
+
+<span class="hljs-comment">// pass a single DSN string to register a single server with the client</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = MemcachedAdapter<span class="hljs-operator">::</span>createConnection(
+    <span class="hljs-string">'memcached://localhost'</span>
+    <span class="hljs-comment">// the DSN can include config options (pass them as a query string):</span>
+    <span class="hljs-comment">// 'memcached://localhost:11222?retry_timeout=10'</span>
+    <span class="hljs-comment">// 'memcached://localhost:11222?socket_recv_size=1&amp;socket_send_size=2'</span>
+);
+
+<span class="hljs-comment">// pass an array of DSN strings to register multiple servers with the client</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = MemcachedAdapter<span class="hljs-operator">::</span>createConnection([
+    <span class="hljs-string">'memcached://10.0.0.100'</span>,
+    <span class="hljs-string">'memcached://10.0.0.101'</span>,
+    <span class="hljs-string">'memcached://10.0.0.102'</span>,
+    <span class="hljs-comment">// etc...</span>
+]);
+
+<span class="hljs-comment">// a single DSN can define multiple servers using the following syntax:</span>
+<span class="hljs-comment">// host[hostname-or-IP:port] (where port is optional). Sockets must include a trailing ':'</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = MemcachedAdapter<span class="hljs-operator">::</span>createConnection(
+    <span class="hljs-string">'memcached:?host[localhost]&amp;host[localhost:12345]&amp;host[/some/memcached.sock:]=3'</span>
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <a href="https://en.wikipedia.org/wiki/Data_source_name" class="reference external" rel="external noopener noreferrer" target="_blank">Data Source Name (DSN)</a> for this adapter must use the following format:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">memcached://[user:pass@][ip|host|socket[:port]][?weight=int]</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The DSN must include a IP/host (and an optional port) or a socket path, an
+optional username and password (for SASL authentication; it requires that the
+memcached extension was compiled with <code translate="no" class="notranslate">--enable-memcached-sasl</code>) and an
+optional weight (for prioritizing servers in a cluster; its value is an integer
+between <code translate="no" class="notranslate">0</code> and <code translate="no" class="notranslate">100</code> which defaults to <code translate="no" class="notranslate">null</code>; a higher value means more
+priority).</p>
+<p>Below are common examples of valid DSNs showing a combination of available values:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">MemcachedAdapter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = MemcachedAdapter<span class="hljs-operator">::</span>createConnection([
+    <span class="hljs-comment">// hostname + port</span>
+    <span class="hljs-string">'memcached://my.server.com:11211'</span>
+
+    <span class="hljs-comment">// hostname without port + SASL username and password</span>
+    <span class="hljs-string">'memcached://rmf:abcdef@localhost'</span>
+
+    <span class="hljs-comment">// IP address instead of hostname + weight</span>
+    <span class="hljs-string">'memcached://127.0.0.1?weight=50'</span>
+
+    <span class="hljs-comment">// socket instead of hostname/IP + SASL username and password</span>
+    <span class="hljs-string">'memcached://janesmith:mypassword@/var/run/memcached.sock'</span>
+
+    <span class="hljs-comment">// socket instead of hostname/IP + weight</span>
+    <span class="hljs-string">'memcached:///var/run/memcached.sock?weight=20'</span>
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="configure-the-options">
+    Configure the Options
+    <a class="headerlink" href="#configure-the-options" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/MemcachedAdapter.php#method_createConnection" class="reference external" title="Symfony\Component\Cache\Adapter\MemcachedAdapter::createConnection()" rel="external noopener noreferrer" target="_blank">createConnection()</a>
+helper method also accepts an array of options as its second argument. The
+expected format is an associative array of <code translate="no" class="notranslate">key =&gt; value</code> pairs representing
+option names and their respective values:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">MemcachedAdapter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = MemcachedAdapter<span class="hljs-operator">::</span>createConnection(
+    <span class="hljs-comment">// a DSN string or an array of DSN strings</span>
+    [],
+
+    <span class="hljs-comment">// associative array of configuration options</span>
+    [
+        <span class="hljs-string">'libketama_compatible'</span> =&gt; <span class="hljs-keyword">true</span>,
+        <span class="hljs-string">'serializer'</span> =&gt; <span class="hljs-string">'igbinary'</span>,
+    ]
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="available-options">
+    Available Options
+    <a class="headerlink" href="#available-options" title="Permalink to this headline">¶</a>
+</h3>
+<dl>
+                        <dt><code translate="no" class="notranslate">auto_eject_hosts</code> (type: <code translate="no" class="notranslate">bool</code>, default: <code translate="no" class="notranslate">false</code>)</dt>
+        
+        <dd>
+                            Enables or disables a constant, automatic, re-balancing of the cluster by
+auto-ejecting hosts that have exceeded the configured <code translate="no" class="notranslate">server_failure_limit</code>.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">buffer_writes</code> (type: <code translate="no" class="notranslate">bool</code>, default: <code translate="no" class="notranslate">false</code>)</dt>
+        
+        <dd>
+                            Enables or disables buffered input/output operations, causing storage
+commands to buffer instead of being immediately sent to the remote
+server(s). Any action that retrieves data, quits the connection, or closes
+down the connection will cause the buffer to be committed.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">connect_timeout</code> (type: <code translate="no" class="notranslate">int</code>, default: <code translate="no" class="notranslate">1000</code>)</dt>
+        
+        <dd>
+                            <p class="first">Specifies the timeout (in milliseconds) of socket connection operations when
+the <code translate="no" class="notranslate">no_block</code> option is enabled.</p>
+                            <p class="last">Valid option values include <em>any positive integer</em>.</p>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">distribution</code> (type: <code translate="no" class="notranslate">string</code>, default: <code translate="no" class="notranslate">consistent</code>)</dt>
+        
+        <dd>
+                            <p class="first">Specifies the item key distribution method among the servers. Consistent
+hashing delivers better distribution and allows servers to be added to the
+cluster with minimal cache losses.</p>
+                            <p class="last">Valid option values include <code translate="no" class="notranslate">modula</code>, <code translate="no" class="notranslate">consistent</code>, and <code translate="no" class="notranslate">virtual_bucket</code>.</p>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">hash</code> (type: <code translate="no" class="notranslate">string</code>, default: <code translate="no" class="notranslate">md5</code>)</dt>
+        
+        <dd>
+                            <p class="first">Specifies the hashing algorithm used for item keys. Each hash algorithm has
+its advantages and its disadvantages. The default is suggested for compatibility
+with other clients.</p>
+                            <p class="last">Valid option values include <code translate="no" class="notranslate">default</code>, <code translate="no" class="notranslate">md5</code>, <code translate="no" class="notranslate">crc</code>, <code translate="no" class="notranslate">fnv1_64</code>,
+<code translate="no" class="notranslate">fnv1a_64</code>, <code translate="no" class="notranslate">fnv1_32</code>, <code translate="no" class="notranslate">fnv1a_32</code>, <code translate="no" class="notranslate">hsieh</code>, and <code translate="no" class="notranslate">murmur</code>.</p>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">libketama_compatible</code> (type: <code translate="no" class="notranslate">bool</code>, default: <code translate="no" class="notranslate">true</code>)</dt>
+        
+        <dd>
+                            Enables or disables &quot;libketama&quot; compatible behavior, enabling other
+libketama-based clients to access the keys stored by client instance
+transparently (like Python and Ruby). Enabling this option sets the <code translate="no" class="notranslate">hash</code>
+option to <code translate="no" class="notranslate">md5</code> and the <code translate="no" class="notranslate">distribution</code> option to <code translate="no" class="notranslate">consistent</code>.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">no_block</code> (type: <code translate="no" class="notranslate">bool</code>, default: <code translate="no" class="notranslate">true</code>)</dt>
+        
+        <dd>
+                            Enables or disables asynchronous input and output operations. This is the
+fastest transport option available for storage functions.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">number_of_replicas</code> (type: <code translate="no" class="notranslate">int</code>, default: <code translate="no" class="notranslate">0</code>)</dt>
+        
+        <dd>
+                            <p class="first">Specifies the number of replicas that should be stored for each item (on
+different servers). This does not dedicate certain memcached servers to
+store the replicas in, but instead stores the replicas together with all of
+the other objects (on the &quot;n&quot; next servers registered).</p>
+                            <p class="last">Valid option values include <em>any positive integer</em>.</p>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">prefix_key</code> (type: <code translate="no" class="notranslate">string</code>, default: an empty string)</dt>
+        
+        <dd>
+                            <p class="first">Specifies a &quot;domain&quot; (or &quot;namespace&quot;) prepended to your keys. It cannot be
+longer than 128 characters and reduces the maximum key size.</p>
+                            <p class="last">Valid option values include <em>any alphanumeric string</em>.</p>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">poll_timeout</code> (type: <code translate="no" class="notranslate">int</code>, default: <code translate="no" class="notranslate">1000</code>)</dt>
+        
+        <dd>
+                            <p class="first">Specifies the amount of time (in seconds) before timing out during a socket
+polling operation.</p>
+                            <p class="last">Valid option values include <em>any positive integer</em>.</p>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">randomize_replica_read</code> (type: <code translate="no" class="notranslate">bool</code>, type: <code translate="no" class="notranslate">false</code>)</dt>
+        
+        <dd>
+                            Enables or disables randomization of the replica reads starting point.
+Normally the read is done from primary server and in case of a miss the read
+is done from &quot;primary+1&quot;, then &quot;primary+2&quot;, all the way to &quot;n&quot; replicas.
+This option sets the replica reads as randomized between all available
+servers; it allows distributing read load to multiple servers with the
+expense of more write traffic.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">recv_timeout</code> (type: <code translate="no" class="notranslate">int</code>, default: <code translate="no" class="notranslate">0</code>)</dt>
+        
+        <dd>
+                            <p class="first">Specifies the amount of time (in microseconds) before timing out during an outgoing socket (read) operation.
+When the <code translate="no" class="notranslate">no_block</code> option isn't enabled, this will allow you to still have timeouts on the reading of data.</p>
+                            <p class="last">Valid option values include <code translate="no" class="notranslate">0</code> or <em>any positive integer</em>.</p>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">retry_timeout</code> (type: <code translate="no" class="notranslate">int</code>, default: <code translate="no" class="notranslate">0</code>)</dt>
+        
+        <dd>
+                            <p class="first">Specifies the amount of time (in seconds) before timing out and retrying a
+connection attempt.</p>
+                            <p class="last">Valid option values include <em>any positive integer</em>.</p>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">send_timeout</code> (type: <code translate="no" class="notranslate">int</code>, default: <code translate="no" class="notranslate">0</code>)</dt>
+        
+        <dd>
+                            <p class="first">Specifies the amount of time (in microseconds) before timing out during an
+incoming socket (send) operation. When the <code translate="no" class="notranslate">no_block</code> option isn't enabled,
+this will allow you to still have timeouts on the sending of data.</p>
+                            <p class="last">Valid option values include <code translate="no" class="notranslate">0</code> or <em>any positive integer</em>.</p>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">serializer</code> (type: <code translate="no" class="notranslate">string</code>, default: <code translate="no" class="notranslate">php</code>)</dt>
+        
+        <dd>
+                            <p class="first">Specifies the serializer to use for serializing non-scalar values. The
+<code translate="no" class="notranslate">igbinary</code> options requires the igbinary PHP extension to be enabled, as
+well as the memcached extension to have been compiled with support for it.</p>
+                            <p class="last">Valid option values include <code translate="no" class="notranslate">php</code> and <code translate="no" class="notranslate">igbinary</code>.</p>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">server_failure_limit</code> (type: <code translate="no" class="notranslate">int</code>, default: <code translate="no" class="notranslate">0</code>)</dt>
+        
+        <dd>
+                            <p class="first">Specifies the failure limit for server connection attempts before marking
+the server as &quot;dead&quot;. The server will remain in the server pool unless
+<code translate="no" class="notranslate">auto_eject_hosts</code> is enabled.</p>
+                            <p class="last">Valid option values include <em>any positive integer</em>.</p>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">socket_recv_size</code> (type: <code translate="no" class="notranslate">int</code>)</dt>
+        
+        <dd>
+                            <p class="first">Specified the maximum buffer size (in bytes) in the context of incoming
+(receive) socket connection data.</p>
+                            <p class="last">Valid option values include <em>any positive integer</em>, with a default value
+that <em>varies by platform and kernel configuration</em>.</p>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">socket_send_size</code> (type: <code translate="no" class="notranslate">int</code>)</dt>
+        
+        <dd>
+                            <p class="first">Specified the maximum buffer size (in bytes) in the context of outgoing (send)
+socket connection data.</p>
+                            <p class="last">Valid option values include <em>any positive integer</em>, with a default value
+that <em>varies by platform and kernel configuration</em>.</p>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">tcp_keepalive</code> (type: <code translate="no" class="notranslate">bool</code>, default: <code translate="no" class="notranslate">false</code>)</dt>
+        
+        <dd>
+                            Enables or disables the &quot;`keep-alive`_&quot; <a href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol" class="reference external" rel="external noopener noreferrer" target="_blank">Transmission Control Protocol (TCP)</a>
+feature, which is a feature that helps to determine whether the other end
+has stopped responding by sending probes to the network peer after an idle
+period and closing or persisting the socket based on the response (or lack thereof).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">tcp_nodelay</code> (type: <code translate="no" class="notranslate">bool</code>, default: <code translate="no" class="notranslate">false</code>)</dt>
+        
+        <dd>
+                            Enables or disables the &quot;`no-delay`_&quot; (Nagle's algorithm) <a href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol" class="reference external" rel="external noopener noreferrer" target="_blank">Transmission Control Protocol (TCP)</a>
+algorithm, which is a mechanism intended to improve the efficiency of
+networks by reducing the overhead of TCP headers by combining a number of
+small outgoing messages and sending them all at once.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">use_udp</code> (type: <code translate="no" class="notranslate">bool</code>, default: <code translate="no" class="notranslate">false</code>)</dt>
+        
+        <dd>
+                            <p class="first">Enables or disables the use of <a href="https://en.wikipedia.org/wiki/User_Datagram_Protocol" class="reference external" rel="external noopener noreferrer" target="_blank">User Datagram Protocol (UDP)</a> mode (instead
+of <a href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol" class="reference external" rel="external noopener noreferrer" target="_blank">Transmission Control Protocol (TCP)</a> mode), where all operations are
+executed in a &quot;fire-and-forget&quot; manner; no attempt to ensure the operation
+has been received or acted on will be made once the client has executed it.</p>
+                            <div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Not all library operations are tested in this mode. Mixed TCP and UDP
+servers are not allowed.</p>
+</div>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">verify_key</code> (type: <code translate="no" class="notranslate">bool</code>, default: <code translate="no" class="notranslate">false</code>)</dt>
+        
+        <dd>
+                            Enables or disables testing and verifying of all keys used to ensure they
+are valid and fit within the design of the protocol being used.
+                    </dd>
+    </dl>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Reference the <a href="https://www.php.net/manual/en/class.memcached.php" class="reference external" rel="external noopener noreferrer" target="_blank">Memcached</a> extension's <a href="https://www.php.net/manual/en/memcached.constants.php" class="reference external" rel="external noopener noreferrer" target="_blank">predefined constants</a> documentation
+for additional information about the available options.</p>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,642 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <span id="symfony2-and-http-fundamentals"></span>
+<div class="section">
+<h1 id="symfony-and-http-fundamentals">
+    Symfony and HTTP Fundamentals
+    <a class="headerlink" href="#symfony-and-http-fundamentals" title="Permalink to this headline">¶</a>
+</h1>
+<p>Great news! While you're learning Symfony, you're <em>also</em> learning the fundamentals
+of the <em>web</em>. Symfony is closely modeled after the HTTP Request-Response flow: that
+<em>fundamental</em> paradigm that's behind almost <em>all</em> communication on the web.</p>
+<p>In this article, you'll walk through the HTTP fundamentals and find out how these
+are applied throughout Symfony.</p>
+<div class="section">
+<h2 id="requests-and-responses-in-http">
+    Requests and Responses in HTTP
+    <a class="headerlink" href="#requests-and-responses-in-http" title="Permalink to this headline">¶</a>
+</h2>
+<p>HTTP (Hypertext Transfer Protocol) is a text language that allows two machines
+to communicate with each other. For example, when checking for the latest
+<a href="https://xkcd.com/" class="reference external" rel="external noopener noreferrer" target="_blank">xkcd</a> comic, the following (approximate) conversation takes place:</p>
+<img src="_images/xkcd-full.png" align="center" />
+<p>HTTP is the term used to describe this text-based language. The goal of
+your server is <em>always</em> to understand text requests and return text responses.</p>
+<p>Symfony is built from the ground up around that reality. Whether you realize
+it or not, HTTP is something you use every day. With Symfony, you'll learn
+how to master it.</p>
+<div class="section">
+<h3 id="step-1-the-client-sends-a-request">
+    Step 1: The Client Sends a Request
+    <a class="headerlink" href="#step-1-the-client-sends-a-request" title="Permalink to this headline">¶</a>
+</h3>
+<p>Every conversation on the web starts with a <em>request</em>. The request is a text
+message created by a client (e.g. a browser, a smartphone app, etc) in a
+special format known as HTTP. The client sends that request to a server,
+and then waits for the response.</p>
+<p>Take a look at the first part of the interaction (the request) between a
+browser and the xkcd web server:</p>
+<img src="_images/xkcd-request.png" align="center" />
+<p>In HTTP-speak, this HTTP request would actually look something like this:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">GET / HTTP/1.1
+Host: xkcd.com
+Accept: text/html
+User-Agent: Mozilla/5.0 (Macintosh)</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>These few lines communicate <em>everything</em> necessary about exactly which
+resource the client is requesting. The first line of an HTTP request is the
+most important, because it contains two important things: the HTTP method (GET)
+and the URI (<code translate="no" class="notranslate">/</code>).</p>
+<p>The URI (e.g. <code translate="no" class="notranslate">/</code>, <code translate="no" class="notranslate">/contact</code>, etc) is the unique address or location
+that identifies the resource the client wants. The HTTP method (e.g. <code translate="no" class="notranslate">GET</code>)
+defines what the client wants to <em>do</em> with the resource. The HTTP methods (also
+known as verbs) define the few common ways that the client can act upon the
+resource - the most common HTTP methods are:</p>
+<dl>
+                        <dt><strong>GET</strong></dt>
+        
+        <dd>
+                            Retrieve the resource from the server (e.g. when visiting a page);
+                    </dd>
+                        <dt><strong>POST</strong></dt>
+        
+        <dd>
+                            Create a resource on the server (e.g. when submitting a form);
+                    </dd>
+                        <dt><strong>PUT</strong>/<strong>PATCH</strong></dt>
+        
+        <dd>
+                            Update the resource on the server (used by APIs);
+                    </dd>
+                        <dt><strong>DELETE</strong></dt>
+        
+        <dd>
+                            Delete the resource from the server (used by APIs).
+                    </dd>
+    </dl>
+<p>With this in mind, you can imagine what an HTTP request might look like to
+delete a specific blog post, for example:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">DELETE /blog/15 HTTP/1.1</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>There are actually nine HTTP methods defined by the HTTP specification,
+but many of them are not widely used or supported. In reality, many
+modern browsers only support <code translate="no" class="notranslate">POST</code> and <code translate="no" class="notranslate">GET</code> in HTML forms. Various
+others are however supported in <a href="https://en.wikipedia.org/wiki/XMLHttpRequest" class="reference external" rel="external noopener noreferrer" target="_blank">XMLHttpRequest</a>.</p>
+</div>
+<p>In addition to the first line, an HTTP request invariably contains other
+lines of information called request <strong>headers</strong>. The headers can supply a wide
+range of information such as the host of the resource being requested (<code translate="no" class="notranslate">Host</code>),
+the response formats the client accepts (<code translate="no" class="notranslate">Accept</code>) and the application the
+client is using to make the request (<code translate="no" class="notranslate">User-Agent</code>). Many other headers exist
+and can be found on Wikipedia's <a href="https://en.wikipedia.org/wiki/List_of_HTTP_header_fields" class="reference external" rel="external noopener noreferrer" target="_blank">List of HTTP header fields</a> article.</p>
+</div>
+<div class="section">
+<h3 id="step-2-the-server-returns-a-response">
+    Step 2: The Server Returns a Response
+    <a class="headerlink" href="#step-2-the-server-returns-a-response" title="Permalink to this headline">¶</a>
+</h3>
+<p>Once a server has received the request, it knows exactly which resource the
+client needs (via the URI) and what the client wants to do with that resource
+(via the method). For example, in the case of a GET request, the server
+prepares the resource and returns it in an HTTP response. Consider the response
+from the xkcd web server:</p>
+<img src="_images/xkcd-full.png" align="center" />
+<p>Translated into HTTP, the response sent back to the browser will look something
+like this:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">HTTP/1.1 200 OK
+Date: Sat, 02 Apr 2011 21:05:05 GMT
+Server: lighttpd/1.4.19
+Content-Type: text/html
+
+&lt;html&gt;
+    &lt;!-- ... HTML for the xkcd comic --&gt;
+&lt;/html&gt;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The HTTP response contains the requested resource (the HTML content in this
+case), as well as other information about the response. The first line is
+especially important and contains the HTTP response status code (200 in this
+case).</p>
+<p>The status code communicates the overall outcome of the request back to the
+client. Was the request successful? Was there an error? Different status codes
+exist that indicate success, an error or that the client needs to do something
+(e.g. redirect to another page). Check out the <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" class="reference external" rel="external noopener noreferrer" target="_blank">list of HTTP status codes</a>.</p>
+<p>Like the request, an HTTP response contains additional pieces of information
+known as HTTP headers. The body of the same resource could be returned in multiple
+different formats like HTML, XML or JSON and the <code translate="no" class="notranslate">Content-Type</code> header uses
+Internet Media Types like <code translate="no" class="notranslate">text/html</code> to tell the client which format is
+being returned. You can see a <a href="https://www.iana.org/assignments/media-types/media-types.xhtml" class="reference external" rel="external noopener noreferrer" target="_blank">List of common media types</a> from IANA.</p>
+<p>Many other headers exist, some of which are very powerful. For example, certain
+headers can be used to create a powerful caching system.</p>
+</div>
+<div class="section">
+<h3 id="requests-responses-and-web-development">
+    Requests, Responses and Web Development
+    <a class="headerlink" href="#requests-responses-and-web-development" title="Permalink to this headline">¶</a>
+</h3>
+<p>This request-response conversation is the fundamental process that drives all
+communication on the web.</p>
+<p>The most important fact is this: regardless of the language you use, the
+type of application you build (web, mobile, JSON API) or the development
+philosophy you follow, the end goal of an application is <strong>always</strong> to understand
+each request and create and return the appropriate response.</p>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>To learn more about the HTTP specification, read the original <a href="http://www.w3.org/Protocols/rfc2616/rfc2616.html" class="reference external" rel="external noopener noreferrer" target="_blank">HTTP 1.1 RFC</a>
+or the <a href="http://datatracker.ietf.org/wg/httpbis/" class="reference external" rel="external noopener noreferrer" target="_blank">HTTP Bis</a>, which is an active effort to clarify the original
+specification.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="requests-and-responses-in-php">
+    Requests and Responses in PHP
+    <a class="headerlink" href="#requests-and-responses-in-php" title="Permalink to this headline">¶</a>
+</h2>
+<p>So how do you interact with the &quot;request&quot; and create a &quot;response&quot; when using
+PHP? In reality, PHP abstracts you a bit from the whole process:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uri</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'REQUEST_URI'</span>];
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_GET</span>[<span class="hljs-string">'foo'</span>];
+
+header(<span class="hljs-string">'Content-Type: text/html'</span>);
+<span class="hljs-keyword">echo</span> <span class="hljs-string">'The URI requested is: '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uri</span>;
+<span class="hljs-keyword">echo</span> <span class="hljs-string">'The value of the "foo" parameter is: '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span>;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As strange as it sounds, this small application is in fact taking information
+from the HTTP request and using it to create an HTTP response. Instead of
+parsing the raw HTTP request message, PHP prepares superglobal variables
+(such as <code translate="no" class="notranslate">$_SERVER</code> and <code translate="no" class="notranslate">$_GET</code>) that contain all the information from the
+request. Similarly, instead of returning the HTTP-formatted text response, you
+can use the PHP <a href="https://secure.php.net/manual/en/function.header.php" class="reference external" title="header" rel="external noopener noreferrer" target="_blank">header</a> function to create response headers and
+print out the actual content that will be the content portion of the response
+message. PHP will create a true HTTP response and return it to the client:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">HTTP/1.1 200 OK
+Date: Sat, 03 Apr 2011 02:14:33 GMT
+Server: Apache/2.2.17 (Unix)
+Content-Type: text/html
+
+The URI requested is: /testing?foo=symfony
+The value of the &quot;foo&quot; parameter is: symfony</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="requests-and-responses-in-symfony">
+    Requests and Responses in Symfony
+    <a class="headerlink" href="#requests-and-responses-in-symfony" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony provides an alternative to the raw PHP approach via two classes that
+allow you to interact with the HTTP request and response in an easier way.</p>
+<div class="section">
+<h3 id="symfony-request-object">
+    Symfony Request Object
+    <a class="headerlink" href="#symfony-request-object" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Request.php" class="reference external" title="Symfony\Component\HttpFoundation\Request" rel="external noopener noreferrer" target="_blank">Request</a> class is an
+object-oriented representation of the HTTP request message. With it, you
+have all the request information at your fingertips:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+
+<span class="hljs-comment">// the URI being requested (e.g. /about) minus any query parameters</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo();
+
+<span class="hljs-comment">// retrieves $_GET and $_POST variables respectively</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>query<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'id'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>request<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'category'</span>, <span class="hljs-string">'default category'</span>);
+
+<span class="hljs-comment">// retrieves $_SERVER variables</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>server<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'HTTP_HOST'</span>);
+
+<span class="hljs-comment">// retrieves an instance of UploadedFile identified by "attachment"</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>files<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'attachment'</span>);
+
+<span class="hljs-comment">// retrieves a $_COOKIE value</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>cookies<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'PHPSESSID'</span>);
+
+<span class="hljs-comment">// retrieves an HTTP request header, with normalized, lowercase keys</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>headers<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'host'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>headers<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'content-type'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getMethod();    <span class="hljs-comment">// e.g. GET, POST, PUT, DELETE or HEAD</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getLanguages(); <span class="hljs-comment">// an array of languages the client accepts</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As a bonus, the <code translate="no" class="notranslate">Request</code> class does a lot of work in the background about which
+you will never need to worry. For example, the <code translate="no" class="notranslate">isSecure()</code> method
+checks the <em>three</em> different values in PHP that can indicate whether or not
+the user is connecting via a secure connection (i.e. HTTPS).</p>
+</div>
+<div class="section">
+<h3 id="symfony-response-object">
+    Symfony Response Object
+    <a class="headerlink" href="#symfony-response-object" title="Permalink to this headline">¶</a>
+</h3>
+<p>Symfony also provides a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Response.php" class="reference external" title="Symfony\Component\HttpFoundation\Response" rel="external noopener noreferrer" target="_blank">Response</a>
+class: a PHP representation of an HTTP response message. This allows your
+application to use an object-oriented interface to construct the response that
+needs to be returned to the client:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setContent(<span class="hljs-string">'&lt;html&gt;&lt;body&gt;&lt;h1&gt;Hello world!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setStatusCode(Response<span class="hljs-operator">::</span>HTTP_OK);
+
+<span class="hljs-comment">// sets a HTTP response header</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>headers<span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'Content-Type'</span>, <span class="hljs-string">'text/html'</span>);
+
+<span class="hljs-comment">// prints the HTTP headers followed by the content</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>There are also several response <em>sub-classes</em> to help you return
+<a href="../components/http_foundation.html#component-http-foundation-json-response" class="reference internal">JSON</a>,
+<a href="../components/http_foundation.html#redirect-response" class="reference internal">redirect</a>,
+<a href="../components/http_foundation.html#component-http-foundation-serving-files" class="reference internal">stream file downloads</a>
+and more.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The <code translate="no" class="notranslate">Request</code> and <code translate="no" class="notranslate">Response</code> classes are part of a standalone component
+called <a href="../components/http_foundation.html" class="reference internal">symfony/http-foundation</a>
+that you can use in <em>any</em> PHP project. This also contains classes for handling
+sessions, file uploads and more.</p>
+</div>
+<p>If Symfony offered nothing else, you would already have a toolkit for accessing
+request information and an object-oriented interface for creating the response.
+Even as you learn the many powerful features in Symfony, keep in mind that the
+goal of your application is always <em>to interpret a request and create the
+appropriate response based on your application logic</em>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="the-journey-from-the-request-to-the-response">
+    The Journey from the Request to the Response
+    <a class="headerlink" href="#the-journey-from-the-request-to-the-response" title="Permalink to this headline">¶</a>
+</h2>
+<p>Like HTTP itself, using the <code translate="no" class="notranslate">Request</code> and <code translate="no" class="notranslate">Response</code> objects is pretty
+straightforward. The hard part of building an application is writing what comes in
+between. In other words, the real work comes in writing the code that
+interprets the request information and creates the response.</p>
+<p>Your application probably does many things, like sending emails, handling
+form submissions, saving things to a database, rendering HTML pages and protecting
+content with security. How can you manage all of this and still keep your
+code organized and maintainable? Symfony was created to help you with these
+problems.</p>
+<div class="section">
+<h3 id="the-front-controller">
+    The Front Controller
+    <a class="headerlink" href="#the-front-controller" title="Permalink to this headline">¶</a>
+</h3>
+<p>Traditionally, applications were built so that each &quot;page&quot; of a site was
+its own physical file (e.g. <code translate="no" class="notranslate">index.php</code>, <code translate="no" class="notranslate">contact.php</code>, etc.).</p>
+<p>There are several problems with this approach, including the inflexibility
+of the URLs (what if you wanted to change <code translate="no" class="notranslate">blog.php</code> to <code translate="no" class="notranslate">news.php</code> without
+breaking all of your links?) and the fact that each file <em>must</em> manually
+include some set of core files so that security, database connections and
+the &quot;look&quot; of the site can remain consistent.</p>
+<p>A much better solution is to use a front controller: a single PHP file that
+handles every request coming into your application. For example:</p>
+<div class="table-wrapper">
+<table>
+        <tbody>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">/index.php</code></td>
+                                    <td>executes <code translate="no" class="notranslate">index.php</code></td>
+                            </tr>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">/index.php/contact</code></td>
+                                    <td>executes <code translate="no" class="notranslate">index.php</code></td>
+                            </tr>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">/index.php/blog</code></td>
+                                    <td>executes <code translate="no" class="notranslate">index.php</code></td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>By using rewrite rules in your
+<a href="../setup/web_server_configuration.html" class="reference internal">web server configuration</a>,
+the <code translate="no" class="notranslate">index.php</code> won't be needed and you will have beautiful, clean URLs
+(e.g. <code translate="no" class="notranslate">/show</code>).</p>
+</div>
+<p>Now, every request is handled exactly the same way. Instead of individual URLs
+executing different PHP files, the front controller is <em>always</em> executed,
+and the routing of different URLs to different parts of your application
+is done internally.</p>
+<p>A small front controller might look like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// index.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo(); <span class="hljs-comment">// the URI path being requested</span>
+
+<span class="hljs-keyword">if</span> (in_array(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>, [<span class="hljs-string">''</span>, <span class="hljs-string">'/'</span>])) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Welcome to the homepage.'</span>);
+} <span class="hljs-keyword">elseif</span> (<span class="hljs-string">'/contact'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Contact us'</span>);
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Page not found.'</span>, Response<span class="hljs-operator">::</span>HTTP_NOT_FOUND);
+}
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This is better, but this is still a lot of repeated work! Fortunately, Symfony can
+help once again.</p>
+</div>
+<div class="section">
+<h3 id="the-symfony-application-flow">
+    The Symfony Application Flow
+    <a class="headerlink" href="#the-symfony-application-flow" title="Permalink to this headline">¶</a>
+</h3>
+<p>A Symfony framework application <em>also</em> uses a front-controller file. But inside,
+<em>Symfony</em> is responsible for handling each incoming request and figuring out what
+to do:</p>
+<span id="request-flow-figure"></span>
+<object data="../_images/http/request-flow.svg" type="image/svg+xml"></object>
+<p>Incoming requests are interpreted by the <a href="../routing.html" class="reference internal">Routing component</a> and
+passed to PHP functions that return <code translate="no" class="notranslate">Response</code> objects.</p>
+<p>This may not make sense yet, but as you keep reading, you'll learn about <a href="../routing.html" class="reference internal">routes</a>
+and <a href="../controller.html" class="reference internal">controllers</a>: the two fundamental parts to creating a page.
+But as you go along, don't forget that no matter <em>how</em> complex your app gets, your
+job is always the same: read information from the Request and use it to create a
+Response.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="summary-the-request-response-flow">
+    Summary: The Request-Response Flow
+    <a class="headerlink" href="#summary-the-request-response-flow" title="Permalink to this headline">¶</a>
+</h2>
+<p>Here's what we've learned so far:</p>
+<ol class="arabic">
+    <li>A client (e.g. a browser) sends an HTTP request;</li>
+<li>Each request executes the same, single file (called a &quot;front controller&quot;);</li>
+<li>The front controller boots Symfony and passes the request information;</li>
+<li>Internally, Symfony uses <em>routes</em> and <em>controllers</em> to create the Response for
+the page (we'll learn about these soon!);</li>
+<li>Symfony turns your <code translate="no" class="notranslate">Response</code> object into the text headers and content
+(i.e. the HTTP response), which are sent back to the client.</li>
+</ol>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

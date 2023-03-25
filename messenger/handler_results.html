@@ -1,0 +1,266 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="getting-results-from-your-handler">
+    Getting Results from your Handler
+    <a class="headerlink" href="#getting-results-from-your-handler" title="Permalink to this headline">¶</a>
+</h1>
+<p>When a message is handled, the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Messenger/Middleware/HandleMessageMiddleware.php" class="reference external" title="Symfony\Component\Messenger\Middleware\HandleMessageMiddleware" rel="external noopener noreferrer" target="_blank">HandleMessageMiddleware</a>
+adds a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Messenger/Stamp/HandledStamp.php" class="reference external" title="Symfony\Component\Messenger\Stamp\HandledStamp" rel="external noopener noreferrer" target="_blank">HandledStamp</a> for each object that handled the message.
+You can use this to get the value returned by the handler(s):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">MessageBusInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">Stamp</span>\<span class="hljs-title">HandledStamp</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>envelope</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>messageBus</span><span class="hljs-operator">-&gt;</span>dispatch(<span class="hljs-keyword">new</span> SomeMessage());
+
+<span class="hljs-comment">// get the value that was returned by the last message handler</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>handledStamp</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>envelope</span><span class="hljs-operator">-&gt;</span>last(HandledStamp<span class="hljs-operator">::</span>class);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>handledStamp</span><span class="hljs-operator">-&gt;</span>getResult();
+
+<span class="hljs-comment">// or get info about all of handlers</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>handledStamps</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>envelope</span><span class="hljs-operator">-&gt;</span>all(HandledStamp<span class="hljs-operator">::</span>class);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h2 id="working-with-command-query-buses">
+    Working with Command &amp; Query Buses
+    <a class="headerlink" href="#working-with-command-query-buses" title="Permalink to this headline">¶</a>
+</h2>
+<p>The Messenger component can be used in CQRS architectures where command &amp; query
+buses are central pieces of the application. Read Martin Fowler's
+<a href="https://martinfowler.com/bliki/CQRS.html" class="reference external" rel="external noopener noreferrer" target="_blank">article about CQRS</a> to learn more and
+<a href="multiple_buses.html" class="reference internal">how to configure multiple buses</a>.</p>
+<p>As queries are usually synchronous and expected to be handled once,
+getting the result from the handler is a common need.</p>
+<p>A <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Messenger/HandleTrait.php" class="reference external" title="Symfony\Component\Messenger\HandleTrait" rel="external noopener noreferrer" target="_blank">HandleTrait</a> exists to get the result
+of the handler when processing synchronously. It also ensures that exactly one
+handler is registered. The <code translate="no" class="notranslate">HandleTrait</code> can be used in any class that has a
+<code translate="no" class="notranslate">$messageBus</code> property:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Action/ListItems.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Action</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">ListItemsQuery</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">MessageHandler</span>\<span class="hljs-title">ListItemsQueryResult</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">HandleTrait</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">MessageBusInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ListItems</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">HandleTrait</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private MessageBusInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>messageBus</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__invoke</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>result</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>query(<span class="hljs-keyword">new</span> ListItemsQuery(<span class="hljs-comment">/* ... */</span>));
+
+        <span class="hljs-comment">// Do something with the result</span>
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-comment">// Creating such a method is optional, but allows type-hinting the result</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">query</span><span class="hljs-params">(ListItemsQuery <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>query</span>)</span>: <span class="hljs-title">ListItemsQueryResult</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>query</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Hence, you can use the trait to create command &amp; query bus classes.
+For example, you could create a special <code translate="no" class="notranslate">QueryBus</code> class and inject it
+wherever you need a query bus behavior instead of the <code translate="no" class="notranslate">MessageBusInterface</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/MessageBus/QueryBus.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">MessageBus</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">Envelope</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">HandleTrait</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">MessageBusInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">QueryBus</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">HandleTrait</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private MessageBusInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>messageBus</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@param</span> object|Envelope $query
+     *
+     * <span class="hljs-doctag">@return</span> mixed The handler returned value
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">query</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>query</span>)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>query</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

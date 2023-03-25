@@ -1,0 +1,841 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="migrating-an-existing-application-to-symfony">
+    Migrating an Existing Application to Symfony
+    <a class="headerlink" href="#migrating-an-existing-application-to-symfony" title="Permalink to this headline">¶</a>
+</h1>
+<p>When you have an existing application that was not built with Symfony,
+you might want to move over parts of that application without rewriting
+the existing logic completely. For those cases there is a pattern called
+<a href="https://martinfowler.com/bliki/StranglerFigApplication.html" class="reference external" rel="external noopener noreferrer" target="_blank">Strangler Fig Application</a>. The basic idea of this pattern is to create a
+new application that gradually takes over functionality from an existing
+application. This migration approach can be implemented with Symfony in
+various ways and has some benefits over a rewrite such as being able
+to introduce new features in the existing application and reducing risk
+by avoiding a &quot;big bang&quot;-release for the new application.</p>
+<div class="admonition admonition-screencast screencast">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                <span>Screencast</span>
+    </p><p>The topic of migrating from an existing application towards Symfony is
+sometimes discussed during conferences. For example the talk
+<a href="https://youtu.be/YzyiZNY9htQ" class="reference external" rel="external noopener noreferrer" target="_blank">Modernizing with Symfony</a> reiterates some of the points from this page.</p>
+</div>
+<div class="section">
+<h2 id="prerequisites">
+    Prerequisites
+    <a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a>
+</h2>
+<p>Before you start introducing Symfony to the existing application, you have to
+ensure certain requirements are met by your existing application and
+environment.  Making the decisions and preparing the environment before
+starting the migration process is crucial for its success.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The following steps do not require you to have the new Symfony
+application in place and in fact it might be safer to introduce these
+changes beforehand in your existing application.</p>
+</div>
+<div class="section">
+<h3 id="choosing-the-target-symfony-version">
+    Choosing the Target Symfony Version
+    <a class="headerlink" href="#choosing-the-target-symfony-version" title="Permalink to this headline">¶</a>
+</h3>
+<p>Most importantly, this means that you will have to decide which version you
+are aiming to migrate to, either a current stable release or the long
+term support version (LTS). The main difference is, how frequently you
+will need to upgrade in order to use a supported version. In the context
+of a migration, other factors, such as the supported PHP-version or
+support for libraries/bundles you use, may have a strong impact as well.
+Using the most recent, stable release will likely give you more features,
+but it will also require you to update more frequently to ensure you will
+get support for bug fixes and security patches and you will have to work
+faster on fixing deprecations to be able to upgrade.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>When upgrading to Symfony you might be tempted to also use
+<a href="setup.html#symfony-flex" class="reference internal">Flex</a>. Please keep in mind that it primarily
+focuses on bootstrapping a new Symfony application according to best
+practices regarding the directory structure. When you work in the
+constraints of an existing application you might not be able to
+follow these constraints, making Flex less useful.</p>
+</div>
+<p>First of all your environment needs to be able to support the minimum
+requirements for both applications. In other words, when the Symfony
+release you aim to use requires PHP 7.1 and your existing application
+does not yet support this PHP version, you will probably have to upgrade
+your legacy project. Use the <code translate="no" class="notranslate">check:requirements</code> command to check if your
+server meets the <a href="setup.html#symfony-tech-requirements" class="reference internal">technical requirements for running Symfony applications</a>
+and compare them with your current application's environment to make sure you
+are able to run both applications on the same system. Having a test
+system, that is as close to the production environment as possible,
+where you can just install a new Symfony project next to the existing one
+and check if it is working will give you an even more reliable result.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If your current project is running on an older PHP version such as
+PHP 5.x upgrading to a recent version will give you a performance
+boost without having to change your code.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="setting-up-composer">
+    Setting up Composer
+    <a class="headerlink" href="#setting-up-composer" title="Permalink to this headline">¶</a>
+</h3>
+<p>Another point you will have to look out for is conflicts between
+dependencies in both applications. This is especially important if your
+existing application already uses Symfony components or libraries commonly
+used in Symfony applications such as Doctrine ORM or Twig.
+A good way for ensuring compatibility is to use the same <code translate="no" class="notranslate">composer.json</code>
+for both project's dependencies.</p>
+<p>Once you have introduced composer for managing your project's dependencies
+you can use its autoloader to ensure you do not run into any conflicts due
+to custom autoloading from your existing framework. This usually entails
+adding an <a href="https://getcomposer.org/doc/04-schema.md#autoload" class="reference external" rel="external noopener noreferrer" target="_blank">autoload</a>-section to your <code translate="no" class="notranslate">composer.json</code> and configuring it
+based on your application and replacing your custom logic with something
+like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="removing-global-state-from-the-legacy-application">
+    Removing Global State from the Legacy Application
+    <a class="headerlink" href="#removing-global-state-from-the-legacy-application" title="Permalink to this headline">¶</a>
+</h3>
+<p>In older PHP applications it was quite common to rely on global state and
+even mutate it during runtime. This might have side effects on the newly
+introduced Symfony application. In other words code relying on globals
+in the existing application should be refactored to allow for both systems
+to work simultaneously. Since relying on global state is considered an
+anti-pattern nowadays you might want to start working on this even before
+doing any integration.</p>
+</div>
+<div class="section">
+<h3 id="setting-up-the-environment">
+    Setting up the Environment
+    <a class="headerlink" href="#setting-up-the-environment" title="Permalink to this headline">¶</a>
+</h3>
+<p>There might be additional steps you need to take depending on the libraries
+you use, the original framework your project is based on and most importantly
+the age of the project as PHP itself underwent many improvements throughout
+the years that your code might not have caught on to, yet. As long as both
+your existing code and a new Symfony project can run in parallel on the
+same system you are on a good way. All these steps do not require you to
+introduce Symfony just yet and will already open up some opportunities for
+modernizing your existing code.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="establishing-a-safety-net-for-regressions">
+    Establishing a Safety Net for Regressions
+    <a class="headerlink" href="#establishing-a-safety-net-for-regressions" title="Permalink to this headline">¶</a>
+</h2>
+<p>Before you can safely make changes to the existing code, you must ensure that
+nothing will break. One reason for choosing to migrate is making sure that the
+application is in a state where it can run at all times. The best way for
+ensuring a working state is to establish automated tests.</p>
+<p>It is quite common for an existing application to either not have a test suite
+at all or have low code coverage. Introducing unit tests for this code is
+likely not cost effective as the old code might be replaced with functionality
+from Symfony components or might be adapted to the new application.
+Additionally legacy code tends to be hard to write tests for, making the process
+slow and cumbersome.</p>
+<p>Instead of providing low level tests, that ensure each class works as expected, it
+might makes sense to write high level tests ensuring that at least anything user
+facing works on at least a superficial level. These kinds of tests are commonly
+called End-to-End tests, because they cover the whole application from what the
+user sees in the browser down to the very code that is being run and connected
+services like a database. To automate this you have to make sure that you can
+get a test instance of your system running as easily as possible and making
+sure that external systems do not change your production environment, e.g.
+provide a separate test database with (anonymized) data from a production
+system or being able to setup a new schema with a basic dataset for your test
+environment. Since these tests do not rely as much on isolating testable code
+and instead look at the interconnected system, writing them is usually easier
+and more productive when doing a migration. You can then limit your effort on
+writing lower level tests on parts of the code that you have to change or
+replace in the new application making sure it is testable right from the start.</p>
+<p>There are tools aimed at End-to-End testing you can use such as
+<a href="https://github.com/symfony/panther" class="reference external" rel="external noopener noreferrer" target="_blank">Symfony Panther</a> or you can write <a href="testing.html" class="reference internal">functional tests</a>
+in the new Symfony application as soon as the initial setup is completed.
+For example you can add so called Smoke Tests, which only ensure a certain
+path is accessible by checking the HTTP status code returned or looking for
+a text snippet from the page.</p>
+</div>
+<div class="section">
+<h2 id="introducing-symfony-to-the-existing-application">
+    Introducing Symfony to the Existing Application
+    <a class="headerlink" href="#introducing-symfony-to-the-existing-application" title="Permalink to this headline">¶</a>
+</h2>
+<p>The following instructions only provide an outline of common tasks for
+setting up a Symfony application that falls back to a legacy application
+whenever a route is not accessible. Your mileage may vary and likely you
+will need to adjust some of this or even provide additional configuration
+or retrofitting to make it work with your application. This guide is not
+supposed to be comprehensive and instead aims to be a starting point.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you get stuck or need additional help you can reach out to the
+<a href="contributing/community/index.html" class="reference internal">Symfony community</a> whenever you need
+concrete feedback on an issue you are facing.</p>
+</div>
+<div class="section">
+<h3 id="booting-symfony-in-a-front-controller">
+    Booting Symfony in a Front Controller
+    <a class="headerlink" href="#booting-symfony-in-a-front-controller" title="Permalink to this headline">¶</a>
+</h3>
+<p>When looking at how a typical PHP application is bootstrapped there are
+two major approaches. Nowadays most frameworks provide a so called
+front controller which acts as an entrypoint. No matter which URL-path
+in your application you are going to, every request is being sent to
+this front controller, which then determines which parts of your
+application to load, e.g. which controller and action to call. This is
+also the approach that Symfony takes with <code translate="no" class="notranslate">public/index.php</code> being
+the front controller. Especially in older applications it was common
+that different paths were handled by different PHP files.</p>
+<p>In any case you have to create a <code translate="no" class="notranslate">public/index.php</code> that will start
+your Symfony application by either copying the file from the
+<code translate="no" class="notranslate">FrameworkBundle</code>-recipe or by using Flex and requiring the
+FrameworkBundle. You will also likely have to update your web server
+(e.g. Apache or nginx) to always use this front controller. You can
+look at <a href="setup/web_server_configuration.html" class="reference internal">Web Server Configuration</a>
+for examples on how this might look. For example when using Apache you can
+use Rewrite Rules to ensure PHP files are ignored and instead only index.php
+is called:</p>
+<div translate="no" class="highlight-apache notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs apache"><span class="hljs-attribute"><span class="hljs-nomarkup">RewriteEngine</span></span> <span class="hljs-literal">On</span>
+
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteCond</span></span> <span class="hljs-variable">%{REQUEST_URI}</span>::<span class="hljs-number">$1</span> ^(/.+)/(.*)::\2$
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteRule</span></span> ^(.*) -<span class="hljs-meta"> [E=BASE:%1]</span>
+
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteCond</span></span> <span class="hljs-variable">%{ENV:REDIRECT_STATUS}</span> ^$
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteRule</span></span> ^index\.php(?:/(.*)|$) <span class="hljs-variable">%{ENV:BASE}</span>/<span class="hljs-number">$1</span><span class="hljs-meta"> [R=301,L]</span>
+
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteRule</span></span> ^index\.php -<span class="hljs-meta"> [L]</span>
+
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteCond</span></span> <span class="hljs-variable">%{REQUEST_FILENAME}</span> -f
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteCond</span></span> <span class="hljs-variable">%{REQUEST_FILENAME}</span> !^.+\.php$
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteRule</span></span> ^ -<span class="hljs-meta"> [L]</span>
+
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteRule</span></span> ^ <span class="hljs-variable">%{ENV:BASE}</span>/index.php<span class="hljs-meta"> [L]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This change will make sure that from now on your Symfony application is
+the first one handling all requests. The next step is to make sure that
+your existing application is started and taking over whenever Symfony
+can not yet handle a path previously managed by the existing application.</p>
+<p>From this point, many tactics are possible and every project requires its
+unique approach for migration. This guide shows two examples of commonly used
+approaches, which you can use as a base for your own approach:</p>
+<ul>
+    <li><a href="migration.html#front-controller-with-legacy-bridge" class="reference internal">Front Controller with Legacy Bridge</a>, which leaves the legacy application
+untouched and allows migrating it in phases to the Symfony application.</li>
+<li><a href="migration.html#legacy-route-loader" class="reference internal">Legacy Route Loader</a>, where the legacy application is integrated in phases
+into Symfony, with a fully integrated final result.</li>
+</ul>
+</div>
+<div class="section">
+<h3 id="front-controller-with-legacy-bridge">
+    Front Controller with Legacy Bridge
+    <a class="headerlink" href="#front-controller-with-legacy-bridge" title="Permalink to this headline">¶</a>
+</h3>
+<p>Once you have a running Symfony application that takes over all requests,
+falling back to your legacy application is done by extending the original front
+controller script with some logic for going to your legacy system. The file
+could look something like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// public/index.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Kernel</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">LegacyBridge</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Dotenv</span>\<span class="hljs-title">Dotenv</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ErrorHandler</span>\<span class="hljs-title">Debug</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+
+<span class="hljs-keyword">require</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload.php'</span>;
+
+(<span class="hljs-keyword">new</span> Dotenv())<span class="hljs-operator">-&gt;</span>bootEnv(dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/.env'</span>);
+
+<span class="hljs-comment">/*
+ * The kernel will always be available globally, allowing you to
+ * access it from your existing application and through it the
+ * service container. This allows for introducing new features in
+ * the existing application.
+ */</span>
+<span class="hljs-keyword">global</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span>;
+
+<span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'APP_DEBUG'</span>]) {
+    umask(<span class="hljs-number">0000</span>);
+
+    Debug<span class="hljs-operator">::</span>enable();
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>trustedProxies</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'TRUSTED_PROXIES'</span>] ?? <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_ENV</span>[<span class="hljs-string">'TRUSTED_PROXIES'</span>] ?? <span class="hljs-keyword">false</span>) {
+    Request<span class="hljs-operator">::</span>setTrustedProxies(
+      explode(<span class="hljs-string">','</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>trustedProxies</span>),
+      Request<span class="hljs-operator">::</span>HEADER_X_FORWARDED_FOR | Request<span class="hljs-operator">::</span>HEADER_X_FORWARDED_PORT | Request<span class="hljs-operator">::</span>HEADER_X_FORWARDED_PROTO
+    );
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>trustedHosts</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'TRUSTED_HOSTS'</span>] ?? <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_ENV</span>[<span class="hljs-string">'TRUSTED_HOSTS'</span>] ?? <span class="hljs-keyword">false</span>) {
+    Request<span class="hljs-operator">::</span>setTrustedHosts([<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>trustedHosts</span>]);
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span> = <span class="hljs-keyword">new</span> Kernel(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'APP_ENV'</span>], (bool) <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'APP_DEBUG'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">false</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>isNotFound()) {
+    <span class="hljs-comment">// Symfony successfully handled the route.</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();
+} <span class="hljs-keyword">else</span> {
+    LegacyBridge<span class="hljs-operator">::</span>handleRequest(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>, <span class="hljs-keyword">__DIR__</span>);
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>terminate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>There are 2 major deviations from the original file:</p>
+<dl>
+                        <dt>Line 18</dt>
+        
+        <dd>
+                            First of all, <code translate="no" class="notranslate">$kernel</code> is made globally available. This allows you to use
+Symfony features inside your existing application and gives access to
+services configured in our Symfony application. This helps you prepare your
+own code to work better within the Symfony application before you transition
+it over. For instance, by replacing outdated or redundant libraries with
+Symfony components.
+                    </dd>
+                        <dt>Line 41 - 46</dt>
+        
+        <dd>
+                            If Symfony handled the response, it is sent; otherwise, the <code translate="no" class="notranslate">LegacyBridge</code>
+handles the request.
+                    </dd>
+    </dl>
+<p>This legacy bridge is responsible for figuring out which file should be loaded
+in order to process the old application logic. This can either be a front
+controller similar to Symfony's <code translate="no" class="notranslate">public/index.php</code> or a specific script file
+based on the current route. The basic outline of this LegacyBridge could look
+somewhat like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/LegacyBridge.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LegacyBridge</span>
+</span>{
+
+    <span class="hljs-comment">/**
+     * Map the incoming request to the right file. This is the
+     * key function of the LegacyBridge.
+     *
+     * Sample code only. Your implementation will vary, depending on the
+     * architecture of the legacy code and how it's executed.
+     *
+     * If your mapping is complicated, you may want to write unit tests
+     * to verify your logic, hence this is public static.
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getLegacyScript</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requestPathInfo</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyRoot</span> = <span class="hljs-keyword">__DIR__</span> . <span class="hljs-string">'/../'</span>;
+
+        <span class="hljs-comment">// Map a route to a legacy script:</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requestPathInfo</span> == <span class="hljs-string">'/customer/'</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-string">"{$legacyRoot}src/customers/list.php"</span>;
+        }
+
+        <span class="hljs-comment">// Map a direct file call, e.g. an ajax call:</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requestPathInfo</span> == <span class="hljs-string">'inc/ajax_cust_details.php'</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-string">"{$legacyRoot}inc/ajax_cust_details.php"</span>;
+        }
+
+        <span class="hljs-comment">// ... etc.</span>
+
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> \<span class="hljs-keyword">Exception</span>(<span class="hljs-string">"Unhandled legacy mapping for $requestPathInfo"</span>);
+    }
+
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleRequest</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, Response <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>, string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>publicDirectory</span>)</span>: ?<span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyScriptFilename</span> = LegacyBridge<span class="hljs-operator">::</span>getLegacyScript(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+
+        <span class="hljs-comment">// Possibly (re-)set some env vars (e.g. to handle forms</span>
+        <span class="hljs-comment">// posting to PHP_SELF):</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>p</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'PHP_SELF'</span>] = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>p</span>;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'SCRIPT_NAME'</span>] = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>p</span>;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'SCRIPT_FILENAME'</span>] = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyScriptFilename</span>;
+
+        <span class="hljs-keyword">require</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyScriptFilename</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This is the most generic approach you can take, that is likely to work
+no matter what your previous system was. You might have to account for
+certain &quot;quirks&quot;, but since your original application is only started
+after Symfony finished handling the request you reduced the chances
+for side effects and any interference.</p>
+<p>Since the old script is called in the global variable scope it will reduce side
+effects on the old code which can sometimes require variables from the global
+scope. At the same time, because your Symfony application will always be
+booted first, you can access the container via the <code translate="no" class="notranslate">$kernel</code> variable and
+then fetch any service (using <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/KernelInterface.php#method_getContainer" class="reference external" title="Symfony\Component\HttpKernel\KernelInterface::getContainer()" rel="external noopener noreferrer" target="_blank">getContainer()</a>).
+This can be helpful if you want to introduce new features to your legacy
+application, without switching over the whole action to the new application.
+For example, you could now use the Symfony Translator in your old application
+or instead of using your old database logic, you could use Doctrine to refactor
+old queries. This will also allow you to incrementally improve the legacy code
+making it easier to transition it over to the new Symfony application.</p>
+<p>The major downside is, that both systems are not well integrated
+into each other leading to some redundancies and possibly duplicated code.
+For example, since the Symfony application is already done handling the
+request you can not take advantage of kernel events or utilize Symfony's
+routing for determining which legacy script to call.</p>
+</div>
+<div class="section">
+<h3 id="legacy-route-loader">
+    Legacy Route Loader
+    <a class="headerlink" href="#legacy-route-loader" title="Permalink to this headline">¶</a>
+</h3>
+<p>The major difference to the LegacyBridge-approach from before is, that the
+logic is moved inside the Symfony application. It removes some of the
+redundancies and allows us to also interact with parts of the legacy
+application from inside Symfony, instead of just the other way around.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The following route loader is just a generic example that you might
+have to tweak for your legacy application. You can familiarize
+yourself with the concepts by reading up on it in <a href="routing.html" class="reference internal">Routing</a>.</p>
+</div>
+<p>The legacy route loader is <a href="routing/custom_route_loader.html" class="reference internal">a custom route loader</a>.
+The legacy route loader has a similar functionality as the previous
+LegacyBridge, but it is a service that is registered inside Symfony's Routing
+component:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Legacy/LegacyRouteLoader.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Legacy</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Loader</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Route</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">RouteCollection</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LegacyRouteLoader</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Loader</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resource</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span> = null)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>collection</span> = <span class="hljs-keyword">new</span> RouteCollection();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span> = <span class="hljs-keyword">new</span> Finder();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'*.php'</span>);
+
+        <span class="hljs-comment">/** <span class="hljs-doctag">@var</span> SplFileInfo $legacyScriptFile */</span>
+        <span class="hljs-keyword">foreach</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>in(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>webDir) <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyScriptFile</span>) {
+            <span class="hljs-comment">// This assumes all legacy files use ".php" as extension</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filename</span> = basename(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyScriptFile</span><span class="hljs-operator">-&gt;</span>getRelativePathname(), <span class="hljs-string">'.php'</span>);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routeName</span> = sprintf(<span class="hljs-string">'app.legacy.%s'</span>, str_replace(<span class="hljs-string">'/'</span>, <span class="hljs-string">'__'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filename</span>));
+
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>collection</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routeName</span>, <span class="hljs-keyword">new</span> Route(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyScriptFile</span><span class="hljs-operator">-&gt;</span>getRelativePathname(), [
+                <span class="hljs-string">'_controller'</span> =&gt; <span class="hljs-string">'App\Controller\LegacyController::loadLegacyScript'</span>,
+                <span class="hljs-string">'requestPath'</span> =&gt; <span class="hljs-string">'/'</span> . <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyScriptFile</span><span class="hljs-operator">-&gt;</span>getRelativePathname(),
+                <span class="hljs-string">'legacyScript'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyScriptFile</span><span class="hljs-operator">-&gt;</span>getPathname(),
+            ]));
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>collection</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You will also have to register the loader in your application's
+<code translate="no" class="notranslate">routing.yaml</code> as described in the documentation for
+<a href="routing/custom_route_loader.html" class="reference internal">Custom Route Loaders</a>.
+Depending on your configuration, you might also have to tag the service with
+<code translate="no" class="notranslate">routing.loader</code>. Afterwards you should be able to see all the legacy routes
+in your route configuration, e.g. when you call the <code translate="no" class="notranslate">debug:router</code>-command:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:router</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In order to use these routes you will need to create a controller that handles
+these routes. You might have noticed the <code translate="no" class="notranslate">_controller</code> attribute in the
+previous code example, which tells Symfony which Controller to call whenever it
+tries to access one of our legacy routes. The controller itself can then use the
+other route attributes (i.e. <code translate="no" class="notranslate">requestPath</code> and <code translate="no" class="notranslate">legacyScript</code>) to determine
+which script to call and wrap the output in a response class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/LegacyController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">StreamedResponse</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LegacyController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadLegacyScript</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requestPath</span>, string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyScript</span>)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> StreamedResponse(
+            <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> <span class="hljs-title">use</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requestPath</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyScript</span>)</span> </span>{
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'PHP_SELF'</span>] = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requestPath</span>;
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'SCRIPT_NAME'</span>] = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requestPath</span>;
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'SCRIPT_FILENAME'</span>] = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyScript</span>;
+
+                chdir(dirname(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyScript</span>));
+
+                <span class="hljs-keyword">require</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>legacyScript</span>;
+            }
+        );
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This controller will set some server variables that might be needed by
+the legacy application. This will simulate the legacy script being called
+directly, in case it relies on these variables (e.g. when determining
+relative paths or file names). Finally the action requires the old script,
+which essentially calls the original script as before, but it runs inside
+our current application scope, instead of the global scope.</p>
+<p>There are some risks to this approach, as it is no longer run in the global
+scope. However, since the legacy code now runs inside a controller action, you gain
+access to many functionalities from the new Symfony application, including the
+chance to use Symfony's event lifecycle. For instance, this allows you to
+transition the authentication and authorization of the legacy application over
+to the Symfony application using the Security component and its firewalls.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,1558 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="pushing-data-to-clients-using-the-mercure-protocol">
+    Pushing Data to Clients Using the Mercure Protocol
+    <a class="headerlink" href="#pushing-data-to-clients-using-the-mercure-protocol" title="Permalink to this headline">¶</a>
+</h1>
+<p>Being able to broadcast data in real-time from servers to clients is a
+requirement for many modern web and mobile applications.</p>
+<p>Creating a UI reacting in live to changes made by other users
+(e.g. a user changes the data currently browsed by several other users,
+all UIs are instantly updated),
+notifying the user when <a href="messenger.html" class="reference internal">an asynchronous job</a> has been
+completed or creating chat applications are among the typical use cases
+requiring &quot;push&quot; capabilities.</p>
+<p>Symfony provides a straightforward component, built on top of
+<a href="https://mercure.rocks/spec" class="reference external" rel="external noopener noreferrer" target="_blank">the Mercure protocol</a>, specifically designed for this class of use cases.</p>
+<p>Mercure is an open protocol designed from the ground up to publish updates from
+server to clients. It is a modern and efficient alternative to timer-based
+polling and to WebSocket.</p>
+<p>Because it is built on top <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events" class="reference external" rel="external noopener noreferrer" target="_blank">Server-Sent Events (SSE)</a>, Mercure is supported
+out of the box in modern browsers (old versions of Edge and IE require
+<a href="https://github.com/Yaffle/EventSource" class="reference external" rel="external noopener noreferrer" target="_blank">a polyfill</a>) and has <a href="https://mercure.rocks/docs/ecosystem/awesome" class="reference external" rel="external noopener noreferrer" target="_blank">high-level implementations</a> in many programming
+languages.</p>
+<p>Mercure comes with an authorization mechanism,
+automatic reconnection in case of network issues
+with retrieving of lost updates, a presence API,
+&quot;connection-less&quot; push for smartphones and auto-discoverability (a supported
+client can automatically discover and subscribe to updates of a given resource
+thanks to a specific HTTP header).</p>
+<p>All these features are supported in the Symfony integration.</p>
+<p><a href="https://www.youtube.com/watch?v=UI1l0JOjLeI" class="reference external" rel="external noopener noreferrer" target="_blank">In this recording</a> you can see how a Symfony web API leverages Mercure
+and API Platform to update in live a React app and a mobile app (React Native)
+generated using the API Platform client generator.</p>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="installing-the-symfony-bundle">
+    Installing the Symfony Bundle
+    <a class="headerlink" href="#installing-the-symfony-bundle" title="Permalink to this headline">¶</a>
+</h3>
+<p>Run this command to install the Mercure support:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require mercure</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>To manage persistent connections, Mercure relies on a Hub: a dedicated server
+that handles persistent SSE connections with the clients.
+The Symfony app publishes the updates to the hub, that will broadcast them to
+clients.</p>
+<p>Thanks to <a href="setup/docker.html" class="reference internal">the Docker integration of Symfony</a>,
+<a href="setup.html#symfony-flex" class="reference internal">Flex</a> proposes to install a Mercure hub.
+Run <code translate="no" class="notranslate">docker-compose up</code> to start the hub if you have chosen this option.</p>
+<p>If you use the <a href="setup/symfony_server.html" class="reference internal">Symfony Local Web Server</a>,
+you must start it with the <code translate="no" class="notranslate">--no-tls</code> option.</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>symfony server:start --no-tls -d</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="running-a-mercure-hub">
+    Running a Mercure Hub
+    <a class="headerlink" href="#running-a-mercure-hub" title="Permalink to this headline">¶</a>
+</h3>
+<img src="_images/schema.png" />
+<p>If you use the Docker integration, a hub is already up and running,
+and you can go straight to the next section.</p>
+<p>Otherwise, and in production, you have to install a hub by yourself.
+An official and open source (AGPL) Hub based on the Caddy web server
+can be downloaded as a static binary from <a href="https://mercure.rocks" class="reference external" rel="external noopener noreferrer" target="_blank">Mercure.rocks</a>.
+A Docker image, a Helm chart for Kubernetes
+and a managed, High Availability Hub are also provided.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="configuration">
+    Configuration
+    <a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a>
+</h2>
+<p>The preferred way to configure MercureBundle is using
+<a href="configuration.html" class="reference internal">environment variables</a>.</p>
+<p>When MercureBundle has been installed, the <code translate="no" class="notranslate">.env</code> file of your project
+has been updated by the Flex recipe to include the available env vars.</p>
+<p>Also, if you are using the Docker integration with the Symfony Local Web Server,
+<a href="https://github.com/dunglas/symfony-docker/" class="reference external" rel="external noopener noreferrer" target="_blank">Symfony Docker</a> or the <a href="https://api-platform.com/docs/distribution/" class="reference external" rel="external noopener noreferrer" target="_blank">API Platform distribution</a>,
+the proper environment variables have been automatically set.
+Skip straight to the next section.</p>
+<p>Otherwise, set the URL of your hub as the value of the <code translate="no" class="notranslate">MERCURE_URL</code>
+and <code translate="no" class="notranslate">MERCURE_PUBLIC_URL</code> env vars.
+Sometimes a different URL must be called by the Symfony app (usually to publish),
+and the JavaScript client (usually to subscribe). It's especially common when
+the Symfony app must use a local URL and the client-side JavaScript code a public one.
+In this case, <code translate="no" class="notranslate">MERCURE_URL</code> must contain the local URL used by the
+Symfony app (e.g. <code translate="no" class="notranslate">https://mercure/.well-known/mercure</code>), and <code translate="no" class="notranslate">MERCURE_PUBLIC_URL</code>
+the publicly available URL (e.g. <code translate="no" class="notranslate">https://example.com/.well-known/mercure</code>).</p>
+<p>The clients must also bear a <a href="https://tools.ietf.org/html/rfc7519" class="reference external" rel="external noopener noreferrer" target="_blank">JSON Web Token</a> (JWT)
+to the Mercure Hub to be authorized to publish updates and, sometimes, to subscribe.</p>
+<p>This token must be signed with the same secret key as the one used by the Hub to verify the JWT (<code translate="no" class="notranslate">!ChangeThisMercureHubJWTSecretKey!</code> if you use the Docker integration).
+This secret key must be stored in the <code translate="no" class="notranslate">MERCURE_JWT_SECRET</code> environment variable.
+MercureBundle will use it to automatically generate and sign the needed JWTs.</p>
+<p>In addition to these environment variables,
+MercureBundle provides a more advanced configuration:</p>
+<ul>
+    <li><code translate="no" class="notranslate">secret</code>: the key to use to sign the JWT - A key of the same size as the hash output (for instance, 256 bits for &quot;HS256&quot;) or larger MUST be used. (all other options, beside <code translate="no" class="notranslate">algorithm</code>, <code translate="no" class="notranslate">subscribe</code>, and <code translate="no" class="notranslate">publish</code> will be ignored)</li>
+<li><code translate="no" class="notranslate">publish</code>: a list of topics to allow publishing to when generating the JWT (only usable when <code translate="no" class="notranslate">secret</code>, or <code translate="no" class="notranslate">factory</code> are provided)</li>
+<li><code translate="no" class="notranslate">subscribe</code>: a list of topics to allow subscribing to when generating the JWT (only usable when <code translate="no" class="notranslate">secret</code>, or <code translate="no" class="notranslate">factory</code> are provided)</li>
+<li><code translate="no" class="notranslate">algorithm</code>: The algorithm to use to sign the JWT (only usable when <code translate="no" class="notranslate">secret</code> is provided)</li>
+<li><code translate="no" class="notranslate">provider</code>: The ID of a service to call to provide the JWT (all other options will be ignored)</li>
+<li><code translate="no" class="notranslate">factory</code>: The ID of a service to call to create the JWT (all other options, beside <code translate="no" class="notranslate">subscribe</code>, and <code translate="no" class="notranslate">publish</code> will be ignored)</li>
+<li><code translate="no" class="notranslate">value</code>: the raw JWT to use (all other options will be ignored)</li>
+</ul>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-a044857dffcdbe51aa3eee1ab7db0d620bf7e0e0" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-a057e4bbe589734e0b4839b89c55ce6ea72c8b32" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-a215ce277ca266dcaa30d8516bdee077363d71c7" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-a044857dffcdbe51aa3eee1ab7db0d620bf7e0e0" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/mercure.yaml</span>
+<span class="hljs-attr">mercure:</span>
+    <span class="hljs-attr">hubs:</span>
+        <span class="hljs-attr">default:</span>
+            <span class="hljs-attr">url:</span> <span class="hljs-string">https://mercure-hub.example.com/.well-known/mercure</span>
+            <span class="hljs-attr">jwt:</span>
+                <span class="hljs-attr">secret:</span> <span class="hljs-string">'!ChangeThisMercureHubJWTSecretKey!'</span>
+                <span class="hljs-attr">publish:</span> <span class="hljs-string">['foo',</span> <span class="hljs-string">'https://example.com/foo'</span><span class="hljs-string">]</span>
+                <span class="hljs-attr">subscribe:</span> <span class="hljs-string">['bar',</span> <span class="hljs-string">'https://example.com/bar'</span><span class="hljs-string">]</span>
+                <span class="hljs-attr">algorithm:</span> <span class="hljs-string">'hmac.sha256'</span>
+                <span class="hljs-attr">provider:</span> <span class="hljs-string">'My\Provider'</span>
+                <span class="hljs-attr">factory:</span> <span class="hljs-string">'My\Factory'</span>
+                <span class="hljs-attr">value:</span> <span class="hljs-string">'my.jwt'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-a057e4bbe589734e0b4839b89c55ce6ea72c8b32" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/mercure.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">hub</span>
+        <span class="hljs-attr">name</span>=<span class="hljs-string">"default"</span>
+        <span class="hljs-attr">url</span>=<span class="hljs-string">"https://mercure-hub.example.com/.well-known/mercure"</span>
+    &gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">jwt</span>
+            <span class="hljs-attr">secret</span>=<span class="hljs-string">"!ChangeThisMercureHubJWTSecretKey!"</span>
+            <span class="hljs-attr">algorithm</span>=<span class="hljs-string">"hmac.sha256"</span>
+            <span class="hljs-attr">provider</span>=<span class="hljs-string">"My\Provider"</span>
+            <span class="hljs-attr">factory</span>=<span class="hljs-string">"My\Factory"</span>
+            <span class="hljs-attr">value</span>=<span class="hljs-string">"my.jwt"</span>
+        &gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">publish</span>&gt;</span>foo<span class="hljs-tag">&lt;/<span class="hljs-name">publish</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">publish</span>&gt;</span>https://example.com/foo<span class="hljs-tag">&lt;/<span class="hljs-name">publish</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">subscribe</span>&gt;</span>bar<span class="hljs-tag">&lt;/<span class="hljs-name">subscribe</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">subscribe</span>&gt;</span>https://example.com/bar<span class="hljs-tag">&lt;/<span class="hljs-name">subscribe</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">jwt</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">hub</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-a215ce277ca266dcaa30d8516bdee077363d71c7" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/mercure.php</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>loadFromExtension(<span class="hljs-string">'mercure'</span>, [
+    <span class="hljs-string">'hubs'</span> =&gt; [
+        <span class="hljs-string">'default'</span> =&gt; [
+            <span class="hljs-string">'url'</span> =&gt; <span class="hljs-string">'https://mercure-hub.example.com/.well-known/mercure'</span>,
+            <span class="hljs-string">'jwt'</span> =&gt; [
+                <span class="hljs-string">'secret'</span> =&gt; <span class="hljs-string">'!ChangeThisMercureHubJWTSecretKey!'</span>,
+                <span class="hljs-string">'publish'</span> =&gt; [<span class="hljs-string">'foo'</span>, <span class="hljs-string">'https://example.com/foo'</span>],
+                <span class="hljs-string">'subscribe'</span> =&gt; [<span class="hljs-string">'bar'</span>, <span class="hljs-string">'https://example.com/bar'</span>],
+                <span class="hljs-string">'algorithm'</span> =&gt; <span class="hljs-string">'hmac.sha256'</span>,
+                <span class="hljs-string">'provider'</span> =&gt; <span class="hljs-string">'My\Provider'</span>,
+                <span class="hljs-string">'factory'</span> =&gt; <span class="hljs-string">'My\Factory'</span>,
+                <span class="hljs-string">'value'</span> =&gt; <span class="hljs-string">'my.jwt'</span>,
+            ],
+        ],
+    ],
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The JWT payload must contain at least the following structure for the client to be allowed to
+publish:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"mercure"</span>: {
+        <span class="hljs-attr">"publish"</span>: [<span class="hljs-string">"*"</span>]
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The jwt.io website is a convenient way to create and sign JWTs, checkout this <a href="https://jwt.io/#debugger-io?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOlsiKiJdfX0.iHLdpAEjX4BqCsHJEegxRmO-Y6sMxXwNATrQyRNt3GY" class="reference external" rel="external noopener noreferrer" target="_blank">example JWT</a>.
+Don't forget to set your secret key properly in the bottom of the right panel of the form!</p>
+</div>
+</div>
+<div class="section">
+<h2 id="basic-usage">
+    Basic Usage
+    <a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="publishing">
+    Publishing
+    <a class="headerlink" href="#publishing" title="Permalink to this headline">¶</a>
+</h3>
+<p>The Mercure Component provides an <code translate="no" class="notranslate">Update</code> value object representing
+the update to publish. It also provides a <code translate="no" class="notranslate">Publisher</code> service to dispatch
+updates to the Hub.</p>
+<p>The <code translate="no" class="notranslate">Publisher</code> service can be injected using the
+<a href="service_container/autowiring.html" class="reference internal">autowiring</a> in any other
+service, including controllers:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/PublishController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">HubInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">Update</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PublishController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">publish</span><span class="hljs-params">(HubInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hub</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>update</span> = <span class="hljs-keyword">new</span> Update(
+            <span class="hljs-string">'https://example.com/books/1'</span>,
+            json_encode([<span class="hljs-string">'status'</span> =&gt; <span class="hljs-string">'OutOfStock'</span>])
+        );
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hub</span><span class="hljs-operator">-&gt;</span>publish(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>update</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'published!'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The first parameter to pass to the <code translate="no" class="notranslate">Update</code> constructor is
+the <strong>topic</strong> being updated. This topic should be an <a href="https://tools.ietf.org/html/rfc3987" class="reference external" rel="external noopener noreferrer" target="_blank">IRI</a>
+(Internationalized Resource Identifier, RFC 3987): a unique identifier
+of the resource being dispatched.</p>
+<p>Usually, this parameter contains the original URL of the resource
+transmitted to the client, but it can be any string or <a href="https://tools.ietf.org/html/rfc3987" class="reference external" rel="external noopener noreferrer" target="_blank">IRI</a>,
+and it doesn't have to be a URL that exists (similarly to XML namespaces).</p>
+<p>The second parameter of the constructor is the content of the update.
+It can be anything, stored in any format.
+However, serializing the resource in a hypermedia format such as JSON-LD,
+Atom, HTML or XML is recommended.</p>
+</div>
+<div class="section">
+<h3 id="subscribing">
+    Subscribing
+    <a class="headerlink" href="#subscribing" title="Permalink to this headline">¶</a>
+</h3>
+<p>Subscribing to updates in JavaScript from a Twig template is straightforward:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+<span class="hljs-keyword">const</span> eventSource = <span class="hljs-keyword">new</span> EventSource(<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ mercure('https://example.com/books/1')|<span class="hljs-keyword">escape</span>('js') }}</span><span class="xml">");
+eventSource.onmessage = event =&gt; {
+    // Will be called every time an update is published by the server
+    console.log(JSON.parse(event.data));
+}
+<span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">mercure()</code> Twig function generates the URL of the Mercure hub
+according to the configuration. The URL includes the <code translate="no" class="notranslate">topic</code> query
+parameters corresponding to the topics passed as first argument.</p>
+<p>If you want to access to this URL from an external JavaScript file, generate the
+URL in a dedicated HTML element:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"application/json"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"mercure-url"</span>&gt;</span>
+</span><span class="hljs-template-variable">{{ mercure('https://example.com/books/1')|<span class="hljs-keyword">json_encode</span>(<span class="hljs-name">constant</span><span class="hljs-params">('JSON_UNESCAPED_SLASHES')</span> b-or <span class="hljs-name">constant</span><span class="hljs-params">('JSON_HEX_TAG')</span>)|<span class="hljs-keyword">raw</span> }}</span><span class="xml">
+<span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then retrieve it from your JS file:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-keyword">const</span> url = <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"mercure-url"</span>).textContent);
+<span class="hljs-keyword">const</span> eventSource = <span class="hljs-keyword">new</span> EventSource(url);
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Mercure also allows subscribing to several topics,
+and to use URI Templates or the special value <code translate="no" class="notranslate">*</code> (matched by all topics)
+as patterns:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span>
+</span><span class="hljs-comment">{# Subscribe to updates of several Book resources and to all Review resources matching the given pattern #}</span><span class="xml"><span class="actionscript">
+<span class="hljs-keyword">const</span> eventSource = <span class="hljs-keyword">new</span> EventSource(<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ mercure([
+    'https://example.com/books/1',
+    'https://example.com/books/2',
+    'https://example.com/reviews/{id}'
+])|<span class="hljs-keyword">escape</span>('js') }}</span><span class="xml">");
+
+eventSource.onmessage = event =&gt; {
+    console.log(JSON.parse(event.data));
+}
+<span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Google Chrome DevTools natively integrate a <a href="https://twitter.com/ChromeDevTools/status/562324683194785792" class="reference external" rel="external noopener noreferrer" target="_blank">practical UI</a> displaying in live
+the received events:</p>
+<img src="_images/chrome.png" />
+<p>To use it:</p>
+<ul>
+    <li>open the DevTools</li>
+<li>select the &quot;Network&quot; tab</li>
+<li>click on the request to the Mercure hub</li>
+<li>click on the &quot;EventStream&quot; sub-tab.</li>
+</ul>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Test if a URI Template match a URL using <a href="https://uri-template-tester.mercure.rocks" class="reference external" rel="external noopener noreferrer" target="_blank">the online debugger</a></p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="discovery">
+    Discovery
+    <a class="headerlink" href="#discovery" title="Permalink to this headline">¶</a>
+</h2>
+<p>The Mercure protocol comes with a discovery mechanism.
+To leverage it, the Symfony application must expose the URL of the Mercure Hub
+in a <code translate="no" class="notranslate">Link</code> HTTP header.</p>
+<img src="_images/discovery.png" />
+<p>You can create <code translate="no" class="notranslate">Link</code> headers with the <code translate="no" class="notranslate">Discovery</code> helper class
+(under the hood, it uses the <a href="web_link.html" class="reference internal">WebLink Component</a>):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/DiscoverController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">JsonResponse</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">Discovery</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DiscoverController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">discover</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, Discovery <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>discovery</span>)</span>: <span class="hljs-title">JsonResponse</span>
+    </span>{
+        <span class="hljs-comment">// Link: &lt;https://hub.example.com/.well-known/mercure&gt;; rel="mercure"</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>discovery</span><span class="hljs-operator">-&gt;</span>addLink(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>json([
+            <span class="hljs-string">'@id'</span> =&gt; <span class="hljs-string">'/books/1'</span>,
+            <span class="hljs-string">'availability'</span> =&gt; <span class="hljs-string">'https://schema.org/InStock'</span>,
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, this header can be parsed client-side to find the URL of the Hub,
+and to subscribe to it:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// Fetch the original resource served by the Symfony web API</span>
+fetch(<span class="hljs-string">'/books/1'</span>) <span class="hljs-comment">// Has Link: &lt;https://hub.example.com/.well-known/mercure&gt;; rel="mercure"</span>
+    .then(<span class="hljs-function"><span class="hljs-params">response</span> =&gt;</span> {
+        <span class="hljs-comment">// Extract the hub URL from the Link header</span>
+        <span class="hljs-keyword">const</span> hubUrl = response.headers.get(<span class="hljs-string">'Link'</span>).match(<span class="hljs-regexp">/&lt;([^&gt;]+)&gt;;\s+rel=(?:mercure|"[^"]*mercure[^"]*")/</span>)[<span class="hljs-number">1</span>];
+
+        <span class="hljs-comment">// Append the topic(s) to subscribe as query parameter</span>
+        <span class="hljs-keyword">const</span> hub = <span class="hljs-keyword">new</span> URL(hubUrl, <span class="hljs-built_in">window</span>.origin);
+        hub.searchParams.append(<span class="hljs-string">'topic'</span>, <span class="hljs-string">'https://example.com/books/{id}'</span>);
+
+        <span class="hljs-comment">// Subscribe to updates</span>
+        <span class="hljs-keyword">const</span> eventSource = <span class="hljs-keyword">new</span> EventSource(hub);
+        eventSource.onmessage = <span class="hljs-function"><span class="hljs-params">event</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(event.data);
+    });</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="authorization">
+    Authorization
+    <a class="headerlink" href="#authorization" title="Permalink to this headline">¶</a>
+</h2>
+<p>Mercure also allows dispatching updates only to authorized clients.
+To do so, mark the update as <strong>private</strong> by setting the third parameter
+of the <code translate="no" class="notranslate">Update</code> constructor to <code translate="no" class="notranslate">true</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/Publish.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">Update</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PublishController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">publish</span><span class="hljs-params">(HubInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hub</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>update</span> = <span class="hljs-keyword">new</span> Update(
+            <span class="hljs-string">'https://example.com/books/1'</span>,
+            json_encode([<span class="hljs-string">'status'</span> =&gt; <span class="hljs-string">'OutOfStock'</span>]),
+            <span class="hljs-keyword">true</span> <span class="hljs-comment">// private</span>
+        );
+
+        <span class="hljs-comment">// Publisher's JWT must contain this topic, a URI template it matches or * in mercure.publish or you'll get a 401</span>
+        <span class="hljs-comment">// Subscriber's JWT must contain this topic, a URI template it matches or * in mercure.subscribe to receive the update</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hub</span><span class="hljs-operator">-&gt;</span>publish(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>update</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'private update published!'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>To subscribe to private updates, subscribers must provide to the Hub
+a JWT containing a topic selector matching by the topic of the update.</p>
+<p>To provide this JWT, the subscriber can use a cookie,
+or an <code translate="no" class="notranslate">Authorization</code> HTTP header.</p>
+<p>Cookies can be set automatically by Symfony by passing the appropriate options
+to the <code translate="no" class="notranslate">mercure()</code> Twig function. Cookies set by Symfony are automatically
+passed by the browsers to the Mercure hub if the <code translate="no" class="notranslate">withCredentials</code> attribute
+of the <code translate="no" class="notranslate">EventSource</code> class is set to <code translate="no" class="notranslate">true</code>. Then, the Hub verifies the
+validity of the provided JWT, and extract the topic selectors from it.</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+<span class="hljs-keyword">const</span> eventSource = <span class="hljs-keyword">new</span> EventSource(<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ mercure('https://example.com/books/1', { subscribe: 'https://example.com/books/1' })|<span class="hljs-keyword">escape</span>('js') }}</span><span class="xml">", {
+    withCredentials: true
+});
+<span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The supported options are:</p>
+<ul>
+    <li><code translate="no" class="notranslate">subscribe</code>: the list of topic selectors to include in the <code translate="no" class="notranslate">mercure.subscribe</code> claim of the JWT</li>
+<li><code translate="no" class="notranslate">publish</code>: the list of topic selectors to include in the <code translate="no" class="notranslate">mercure.publish</code> claim of the JWT</li>
+<li><code translate="no" class="notranslate">additionalClaims</code>: extra claims to include in the JWT (expiration date, token ID...)</li>
+</ul>
+<p>Using cookies is the most secure and preferred way when the client is a web
+browser. If the client is not a web browser, then using an authorization header
+is the way to go.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>To use the cookie authentication method, the Symfony app and the Hub
+must be served from the same domain (can be different sub-domains).</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The native implementation of EventSource doesn't allow specifying headers.
+For example, authorization using a Bearer token. In order to achieve that, use <a href="https://github.com/Yaffle/EventSource" class="reference external" rel="external noopener noreferrer" target="_blank">a polyfill</a></p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+<span class="hljs-keyword">const</span> es = <span class="hljs-keyword">new</span> EventSourcePolyfill(<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ mercure('https://example.com/books/1') }}</span><span class="xml">", {
+    headers: {
+        'Authorization': 'Bearer ' + token,
+    }
+});
+<span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="programmatically-setting-the-cookie">
+    Programmatically Setting The Cookie
+    <a class="headerlink" href="#programmatically-setting-the-cookie" title="Permalink to this headline">¶</a>
+</h3>
+<p>Sometimes, it can be convenient to set the authorization cookie from your code
+instead of using the Twig function. MercureBundle provides a convenient service,
+<code translate="no" class="notranslate">Authorization</code>, to do so.</p>
+<p>In the following example controller, the added cookie contains a JWT, itself
+containing the appropriate topic selector.</p>
+<p>And here is the controller:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/DiscoverController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">JsonResponse</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">Authorization</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">Discovery</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DiscoverController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">publish</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, Discovery <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>discovery</span>, Authorization <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>authorization</span>)</span>: <span class="hljs-title">JsonResponse</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>discovery</span><span class="hljs-operator">-&gt;</span>addLink(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>authorization</span><span class="hljs-operator">-&gt;</span>setCookie(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, [<span class="hljs-string">'https://example.com/books/1'</span>]);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>json([
+            <span class="hljs-string">'@id'</span> =&gt; <span class="hljs-string">'/demo/books/1'</span>,
+            <span class="hljs-string">'availability'</span> =&gt; <span class="hljs-string">'https://schema.org/InStock'</span>
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You cannot use the <code translate="no" class="notranslate">mercure()</code> helper and the <code translate="no" class="notranslate">setCookie()</code>
+method at the same time (it would set the cookie twice on a single request). Choose
+either one method or the other.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="programmatically-generating-the-jwt-used-to-publish">
+    Programmatically Generating The JWT Used to Publish
+    <a class="headerlink" href="#programmatically-generating-the-jwt-used-to-publish" title="Permalink to this headline">¶</a>
+</h2>
+<p>Instead of directly storing a JWT in the configuration,
+you can create a token provider that will return the token used by
+the <code translate="no" class="notranslate">HubInterface</code> object:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Mercure/MyTokenProvider.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Mercure</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">Jwt</span>\<span class="hljs-title">TokenProviderInterface</span>;
+
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyTokenProvider</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">TokenProviderInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getJwt</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'the-JWT'</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, reference this service in the bundle configuration:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-4b99ba55f5173e9f2631b68843b42bb0b0a07413" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-6256fed693d5929e0de6cdd7f77ccf2b4863a550" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-e1dc7957aeabd0010f8449365f4386046f80443c" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-4b99ba55f5173e9f2631b68843b42bb0b0a07413" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/mercure.yaml</span>
+<span class="hljs-attr">mercure:</span>
+    <span class="hljs-attr">hubs:</span>
+        <span class="hljs-attr">default:</span>
+            <span class="hljs-attr">url:</span> <span class="hljs-string">https://mercure-hub.example.com/.well-known/mercure</span>
+            <span class="hljs-attr">jwt:</span>
+                <span class="hljs-attr">provider:</span> <span class="hljs-string">App\Mercure\MyTokenProvider</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-6256fed693d5929e0de6cdd7f77ccf2b4863a550" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/mercure.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">hub</span>
+        <span class="hljs-attr">name</span>=<span class="hljs-string">"default"</span>
+        <span class="hljs-attr">url</span>=<span class="hljs-string">"https://mercure-hub.example.com/.well-known/mercure"</span>
+    &gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">jwt</span> <span class="hljs-attr">provider</span>=<span class="hljs-string">"App\Mercure\MyTokenProvider"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">hub</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-e1dc7957aeabd0010f8449365f4386046f80443c" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/mercure.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">MyJwtProvider</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>loadFromExtension(<span class="hljs-string">'mercure'</span>, [
+    <span class="hljs-string">'hubs'</span> =&gt; [
+        <span class="hljs-string">'default'</span> =&gt; [
+            <span class="hljs-string">'url'</span> =&gt; <span class="hljs-string">'https://mercure-hub.example.com/.well-known/mercure'</span>,
+            <span class="hljs-string">'jwt'</span> =&gt; [
+                <span class="hljs-string">'provider'</span> =&gt; MyJwtProvider<span class="hljs-operator">::</span>class,
+            ],
+        ],
+    ],
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>This method is especially convenient when using tokens having an expiration
+date, that can be refreshed programmatically.</p>
+</div>
+<div class="section">
+<h2 id="web-apis">
+    Web APIs
+    <a class="headerlink" href="#web-apis" title="Permalink to this headline">¶</a>
+</h2>
+<p>When creating a web API, it's convenient to be able to instantly push
+new versions of the resources to all connected devices, and to update
+their views.</p>
+<p>API Platform can use the Mercure Component to dispatch updates automatically,
+every time an API resource is created, modified or deleted.</p>
+<p>Start by installing the library using its official recipe:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require api</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, creating the following entity is enough to get a fully-featured
+hypermedia API, and automatic update broadcasting through the Mercure hub:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Entity/Book.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">ApiPlatform</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">ApiResource</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Mapping</span> <span class="hljs-title">as</span> <span class="hljs-title">ORM</span>;
+
+<span class="hljs-comment">#[ApiResource(mercure: true)]</span>
+<span class="hljs-comment">#[ORM\Entity]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Book</span>
+</span>{
+    <span class="hljs-comment">#[ORM\Id]</span>
+    <span class="hljs-comment">#[ORM\Column]</span>
+    <span class="hljs-keyword">public</span> string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span> = <span class="hljs-string">''</span>;
+
+    <span class="hljs-comment">#[ORM\Column]</span>
+    <span class="hljs-keyword">public</span> string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>status</span> = <span class="hljs-string">''</span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As showcased <a href="https://www.youtube.com/watch?v=UI1l0JOjLeI" class="reference external" rel="external noopener noreferrer" target="_blank">in this recording</a>, the API Platform Client Generator also
+allows to scaffold complete React and React Native applications from this API.
+These applications will render the content of Mercure updates in real-time.</p>
+<p>Checkout <a href="https://api-platform.com/docs/core/mercure/" class="reference external" rel="external noopener noreferrer" target="_blank">the dedicated API Platform documentation</a> to learn more about
+its Mercure support.</p>
+</div>
+<div class="section">
+<h2 id="testing">
+    Testing
+    <a class="headerlink" href="#testing" title="Permalink to this headline">¶</a>
+</h2>
+<p>During unit testing it's usually not needed to send updates to Mercure.</p>
+<p>You can instead make use of the `MockHub` class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// tests/FunctionalTest.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>\<span class="hljs-title">Unit</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">MessageController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">HubInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">JWT</span>\<span class="hljs-title">StaticTokenProvider</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">MockHub</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">Update</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MessageControllerTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testPublishing</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hub</span> = <span class="hljs-keyword">new</span> MockHub(<span class="hljs-string">'https://internal/.well-known/mercure'</span>, <span class="hljs-keyword">new</span> StaticTokenProvider(<span class="hljs-string">'foo'</span>), <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(Update <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>update</span>)</span>: <span class="hljs-title">string</span> </span>{
+            <span class="hljs-comment">// $this-&gt;assertTrue($update-&gt;isPrivate());</span>
+
+            <span class="hljs-keyword">return</span> <span class="hljs-string">'id'</span>;
+        });
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controller</span> = <span class="hljs-keyword">new</span> MessageController(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hub</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>For functional testing, you can instead create a stub of the Hub:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// tests/Functional/Stub/HubStub.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>\<span class="hljs-title">Functional</span>\<span class="hljs-title">Stub</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">HubInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">Update</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HubStub</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">HubInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">publish</span><span class="hljs-params">(Update <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>update</span>)</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'id'</span>;
+    }
+
+    <span class="hljs-comment">// implement rest of HubInterface methods here</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Use <code translate="no" class="notranslate">HubStub</code> to replace the default hub service so no updates are actually
+sent:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services_test.yaml</span>
+<span class="hljs-attr">mercure.hub.default:</span>
+    <span class="hljs-attr">class:</span> <span class="hljs-string">App\Tests\Functional\Stub\HubStub</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As MercureBundle support multiple hubs, you may have to replace
+the other service definitions accordingly.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Symfony Panther has <a href="https://github.com/symfony/panther#creating-isolated-browsers-to-test-apps-using-mercure-or-websocket" class="reference external" rel="external noopener noreferrer" target="_blank">a feature to test applications using Mercure</a>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="debugging">
+    Debugging
+    <a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a>
+</h2>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>0.2</span>
+    </p><p>The WebProfiler panel was introduced in MercureBundle 0.2.</p>
+</div>
+<p>Enable the panel in your configuration, as follows:</p>
+<p>MercureBundle is shipped with a debug panel. Install the Debug pack to
+enable it:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require --dev symfony/debug-pack</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<img src="_images/panel.png" />
+</div>
+<div class="section">
+<h2 id="async-dispatching">
+    Async dispatching
+    <a class="headerlink" href="#async-dispatching" title="Permalink to this headline">¶</a>
+</h2>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Async dispatching is discouraged. Most Mercure hubs already
+handle publications asynchronously and using Messenger is
+usually not necessary.</p>
+</div>
+<p>Instead of calling the <code translate="no" class="notranslate">Publisher</code> service directly, you can also let Symfony
+dispatching the updates asynchronously thanks to the provided integration with
+the Messenger component.</p>
+<p>First, be sure <a href="messenger.html" class="reference internal">to install the Messenger component</a>
+and to configure properly a transport (if you don't, the handler will
+be called synchronously).</p>
+<p>Then, dispatch the Mercure <code translate="no" class="notranslate">Update</code> to the Messenger's Message Bus,
+it will be handled automatically:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/PublishController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mercure</span>\<span class="hljs-title">Update</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Messenger</span>\<span class="hljs-title">MessageBusInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PublishController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">publish</span><span class="hljs-params">(MessageBusInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bus</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>update</span> = <span class="hljs-keyword">new</span> Update(
+            <span class="hljs-string">'https://example.com/books/1'</span>,
+            json_encode([<span class="hljs-string">'status'</span> =&gt; <span class="hljs-string">'OutOfStock'</span>])
+        );
+
+        <span class="hljs-comment">// Sync, or async (Doctrine, RabbitMQ, Kafka...)</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bus</span><span class="hljs-operator">-&gt;</span>dispatch(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>update</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'published!'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="going-further">
+    Going further
+    <a class="headerlink" href="#going-further" title="Permalink to this headline">¶</a>
+</h2>
+<ul>
+    <li>The Mercure protocol is also supported by <a href="notifier.html" class="reference internal">the Notifier component</a>.
+Use it to send push notifications to web browsers.</li>
+<li><a href="https://github.com/symfony/ux-turbo" class="reference external" rel="external noopener noreferrer" target="_blank">Symfony UX Turbo</a> is a library using Mercure to provide the same experience
+as with Single Page Applications but without having to write a single line of JavaScript!</li>
+</ul>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

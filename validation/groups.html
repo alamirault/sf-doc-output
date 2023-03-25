@@ -1,0 +1,430 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-apply-only-a-subset-of-all-your-validation-constraints-validation-groups">
+    How to Apply only a Subset of all Your Validation Constraints (Validation Groups)
+    <a class="headerlink" href="#how-to-apply-only-a-subset-of-all-your-validation-constraints-validation-groups" title="Permalink to this headline">¶</a>
+</h1>
+<p>By default, when validating an object all constraints of this class will
+be checked whether or not they actually pass. In some cases, however, you
+will need to validate an object against only <em>some</em> constraints on that class.
+To do this, you can organize each constraint into one or more &quot;validation
+groups&quot; and then apply validation against one group of constraints.</p>
+<p>For example, suppose you have a <code translate="no" class="notranslate">User</code> class, which is used both when a
+user registers and when a user updates their contact information later:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-4">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-d81f7fd11631d284e50dcf24a2db51201a99bae1" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-814e778eeb3af1f79dfdfe0015ef20beb7f753cc" aria-selected="false"
+                 tabindex="-1">
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-c6b6d5c0ed7194b5679a5268d3dcb10df49f5164" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-96b870eba3ae8d2852e7670b6b7e643bf8f28333" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-d81f7fd11631d284e50dcf24a2db51201a99bae1" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Entity/User.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">User</span>\<span class="hljs-title">UserInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserInterface</span>
+</span>{
+    <span class="hljs-comment">#[Assert\Email(groups: ['registration'])]</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span>;
+
+    <span class="hljs-comment">#[Assert\NotBlank(groups: ['registration'])]</span>
+    <span class="hljs-comment">#[Assert\Length(min: 7, groups: ['registration'])]</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>password</span>;
+
+    <span class="hljs-comment">#[Assert\Length(min: 2)]</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>city</span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-814e778eeb3af1f79dfdfe0015ef20beb7f753cc" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="display: none">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/validator/validation.yaml</span>
+<span class="hljs-string">App\Entity\User:</span>
+    <span class="hljs-attr">properties:</span>
+        <span class="hljs-attr">email:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-attr">Email:</span> <span class="hljs-string">{</span> <span class="hljs-attr">groups:</span> <span class="hljs-string">[registration]</span> <span class="hljs-string">}</span>
+        <span class="hljs-attr">password:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-attr">NotBlank:</span> <span class="hljs-string">{</span> <span class="hljs-attr">groups:</span> <span class="hljs-string">[registration]</span> <span class="hljs-string">}</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-attr">Length:</span> <span class="hljs-string">{</span> <span class="hljs-attr">min:</span> <span class="hljs-number">7</span><span class="hljs-string">,</span> <span class="hljs-attr">groups:</span> <span class="hljs-string">[registration]</span> <span class="hljs-string">}</span>
+        <span class="hljs-attr">city:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-attr">Length:</span>
+                <span class="hljs-attr">min:</span> <span class="hljs-number">2</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-c6b6d5c0ed7194b5679a5268d3dcb10df49f5164" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/validator/validation.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">constraint-mapping</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/constraint-mapping"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"
+        http://symfony.com/schema/dic/constraint-mapping
+        https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd
+    "</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">class</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"App\Entity\User"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"email"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">constraint</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Email"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"groups"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">value</span>&gt;</span>registration<span class="hljs-tag">&lt;/<span class="hljs-name">value</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">constraint</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"password"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">constraint</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"NotBlank"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"groups"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">value</span>&gt;</span>registration<span class="hljs-tag">&lt;/<span class="hljs-name">value</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">constraint</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">constraint</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Length"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"min"</span>&gt;</span>7<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"groups"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">value</span>&gt;</span>registration<span class="hljs-tag">&lt;/<span class="hljs-name">value</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">constraint</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"city"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">constraint</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Length"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"min"</span>&gt;</span>2<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">constraint</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">class</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">constraint-mapping</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-96b870eba3ae8d2852e7670b6b7e643bf8f28333" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Entity/User.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Mapping</span>\<span class="hljs-title">ClassMetadata</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadValidatorMetadata</span><span class="hljs-params">(ClassMetadata <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addPropertyConstraint(<span class="hljs-string">'email'</span>, <span class="hljs-keyword">new</span> Assert\Email([
+            <span class="hljs-string">'groups'</span> =&gt; [<span class="hljs-string">'registration'</span>],
+        ]));
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addPropertyConstraint(<span class="hljs-string">'password'</span>, <span class="hljs-keyword">new</span> Assert\NotBlank([
+            <span class="hljs-string">'groups'</span> =&gt; [<span class="hljs-string">'registration'</span>],
+        ]));
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addPropertyConstraint(<span class="hljs-string">'password'</span>, <span class="hljs-keyword">new</span> Assert\Length([
+            <span class="hljs-string">'min'</span>    =&gt; <span class="hljs-number">7</span>,
+            <span class="hljs-string">'groups'</span> =&gt; [<span class="hljs-string">'registration'</span>],
+        ]));
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addPropertyConstraint(<span class="hljs-string">'city'</span>, <span class="hljs-keyword">new</span> Assert\Length([
+            <span class="hljs-string">'min'</span> =&gt; <span class="hljs-number">2</span>,
+        ]));
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>With this configuration, there are three validation groups:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">Default</code></dt>
+        
+        <dd>
+                            Contains the constraints in the current class and all referenced classes
+that belong to no other group. In this example, it only contains the
+<code translate="no" class="notranslate">city</code> field.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">User</code></dt>
+        
+        <dd>
+                            Equivalent to all constraints of the <code translate="no" class="notranslate">User</code> object in the <code translate="no" class="notranslate">Default</code>
+group. This is always the name of the class. The difference between this
+and <code translate="no" class="notranslate">Default</code> is explained in <a href="sequence_provider.html" class="reference internal">How to Sequentially Apply Validation Groups</a>.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">registration</code></dt>
+        
+        <dd>
+                            This is a custom validation group, so it only contains the constraints
+that are explicitly associated with it. In this example, only the <code translate="no" class="notranslate">email</code> and
+<code translate="no" class="notranslate">password</code> fields.
+                    </dd>
+    </dl>
+<p>Constraints in the <code translate="no" class="notranslate">Default</code> group of a class are the constraints that have
+either no explicit group configured or that are configured to a group equal to
+the class name or the string <code translate="no" class="notranslate">Default</code>.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When validating <em>just</em> the User object, there is no difference between the
+<code translate="no" class="notranslate">Default</code> group and the <code translate="no" class="notranslate">User</code> group. But, there is a difference if
+<code translate="no" class="notranslate">User</code> has embedded objects. For example, imagine <code translate="no" class="notranslate">User</code> has an
+<code translate="no" class="notranslate">address</code> property that contains some <code translate="no" class="notranslate">Address</code> object and that you've
+added the <a href="../reference/constraints/Valid.html" class="reference internal">Valid</a> constraint to this property
+so that it's validated when you validate the <code translate="no" class="notranslate">User</code> object.</p>
+<p>If you validate <code translate="no" class="notranslate">User</code> using the <code translate="no" class="notranslate">Default</code> group, then any constraints
+on the <code translate="no" class="notranslate">Address</code> class that are in the <code translate="no" class="notranslate">Default</code> group <em>will</em> be used.
+But, if you validate <code translate="no" class="notranslate">User</code> using the <code translate="no" class="notranslate">User</code> validation group, then
+only constraints on the <code translate="no" class="notranslate">Address</code> class with the <code translate="no" class="notranslate">User</code> group will be
+validated.</p>
+<p>In other words, the <code translate="no" class="notranslate">Default</code> group and the class name group (e.g.
+<code translate="no" class="notranslate">User</code>) are identical, except when the class is embedded in another
+object that's actually the one being validated.</p>
+<p>If you have inheritance (e.g. <code translate="no" class="notranslate">User extends BaseUser</code>) and you validate
+with the class name of the subclass (i.e. <code translate="no" class="notranslate">User</code>), then all constraints
+in the <code translate="no" class="notranslate">User</code> and <code translate="no" class="notranslate">BaseUser</code> will be validated. However, if you
+validate using the base class (i.e. <code translate="no" class="notranslate">BaseUser</code>), then only the default
+constraints in the <code translate="no" class="notranslate">BaseUser</code> class will be validated.</p>
+</div>
+<p>To tell the validator to use a specific group, pass one or more group names
+as the third argument to the <code translate="no" class="notranslate">validate()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>errors</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span><span class="hljs-operator">-&gt;</span>validate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>author</span>, <span class="hljs-keyword">null</span>, [<span class="hljs-string">'registration'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If no groups are specified, all constraints that belong to the group <code translate="no" class="notranslate">Default</code>
+will be applied.</p>
+<p>In a full stack Symfony project, you'll usually work with validation indirectly
+through the form library. For information on how to use validation groups inside
+forms, see <a href="../form/validation_groups.html" class="reference internal">How to Define the Validation Groups to Use</a>.</p>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

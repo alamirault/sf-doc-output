@@ -1,0 +1,440 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="templating">
+    Templating
+    <a class="headerlink" href="#templating" title="Permalink to this headline">¶</a>
+</h1>
+<p>The astute reader has noticed that our framework hardcodes the way specific
+&quot;code&quot; (the templates) is run. For simple pages like the ones we have created
+so far, that's not a problem, but if you want to add more logic, you would be
+forced to put the logic into the template itself, which is probably not a good
+idea, especially if you still have the separation of concerns principle in
+mind.</p>
+<p>Let's separate the template code from the logic by adding a new layer: the
+controller: <em>The controller's mission is to generate a Response based on the
+information conveyed by the client's Request.</em></p>
+<p>Change the template rendering part of the framework to read as follows:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// example.com/web/front.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>add(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span><span class="hljs-operator">-&gt;</span>match(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo()));
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = call_user_func(<span class="hljs-string">'render_template'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+} <span class="hljs-keyword">catch</span> (Routing\<span class="hljs-keyword">Exception</span>\ResourceNotFoundException <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Not Found'</span>, <span class="hljs-number">404</span>);
+} <span class="hljs-keyword">catch</span> (<span class="hljs-keyword">Exception</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'An error occurred'</span>, <span class="hljs-number">500</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As the rendering is now done by an external function (<code translate="no" class="notranslate">render_template()</code>
+here), we need to pass to it the attributes extracted from the URL. We could
+have passed them as an additional argument to <code translate="no" class="notranslate">render_template()</code>, but
+instead, let's use another feature of the <code translate="no" class="notranslate">Request</code> class called
+<em>attributes</em>: Request attributes is a way to attach additional information
+about the Request that is not directly related to the HTTP Request data.</p>
+<p>You can now create the <code translate="no" class="notranslate">render_template()</code> function, a generic controller
+that renders a template when there is no specific logic. To keep the same
+template as before, request attributes are extracted before the template is
+rendered:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render_template</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>
+</span>{
+    extract(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>all(), EXTR_SKIP);
+    ob_start();
+    <span class="hljs-keyword">include</span> sprintf(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../src/pages/%s.php'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_route</span>);
+
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(ob_get_clean());
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As <code translate="no" class="notranslate">render_template</code> is used as an argument to the PHP <code translate="no" class="notranslate">call_user_func()</code>
+function, we can replace it with any valid PHP <a href="https://www.php.net/manual/en/language.types.callable.php" class="reference external" rel="external noopener noreferrer" target="_blank">callbacks</a>. This allows us to
+use a function, an anonymous function or a method of a class as a
+controller... your choice.</p>
+<p>As a convention, for each route, the associated controller is configured via
+the <code translate="no" class="notranslate">_controller</code> route attribute:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'hello'</span>, <span class="hljs-keyword">new</span> Routing\Route(<span class="hljs-string">'/hello/{name}'</span>, [
+    <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'World'</span>,
+    <span class="hljs-string">'_controller'</span> =&gt; <span class="hljs-string">'render_template'</span>,
+]));
+
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>add(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span><span class="hljs-operator">-&gt;</span>match(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo()));
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = call_user_func(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'_controller'</span>), <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+} <span class="hljs-keyword">catch</span> (Routing\<span class="hljs-keyword">Exception</span>\ResourceNotFoundException <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Not Found'</span>, <span class="hljs-number">404</span>);
+} <span class="hljs-keyword">catch</span> (<span class="hljs-keyword">Exception</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'An error occurred'</span>, <span class="hljs-number">500</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>A route can now be associated with any controller and within a controller, you
+can still use the <code translate="no" class="notranslate">render_template()</code> to render a template:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'hello'</span>, <span class="hljs-keyword">new</span> Routing\Route(<span class="hljs-string">'/hello/{name}'</span>, [
+    <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'World'</span>,
+    <span class="hljs-string">'_controller'</span> =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span> </span>{
+        <span class="hljs-keyword">return</span> render_template(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+    }
+]));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This is rather flexible as you can change the Response object afterwards and
+you can even pass additional arguments to the template:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'hello'</span>, <span class="hljs-keyword">new</span> Routing\Route(<span class="hljs-string">'/hello/{name}'</span>, [
+    <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'World'</span>,
+    <span class="hljs-string">'_controller'</span> =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span> </span>{
+        <span class="hljs-comment">// $foo will be available in the template</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'bar'</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = render_template(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+
+        <span class="hljs-comment">// change some header</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>headers<span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'Content-Type'</span>, <span class="hljs-string">'text/plain'</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>;
+    }
+]));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Here is the updated and improved version of our framework:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// example.com/web/front.php</span>
+<span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../vendor/autoload.php'</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render_template</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>
+</span>{
+    extract(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>all(), EXTR_SKIP);
+    ob_start();
+    <span class="hljs-keyword">include</span> sprintf(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../src/pages/%s.php'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_route</span>);
+
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(ob_get_clean());
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span> = <span class="hljs-keyword">include</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../src/app.php'</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span> = <span class="hljs-keyword">new</span> Routing\RequestContext();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span><span class="hljs-operator">-&gt;</span>fromRequest(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span> = <span class="hljs-keyword">new</span> Routing\Matcher\UrlMatcher(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>);
+
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>add(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span><span class="hljs-operator">-&gt;</span>match(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo()));
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = call_user_func(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'_controller'</span>), <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+} <span class="hljs-keyword">catch</span> (Routing\<span class="hljs-keyword">Exception</span>\ResourceNotFoundException <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Not Found'</span>, <span class="hljs-number">404</span>);
+} <span class="hljs-keyword">catch</span> (<span class="hljs-keyword">Exception</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'An error occurred'</span>, <span class="hljs-number">500</span>);
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>To celebrate the birth of our new framework, let's create a brand new
+application that needs some simple logic. Our application has one page that
+says whether a given year is a leap year or not. When calling
+<code translate="no" class="notranslate">/is_leap_year</code>, you get the answer for the current year, but you can
+also specify a year like in <code translate="no" class="notranslate">/is_leap_year/2009</code>. Being generic, the
+framework does not need to be modified in any way, create a new
+<code translate="no" class="notranslate">app.php</code> file:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// example.com/src/app.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">is_leap_year</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>year</span> = null)</span>
+</span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">null</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>year</span>) {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>year</span> = date(<span class="hljs-string">'Y'</span>);
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>year</span> % <span class="hljs-number">400</span> || (<span class="hljs-number">0</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>year</span> % <span class="hljs-number">4</span> &amp;&amp; <span class="hljs-number">0</span> !== <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>year</span> % <span class="hljs-number">100</span>);
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span> = <span class="hljs-keyword">new</span> Routing\RouteCollection();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'leap_year'</span>, <span class="hljs-keyword">new</span> Routing\Route(<span class="hljs-string">'/is_leap_year/{year}'</span>, [
+    <span class="hljs-string">'year'</span> =&gt; <span class="hljs-keyword">null</span>,
+    <span class="hljs-string">'_controller'</span> =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span> </span>{
+        <span class="hljs-keyword">if</span> (is_leap_year(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'year'</span>))) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Yep, this is a leap year!'</span>);
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Nope, this is not a leap year.'</span>);
+    }
+]));
+
+<span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">is_leap_year()</code> function returns <code translate="no" class="notranslate">true</code> when the given year is a leap
+year, <code translate="no" class="notranslate">false</code> otherwise. If the year is <code translate="no" class="notranslate">null</code>, the current year is
+tested. The controller does little: it gets the year from the request
+attributes, pass it to the <code translate="no" class="notranslate">is_leap_year()</code> function, and according to the
+return value it creates a new Response object.</p>
+<p>As always, you can decide to stop here and use the framework as is; it's
+probably all you need to create simple websites like those fancy one-page
+<a href="https://kottke.org/08/02/single-serving-sites" class="reference external" rel="external noopener noreferrer" target="_blank">websites</a> and hopefully a few others.</p>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

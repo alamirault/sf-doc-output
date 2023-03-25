@@ -1,0 +1,1049 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="symfony-local-web-server">
+    Symfony Local Web Server
+    <a class="headerlink" href="#symfony-local-web-server" title="Permalink to this headline">¶</a>
+</h1>
+<p>You can run Symfony applications with any web server (Apache, nginx, the
+internal PHP web server, etc.). However, Symfony provides its own web server to
+make you more productive while developing your applications.</p>
+<p>Although this server is not intended for production use, it supports HTTP/2,
+TLS/SSL, automatic generation of security certificates, local domains, and many
+other features that sooner or later you'll need when developing web projects.
+Moreover, the server is not tied to Symfony and you can also use it with any
+PHP application and even with HTML or single page applications.</p>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<p>The Symfony server is part of the <code translate="no" class="notranslate">symfony</code> binary created when you
+<a href="https://symfony.com/download" class="reference external">install Symfony</a> and has support for Linux, macOS and Windows.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>You can view and contribute to the Symfony CLI source in the
+<a href="https://github.com/symfony-cli/symfony-cli" class="reference external" rel="external noopener noreferrer" target="_blank">symfony-cli/symfony-cli GitHub repository</a>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="getting-started">
+    Getting Started
+    <a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a>
+</h2>
+<p>The Symfony server is started once per project, so you may end up with several
+instances (each of them listening to a different port). This is the common
+workflow to serve a Symfony project:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span><span class="hljs-built_in">cd</span> my-project/
+<span class="hljs-prompt">$ </span>symfony server:start
+
+  [OK] Web server listening on http://127.0.0.1:....
+  ...
+
+<span class="hljs-comment"># Now, browse the given URL, or run this command:</span>
+<span class="hljs-prompt">$ </span>symfony open:<span class="hljs-built_in">local</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Running the server this way makes it display the log messages in the console, so
+you won't be able to run other commands at the same time. If you prefer, you can
+run the Symfony server in the background:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span><span class="hljs-built_in">cd</span> my-project/
+
+<span class="hljs-comment"># start the server in the background</span>
+<span class="hljs-prompt">$ </span>symfony server:start -d
+
+<span class="hljs-comment"># continue working and running other commands...</span>
+
+<span class="hljs-comment"># show the latest log messages</span>
+<span class="hljs-prompt">$ </span>symfony server:<span class="hljs-built_in">log</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>On macOS, when starting the Symfony server you might see a warning dialog asking
+<em>&quot;Do you want the application to accept incoming network connections?&quot;</em>.
+This happens when running unsigned appplications that are not listed in the
+firewall list. The solution is to run this command that signs the Symfony binary:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># change the path to the location of your Symfony binary</span>
+<span class="hljs-prompt">$ </span>sudo codesign --force --deep --sign - /opt/homebrew/Cellar/symfony-cli/5.4.21/bin/symfony</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="enabling-php-fpm">
+    Enabling PHP-FPM
+    <a class="headerlink" href="#enabling-php-fpm" title="Permalink to this headline">¶</a>
+</h2>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>PHP-FPM must be installed locally for the Symfony server to utilize.</p>
+</div>
+<p>When the server starts, it checks for <code translate="no" class="notranslate">web/index_dev.php</code>, <code translate="no" class="notranslate">web/index.php</code>,
+<code translate="no" class="notranslate">public/app_dev.php</code>, <code translate="no" class="notranslate">public/app.php</code> in that order. If one is found, the
+server will automatically start with PHP-FPM enabled. Otherwise the server will
+start without PHP-FPM and will show a <code translate="no" class="notranslate">Page not found</code> page when trying to
+access a <code translate="no" class="notranslate">.php</code> file in the browser.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>When an <code translate="no" class="notranslate">index.html</code> and a front controller like e.g. <code translate="no" class="notranslate">index.php</code> are
+both present the server will still start with PHP-FPM enabled but the
+<code translate="no" class="notranslate">index.html</code> will take precedence over the front controller. This means
+when an <code translate="no" class="notranslate">index.html</code> file is present in <code translate="no" class="notranslate">public</code> or <code translate="no" class="notranslate">web</code>, it will be
+displayed instead of the <code translate="no" class="notranslate">index.php</code> which would show e.g. the Symfony
+application.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="enabling-tls">
+    Enabling TLS
+    <a class="headerlink" href="#enabling-tls" title="Permalink to this headline">¶</a>
+</h2>
+<p>Browsing the secure version of your applications locally is important to detect
+problems with mixed content early, and to run libraries that only run in HTTPS.
+Traditionally this has been painful and complicated to set up, but the Symfony
+server automates everything. First, run this command:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>symfony server:ca:install</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This command creates a local certificate authority, registers it in your system
+trust store, registers it in Firefox (this is required only for that browser)
+and creates a default certificate for <code translate="no" class="notranslate">localhost</code> and <code translate="no" class="notranslate">127.0.0.1</code>. In other
+words, it does everything for you.</p>
+<p>Before browsing your local application with HTTPS instead of HTTP, restart its
+server stopping and starting it again.</p>
+</div>
+<div class="section">
+<h2 id="different-php-settings-per-project">
+    Different PHP Settings Per Project
+    <a class="headerlink" href="#different-php-settings-per-project" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="selecting-a-different-php-version">
+    Selecting a Different PHP Version
+    <a class="headerlink" href="#selecting-a-different-php-version" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you have multiple PHP versions installed on your computer, you can tell
+Symfony which one to use creating a file called <code translate="no" class="notranslate">.php-version</code> at the project
+root directory:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span><span class="hljs-built_in">cd</span> my-project/
+
+<span class="hljs-comment"># use a specific PHP version</span>
+<span class="hljs-prompt">$ </span><span class="hljs-built_in">echo</span> 7.4 &gt; .php-version
+
+<span class="hljs-comment"># use any PHP 8.x version available</span>
+<span class="hljs-prompt">$ </span><span class="hljs-built_in">echo</span> 8 &gt; .php-version</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The Symfony server traverses the directory structure up to the root
+directory, so you can create a <code translate="no" class="notranslate">.php-version</code> file in some parent
+directory to set the same PHP version for a group of projects under that
+directory.</p>
+</div>
+<p>Run the command below if you don't remember all the PHP versions installed on your
+computer:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>symfony <span class="hljs-built_in">local</span>:php:list
+
+  <span class="hljs-comment"># You'll see all supported SAPIs (CGI, FastCGI, etc.) for each version.</span>
+  <span class="hljs-comment"># FastCGI (php-fpm) is used when possible; then CGI (which acts as a FastCGI</span>
+  <span class="hljs-comment"># server as well), and finally, the server falls back to plain CGI.</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="overriding-php-config-options-per-project">
+    Overriding PHP Config Options Per Project
+    <a class="headerlink" href="#overriding-php-config-options-per-project" title="Permalink to this headline">¶</a>
+</h3>
+<p>You can change the value of any PHP runtime config option per project by creating a
+file called <code translate="no" class="notranslate">php.ini</code> at the project root directory. Add only the options you want
+to override:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span><span class="hljs-built_in">cd</span> my-project/
+
+<span class="hljs-comment"># this project only overrides the default PHP timezone</span>
+<span class="hljs-prompt">$ </span>cat php.ini
+[Date]
+date.timezone = Asia/Tokyo</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="running-commands-with-different-php-versions">
+    Running Commands with Different PHP Versions
+    <a class="headerlink" href="#running-commands-with-different-php-versions" title="Permalink to this headline">¶</a>
+</h3>
+<p>When running different PHP versions, it is useful to use the main <code translate="no" class="notranslate">symfony</code>
+command as a wrapper for the <code translate="no" class="notranslate">php</code> command. This allows you to always select
+the most appropriate PHP version according to the project which is running the
+commands. It also loads the env vars automatically, which is important when
+running non-Symfony commands:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># runs the command with the default PHP version</span>
+<span class="hljs-prompt">$ </span>php -r <span class="hljs-string">"..."</span>
+
+<span class="hljs-comment"># runs the command with the PHP version selected by the project</span>
+<span class="hljs-comment"># (or the default PHP version if the project didn't select one)</span>
+<span class="hljs-prompt">$ </span>symfony php -r <span class="hljs-string">"..."</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="local-domain-names">
+    Local Domain Names
+    <a class="headerlink" href="#local-domain-names" title="Permalink to this headline">¶</a>
+</h2>
+<p>By default, projects are accessible at some random port of the <code translate="no" class="notranslate">127.0.0.1</code>
+local IP. However, sometimes it is preferable to associate a domain name to them:</p>
+<ul>
+    <li>It's more convenient when you work continuously on the same project because
+port numbers can change but domains don't;</li>
+<li>The behavior of some applications depend on their domains/subdomains;</li>
+<li>To have stable endpoints, such as the local redirection URL for OAuth2.</li>
+</ul>
+<div class="section">
+<h3 id="setting-up-the-local-proxy">
+    Setting up the Local Proxy
+    <a class="headerlink" href="#setting-up-the-local-proxy" title="Permalink to this headline">¶</a>
+</h3>
+<p>Local domains are possible thanks to a local proxy provided by the Symfony server.
+If this is the first time you run the proxy, you must configure it as follows:</p>
+<ol class="arabic">
+    <li><p>Open the <strong>proxy settings</strong> of your operating system:</p>
+<ul>
+    <li><a href="https://www.dummies.com/computers/operating-systems/windows-10/how-to-set-up-a-proxy-in-windows-10/" class="reference external" rel="external noopener noreferrer" target="_blank">Proxy settings in Windows</a>;</li>
+<li><a href="https://support.apple.com/guide/mac-help/enter-proxy-server-settings-on-mac-mchlp2591/mac" class="reference external" rel="external noopener noreferrer" target="_blank">Proxy settings in macOS</a>;</li>
+<li><a href="https://help.ubuntu.com/stable/ubuntu-help/net-proxy.html.en" class="reference external" rel="external noopener noreferrer" target="_blank">Proxy settings in Ubuntu</a>.</li>
+</ul></li>
+<li>Set the following URL as the value of the <strong>Automatic Proxy Configuration</strong>:
+<code translate="no" class="notranslate">http://127.0.0.1:7080/proxy.pac</code></li>
+</ol>
+<p>Now run this command to start the proxy:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>symfony proxy:start</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If the proxy doesn't work as explained in the following sections, check these:</p>
+<ul>
+    <li>Some browsers (e.g. Chrome) require to re-apply proxy settings (clicking on
+<code translate="no" class="notranslate">Re-apply settings</code> button on the <code translate="no" class="notranslate">chrome://net-internals/#proxy</code> page)
+or a full restart after starting the proxy. Otherwise, you'll see a
+<em>&quot;This webpage is not available&quot;</em> error (<code translate="no" class="notranslate">ERR_NAME_NOT_RESOLVED</code>);</li>
+<li>Some Operating Systems (e.g. macOS) don't apply by default the proxy settings
+to local hosts and domains. You may need to remove <code translate="no" class="notranslate">*.local</code> and/or other
+IP addresses from that list.</li>
+</ul>
+</div>
+<div class="section">
+<h3 id="defining-the-local-domain">
+    Defining the Local Domain
+    <a class="headerlink" href="#defining-the-local-domain" title="Permalink to this headline">¶</a>
+</h3>
+<p>By default, Symfony proposes <code translate="no" class="notranslate">.wip</code> (for <em>Work in Progress</em>) for the local
+domains. You can define a local domain for your project as follows:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span><span class="hljs-built_in">cd</span> my-project/
+<span class="hljs-prompt">$ </span>symfony proxy:domain:attach my-domain</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you have installed the local proxy as explained in the previous section, you
+can now browse <code translate="no" class="notranslate">https://my-domain.wip</code> to access your local project with the
+new custom domain.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Browse the <a href="http://127.0.0.1:7080" class="reference external" rel="external noopener noreferrer" target="_blank">http://127.0.0.1:7080</a> URL to get the full list of local project
+directories, their custom domains, and port numbers.</p>
+</div>
+<p>You can also add a wildcard domain:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>symfony proxy:domain:attach <span class="hljs-string">"*.my-domain"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>So it will match all subdomains like <code translate="no" class="notranslate">https://admin.my-domain.wip</code>, <code translate="no" class="notranslate">https://other.my-domain.wip</code>...</p>
+<p>When running console commands, add the <code translate="no" class="notranslate">https_proxy</code> env var to make custom
+domains work:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># Example with curl</span>
+<span class="hljs-prompt">$ </span>https_proxy=$(symfony proxy:url) curl https://my-domain.wip
+
+<span class="hljs-comment"># Example with Blackfire and curl</span>
+<span class="hljs-prompt">$ </span>https_proxy=$(symfony proxy:url) blackfire curl https://my-domain.wip
+
+<span class="hljs-comment"># Example with Cypress</span>
+<span class="hljs-prompt">$ </span>https_proxy=$(symfony proxy:url) ./node_modules/bin/cypress open</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Although env var names are always defined in uppercase, the <code translate="no" class="notranslate">https_proxy</code>
+env var <a href="https://ec.haxx.se/usingcurl/usingcurl-proxies#http_proxy-in-lower-case-only" class="reference external" rel="external noopener noreferrer" target="_blank">is treated differently</a> than other env vars and its name must be
+spelled in lowercase.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you prefer to use a different TLD, edit the <code translate="no" class="notranslate">~/.symfony5/proxy.json</code>
+file (where <code translate="no" class="notranslate">~</code> means the path to your user directory) and change the
+value of the <code translate="no" class="notranslate">tld</code> option from <code translate="no" class="notranslate">wip</code> to any other TLD.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="long-running-commands">
+    Long-Running Commands
+    <a class="headerlink" href="#long-running-commands" title="Permalink to this headline">¶</a>
+</h2>
+<p>Long-running commands, such as the ones that compile front-end web assets, block
+the terminal and you can't run other commands at the same time. The Symfony
+server provides a <code translate="no" class="notranslate">run</code> command to wrap them as follows:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># compile Webpack assets using Symfony Encore ... but do that in the</span>
+<span class="hljs-comment"># background to not block the terminal</span>
+<span class="hljs-prompt">$ </span>symfony run -d yarn encore dev --watch
+
+<span class="hljs-comment"># continue working and running other commands...</span>
+
+<span class="hljs-comment"># from time to time, check the command logs if you want</span>
+<span class="hljs-prompt">$ </span>symfony server:<span class="hljs-built_in">log</span>
+
+<span class="hljs-comment"># and you can also check if the command is still running</span>
+<span class="hljs-prompt">$ </span>symfony server:status
+Web server listening on ...
+Command <span class="hljs-string">"yarn ..."</span> running with PID ...
+
+<span class="hljs-comment"># stop the web server (and all the associated commands) when you are finished</span>
+<span class="hljs-prompt">$ </span>symfony server:stop</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="configuration-file">
+    Configuration file
+    <a class="headerlink" href="#configuration-file" title="Permalink to this headline">¶</a>
+</h2>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>This feature is experimental and could change or be removed at any time
+without prior notice.</p>
+</div>
+<p>There are several options that you can set using a <code translate="no" class="notranslate">.symfony.local.yaml</code> config file:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># Sets domain1.wip and domain2.wip for the current project</span>
+<span class="hljs-attr">proxy:</span>
+    <span class="hljs-attr">domains:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-string">domain1</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-string">domain2</span>
+
+<span class="hljs-attr">http:</span>
+    <span class="hljs-attr">document_root:</span> <span class="hljs-string">public/</span> <span class="hljs-comment"># Path to the project document root</span>
+    <span class="hljs-attr">passthru:</span> <span class="hljs-string">index.php</span> <span class="hljs-comment"># Project passthru index</span>
+    <span class="hljs-attr">port:</span> <span class="hljs-number">8000</span> <span class="hljs-comment"># Force the port that will be used to run the server</span>
+    <span class="hljs-attr">preferred_port:</span> <span class="hljs-number">8001</span> <span class="hljs-comment"># Preferred HTTP port [default: 8000]</span>
+    <span class="hljs-attr">p12:</span> <span class="hljs-string">path/to/p12_cert</span> <span class="hljs-comment"># Name of the file containing the TLS certificate to use in p12 format</span>
+    <span class="hljs-attr">allow_http:</span> <span class="hljs-literal">true</span> <span class="hljs-comment"># Prevent auto-redirection from HTTP to HTTPS</span>
+    <span class="hljs-attr">no_tls:</span> <span class="hljs-literal">true</span> <span class="hljs-comment"># Use HTTP instead of HTTPS</span>
+    <span class="hljs-attr">daemon:</span> <span class="hljs-literal">true</span> <span class="hljs-comment"># Run the server in the background</span>
+    <span class="hljs-attr">use_gzip:</span> <span class="hljs-literal">true</span> <span class="hljs-comment"># Toggle GZIP compression</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Setting domains in this configuration file will override any domains you set
+using the <code translate="no" class="notranslate">proxy:domain:attach</code> command for the current project when you start
+the server.</p>
+</div>
+<div class="section">
+<h3 id="configuring-workers">
+    Configuring Workers
+    <a class="headerlink" href="#configuring-workers" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you like some processes to start automatically, along with the webserver
+(<code translate="no" class="notranslate">symfony server:start</code>), you can set them in the YAML configuration file:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># .symfony.local.yaml</span>
+<span class="hljs-attr">workers:</span>
+    <span class="hljs-comment"># built-in command that builds and watches front-end assets</span>
+    <span class="hljs-comment"># yarn_encore_watch:</span>
+    <span class="hljs-comment">#     cmd: ['yarn', 'encore', 'dev', '--watch']</span>
+    <span class="hljs-attr">yarn_encore_watch:</span> <span class="hljs-string">~</span>
+
+    <span class="hljs-comment"># built-in command that starts messenger consumer</span>
+    <span class="hljs-comment"># messenger_consume_async:</span>
+    <span class="hljs-comment">#     cmd: ['symfony', 'console', 'messenger:consume', 'async']</span>
+    <span class="hljs-comment">#     watch: ['config', 'src', 'templates', 'vendor']</span>
+    <span class="hljs-attr">messenger_consume_async:</span> <span class="hljs-string">~</span>
+
+    <span class="hljs-comment"># you can also add your own custom commands</span>
+    <span class="hljs-attr">build_spa:</span>
+        <span class="hljs-attr">cmd:</span> <span class="hljs-string">['yarn',</span> <span class="hljs-string">'--cwd'</span><span class="hljs-string">,</span> <span class="hljs-string">'./spa/'</span><span class="hljs-string">,</span> <span class="hljs-string">'dev'</span><span class="hljs-string">]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="symfony-server-docker"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="docker-integration">
+    Docker Integration
+    <a class="headerlink" href="#docker-integration" title="Permalink to this headline">¶</a>
+</h2>
+<p>The local Symfony server provides full <a href="https://en.wikipedia.org/wiki/Docker_(software)" class="reference external" rel="external noopener noreferrer" target="_blank">Docker</a> integration for projects that
+use it. To learn more about Docker &amp; Symfony, see <a href="docker.html" class="reference internal">Using Docker with Symfony</a>.</p>
+<p>When the web server detects that Docker Compose is running for the project, it
+automatically exposes some environment variables.</p>
+<p>Via the <code translate="no" class="notranslate">docker-compose</code> API, it looks for exposed ports used for common
+services. When it detects one it knows about, it uses the service name to
+expose environment variables.</p>
+<p>Consider the following configuration:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># docker-compose.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-attr">database:</span>
+        <span class="hljs-attr">ports:</span> <span class="hljs-string">[3306]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The web server detects that a service exposing port <code translate="no" class="notranslate">3306</code> is running for the
+project. It understands that this is a MySQL service and creates environment
+variables accordingly with the service name (<code translate="no" class="notranslate">database</code>) as a prefix:
+<code translate="no" class="notranslate">DATABASE_URL</code>, <code translate="no" class="notranslate">DATABASE_HOST</code>, ...</p>
+<p>If the service is not in the supported list below, generic environment
+variables are set: <code translate="no" class="notranslate">PORT</code>, <code translate="no" class="notranslate">IP</code>, and <code translate="no" class="notranslate">HOST</code>.</p>
+<p>If the <code translate="no" class="notranslate">docker-compose.yaml</code> names do not match Symfony's conventions, add a
+label to override the environment variables prefix:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># docker-compose.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-attr">db:</span>
+        <span class="hljs-attr">ports:</span> <span class="hljs-string">[3306]</span>
+        <span class="hljs-attr">labels:</span>
+            <span class="hljs-attr">com.symfony.server.service-prefix:</span> <span class="hljs-string">'DATABASE'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In this example, the service is named <code translate="no" class="notranslate">db</code>, so environment variables would be
+prefixed with <code translate="no" class="notranslate">DB_</code>, but as the <code translate="no" class="notranslate">com.symfony.server.service-prefix</code> is set
+to <code translate="no" class="notranslate">DATABASE</code>, the web server creates environment variables starting with
+<code translate="no" class="notranslate">DATABASE_</code> instead as expected by the default Symfony configuration.</p>
+<p>Here is the list of supported services with their ports and default Symfony
+prefixes:</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Service</th>
+                                            <th>Port</th>
+                                            <th>Symfony default prefix</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td>MySQL</td>
+                                    <td>3306</td>
+                                    <td><code translate="no" class="notranslate">DATABASE_</code></td>
+                            </tr>
+                    <tr>
+                                    <td>PostgreSQL</td>
+                                    <td>5432</td>
+                                    <td><code translate="no" class="notranslate">DATABASE_</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Redis</td>
+                                    <td>6379</td>
+                                    <td><code translate="no" class="notranslate">REDIS_</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Memcached</td>
+                                    <td>11211</td>
+                                    <td><code translate="no" class="notranslate">MEMCACHED_</code></td>
+                            </tr>
+                    <tr>
+                                    <td>RabbitMQ</td>
+                                    <td>5672</td>
+                                    <td><code translate="no" class="notranslate">RABBITMQ_</code> (set user and pass via Docker <code translate="no" class="notranslate">RABBITMQ_DEFAULT_USER</code> and <code translate="no" class="notranslate">RABBITMQ_DEFAULT_PASS</code> env var)</td>
+                            </tr>
+                    <tr>
+                                    <td>Elasticsearch</td>
+                                    <td>9200</td>
+                                    <td><code translate="no" class="notranslate">ELASTICSEARCH_</code></td>
+                            </tr>
+                    <tr>
+                                    <td>MongoDB</td>
+                                    <td>27017</td>
+                                    <td><code translate="no" class="notranslate">MONGODB_</code> (set the database via a Docker <code translate="no" class="notranslate">MONGO_DATABASE</code> env var)</td>
+                            </tr>
+                    <tr>
+                                    <td>Kafka</td>
+                                    <td>9092</td>
+                                    <td><code translate="no" class="notranslate">KAFKA_</code></td>
+                            </tr>
+                    <tr>
+                                    <td>MailCatcher</td>
+                                    <td>1025/1080
+or 25/80</td>
+                                    <td><code translate="no" class="notranslate">MAILER_</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Blackfire</td>
+                                    <td>8707</td>
+                                    <td><code translate="no" class="notranslate">BLACKFIRE_</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Mercure</td>
+                                    <td>80</td>
+                                    <td>Always exposes <code translate="no" class="notranslate">MERCURE_PUBLIC_URL</code> and <code translate="no" class="notranslate">MERCURE_URL</code> (only works with the <code translate="no" class="notranslate">dunglas/mercure</code> Docker image)</td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<p>You can open web management interfaces for the services that expose them:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash">$ symfony open:<span class="hljs-built_in">local</span>:webmail
+$ symfony open:<span class="hljs-built_in">local</span>:rabbitmq</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Or click on the links in the &quot;Server&quot; section of the web debug toolbar.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>To debug and list all exported environment variables, run <code translate="no" class="notranslate">symfony
+var:export --debug</code>.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>For some services, the web server also exposes environment variables
+understood by CLI tools related to the service. For instance, running
+<code translate="no" class="notranslate">symfony run psql</code> will connect you automatically to the PostgreSQL server
+running in a container without having to specify the username, password, or
+database name.</p>
+</div>
+<p>When Docker services are running, browse a page of your Symfony application and
+check the &quot;Symfony Server&quot; section in the web debug toolbar; you'll see that
+&quot;Docker Compose&quot; is &quot;Up&quot;.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you don't want environment variables to be exposed for a service, set
+the <code translate="no" class="notranslate">com.symfony.server.service-ignore</code> label to <code translate="no" class="notranslate">true</code>:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># docker-compose.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-attr">db:</span>
+        <span class="hljs-attr">ports:</span> <span class="hljs-string">[3306]</span>
+        <span class="hljs-attr">labels:</span>
+            <span class="hljs-attr">com.symfony.server.service-ignore:</span> <span class="hljs-literal">true</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<p>If your Docker Compose file is not at the root of the project, use the
+<code translate="no" class="notranslate">COMPOSE_FILE</code> and <code translate="no" class="notranslate">COMPOSE_PROJECT_NAME</code> environment variables to define
+its location, same as for <code translate="no" class="notranslate">docker-compose</code>:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash"><span class="hljs-comment"># start your containers:</span>
+COMPOSE_FILE=docker/docker-compose.yaml COMPOSE_PROJECT_NAME=project_name docker-compose up -d
+
+<span class="hljs-comment"># run any Symfony CLI command:</span>
+COMPOSE_FILE=docker/docker-compose.yaml COMPOSE_PROJECT_NAME=project_name symfony var:<span class="hljs-built_in">export</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you have more than one Docker Compose file, you can provide them all
+separated by <code translate="no" class="notranslate">:</code> as explained in the <a href="https://docs.docker.com/compose/reference/envvars/" class="reference external" rel="external noopener noreferrer" target="_blank">Docker compose CLI env var reference</a>.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When using the Symfony binary with <code translate="no" class="notranslate">php bin/console</code> (<code translate="no" class="notranslate">symfony console ...</code>),
+the binary will <strong>always</strong> use environment variables detected via Docker and will
+ignore local environment variables.
+For example if you set up a different database name in your <code translate="no" class="notranslate">.env.test</code> file
+(<code translate="no" class="notranslate">DATABASE_URL=mysql://db_user:db_password@127.0.0.1:3306/test</code>) and if you run
+<code translate="no" class="notranslate">symfony console doctrine:database:drop --force --env=test</code>, the command will drop the database
+defined in your Docker configuration and not the &quot;test&quot; one.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="platform-sh-integration">
+    Platform.sh Integration
+    <a class="headerlink" href="#platform-sh-integration" title="Permalink to this headline">¶</a>
+</h2>
+<p>The local Symfony server provides full, but optional, integration with
+<a href="https://symfony.com/cloud/" class="reference external">Platform.sh</a>, a service optimized to run your Symfony applications on the
+cloud. It provides features such as creating environments, backups/snapshots,
+and even access to a copy of the production data from your local machine to
+help debug any issues.</p>
+<p><a href="https://symfony.com/doc/master/cloud/intro.html" class="reference external">Read Platform.sh for Symfony technical docs</a>.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

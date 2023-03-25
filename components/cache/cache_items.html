@@ -1,0 +1,312 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="cache-items">
+    Cache Items
+    <a class="headerlink" href="#cache-items" title="Permalink to this headline">¶</a>
+</h1>
+<p>Cache items are the information units stored in the cache as a key/value pair.
+In the Cache component they are represented by the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/CacheItem.php" class="reference external" title="Symfony\Component\Cache\CacheItem" rel="external noopener noreferrer" target="_blank">CacheItem</a> class.
+They are used in both the Cache Contracts and the PSR-6 interfaces.</p>
+<div class="section">
+<h2 id="cache-item-keys-and-values">
+    Cache Item Keys and Values
+    <a class="headerlink" href="#cache-item-keys-and-values" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <strong>key</strong> of a cache item is a plain string which acts as its
+identifier, so it must be unique for each cache pool. You can freely choose the
+keys, but they should only contain letters (A-Z, a-z), numbers (0-9) and the
+<code translate="no" class="notranslate">_</code> and <code translate="no" class="notranslate">.</code> symbols. Other common symbols (such as <code translate="no" class="notranslate">{</code>, <code translate="no" class="notranslate">}</code>, <code translate="no" class="notranslate">(</code>,
+<code translate="no" class="notranslate">)</code>, <code translate="no" class="notranslate">/</code>, <code translate="no" class="notranslate">\</code>, <code translate="no" class="notranslate">@</code> and <code translate="no" class="notranslate">:</code>) are reserved by the PSR-6 standard for future
+uses.</p>
+<p>The <strong>value</strong> of a cache item can be any data represented by a type which is
+serializable by PHP, such as basic types (string, integer, float, boolean, null),
+arrays and objects.</p>
+</div>
+<div class="section">
+<h2 id="creating-cache-items">
+    Creating Cache Items
+    <a class="headerlink" href="#creating-cache-items" title="Permalink to this headline">¶</a>
+</h2>
+<p>The only way to create cache items is via cache pools. When using the Cache
+Contracts, they are passed as arguments to the recomputation callback:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// $cache pool object was created before</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>productsCount</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'stats.products_count'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ItemInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>item</span>)</span> </span>{
+    <span class="hljs-comment">// [...]</span>
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When using PSR-6, they are created with the <code translate="no" class="notranslate">getItem($key)</code> method of the cache
+pool:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// $cache pool object was created before</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>productsCount</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>getItem(<span class="hljs-string">'stats.products_count'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, use the <code translate="no" class="notranslate">Psr\Cache\CacheItemInterface::set</code> method to set the data stored
+in the cache item (this step is done automatically when using the Cache Contracts):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// storing a simple integer</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>productsCount</span><span class="hljs-operator">-&gt;</span>set(<span class="hljs-number">4711</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>save(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>productsCount</span>);
+
+<span class="hljs-comment">// storing an array</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>productsCount</span><span class="hljs-operator">-&gt;</span>set([
+    <span class="hljs-string">'category1'</span> =&gt; <span class="hljs-number">4711</span>,
+    <span class="hljs-string">'category2'</span> =&gt; <span class="hljs-number">2387</span>,
+]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>save(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>productsCount</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The key and the value of any given cache item can be obtained with the
+corresponding <em>getter</em> methods:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cacheItem</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>getItem(<span class="hljs-string">'exchange_rate'</span>);
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>key</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cacheItem</span><span class="hljs-operator">-&gt;</span>getKey();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cacheItem</span><span class="hljs-operator">-&gt;</span>get();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="cache-item-expiration">
+    Cache Item Expiration
+    <a class="headerlink" href="#cache-item-expiration" title="Permalink to this headline">¶</a>
+</h3>
+<p>By default, cache items are stored permanently. In practice, this &quot;permanent
+storage&quot; can vary greatly depending on the type of cache being used, as
+explained in the <a href="cache_pools.html" class="reference internal">Cache Pools and Supported Adapters</a> article.</p>
+<p>However, in some applications it's common to use cache items with a shorter
+lifespan. Consider for example an application which caches the latest news just
+for one minute. In those cases, use the <code translate="no" class="notranslate">expiresAfter()</code> method to set the
+number of seconds to cache the item:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>latestNews</span><span class="hljs-operator">-&gt;</span>expiresAfter(<span class="hljs-number">60</span>);  <span class="hljs-comment">// 60 seconds = 1 minute</span>
+
+<span class="hljs-comment">// this method also accepts \DateInterval instances</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>latestNews</span><span class="hljs-operator">-&gt;</span>expiresAfter(DateInterval<span class="hljs-operator">::</span>createFromDateString(<span class="hljs-string">'1 hour'</span>));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Cache items define another related method called <code translate="no" class="notranslate">expiresAt()</code> to set the
+exact date and time when the item will expire:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mostPopularNews</span><span class="hljs-operator">-&gt;</span>expiresAt(<span class="hljs-keyword">new</span> \DateTime(<span class="hljs-string">'tomorrow'</span>));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="cache-item-hits-and-misses">
+    Cache Item Hits and Misses
+    <a class="headerlink" href="#cache-item-hits-and-misses" title="Permalink to this headline">¶</a>
+</h2>
+<p>Using a cache mechanism is important to improve the application performance, but
+it should not be required to make the application work. In fact, the PSR-6 document
+wisely states that caching errors should not result in application failures.</p>
+<p>In practice with PSR-6, this means that the <code translate="no" class="notranslate">getItem()</code> method always returns an
+object which implements the <code translate="no" class="notranslate">Psr\Cache\CacheItemInterface</code> interface, even when
+the cache item doesn't exist. Therefore, you don't have to deal with <code translate="no" class="notranslate">null</code> return
+values and you can safely store in the cache values such as <code translate="no" class="notranslate">false</code> and <code translate="no" class="notranslate">null</code>.</p>
+<p>In order to decide if the returned object represents a value coming from the storage
+or not, caches use the concept of hits and misses:</p>
+<ul>
+    <li><strong>Cache Hits</strong> occur when the requested item is found in the cache, its value
+is not corrupted or invalid and it hasn't expired;</li>
+<li><strong>Cache Misses</strong> are the opposite of hits, so they occur when the item is not
+found in the cache, its value is corrupted or invalid for any reason or the
+item has expired.</li>
+</ul>
+<p>Cache item objects define a boolean <code translate="no" class="notranslate">isHit()</code> method which returns <code translate="no" class="notranslate">true</code>
+for cache hits:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>latestNews</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>getItem(<span class="hljs-string">'latest_news'</span>);
+
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>latestNews</span><span class="hljs-operator">-&gt;</span>isHit()) {
+    <span class="hljs-comment">// do some heavy computation</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>news</span> = ...;
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>save(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>latestNews</span><span class="hljs-operator">-&gt;</span>set(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>news</span>));
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>news</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>latestNews</span><span class="hljs-operator">-&gt;</span>get();
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

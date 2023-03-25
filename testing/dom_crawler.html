@@ -1,0 +1,268 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-dom-crawler">
+    The DOM Crawler
+    <a class="headerlink" href="#the-dom-crawler" title="Permalink to this headline">¶</a>
+</h1>
+<p>A Crawler instance is returned each time you make a request with the Client.
+It allows you to traverse HTML or XML documents: select nodes, find links
+and forms, and retrieve attributes or contents.</p>
+<div class="section">
+<h2 id="traversing">
+    Traversing
+    <a class="headerlink" href="#traversing" title="Permalink to this headline">¶</a>
+</h2>
+<p>Like jQuery, the Crawler has methods to traverse the DOM of an HTML/XML
+document. For example, the following finds all <code translate="no" class="notranslate">input[type=submit]</code> elements,
+selects the last one on the page, and then selects its immediate parent element:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>newCrawler</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span><span class="hljs-operator">-&gt;</span>filter(<span class="hljs-string">'input[type=submit]'</span>)
+    <span class="hljs-operator">-&gt;</span>last()
+    <span class="hljs-operator">-&gt;</span>parents()
+    <span class="hljs-operator">-&gt;</span>first()
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Many other methods are also available:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">filter(&#039;h1.title&#039;)</code></dt>
+        
+        <dd>
+                            Nodes that match the CSS selector.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">filterXpath(&#039;h1&#039;)</code></dt>
+        
+        <dd>
+                            Nodes that match the XPath expression.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">eq(1)</code></dt>
+        
+        <dd>
+                            Node for the specified index.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">first()</code></dt>
+        
+        <dd>
+                            First node.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">last()</code></dt>
+        
+        <dd>
+                            Last node.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">siblings()</code></dt>
+        
+        <dd>
+                            Siblings.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">nextAll()</code></dt>
+        
+        <dd>
+                            All following siblings.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">previousAll()</code></dt>
+        
+        <dd>
+                            All preceding siblings.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">parents()</code></dt>
+        
+        <dd>
+                            Returns the parent nodes.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">children()</code></dt>
+        
+        <dd>
+                            Returns children nodes.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">reduce($lambda)</code></dt>
+        
+        <dd>
+                            Nodes for which the callable does not return false.
+                    </dd>
+    </dl>
+<p>Since each of these methods returns a new <code translate="no" class="notranslate">Crawler</code> instance, you can
+narrow down your node selection by chaining the method calls:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span>
+    <span class="hljs-operator">-&gt;</span>filter(<span class="hljs-string">'h1'</span>)
+    <span class="hljs-operator">-&gt;</span>reduce(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>node</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>i</span>)</span> </span>{
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>node</span><span class="hljs-operator">-&gt;</span>attr(<span class="hljs-string">'class'</span>)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+        }
+    })
+    <span class="hljs-operator">-&gt;</span>first()
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Use the <code translate="no" class="notranslate">count()</code> function to get the number of nodes stored in a Crawler:
+<code translate="no" class="notranslate">count($crawler)</code></p>
+</div>
+</div>
+<div class="section">
+<h2 id="extracting-information">
+    Extracting Information
+    <a class="headerlink" href="#extracting-information" title="Permalink to this headline">¶</a>
+</h2>
+<p>The Crawler can extract information from the nodes:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// returns the attribute value for the first node</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span><span class="hljs-operator">-&gt;</span>attr(<span class="hljs-string">'class'</span>);
+
+<span class="hljs-comment">// returns the node value for the first node</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span><span class="hljs-operator">-&gt;</span>text();
+
+<span class="hljs-comment">// returns the default text if the node does not exist</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span><span class="hljs-operator">-&gt;</span>text(<span class="hljs-string">'Default text content'</span>);
+
+<span class="hljs-comment">// pass TRUE as the second argument of text() to remove all extra white spaces, including</span>
+<span class="hljs-comment">// the internal ones (e.g. "  foo\n  bar    baz \n " is returned as "foo bar baz")</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span><span class="hljs-operator">-&gt;</span>text(<span class="hljs-keyword">null</span>, <span class="hljs-keyword">true</span>);
+
+<span class="hljs-comment">// extracts an array of attributes for all nodes</span>
+<span class="hljs-comment">// (_text returns the node value)</span>
+<span class="hljs-comment">// returns an array for each element in crawler,</span>
+<span class="hljs-comment">// each with the value and href</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>info</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span><span class="hljs-operator">-&gt;</span>extract([<span class="hljs-string">'_text'</span>, <span class="hljs-string">'href'</span>]);
+
+<span class="hljs-comment">// executes a lambda for each node and return an array of results</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>data</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span><span class="hljs-operator">-&gt;</span>each(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>node</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>i</span>)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>node</span><span class="hljs-operator">-&gt;</span>attr(<span class="hljs-string">'href'</span>);
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

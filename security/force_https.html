@@ -1,0 +1,267 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-force-https-or-http-for-different-urls">
+    How to Force HTTPS or HTTP for different URLs
+    <a class="headerlink" href="#how-to-force-https-or-http-for-different-urls" title="Permalink to this headline">¶</a>
+</h1>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The <em>best</em> policy is to force <code translate="no" class="notranslate">https</code> on all URLs, which can be done via
+your web server configuration or <code translate="no" class="notranslate">access_control</code>.</p>
+</div>
+<p>You can force areas of your site to use the HTTPS protocol in the security
+config. This is done through the <code translate="no" class="notranslate">access_control</code> rules using the <code translate="no" class="notranslate">requires_channel</code>
+option. To enforce HTTPS on all URLs, add the <code translate="no" class="notranslate">requires_channel</code> config to every
+access control:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-f1e7894f18fd908fabea3427ab9d088d978d86aa" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-14a912886ab131e7ae79cd96cbfe95d082c5f56e" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-6c94ab3b706f317a9e02cb6c2c0699351a60f80c" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-f1e7894f18fd908fabea3427ab9d088d978d86aa" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-attr">access_control:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">path:</span> <span class="hljs-string">'^/secure'</span><span class="hljs-string">,</span> <span class="hljs-attr">roles:</span> <span class="hljs-string">ROLE_ADMIN,</span> <span class="hljs-attr">requires_channel:</span> <span class="hljs-string">https</span> <span class="hljs-string">}</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">path:</span> <span class="hljs-string">'^/login'</span><span class="hljs-string">,</span> <span class="hljs-attr">roles:</span> <span class="hljs-string">PUBLIC_ACCESS,</span> <span class="hljs-attr">requires_channel:</span> <span class="hljs-string">https</span> <span class="hljs-string">}</span>
+        <span class="hljs-comment"># catch all other URLs</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">path:</span> <span class="hljs-string">'^/'</span><span class="hljs-string">,</span> <span class="hljs-attr">roles:</span> <span class="hljs-string">PUBLIC_ACCESS,</span> <span class="hljs-attr">requires_channel:</span> <span class="hljs-string">https</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-14a912886ab131e7ae79cd96cbfe95d082c5f56e" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/security
+        https://symfony.com/schema/dic/security/security-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">rule</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"^/secure"</span> <span class="hljs-attr">role</span>=<span class="hljs-string">"ROLE_ADMIN"</span> <span class="hljs-attr">requires-channel</span>=<span class="hljs-string">"https"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">rule</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"^/login"</span> <span class="hljs-attr">role</span>=<span class="hljs-string">"PUBLIC_ACCESS"</span> <span class="hljs-attr">requires-channel</span>=<span class="hljs-string">"https"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">rule</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"^/"</span> <span class="hljs-attr">role</span>=<span class="hljs-string">"PUBLIC_ACCESS"</span> <span class="hljs-attr">requires-channel</span>=<span class="hljs-string">"https"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-6c94ab3b706f317a9e02cb6c2c0699351a60f80c" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-comment">// ....</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>accessControl()
+        <span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'^/secure'</span>)
+        <span class="hljs-operator">-&gt;</span>roles([<span class="hljs-string">'ROLE_ADMIN'</span>])
+        <span class="hljs-operator">-&gt;</span>requiresChannel(<span class="hljs-string">'https'</span>)
+    ;
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>accessControl()
+        <span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'^/login'</span>)
+        <span class="hljs-operator">-&gt;</span>roles([<span class="hljs-string">'PUBLIC_ACCESS'</span>])
+        <span class="hljs-operator">-&gt;</span>requiresChannel(<span class="hljs-string">'https'</span>)
+    ;
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>accessControl()
+        <span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'^/'</span>)
+        <span class="hljs-operator">-&gt;</span>roles([<span class="hljs-string">'PUBLIC_ACCESS'</span>])
+        <span class="hljs-operator">-&gt;</span>requiresChannel(<span class="hljs-string">'https'</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>To make life easier while developing, you can also use an environment variable,
+like <code translate="no" class="notranslate">requires_channel: &#039;%env(SECURE_SCHEME)%&#039;</code>. In your <code translate="no" class="notranslate">.env</code> file, set
+<code translate="no" class="notranslate">SECURE_SCHEME</code> to <code translate="no" class="notranslate">http</code> by default, but override it to <code translate="no" class="notranslate">https</code> on production.</p>
+<p>See <a href="access_control.html" class="reference internal">How Does the Security access_control Work?</a> for more details about <code translate="no" class="notranslate">access_control</code>
+in general.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>An alternative way to enforce HTTP or HTTPS is to use
+<a href="../routing.html#routing-force-https" class="reference internal">the scheme option</a> of a route or group of routes.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Forcing HTTPS while using a reverse proxy or load balancer requires a proper
+configuration to avoid infinite redirect loops; see <a href="../deployment/proxies.html" class="reference internal">How to Configure Symfony to Work behind a Load Balancer or a Reverse Proxy</a>
+for more details.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

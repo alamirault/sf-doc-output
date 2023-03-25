@@ -1,0 +1,183 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="varying-the-response-for-http-cache">
+    Varying the Response for HTTP Cache
+    <a class="headerlink" href="#varying-the-response-for-http-cache" title="Permalink to this headline">¶</a>
+</h1>
+<p>So far, it's been assumed that each URI has exactly one representation of the
+target resource. By default, HTTP caching is done by using the URI of the
+resource as the cache key. If two people request the same URI of a cacheable
+resource, the second person will receive the cached version.</p>
+<p>Sometimes this isn't enough and different versions of the same URI need to
+be cached based on one or more request header values. For instance, if you
+compress pages when the client supports it, any given URI has two representations:
+one when the client supports compression, and one when it does not. This
+determination is done by the value of the <code translate="no" class="notranslate">Accept-Encoding</code> request header.</p>
+<p>In this case, you need the cache to store both a compressed and uncompressed
+version of the response for the particular URI and return them based on the
+request's <code translate="no" class="notranslate">Accept-Encoding</code> value. This is done by using the <code translate="no" class="notranslate">Vary</code> response
+header, which is a comma-separated list of different headers whose values
+trigger a different representation of the requested resource:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">Vary: Accept-Encoding, User-Agent</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>This particular <code translate="no" class="notranslate">Vary</code> header would cache different versions of each
+resource based on the URI and the value of the <code translate="no" class="notranslate">Accept-Encoding</code> and
+<code translate="no" class="notranslate">User-Agent</code> request header.</p>
+</div>
+<p>Set the <code translate="no" class="notranslate">Vary</code> header via the <code translate="no" class="notranslate">Response</code> object methods or the <code translate="no" class="notranslate">#[Cache()]</code>
+attribute:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-2">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-a8c6def860b510cd70c34bd749096a07e75fe923" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-2a7b06c9e36ac6043f8513a567b9fbc36cad43a7" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-a8c6def860b510cd70c34bd749096a07e75fe923" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// this attribute takes an array with the name of the header(s)</span>
+<span class="hljs-comment">// names for which the response varies</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">Cache</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">#[Cache(vary: ['Accept-Encoding'])]</span>
+<span class="hljs-comment">#[Cache(vary: ['Accept-Encoding', 'User-Agent'])]</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-2a7b06c9e36ac6043f8513a567b9fbc36cad43a7" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// this method takes a header name or an array of header names for</span>
+<span class="hljs-comment">// which the response varies</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setVary(<span class="hljs-string">'Accept-Encoding'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setVary([<span class="hljs-string">'Accept-Encoding'</span>, <span class="hljs-string">'User-Agent'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,1204 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="console-commands">
+    Console Commands
+    <a class="headerlink" href="#console-commands" title="Permalink to this headline">¶</a>
+</h1>
+<p>The Symfony framework provides lots of commands through the <code translate="no" class="notranslate">bin/console</code> script
+(e.g. the well-known <code translate="no" class="notranslate">bin/console cache:clear</code> command). These commands are
+created with the <a href="components/console.html" class="reference internal">Console component</a>. You can also
+use it to create your own commands.</p>
+<div class="section">
+<h2 id="running-commands">
+    Running Commands
+    <a class="headerlink" href="#running-commands" title="Permalink to this headline">¶</a>
+</h2>
+<p>Each Symfony application comes with a large set of commands. You can use
+the <code translate="no" class="notranslate">list</code> command to view all available commands in the application:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console list
+...
+
+Available commands:
+  about                                      Display information about the current project
+  completion                                 Dump the shell completion script
+  <span class="hljs-built_in">help</span>                                       Display <span class="hljs-built_in">help</span> <span class="hljs-keyword">for</span> a <span class="hljs-built_in">command</span>
+  list                                       List commands
+ assets
+  assets:install                             Install bundle<span class="hljs-string">'s web assets under a public directory
+ cache
+  cache:clear                                Clear the cache
+...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you find the command you need, you can run it with the <code translate="no" class="notranslate">--help</code> option
+to view the command's documentation:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console assets:install --<span class="hljs-built_in">help</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="app-env-app-debug">
+    APP_ENV &amp; APP_DEBUG
+    <a class="headerlink" href="#app-env-app-debug" title="Permalink to this headline">¶</a>
+</h3>
+<p>Console commands run in the <a href="configuration.html#config-dot-env" class="reference internal">environment</a> defined in the <code translate="no" class="notranslate">APP_ENV</code>
+variable of the <code translate="no" class="notranslate">.env</code> file, which is <code translate="no" class="notranslate">dev</code> by default. It also reads the <code translate="no" class="notranslate">APP_DEBUG</code>
+value to turn &quot;debug&quot; mode on or off (it defaults to <code translate="no" class="notranslate">1</code>, which is on).</p>
+<p>To run the command in another environment or debug mode, edit the value of <code translate="no" class="notranslate">APP_ENV</code>
+and <code translate="no" class="notranslate">APP_DEBUG</code>. You can also define this env vars when running the
+command, for instance:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># clears the cache for the prod environment</span>
+<span class="hljs-prompt">$ </span>APP_ENV=prod php bin/console cache:clear</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="console-completion-setup"></span>
+</div>
+<div class="section">
+<h3 id="console-completion">
+    Console Completion
+    <a class="headerlink" href="#console-completion" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>Console completion for Fish was introduced in Symfony 6.1.</p>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>Console completion for Zsh was introduced in Symfony 6.2.</p>
+</div>
+<p>If you are using the Bash, Zsh or Fish shell, you can install Symfony's
+completion script to get auto completion when typing commands in the
+terminal. All commands support name and option completion, and some can
+even complete values.</p>
+<img src="_images/completion.gif" />
+<p>First, you have to install the completion script <em>once</em>. Run
+<code translate="no" class="notranslate">bin/console completion --help</code> for the installation instructions for
+your shell.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When using Bash, make sure you installed and setup the &quot;bash completion&quot;
+package for your OS (typically named <code translate="no" class="notranslate">bash-completion</code>).</p>
+</div>
+<p>After installing and restarting your terminal, you're all set to use
+completion (by default, by pressing the Tab key).</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Many PHP tools are built using the Symfony Console component (e.g.
+Composer, PHPstan and Behat). If they are using version 5.4 or higher,
+you can also install their completion script to enable console completion:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php vendor/bin/phpstan completion --<span class="hljs-built_in">help</span>
+<span class="hljs-prompt">$ </span>composer completion --<span class="hljs-built_in">help</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="creating-a-command">
+    Creating a Command
+    <a class="headerlink" href="#creating-a-command" title="Permalink to this headline">¶</a>
+</h2>
+<p>Commands are defined in classes extending
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Command/Command.php" class="reference external" title="Symfony\Component\Console\Command\Command" rel="external noopener noreferrer" target="_blank">Command</a>. For example, you may
+want a command to create a user:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Command/CreateUserCommand.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Command</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsCommand</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+
+<span class="hljs-comment">// the name of the command is what users type after "php bin/console"</span>
+<span class="hljs-comment">#[AsCommand(name: 'app:create-user')]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateUserCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-comment">// ... put here the code to create the user</span>
+
+        <span class="hljs-comment">// this method must return an integer number with the "exit status code"</span>
+        <span class="hljs-comment">// of the command. You can also use these constants to make code more readable</span>
+
+        <span class="hljs-comment">// return this if there was no problem running the command</span>
+        <span class="hljs-comment">// (it's equivalent to returning int(0))</span>
+        <span class="hljs-keyword">return</span> Command<span class="hljs-operator">::</span>SUCCESS;
+
+        <span class="hljs-comment">// or return this if some error happened during the execution</span>
+        <span class="hljs-comment">// (it's equivalent to returning int(1))</span>
+        <span class="hljs-comment">// return Command::FAILURE;</span>
+
+        <span class="hljs-comment">// or return this to indicate incorrect command usage; e.g. invalid options</span>
+        <span class="hljs-comment">// or missing arguments (it's equivalent to returning int(2))</span>
+        <span class="hljs-comment">// return Command::INVALID</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="configuring-the-command">
+    Configuring the Command
+    <a class="headerlink" href="#configuring-the-command" title="Permalink to this headline">¶</a>
+</h3>
+<p>You can optionally define a description, help message and the
+<a href="console/input.html" class="reference internal">input options and arguments</a> by overriding the
+<code translate="no" class="notranslate">configure()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Command/CreateUserCommand.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateUserCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-comment">// the command description shown when running "php bin/console list"</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">static</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaultDescription</span> = <span class="hljs-string">'Creates a new user.'</span>;
+
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configure</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>
+            <span class="hljs-comment">// the command help shown when running the command with the "--help" option</span>
+            <span class="hljs-operator">-&gt;</span>setHelp(<span class="hljs-string">'This command allows you to create a user...'</span>)
+        ;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Defining the <code translate="no" class="notranslate">$defaultDescription</code> static property instead of using the
+<code translate="no" class="notranslate">setDescription()</code> method allows to get the command description without
+instantiating its class. This makes the <code translate="no" class="notranslate">php bin/console list</code> command run
+much faster.</p>
+<p>If you want to always run the <code translate="no" class="notranslate">list</code> command fast, add the <code translate="no" class="notranslate">--short</code> option
+to it (<code translate="no" class="notranslate">php bin/console list --short</code>). This will avoid instantiating command
+classes, but it won't show any description for commands that use the
+<code translate="no" class="notranslate">setDescription()</code> method instead of the static property.</p>
+</div>
+<p>The <code translate="no" class="notranslate">configure()</code> method is called automatically at the end of the command
+constructor. If your command defines its own constructor, set the properties
+first and then call to the parent constructor, to make those properties
+available in the <code translate="no" class="notranslate">configure()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputArgument</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateUserCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(bool <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requirePassword</span> = false)</span>
+    </span>{
+        <span class="hljs-comment">// best practices recommend to call the parent constructor first and</span>
+        <span class="hljs-comment">// then set your own properties. That wouldn't work in this case</span>
+        <span class="hljs-comment">// because configure() needs the properties set in this constructor</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>requirePassword = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requirePassword</span>;
+
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>__construct();
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configure</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>
+            <span class="hljs-comment">// ...</span>
+            <span class="hljs-operator">-&gt;</span>addArgument(<span class="hljs-string">'password'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>requirePassword ? InputArgument<span class="hljs-operator">::</span>REQUIRED : InputArgument<span class="hljs-operator">::</span>OPTIONAL, <span class="hljs-string">'User password'</span>)
+        ;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="console_registering-the-command"></span>
+</div>
+<div class="section">
+<h3 id="registering-the-command">
+    Registering the Command
+    <a class="headerlink" href="#registering-the-command" title="Permalink to this headline">¶</a>
+</h3>
+<p>In PHP 8 and newer versions, you can register the command by adding the
+<code translate="no" class="notranslate">AsCommand</code> attribute to it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Command/CreateUserCommand.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Command</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsCommand</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+
+<span class="hljs-comment">// the "name" and "description" arguments of AsCommand replace the</span>
+<span class="hljs-comment">// static $defaultName and $defaultDescription properties</span>
+<span class="hljs-comment">#[AsCommand(</span>
+    name: <span class="hljs-string">'app:create-user'</span>,
+    description: <span class="hljs-string">'Creates a new user.'</span>,
+    hidden: <span class="hljs-keyword">false</span>,
+    aliases: [<span class="hljs-string">'app:add-user'</span>]
+)]
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateUserCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you can't use PHP attributes, register the command as a service and
+<a href="service_container/tags.html" class="reference internal">tag it</a> with the <code translate="no" class="notranslate">console.command</code> tag. If you're using the
+<a href="service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>,
+this is already done for you, thanks to <a href="service_container.html#services-autoconfigure" class="reference internal">autoconfiguration</a>.</p>
+</div>
+<div class="section">
+<h3 id="running-the-command">
+    Running the Command
+    <a class="headerlink" href="#running-the-command" title="Permalink to this headline">¶</a>
+</h3>
+<p>After configuring and registering the command, you can run it in the terminal:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console app:create-user</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As you might expect, this command will do nothing as you didn't write any logic
+yet. Add your own logic inside the <code translate="no" class="notranslate">execute()</code> method.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="console-output">
+    Console Output
+    <a class="headerlink" href="#console-output" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <code translate="no" class="notranslate">execute()</code> method has access to the output stream to write messages to
+the console:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>: <span class="hljs-title">int</span>
+</span>{
+    <span class="hljs-comment">// outputs multiple lines to the console (adding "\n" at the end of each line)</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln([
+        <span class="hljs-string">'User Creator'</span>,
+        <span class="hljs-string">'============'</span>,
+        <span class="hljs-string">''</span>,
+    ]);
+
+    <span class="hljs-comment">// the value returned by someMethod() can be an iterator (https://php.net/iterator)</span>
+    <span class="hljs-comment">// that generates and returns the messages with the 'yield' PHP keyword</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>someMethod());
+
+    <span class="hljs-comment">// outputs a message followed by a "\n"</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-string">'Whoa!'</span>);
+
+    <span class="hljs-comment">// outputs a message without adding a "\n" at the end of the line</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>write(<span class="hljs-string">'You are about to '</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>write(<span class="hljs-string">'create a user.'</span>);
+
+    <span class="hljs-keyword">return</span> Command<span class="hljs-operator">::</span>SUCCESS;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, try executing the command:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console app:create-user
+User Creator
+============
+
+Whoa!
+You are about to create a user.</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="console-output-sections"></span>
+<div class="section">
+<h3 id="output-sections">
+    Output Sections
+    <a class="headerlink" href="#output-sections" title="Permalink to this headline">¶</a>
+</h3>
+<p>The regular console output can be divided into multiple independent regions
+called &quot;output sections&quot;. Create one or more of these sections when you need to
+clear and overwrite the output information.</p>
+<p>Sections are created with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Output/ConsoleOutput.php#method_section" class="reference external" title="Symfony\Component\Console\Output\ConsoleOutput::section()" rel="external noopener noreferrer" target="_blank">ConsoleOutput::section()</a>
+method, which returns an instance of
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Output/ConsoleSectionOutput.php" class="reference external" title="Symfony\Component\Console\Output\ConsoleSectionOutput" rel="external noopener noreferrer" target="_blank">ConsoleSectionOutput</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">ConsoleOutputInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> <span class="hljs-keyword">instanceof</span> ConsoleOutputInterface) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> \LogicException(<span class="hljs-string">'This command accepts only an instance of "ConsoleOutputInterface".'</span>);
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section1</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>section();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section2</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>section();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section1</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-string">'Hello'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section2</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-string">'World!'</span>);
+        <span class="hljs-comment">// Output displays "Hello\nWorld!\n"</span>
+
+        <span class="hljs-comment">// overwrite() replaces all the existing section contents with the given content</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section1</span><span class="hljs-operator">-&gt;</span>overwrite(<span class="hljs-string">'Goodbye'</span>);
+        <span class="hljs-comment">// Output now displays "Goodbye\nWorld!\n"</span>
+
+        <span class="hljs-comment">// clear() deletes all the section contents...</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section2</span><span class="hljs-operator">-&gt;</span>clear();
+        <span class="hljs-comment">// Output now displays "Goodbye\n"</span>
+
+        <span class="hljs-comment">// ...but you can also delete a given number of lines</span>
+        <span class="hljs-comment">// (this example deletes the last two lines of the section)</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section1</span><span class="hljs-operator">-&gt;</span>clear(<span class="hljs-number">2</span>);
+        <span class="hljs-comment">// Output is now completely empty!</span>
+
+        <span class="hljs-comment">// setting the max height of a section will make new lines replace the old ones</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section1</span><span class="hljs-operator">-&gt;</span>setMaxHeight(<span class="hljs-number">2</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section1</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-string">'Line1'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section1</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-string">'Line2'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section1</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-string">'Line3'</span>);
+
+        <span class="hljs-keyword">return</span> Command<span class="hljs-operator">::</span>SUCCESS;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>A new line is appended automatically when displaying information in a section.</p>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The feature to limit the height of a console section was introduced in Symfony 6.2.</p>
+</div>
+<p>Output sections let you manipulate the Console output in advanced ways, such as
+<a href="components/console/helpers/progressbar.html#console-multiple-progress-bars" class="reference internal">displaying multiple progress bars</a> which
+are updated independently and <a href="components/console/helpers/table.html#console-modify-rendered-tables" class="reference internal">appending rows to tables</a>
+that have already been rendered.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="console-input">
+    Console Input
+    <a class="headerlink" href="#console-input" title="Permalink to this headline">¶</a>
+</h2>
+<p>Use input options or arguments to pass information to the command:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputArgument</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configure</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>
+        <span class="hljs-comment">// configure an argument</span>
+        <span class="hljs-operator">-&gt;</span>addArgument(<span class="hljs-string">'username'</span>, InputArgument<span class="hljs-operator">::</span>REQUIRED, <span class="hljs-string">'The username of the user.'</span>)
+        <span class="hljs-comment">// ...</span>
+    ;
+}
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>: <span class="hljs-title">int</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln([
+        <span class="hljs-string">'User Creator'</span>,
+        <span class="hljs-string">'============'</span>,
+        <span class="hljs-string">''</span>,
+    ]);
+
+    <span class="hljs-comment">// retrieve the argument value using getArgument()</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-string">'Username: '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span><span class="hljs-operator">-&gt;</span>getArgument(<span class="hljs-string">'username'</span>));
+
+    <span class="hljs-keyword">return</span> Command<span class="hljs-operator">::</span>SUCCESS;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, you can pass the username to the command:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console app:create-user Wouter
+User Creator
+============
+
+Username: Wouter</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Read <a href="console/input.html" class="reference internal">Console Input (Arguments &amp; Options)</a> for more information about console options and
+arguments.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="getting-services-from-the-service-container">
+    Getting Services from the Service Container
+    <a class="headerlink" href="#getting-services-from-the-service-container" title="Permalink to this headline">¶</a>
+</h2>
+<p>To actually create a new user, the command has to access some
+<a href="service_container.html" class="reference internal">services</a>. Since your command is already registered
+as a service, you can use normal dependency injection. Imagine you have a
+<code translate="no" class="notranslate">App\Service\UserManager</code> service that you want to access:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Service</span>\<span class="hljs-title">UserManager</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateUserCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private UserManager <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userManager</span>,
+    )</span></span>{
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>__construct();
+    }
+
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>userManager<span class="hljs-operator">-&gt;</span>create(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span><span class="hljs-operator">-&gt;</span>getArgument(<span class="hljs-string">'username'</span>));
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-string">'User successfully generated!'</span>);
+
+        <span class="hljs-keyword">return</span> Command<span class="hljs-operator">::</span>SUCCESS;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="command-lifecycle">
+    Command Lifecycle
+    <a class="headerlink" href="#command-lifecycle" title="Permalink to this headline">¶</a>
+</h2>
+<p>Commands have three lifecycle methods that are invoked when running the
+command:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Command/Command.php#method_initialize" class="reference external" title="Symfony\Component\Console\Command\Command::initialize()" rel="external noopener noreferrer" target="_blank">initialize()</a> <em>(optional)</em></dt>
+        
+        <dd>
+                            This method is executed before the <code translate="no" class="notranslate">interact()</code> and the <code translate="no" class="notranslate">execute()</code>
+methods. Its main purpose is to initialize variables used in the rest of
+the command methods.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Command/Command.php#method_interact" class="reference external" title="Symfony\Component\Console\Command\Command::interact()" rel="external noopener noreferrer" target="_blank">interact()</a> <em>(optional)</em></dt>
+        
+        <dd>
+                            This method is executed after <code translate="no" class="notranslate">initialize()</code> and before <code translate="no" class="notranslate">execute()</code>.
+Its purpose is to check if some of the options/arguments are missing
+and interactively ask the user for those values. This is the last place
+where you can ask for missing options/arguments. After this command,
+missing options/arguments will result in an error.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Command/Command.php#method_execute" class="reference external" title="Symfony\Component\Console\Command\Command::execute()" rel="external noopener noreferrer" target="_blank">execute()</a> <em>(required)</em></dt>
+        
+        <dd>
+                            This method is executed after <code translate="no" class="notranslate">interact()</code> and <code translate="no" class="notranslate">initialize()</code>.
+It contains the logic you want the command to execute and it must
+return an integer which will be used as the command <a href="https://en.wikipedia.org/wiki/Exit_status" class="reference external" rel="external noopener noreferrer" target="_blank">exit status</a>.
+                    </dd>
+    </dl>
+<span id="console-testing-commands"></span>
+</div>
+<div class="section">
+<h2 id="testing-commands">
+    Testing Commands
+    <a class="headerlink" href="#testing-commands" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony provides several tools to help you test your commands. The most
+useful one is the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Tester/CommandTester.php" class="reference external" title="Symfony\Component\Console\Tester\CommandTester" rel="external noopener noreferrer" target="_blank">CommandTester</a>
+class. It uses special input and output classes to ease testing without a real
+console:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// tests/Command/CreateUserCommandTest.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>\<span class="hljs-title">Command</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Application</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Test</span>\<span class="hljs-title">KernelTestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Tester</span>\<span class="hljs-title">CommandTester</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateUserCommandTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">KernelTestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testExecute</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span> = <span class="hljs-keyword">self</span><span class="hljs-operator">::</span>bootKernel();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span> = <span class="hljs-keyword">new</span> Application(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>find(<span class="hljs-string">'app:create-user'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>commandTester</span> = <span class="hljs-keyword">new</span> CommandTester(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>commandTester</span><span class="hljs-operator">-&gt;</span>execute([
+            <span class="hljs-comment">// pass arguments to the helper</span>
+            <span class="hljs-string">'username'</span> =&gt; <span class="hljs-string">'Wouter'</span>,
+
+            <span class="hljs-comment">// prefix the key with two dashes when passing options,</span>
+            <span class="hljs-comment">// e.g: '--some-option' =&gt; 'option_value',</span>
+            <span class="hljs-comment">// use brackets for testing array value,</span>
+            <span class="hljs-comment">// e.g: '--some-option' =&gt; ['option_value'],</span>
+        ]);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>commandTester</span><span class="hljs-operator">-&gt;</span>assertCommandIsSuccessful();
+
+        <span class="hljs-comment">// the output of the command in the console</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>commandTester</span><span class="hljs-operator">-&gt;</span>getDisplay();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertStringContainsString(<span class="hljs-string">'Username: Wouter'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you are using a <a href="components/console/single_command_tool.html" class="reference internal">single-command application</a>,
+call <code translate="no" class="notranslate">setAutoExit(false)</code> on it to get the command result in <code translate="no" class="notranslate">CommandTester</code>.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can also test a whole console application by using
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Tester/ApplicationTester.php" class="reference external" title="Symfony\Component\Console\Tester\ApplicationTester" rel="external noopener noreferrer" target="_blank">ApplicationTester</a>.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When testing commands using the <code translate="no" class="notranslate">CommandTester</code> class, console events are
+not dispatched. If you need to test those events, use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Tester/ApplicationTester.php" class="reference external" title="Symfony\Component\Console\Tester\ApplicationTester" rel="external noopener noreferrer" target="_blank">ApplicationTester</a> instead.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When testing commands using the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Tester/ApplicationTester.php" class="reference external" title="Symfony\Component\Console\Tester\ApplicationTester" rel="external noopener noreferrer" target="_blank">ApplicationTester</a>
+class, don't forget to disable the auto exit flag:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span> = <span class="hljs-keyword">new</span> Application();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>setAutoExit(<span class="hljs-keyword">false</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tester</span> = <span class="hljs-keyword">new</span> ApplicationTester(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When testing <code translate="no" class="notranslate">InputOption::VALUE_NONE</code> command options, you must pass an
+empty value to them:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>commandTester</span> = <span class="hljs-keyword">new</span> CommandTester(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>commandTester</span><span class="hljs-operator">-&gt;</span>execute([<span class="hljs-string">'--some-option'</span> =&gt; <span class="hljs-string">''</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When using the Console component in a standalone project, use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Application.php" class="reference external" title="Symfony\Component\Console\Application" rel="external noopener noreferrer" target="_blank">Application</a>
+and extend the normal <code translate="no" class="notranslate">\PHPUnit\Framework\TestCase</code>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="logging-command-errors">
+    Logging Command Errors
+    <a class="headerlink" href="#logging-command-errors" title="Permalink to this headline">¶</a>
+</h2>
+<p>Whenever an exception is thrown while running commands, Symfony adds a log
+message for it including the entire failing command. In addition, Symfony
+registers an <a href="event_dispatcher.html" class="reference internal">event subscriber</a> to listen to the
+<a href="components/console/events.html#console-events-terminate" class="reference internal">ConsoleEvents::TERMINATE event</a> and adds a log
+message whenever a command doesn't finish with the <code translate="no" class="notranslate">0</code> <a href="https://en.wikipedia.org/wiki/Exit_status" class="reference external" rel="external noopener noreferrer" target="_blank">exit status</a>.</p>
+</div>
+<div class="section">
+<h2 id="learn-more">
+    Learn More
+    <a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a>
+</h2>
+<div class="toctree-wrapper toc-size-lg"><ul class="toctree toctree-level-1 toctree-length-10"><li><a href="console/calling_commands.html">How to Call Other Commands</a></li><li><a href="console/coloring.html">How to Color and Style the Console Output</a></li><li><a href="console/command_in_controller.html">How to Call a Command from a Controller</a></li><li><a href="console/commands_as_services.html">How to Define Commands as Services</a></li><li><a href="console/hide_commands.html">How to Hide Console Commands</a></li><li><a href="console/input.html">Console Input (Arguments & Options)</a></li><li><a href="console/lazy_commands.html">How to Make Commands Lazily Loaded</a></li><li><a href="console/lockable_trait.html">Prevent Running the Same Console Command Multiple Times</a></li><li><a href="console/style.html">How to Style a Console Command</a></li><li><a href="console/verbosity.html">Verbosity Levels</a></li></ul></div>
+<p>The console component also contains a set of &quot;helpers&quot; - different small
+tools capable of helping you with different tasks:</p>
+<ul>
+    <li><a href="components/console/helpers/questionhelper.html" class="reference internal">Question Helper</a>: interactively ask the user for information</li>
+<li><a href="components/console/helpers/formatterhelper.html" class="reference internal">Formatter Helper</a>: customize the output colorization</li>
+<li><a href="components/console/helpers/progressbar.html" class="reference internal">Progress Bar</a>: shows a progress bar</li>
+<li><a href="components/console/helpers/table.html" class="reference internal">Table</a>: displays tabular data as a table</li>
+<li><a href="components/console/helpers/debug_formatter.html" class="reference internal">Debug Formatter Helper</a>: provides functions to
+output debug information when running an external program</li>
+<li><a href="components/console/helpers/cursor.html" class="reference internal">Cursor Helper</a>: allows to manipulate the cursor in the terminal</li>
+</ul>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

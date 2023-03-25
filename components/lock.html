@@ -1,0 +1,1990 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-lock-component">
+    The Lock Component
+    <a class="headerlink" href="#the-lock-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The Lock Component creates and manages <a href="https://en.wikipedia.org/wiki/Lock_(computer_science)" class="reference external" rel="external noopener noreferrer" target="_blank">locks</a>, a mechanism to provide
+exclusive access to a shared resource.</p>
+</blockquote>
+<p>If you're using the Symfony Framework, read the
+<a href="../lock.html" class="reference internal">Symfony Framework Lock documentation</a>.</p>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/lock</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>Locks are used to guarantee exclusive access to some shared resource. In
+Symfony applications, you can use locks for example to ensure that a command is
+not executed more than once at the same time (on the same or different servers).</p>
+<p>Locks are created using a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/LockFactory.php" class="reference external" title="Symfony\Component\Lock\LockFactory" rel="external noopener noreferrer" target="_blank">LockFactory</a> class,
+which in turn requires another class to manage the storage of locks:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">LockFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">SemaphoreStore</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> SemaphoreStore();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span> = <span class="hljs-keyword">new</span> LockFactory(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The lock is created by calling the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/LockFactory.php#method_createLock" class="reference external" title="Symfony\Component\Lock\LockFactory::createLock()" rel="external noopener noreferrer" target="_blank">createLock()</a>
+method. Its first argument is an arbitrary string that represents the locked
+resource. Then, a call to the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/LockInterface.php#method_acquire" class="reference external" title="Symfony\Component\Lock\LockInterface::acquire()" rel="external noopener noreferrer" target="_blank">acquire()</a>
+method will try to acquire the lock:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span><span class="hljs-operator">-&gt;</span>createLock(<span class="hljs-string">'pdf-creation'</span>);
+
+<span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>acquire()) {
+    <span class="hljs-comment">// The resource "pdf-creation" is locked.</span>
+    <span class="hljs-comment">// You can compute and generate the invoice safely here.</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>release();
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If the lock can not be acquired, the method returns <code translate="no" class="notranslate">false</code>. The <code translate="no" class="notranslate">acquire()</code>
+method can be safely called repeatedly, even if the lock is already acquired.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Unlike other implementations, the Lock Component distinguishes lock
+instances even when they are created for the same resource. It means that for
+a given scope and resource one lock instance can be acquired multiple times.
+If a lock has to be used by several services, they should share the same <code translate="no" class="notranslate">Lock</code>
+instance returned by the <code translate="no" class="notranslate">LockFactory::createLock</code> method.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you don't release the lock explicitly, it will be released automatically
+upon instance destruction. In some cases, it can be useful to lock a resource
+across several requests. To disable the automatic release behavior, set the
+third argument of the <code translate="no" class="notranslate">createLock()</code> method to <code translate="no" class="notranslate">false</code>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="serializing-locks">
+    Serializing Locks
+    <a class="headerlink" href="#serializing-locks" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/Key.php" class="reference external" title="Symfony\Component\Lock\Key" rel="external noopener noreferrer" target="_blank">Key</a> contains the state of the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/Lock.php" class="reference external" title="Symfony\Component\Lock\Lock" rel="external noopener noreferrer" target="_blank">Lock</a> and can be serialized. This
+allows the user to begin a long job in a process by acquiring the lock, and
+continue the job in another process using the same lock.</p>
+<p>First, you may create a serializable class containing the resource and the
+key of the lock:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Lock/RefreshTaxonomy.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Lock</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Key</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RefreshTaxonomy</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private object <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>article</span>,
+        private Key <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>key</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getArticle</span><span class="hljs-params">()</span>: <span class="hljs-title">object</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>article;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getKey</span><span class="hljs-params">()</span>: <span class="hljs-title">Key</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>key;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, you can use this class to dispatch all that's needed for another process
+to handle the rest of the job:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">RefreshTaxonomy</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Key</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Lock</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>key</span> = <span class="hljs-keyword">new</span> Key(<span class="hljs-string">'article.'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>article</span><span class="hljs-operator">-&gt;</span>getId());
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span> = <span class="hljs-keyword">new</span> Lock(
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>key</span>,
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>store,
+    <span class="hljs-number">300</span>,  <span class="hljs-comment">// ttl</span>
+    <span class="hljs-keyword">false</span> <span class="hljs-comment">// autoRelease</span>
+);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>acquire(<span class="hljs-keyword">true</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>bus<span class="hljs-operator">-&gt;</span>dispatch(<span class="hljs-keyword">new</span> RefreshTaxonomy(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>article</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>key</span>));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Don't forget to set the <code translate="no" class="notranslate">autoRelease</code> argument to <code translate="no" class="notranslate">false</code> in the
+<code translate="no" class="notranslate">Lock</code> constructor to avoid releasing the lock when the destructor is
+called.</p>
+</div>
+<p>Not all stores are compatible with serialization and cross-process locking: for
+example, the kernel will automatically release semaphores acquired by the
+<a href="lock.html#lock-store-semaphore" class="reference internal">SemaphoreStore</a> store. If you use an incompatible
+store (see <a href="lock.html#lock-stores" class="reference internal">lock stores</a> for supported stores), an
+exception will be thrown when the application tries to serialize the key.</p>
+<span id="lock-blocking-locks"></span>
+</div>
+<div class="section">
+<h2 id="blocking-locks">
+    Blocking Locks
+    <a class="headerlink" href="#blocking-locks" title="Permalink to this headline">¶</a>
+</h2>
+<p>By default, when a lock cannot be acquired, the <code translate="no" class="notranslate">acquire</code> method returns
+<code translate="no" class="notranslate">false</code> immediately. To wait (indefinitely) until the lock can be created,
+pass <code translate="no" class="notranslate">true</code> as the argument of the <code translate="no" class="notranslate">acquire()</code> method. This is called a
+<strong>blocking lock</strong> because the execution of your application stops until the
+lock is acquired:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">LockFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">RedisStore</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> RedisStore(<span class="hljs-keyword">new</span> \Predis\Client(<span class="hljs-string">'tcp://localhost:6379'</span>));
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span> = <span class="hljs-keyword">new</span> LockFactory(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span><span class="hljs-operator">-&gt;</span>createLock(<span class="hljs-string">'pdf-creation'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>acquire(<span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When the store does not support blocking locks by implementing the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/BlockingStoreInterface.php" class="reference external" title="Symfony\Component\Lock\BlockingStoreInterface" rel="external noopener noreferrer" target="_blank">BlockingStoreInterface</a> interface (see
+<a href="lock.html#lock-stores" class="reference internal">lock stores</a> for supported stores), the <code translate="no" class="notranslate">Lock</code> class
+will retry to acquire the lock in a non-blocking way until the lock is
+acquired.</p>
+</div>
+<div class="section">
+<h2 id="expiring-locks">
+    Expiring Locks
+    <a class="headerlink" href="#expiring-locks" title="Permalink to this headline">¶</a>
+</h2>
+<p>Locks created remotely are difficult to manage because there is no way for the
+remote <code translate="no" class="notranslate">Store</code> to know if the locker process is still alive. Due to bugs,
+fatal errors or segmentation faults, it cannot be guaranteed that the
+<code translate="no" class="notranslate">release()</code> method will be called, which would cause the resource to be
+locked infinitely.</p>
+<p>The best solution in those cases is to create <strong>expiring locks</strong>, which are
+released automatically after some amount of time has passed (called TTL for
+<em>Time To Live</em>). This time, in seconds, is configured as the second argument of
+the <code translate="no" class="notranslate">createLock()</code> method. If needed, these locks can also be released early
+with the <code translate="no" class="notranslate">release()</code> method.</p>
+<p>The trickiest part when working with expiring locks is choosing the right TTL.
+If it's too short, other processes could acquire the lock before finishing the
+job; if it's too long and the process crashes before calling the <code translate="no" class="notranslate">release()</code>
+method, the resource will stay locked until the timeout:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-comment">// create an expiring lock that lasts 30 seconds (default is 300.0)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span><span class="hljs-operator">-&gt;</span>createLock(<span class="hljs-string">'pdf-creation'</span>, ttl: <span class="hljs-number">30</span>);
+
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>acquire()) {
+    <span class="hljs-keyword">return</span>;
+}
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-comment">// perform a job during less than 30 seconds</span>
+} <span class="hljs-keyword">finally</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>release();
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>To avoid leaving the lock in a locked state, it's recommended to wrap the
+job in a try/catch/finally block to always try to release the expiring lock.</p>
+</div>
+<p>In case of long-running tasks, it's better to start with a not too long TTL and
+then use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/LockInterface.php#method_refresh" class="reference external" title="Symfony\Component\Lock\LockInterface::refresh()" rel="external noopener noreferrer" target="_blank">refresh()</a> method
+to reset the TTL to its original value:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span><span class="hljs-operator">-&gt;</span>createLock(<span class="hljs-string">'pdf-creation'</span>, ttl: <span class="hljs-number">30</span>);
+
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>acquire()) {
+    <span class="hljs-keyword">return</span>;
+}
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">while</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finished</span>) {
+        <span class="hljs-comment">// perform a small part of the job.</span>
+
+        <span class="hljs-comment">// renew the lock for 30 more seconds.</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>refresh();
+    }
+} <span class="hljs-keyword">finally</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>release();
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Another useful technique for long-running tasks is to pass a custom TTL as
+an argument of the <code translate="no" class="notranslate">refresh()</code> method to change the default lock TTL:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span><span class="hljs-operator">-&gt;</span>createLock(<span class="hljs-string">'pdf-creation'</span>, ttl: <span class="hljs-number">30</span>);
+<span class="hljs-comment">// ...</span>
+<span class="hljs-comment">// refresh the lock for 30 seconds</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>refresh();
+<span class="hljs-comment">// ...</span>
+<span class="hljs-comment">// refresh the lock for 600 seconds (next refresh() call will be 30 seconds again)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>refresh(<span class="hljs-number">600</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<p>This component also provides two useful methods related to expiring locks:
+<code translate="no" class="notranslate">getRemainingLifetime()</code> (which returns <code translate="no" class="notranslate">null</code> or a <code translate="no" class="notranslate">float</code>
+as seconds) and <code translate="no" class="notranslate">isExpired()</code> (which returns a boolean).</p>
+<div class="section">
+<h3 id="automatically-releasing-the-lock">
+    Automatically Releasing The Lock
+    <a class="headerlink" href="#automatically-releasing-the-lock" title="Permalink to this headline">¶</a>
+</h3>
+<p>Locks are automatically released when their Lock objects are destroyed. This is
+an implementation detail that is important when sharing Locks between
+processes. In the example below, <code translate="no" class="notranslate">pcntl_fork()</code> creates two processes and the
+Lock will be released automatically as soon as one process finishes:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span><span class="hljs-operator">-&gt;</span>createLock(<span class="hljs-string">'pdf-creation'</span>);
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>acquire()) {
+    <span class="hljs-keyword">return</span>;
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pid</span> = pcntl_fork();
+<span class="hljs-keyword">if</span> (<span class="hljs-number">-1</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pid</span>) {
+    <span class="hljs-comment">// Could not fork</span>
+    <span class="hljs-keyword">exit</span>(<span class="hljs-number">1</span>);
+} <span class="hljs-keyword">elseif</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pid</span>) {
+    <span class="hljs-comment">// Parent process</span>
+    sleep(<span class="hljs-number">30</span>);
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-comment">// Child process</span>
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">'The lock will be released now.'</span>;
+    <span class="hljs-keyword">exit</span>(<span class="hljs-number">0</span>);
+}
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>To disable this behavior, set the <code translate="no" class="notranslate">autoRelease</code> argument of
+<code translate="no" class="notranslate">LockFactory::createLock()</code> to <code translate="no" class="notranslate">false</code>. That will make the lock acquired
+for 3600 seconds or until <code translate="no" class="notranslate">Lock::release()</code> is called:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span><span class="hljs-operator">-&gt;</span>createLock(
+    <span class="hljs-string">'pdf-creation'</span>,
+    <span class="hljs-number">3600</span>, <span class="hljs-comment">// ttl</span>
+    <span class="hljs-keyword">false</span> <span class="hljs-comment">// autoRelease</span>
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="shared-locks">
+    Shared Locks
+    <a class="headerlink" href="#shared-locks" title="Permalink to this headline">¶</a>
+</h2>
+<p>A shared or <a href="https://en.wikipedia.org/wiki/Readers%E2%80%93writer_lock" class="reference external" rel="external noopener noreferrer" target="_blank">readers-writer lock</a> is a synchronization primitive that allows
+concurrent access for read-only operations, while write operations require
+exclusive access. This means that multiple threads can read the data in parallel
+but an exclusive lock is needed for writing or modifying data. They are used for
+example for data structures that cannot be updated atomically and are invalid
+until the update is complete.</p>
+<p>Use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/SharedLockInterface.php#method_acquireRead" class="reference external" title="Symfony\Component\Lock\SharedLockInterface::acquireRead()" rel="external noopener noreferrer" target="_blank">acquireRead()</a>
+method to acquire a read-only lock, and
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/LockInterface.php#method_acquire" class="reference external" title="Symfony\Component\Lock\LockInterface::acquire()" rel="external noopener noreferrer" target="_blank">acquire()</a> method to acquire a
+write lock:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span><span class="hljs-operator">-&gt;</span>createLock(<span class="hljs-string">'user-'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span><span class="hljs-operator">-&gt;</span>id);
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>acquireRead()) {
+    <span class="hljs-keyword">return</span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Similar to the <code translate="no" class="notranslate">acquire()</code> method, pass <code translate="no" class="notranslate">true</code> as the argument of <code translate="no" class="notranslate">acquireRead()</code>
+to acquire the lock in a blocking mode:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span><span class="hljs-operator">-&gt;</span>createLock(<span class="hljs-string">'user-'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span><span class="hljs-operator">-&gt;</span>id);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>acquireRead(<span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The <a href="https://en.wikipedia.org/wiki/Readers%E2%80%93writer_lock#Priority_policies" class="reference external" rel="external noopener noreferrer" target="_blank">priority policy</a> of Symfony's shared locks depends on the underlying
+store (e.g. Redis store prioritizes readers vs writers).</p>
+</div>
+<p>When a read-only lock is acquired with the <code translate="no" class="notranslate">acquireRead()</code> method, it's
+possible to <strong>promote</strong> the lock, and change it to a write lock, by calling the
+<code translate="no" class="notranslate">acquire()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span><span class="hljs-operator">-&gt;</span>createLock(<span class="hljs-string">'user-'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userId</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>acquireRead(<span class="hljs-keyword">true</span>);
+
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>shouldUpdate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userId</span>)) {
+    <span class="hljs-keyword">return</span>;
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>acquire(<span class="hljs-keyword">true</span>); <span class="hljs-comment">// Promote the lock to a write lock</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>update(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userId</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In the same way, it's possible to <strong>demote</strong> a write lock, and change it to a
+read-only lock by calling the <code translate="no" class="notranslate">acquireRead()</code> method.</p>
+<p>When the provided store does not implement the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/SharedLockStoreInterface.php" class="reference external" title="Symfony\Component\Lock\SharedLockStoreInterface" rel="external noopener noreferrer" target="_blank">SharedLockStoreInterface</a> interface (see
+<a href="lock.html#lock-stores" class="reference internal">lock stores</a> for supported stores), the <code translate="no" class="notranslate">Lock</code> class
+will fallback to a write lock by calling the <code translate="no" class="notranslate">acquire()</code> method.</p>
+</div>
+<div class="section">
+<h2 id="the-owner-of-the-lock">
+    The Owner of The Lock
+    <a class="headerlink" href="#the-owner-of-the-lock" title="Permalink to this headline">¶</a>
+</h2>
+<p>Locks that are acquired for the first time are <a href="lock.html#lock-owner-technical-details" class="reference internal">owned</a> by the <code translate="no" class="notranslate">Lock</code> instance that acquired
+it. If you need to check whether the current <code translate="no" class="notranslate">Lock</code> instance is (still) the owner of
+a lock, you can use the <code translate="no" class="notranslate">isAcquired()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>isAcquired()) {
+    <span class="hljs-comment">// We (still) own the lock</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Because some lock stores have expiring locks, it is possible for an instance to
+lose the lock it acquired automatically:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// If we cannot acquire ourselves, it means some other process is already working on it</span>
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>acquire()) {
+    <span class="hljs-keyword">return</span>;
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>beginTransaction();
+
+<span class="hljs-comment">// Perform a very long process that might exceed TTL of the lock</span>
+
+<span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>isAcquired()) {
+    <span class="hljs-comment">// Still all good, no other instance has acquired the lock in the meantime, we're safe</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>commit();
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-comment">// Bummer! Our lock has apparently exceeded TTL and another process has started in</span>
+    <span class="hljs-comment">// the meantime so it's not safe for us to commit.</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>rollback();
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> \<span class="hljs-keyword">Exception</span>(<span class="hljs-string">'Process failed'</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>A common pitfall might be to use the <code translate="no" class="notranslate">isAcquired()</code> method to check if
+a lock has already been acquired by any process. As you can see in this example
+you have to use <code translate="no" class="notranslate">acquire()</code> for this. The <code translate="no" class="notranslate">isAcquired()</code> method is used to check
+if the lock has been acquired by the <strong>current process</strong> only.</p>
+</div>
+<span id="lock-owner-technical-details"></span>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Technically, the true owners of the lock are the ones that share the same instance of <code translate="no" class="notranslate">Key</code>,
+not <code translate="no" class="notranslate">Lock</code>. But from a user perspective, <code translate="no" class="notranslate">Key</code> is internal and you will likely only be working
+with the <code translate="no" class="notranslate">Lock</code> instance so it's easier to think of the <code translate="no" class="notranslate">Lock</code> instance as being the one that
+is the owner of the lock.</p>
+</div>
+<span id="lock-stores"></span>
+</div>
+<div class="section">
+<h2 id="available-stores">
+    Available Stores
+    <a class="headerlink" href="#available-stores" title="Permalink to this headline">¶</a>
+</h2>
+<p>Locks are created and managed in <code translate="no" class="notranslate">Stores</code>, which are classes that implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/PersistingStoreInterface.php" class="reference external" title="Symfony\Component\Lock\PersistingStoreInterface" rel="external noopener noreferrer" target="_blank">PersistingStoreInterface</a> and, optionally,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/BlockingStoreInterface.php" class="reference external" title="Symfony\Component\Lock\BlockingStoreInterface" rel="external noopener noreferrer" target="_blank">BlockingStoreInterface</a>.</p>
+<p>The component includes the following built-in store types:</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Store</th>
+                                            <th>Scope</th>
+                                            <th>Blocking</th>
+                                            <th>Expiring</th>
+                                            <th>Sharing</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td><a href="lock.html#lock-store-flock" class="reference internal">FlockStore</a></td>
+                                    <td>local</td>
+                                    <td>yes</td>
+                                    <td>no</td>
+                                    <td>yes</td>
+                            </tr>
+                    <tr>
+                                    <td><a href="lock.html#lock-store-memcached" class="reference internal">MemcachedStore</a></td>
+                                    <td>remote</td>
+                                    <td>no</td>
+                                    <td>yes</td>
+                                    <td>no</td>
+                            </tr>
+                    <tr>
+                                    <td><a href="lock.html#lock-store-mongodb" class="reference internal">MongoDbStore</a></td>
+                                    <td>remote</td>
+                                    <td>no</td>
+                                    <td>yes</td>
+                                    <td>no</td>
+                            </tr>
+                    <tr>
+                                    <td><a href="lock.html#lock-store-pdo" class="reference internal">PdoStore</a></td>
+                                    <td>remote</td>
+                                    <td>no</td>
+                                    <td>yes</td>
+                                    <td>no</td>
+                            </tr>
+                    <tr>
+                                    <td><a href="lock.html#lock-store-dbal" class="reference internal">DoctrineDbalStore</a></td>
+                                    <td>remote</td>
+                                    <td>no</td>
+                                    <td>yes</td>
+                                    <td>no</td>
+                            </tr>
+                    <tr>
+                                    <td><a href="lock.html#lock-store-pgsql" class="reference internal">PostgreSqlStore</a></td>
+                                    <td>remote</td>
+                                    <td>yes</td>
+                                    <td>no</td>
+                                    <td>yes</td>
+                            </tr>
+                    <tr>
+                                    <td><a href="lock.html#lock-store-dbal-pgsql" class="reference internal">DoctrineDbalPostgreSqlStore</a></td>
+                                    <td>remote</td>
+                                    <td>yes</td>
+                                    <td>no</td>
+                                    <td>yes</td>
+                            </tr>
+                    <tr>
+                                    <td><a href="lock.html#lock-store-redis" class="reference internal">RedisStore</a></td>
+                                    <td>remote</td>
+                                    <td>no</td>
+                                    <td>yes</td>
+                                    <td>yes</td>
+                            </tr>
+                    <tr>
+                                    <td><a href="lock.html#lock-store-semaphore" class="reference internal">SemaphoreStore</a></td>
+                                    <td>local</td>
+                                    <td>yes</td>
+                                    <td>no</td>
+                                    <td>no</td>
+                            </tr>
+                    <tr>
+                                    <td><a href="lock.html#lock-store-zookeeper" class="reference internal">ZookeeperStore</a></td>
+                                    <td>remote</td>
+                                    <td>no</td>
+                                    <td>no</td>
+                                    <td>no</td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>A special <code translate="no" class="notranslate">InMemoryStore</code> is available for saving locks in memory during
+a process, and can be useful for testing.</p>
+</div>
+<span id="lock-store-flock"></span>
+<div class="section">
+<h3 id="flockstore">
+    FlockStore
+    <a class="headerlink" href="#flockstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The FlockStore uses the file system on the local computer to create the locks.
+It does not support expiration, but the lock is automatically released when the
+lock object goes out of scope and is freed by the garbage collector (for example
+when the PHP process ends):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">FlockStore</span>;
+
+<span class="hljs-comment">// the argument is the path of the directory where the locks are created</span>
+<span class="hljs-comment">// if none is given, sys_get_temp_dir() is used internally.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> FlockStore(<span class="hljs-string">'/var/stores'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Beware that some file systems (such as some types of NFS) do not support
+locking. In those cases, it's better to use a directory on a local disk
+drive or a remote store.</p>
+</div>
+<span id="lock-store-memcached"></span>
+</div>
+<div class="section">
+<h3 id="memcachedstore">
+    MemcachedStore
+    <a class="headerlink" href="#memcachedstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The MemcachedStore saves locks on a Memcached server, it requires a Memcached
+connection implementing the <code translate="no" class="notranslate">\Memcached</code> class. This store does not
+support blocking, and expects a TTL to avoid stalled locks:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">MemcachedStore</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>memcached</span> = <span class="hljs-keyword">new</span> \Memcached();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>memcached</span><span class="hljs-operator">-&gt;</span>addServer(<span class="hljs-string">'localhost'</span>, <span class="hljs-number">11211</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> MemcachedStore(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>memcached</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Memcached does not support TTL lower than 1 second.</p>
+</div>
+<span id="lock-store-mongodb"></span>
+</div>
+<div class="section">
+<h3 id="mongodbstore">
+    MongoDbStore
+    <a class="headerlink" href="#mongodbstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The MongoDbStore saves locks on a MongoDB server <code translate="no" class="notranslate">&gt;=2.2</code>, it requires a
+<code translate="no" class="notranslate">\MongoDB\Collection</code> or <code translate="no" class="notranslate">\MongoDB\Client</code> from <a href="https://packagist.org/packages/mongodb/mongodb" class="reference external" rel="external noopener noreferrer" target="_blank">mongodb/mongodb</a> or a
+<a href="https://docs.mongodb.com/manual/reference/connection-string/" class="reference external" rel="external noopener noreferrer" target="_blank">MongoDB Connection String</a>.
+This store does not support blocking and expects a TTL to
+avoid stalled locks:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">MongoDbStore</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mongo</span> = <span class="hljs-string">'mongodb://localhost/database?collection=lock'</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span> = [
+    <span class="hljs-string">'gcProbablity'</span> =&gt; <span class="hljs-number">0.001</span>,
+    <span class="hljs-string">'database'</span> =&gt; <span class="hljs-string">'myapp'</span>,
+    <span class="hljs-string">'collection'</span> =&gt; <span class="hljs-string">'lock'</span>,
+    <span class="hljs-string">'uriOptions'</span> =&gt; [],
+    <span class="hljs-string">'driverOptions'</span> =&gt; [],
+];
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> MongoDbStore(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mongo</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">MongoDbStore</code> takes the following <code translate="no" class="notranslate">$options</code> (depending on the first parameter type):</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Option</th>
+                                            <th>Description</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td>gcProbablity</td>
+                                    <td>Should a TTL Index be created expressed as a probability from 0.0 to 1.0 (Defaults to <code translate="no" class="notranslate">0.001</code>)</td>
+                            </tr>
+                    <tr>
+                                    <td>database</td>
+                                    <td>The name of the database</td>
+                            </tr>
+                    <tr>
+                                    <td>collection</td>
+                                    <td>The name of the collection</td>
+                            </tr>
+                    <tr>
+                                    <td>uriOptions</td>
+                                    <td>Array of URI options for <a href="https://docs.mongodb.com/php-library/current/reference/method/MongoDBClient__construct/" class="reference external" rel="external noopener noreferrer" target="_blank">MongoDBClient::__construct</a></td>
+                            </tr>
+                    <tr>
+                                    <td>driverOptions</td>
+                                    <td>Array of driver options for <a href="https://docs.mongodb.com/php-library/current/reference/method/MongoDBClient__construct/" class="reference external" rel="external noopener noreferrer" target="_blank">MongoDBClient::__construct</a></td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<p>When the first parameter is a:</p>
+<p><code translate="no" class="notranslate">MongoDB\Collection</code>:</p>
+<ul>
+    <li><code translate="no" class="notranslate">$options[&#039;database&#039;]</code> is ignored</li>
+<li><code translate="no" class="notranslate">$options[&#039;collection&#039;]</code> is ignored</li>
+</ul>
+<p><code translate="no" class="notranslate">MongoDB\Client</code>:</p>
+<ul>
+    <li><code translate="no" class="notranslate">$options[&#039;database&#039;]</code> is mandatory</li>
+<li><code translate="no" class="notranslate">$options[&#039;collection&#039;]</code> is mandatory</li>
+</ul>
+<p>MongoDB Connection String:</p>
+<ul>
+    <li><code translate="no" class="notranslate">$options[&#039;database&#039;]</code> is used otherwise <code translate="no" class="notranslate">/path</code> from the DSN, at least one is mandatory</li>
+<li><code translate="no" class="notranslate">$options[&#039;collection&#039;]</code> is used otherwise <code translate="no" class="notranslate">?collection=</code> from the DSN, at least one is mandatory</li>
+</ul>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The <code translate="no" class="notranslate">collection</code> querystring parameter is not part of the <a href="https://docs.mongodb.com/manual/reference/connection-string/" class="reference external" rel="external noopener noreferrer" target="_blank">MongoDB Connection String</a> definition.
+It is used to allow constructing a <code translate="no" class="notranslate">MongoDbStore</code> using a <a href="https://en.wikipedia.org/wiki/Data_source_name" class="reference external" rel="external noopener noreferrer" target="_blank">Data Source Name (DSN)</a> without <code translate="no" class="notranslate">$options</code>.</p>
+</div>
+<span id="lock-store-pdo"></span>
+</div>
+<div class="section">
+<h3 id="pdostore">
+    PdoStore
+    <a class="headerlink" href="#pdostore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The PdoStore saves locks in an SQL database. It is identical to DoctrineDbalStore
+but requires a <a href="https://www.php.net/pdo" class="reference external" rel="external noopener noreferrer" target="_blank">PDO</a> connection or a <a href="https://en.wikipedia.org/wiki/Data_source_name" class="reference external" rel="external noopener noreferrer" target="_blank">Data Source Name (DSN)</a>. This store does
+not support blocking, and expects a TTL to avoid stalled locks:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">PdoStore</span>;
+
+<span class="hljs-comment">// a PDO or DSN for lazy connecting through PDO</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>databaseConnectionOrDSN</span> = <span class="hljs-string">'mysql:host=127.0.0.1;dbname=app'</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> PdoStore(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>databaseConnectionOrDSN</span>, [<span class="hljs-string">'db_username'</span> =&gt; <span class="hljs-string">'myuser'</span>, <span class="hljs-string">'db_password'</span> =&gt; <span class="hljs-string">'mypassword'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>This store does not support TTL lower than 1 second.</p>
+</div>
+<p>The table where values are stored is created automatically on the first call to
+the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/Store/PdoStore.php#method_save" class="reference external" title="Symfony\Component\Lock\Store\PdoStore::save()" rel="external noopener noreferrer" target="_blank">save()</a> method.
+You can also create this table explicitly by calling the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/Store/PdoStore.php#method_createTable" class="reference external" title="Symfony\Component\Lock\Store\PdoStore::createTable()" rel="external noopener noreferrer" target="_blank">createTable()</a> method in
+your code.</p>
+<span id="lock-store-dbal"></span>
+</div>
+<div class="section">
+<h3 id="doctrinedbalstore">
+    DoctrineDbalStore
+    <a class="headerlink" href="#doctrinedbalstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The DoctrineDbalStore saves locks in an SQL database. It is identical to PdoStore
+but requires a <a href="https://github.com/doctrine/dbal/blob/master/src/Connection.php" class="reference external" rel="external noopener noreferrer" target="_blank">Doctrine DBAL Connection</a>, or a <a href="https://www.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/configuration.html#connecting-using-a-url" class="reference external" rel="external noopener noreferrer" target="_blank">Doctrine DBAL URL</a>. This store
+does not support blocking, and expects a TTL to avoid stalled locks:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">DoctrineDbalStore</span>;
+
+<span class="hljs-comment">// a Doctrine DBAL connection or DSN</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>connectionOrURL</span> = <span class="hljs-string">'mysql://myuser:mypassword@127.0.0.1/app'</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> DoctrineDbalStore(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>connectionOrURL</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>This store does not support TTL lower than 1 second.</p>
+</div>
+<p>The table where values are stored will be automatically generated when your run
+the command:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console make:migration</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The automatic table generation when running the <code translate="no" class="notranslate">make:migration</code> command
+was introduced in Symfony 6.3.</p>
+</div>
+<p>If you prefer to create the table yourself and it has not already been created, you can
+create this table explicitly by calling the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/Store/DoctrineDbalStore.php#method_createTable" class="reference external" title="Symfony\Component\Lock\Store\DoctrineDbalStore::createTable()" rel="external noopener noreferrer" target="_blank">createTable()</a> method.
+You can also add this table to your schema by calling
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/Store/DoctrineDbalStore.php#method_configureSchema" class="reference external" title="Symfony\Component\Lock\Store\DoctrineDbalStore::configureSchema()" rel="external noopener noreferrer" target="_blank">configureSchema()</a> method
+in your code</p>
+<p>If the table has not been created upstream, it will be created automatically on the first call to
+the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/Store/DoctrineDbalStore.php#method_save" class="reference external" title="Symfony\Component\Lock\Store\DoctrineDbalStore::save()" rel="external noopener noreferrer" target="_blank">save()</a> method.</p>
+<span id="lock-store-pgsql"></span>
+</div>
+<div class="section">
+<h3 id="postgresqlstore">
+    PostgreSqlStore
+    <a class="headerlink" href="#postgresqlstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The PostgreSqlStore and DoctrineDbalPostgreSqlStore uses <a href="https://www.postgresql.org/docs/current/explicit-locking.html" class="reference external" rel="external noopener noreferrer" target="_blank">Advisory Locks</a> provided by PostgreSQL.
+It is identical to DoctrineDbalPostgreSqlStore but requires <a href="https://www.php.net/pdo" class="reference external" rel="external noopener noreferrer" target="_blank">PDO</a> connection or
+a <a href="https://en.wikipedia.org/wiki/Data_source_name" class="reference external" rel="external noopener noreferrer" target="_blank">Data Source Name (DSN)</a>. It supports native blocking, as well as sharing
+locks:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">PostgreSqlStore</span>;
+
+<span class="hljs-comment">// a PDO instance or DSN for lazy connecting through PDO</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>databaseConnectionOrDSN</span> = <span class="hljs-string">'pgsql:host=localhost;port=5634;dbname=app'</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> PostgreSqlStore(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>databaseConnectionOrDSN</span>, [<span class="hljs-string">'db_username'</span> =&gt; <span class="hljs-string">'myuser'</span>, <span class="hljs-string">'db_password'</span> =&gt; <span class="hljs-string">'mypassword'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In opposite to the <code translate="no" class="notranslate">PdoStore</code>, the <code translate="no" class="notranslate">PostgreSqlStore</code> does not need a table to
+store locks and it does not expire.</p>
+<span id="lock-store-dbal-pgsql"></span>
+</div>
+<div class="section">
+<h3 id="doctrinedbalpostgresqlstore">
+    DoctrineDbalPostgreSqlStore
+    <a class="headerlink" href="#doctrinedbalpostgresqlstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The DoctrineDbalPostgreSqlStore uses <a href="https://www.postgresql.org/docs/current/explicit-locking.html" class="reference external" rel="external noopener noreferrer" target="_blank">Advisory Locks</a> provided by PostgreSQL.
+It is identical to PostgreSqlStore but requires a <a href="https://github.com/doctrine/dbal/blob/master/src/Connection.php" class="reference external" rel="external noopener noreferrer" target="_blank">Doctrine DBAL Connection</a> or
+a <a href="https://www.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/configuration.html#connecting-using-a-url" class="reference external" rel="external noopener noreferrer" target="_blank">Doctrine DBAL URL</a>. It supports native blocking, as well as sharing locks:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">DoctrineDbalPostgreSqlStore</span>;
+
+<span class="hljs-comment">// a Doctrine Connection or DSN</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>databaseConnectionOrDSN</span> = <span class="hljs-string">'postgresql+advisory://myuser:mypassword@127.0.0.1:5634/lock'</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> DoctrineDbalPostgreSqlStore(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>databaseConnectionOrDSN</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In opposite to the <code translate="no" class="notranslate">DoctrineDbalStore</code>, the <code translate="no" class="notranslate">DoctrineDbalPostgreSqlStore</code> does not need a table to
+store locks and does not expire.</p>
+<span id="lock-store-redis"></span>
+</div>
+<div class="section">
+<h3 id="redisstore">
+    RedisStore
+    <a class="headerlink" href="#redisstore" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p><code translate="no" class="notranslate">\Relay\Relay</code> support was introduced in Symfony 6.3.</p>
+</div>
+<p>The RedisStore saves locks on a Redis server, it requires a Redis connection
+implementing the <code translate="no" class="notranslate">\Redis</code>, <code translate="no" class="notranslate">\RedisArray</code>, <code translate="no" class="notranslate">\RedisCluster</code>, <code translate="no" class="notranslate">\Relay\Relay</code> or
+<code translate="no" class="notranslate">\Predis</code> classes. This store does not support blocking, and expects a TTL to
+avoid stalled locks:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">RedisStore</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>redis</span> = <span class="hljs-keyword">new</span> \Redis();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>redis</span><span class="hljs-operator">-&gt;</span>connect(<span class="hljs-string">'localhost'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> RedisStore(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>redis</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="lock-store-semaphore"></span>
+</div>
+<div class="section">
+<h3 id="semaphorestore">
+    SemaphoreStore
+    <a class="headerlink" href="#semaphorestore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The SemaphoreStore uses the <a href="https://www.php.net/manual/en/book.sem.php" class="reference external" rel="external noopener noreferrer" target="_blank">PHP semaphore functions</a> to create the locks:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">SemaphoreStore</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> SemaphoreStore();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="lock-store-combined"></span>
+</div>
+<div class="section">
+<h3 id="combinedstore">
+    CombinedStore
+    <a class="headerlink" href="#combinedstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The CombinedStore is designed for High Availability applications because it
+manages several stores in sync (for example, several Redis servers). When a
+lock is acquired, it forwards the call to all the managed stores, and it
+collects their responses. If a simple majority of stores have acquired the
+lock, then the lock is considered acquired:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">CombinedStore</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">RedisStore</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Strategy</span>\<span class="hljs-title">ConsensusStrategy</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stores</span> = [];
+<span class="hljs-keyword">foreach</span> ([<span class="hljs-string">'server1'</span>, <span class="hljs-string">'server2'</span>, <span class="hljs-string">'server3'</span>] <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>server</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>redis</span> = <span class="hljs-keyword">new</span> \Redis();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>redis</span><span class="hljs-operator">-&gt;</span>connect(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>server</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stores</span>[] = <span class="hljs-keyword">new</span> RedisStore(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>redis</span>);
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> CombinedStore(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stores</span>, <span class="hljs-keyword">new</span> ConsensusStrategy());</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Instead of the simple majority strategy (<code translate="no" class="notranslate">ConsensusStrategy</code>) an
+<code translate="no" class="notranslate">UnanimousStrategy</code> can be used to require the lock to be acquired in all
+the stores:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">CombinedStore</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Strategy</span>\<span class="hljs-title">UnanimousStrategy</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> CombinedStore(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stores</span>, <span class="hljs-keyword">new</span> UnanimousStrategy());</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>In order to get high availability when using the <code translate="no" class="notranslate">ConsensusStrategy</code>, the
+minimum cluster size must be three servers. This allows the cluster to keep
+working when a single server fails (because this strategy requires that the
+lock is acquired for more than half of the servers).</p>
+</div>
+<span id="lock-store-zookeeper"></span>
+</div>
+<div class="section">
+<h3 id="zookeeperstore">
+    ZookeeperStore
+    <a class="headerlink" href="#zookeeperstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The ZookeeperStore saves locks on a <a href="https://zookeeper.apache.org/" class="reference external" rel="external noopener noreferrer" target="_blank">ZooKeeper</a> server. It requires a ZooKeeper
+connection implementing the <code translate="no" class="notranslate">\Zookeeper</code> class. This store does not
+support blocking and expiration but the lock is automatically released when the
+PHP process is terminated:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Lock</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">ZookeeperStore</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>zookeeper</span> = <span class="hljs-keyword">new</span> \Zookeeper(<span class="hljs-string">'localhost:2181'</span>);
+<span class="hljs-comment">// use the following to define a high-availability cluster:</span>
+<span class="hljs-comment">// $zookeeper = new \Zookeeper('localhost1:2181,localhost2:2181,localhost3:2181');</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> ZookeeperStore(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>zookeeper</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Zookeeper does not require a TTL as the nodes used for locking are ephemeral
+and die when the PHP process is terminated.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="reliability">
+    Reliability
+    <a class="headerlink" href="#reliability" title="Permalink to this headline">¶</a>
+</h2>
+<p>The component guarantees that the same resource can't be locked twice as long as
+the component is used in the following way.</p>
+<div class="section">
+<h3 id="remote-stores">
+    Remote Stores
+    <a class="headerlink" href="#remote-stores" title="Permalink to this headline">¶</a>
+</h3>
+<p>Remote stores (<a href="lock.html#lock-store-memcached" class="reference internal">MemcachedStore</a>,
+<a href="lock.html#lock-store-mongodb" class="reference internal">MongoDbStore</a>,
+<a href="lock.html#lock-store-pdo" class="reference internal">PdoStore</a>,
+<a href="lock.html#lock-store-pgsql" class="reference internal">PostgreSqlStore</a>,
+<a href="lock.html#lock-store-redis" class="reference internal">RedisStore</a> and
+<a href="lock.html#lock-store-zookeeper" class="reference internal">ZookeeperStore</a>) use a unique token to recognize
+the true owner of the lock. This token is stored in the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Lock/Key.php" class="reference external" title="Symfony\Component\Lock\Key" rel="external noopener noreferrer" target="_blank">Key</a> object and is used internally by
+the <code translate="no" class="notranslate">Lock</code>.</p>
+<p>Every concurrent process must store the <code translate="no" class="notranslate">Lock</code> on the same server. Otherwise two
+different machines may allow two different processes to acquire the same <code translate="no" class="notranslate">Lock</code>.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>To guarantee that the same server will always be safe, do not use Memcached
+behind a LoadBalancer, a cluster or round-robin DNS. Even if the main server
+is down, the calls must not be forwarded to a backup or failover server.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="expiring-stores">
+    Expiring Stores
+    <a class="headerlink" href="#expiring-stores" title="Permalink to this headline">¶</a>
+</h3>
+<p>Expiring stores (<a href="lock.html#lock-store-memcached" class="reference internal">MemcachedStore</a>,
+<a href="lock.html#lock-store-mongodb" class="reference internal">MongoDbStore</a>,
+<a href="lock.html#lock-store-pdo" class="reference internal">PdoStore</a> and
+<a href="lock.html#lock-store-redis" class="reference internal">RedisStore</a>)
+guarantee that the lock is acquired only for the defined duration of time. If
+the task takes longer to be accomplished, then the lock can be released by the
+store and acquired by someone else.</p>
+<p>The <code translate="no" class="notranslate">Lock</code> provides several methods to check its health. The <code translate="no" class="notranslate">isExpired()</code>
+method checks whether or not its lifetime is over and the <code translate="no" class="notranslate">getRemainingLifetime()</code>
+method returns its time to live in seconds.</p>
+<p>Using the above methods, a robust code would be:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span><span class="hljs-operator">-&gt;</span>createLock(<span class="hljs-string">'pdf-creation'</span>, <span class="hljs-number">30</span>);
+
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>acquire()) {
+    <span class="hljs-keyword">return</span>;
+}
+<span class="hljs-keyword">while</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finished</span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>getRemainingLifetime() &lt;= <span class="hljs-number">5</span>) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>isExpired()) {
+            <span class="hljs-comment">// lock was lost, perform a rollback or send a notification</span>
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> \RuntimeException(<span class="hljs-string">'Lock lost during the overall process'</span>);
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lock</span><span class="hljs-operator">-&gt;</span>refresh();
+    }
+
+    <span class="hljs-comment">// Perform the task whose duration MUST be less than 5 minutes</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Choose wisely the lifetime of the <code translate="no" class="notranslate">Lock</code> and check whether its remaining
+time to live is enough to perform the task.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Storing a <code translate="no" class="notranslate">Lock</code> usually takes a few milliseconds, but network conditions
+may increase that time a lot (up to a few seconds). Take that into account
+when choosing the right TTL.</p>
+</div>
+<p>By design, locks are stored on servers with a defined lifetime. If the date or
+time of the machine changes, a lock could be released sooner than expected.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>To guarantee that date won't change, the NTP service should be disabled
+and the date should be updated when the service is stopped.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="flockstore">
+    FlockStore
+    <a class="headerlink" href="#flockstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>By using the file system, this <code translate="no" class="notranslate">Store</code> is reliable as long as concurrent
+processes use the same physical directory to store locks.</p>
+<p>Processes must run on the same machine, virtual machine or container.
+Be careful when updating a Kubernetes or Swarm service because, for a short
+period of time, there can be two containers running in parallel.</p>
+<p>The absolute path to the directory must remain the same. Be careful of symlinks
+that could change at anytime: Capistrano and blue/green deployment often use
+that trick. Be careful when the path to that directory changes between two
+deployments.</p>
+<p>Some file systems (such as some types of NFS) do not support locking.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>All concurrent processes must use the same physical file system by running
+on the same machine and using the same absolute path to the lock directory.</p>
+<p>Using a <code translate="no" class="notranslate">FlockStore</code> in an HTTP context is incompatible with multiple
+front servers, unless to ensure that the same resource will always be
+locked on the same machine or to use a well configured shared file system.</p>
+</div>
+<p>Files on the file system can be removed during a maintenance operation. For
+instance, to clean up the <code translate="no" class="notranslate">/tmp</code> directory or after a reboot of the machine
+when a directory uses <code translate="no" class="notranslate">tmpfs</code>. It's not an issue if the lock is released when
+the process ended, but it is in case of <code translate="no" class="notranslate">Lock</code> reused between requests.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Do not store locks on a volatile file system if they have to be reused in
+several requests.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="memcachedstore">
+    MemcachedStore
+    <a class="headerlink" href="#memcachedstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The way Memcached works is to store items in memory. That means that by using
+the <a href="lock.html#lock-store-memcached" class="reference internal">MemcachedStore</a> the locks are not persisted
+and may disappear by mistake at any time.</p>
+<p>If the Memcached service or the machine hosting it restarts, every lock would
+be lost without notifying the running processes.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>To avoid that someone else acquires a lock after a restart, it's recommended
+to delay service start and wait at least as long as the longest lock TTL.</p>
+</div>
+<p>By default Memcached uses a LRU mechanism to remove old entries when the service
+needs space to add new items.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>The number of items stored in Memcached must be under control. If it's not
+possible, LRU should be disabled and Lock should be stored in a dedicated
+Memcached service away from Cache.</p>
+</div>
+<p>When the Memcached service is shared and used for multiple usage, Locks could be
+removed by mistake. For instance some implementation of the PSR-6 <code translate="no" class="notranslate">clear()</code>
+method uses the Memcached's <code translate="no" class="notranslate">flush()</code> method which purges and removes everything.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>The method <code translate="no" class="notranslate">flush()</code> must not be called, or locks should be stored in a
+dedicated Memcached service away from Cache.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="mongodbstore">
+    MongoDbStore
+    <a class="headerlink" href="#mongodbstore" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>The locked resource name is indexed in the <code translate="no" class="notranslate">_id</code> field of the lock
+collection. Beware that an indexed field's value in MongoDB can be
+<a href="https://docs.mongodb.com/manual/reference/limits/#Index-Key-Limit" class="reference external" rel="external noopener noreferrer" target="_blank">a maximum of 1024 bytes in length</a> including the structural overhead.</p>
+</div>
+<p>A TTL index must be used to automatically clean up expired locks.
+Such an index can be created manually:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript">db.lock.createIndex(
+    { <span class="hljs-string">"expires_at"</span>: <span class="hljs-number">1</span> },
+    { <span class="hljs-string">"expireAfterSeconds"</span>: <span class="hljs-number">0</span> }
+)</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Alternatively, the method <code translate="no" class="notranslate">MongoDbStore::createTtlIndex(int $expireAfterSeconds = 0)</code>
+can be called once to create the TTL index during database setup. Read more
+about <a href="https://docs.mongodb.com/manual/tutorial/expire-data/" class="reference external" rel="external noopener noreferrer" target="_blank">Expire Data from Collections by Setting TTL</a> in MongoDB.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p><code translate="no" class="notranslate">MongoDbStore</code> will attempt to automatically create a TTL index. It's
+recommended to set constructor option <code translate="no" class="notranslate">gcProbablity</code> to <code translate="no" class="notranslate">0.0</code> to
+disable this behavior if you have manually dealt with TTL index creation.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>This store relies on all PHP application and database nodes to have
+synchronized clocks for lock expiry to occur at the correct time. To ensure
+locks don't expire prematurely; the lock TTL should be set with enough extra
+time in <code translate="no" class="notranslate">expireAfterSeconds</code> to account for any clock drift between nodes.</p>
+</div>
+<p><code translate="no" class="notranslate">writeConcern</code> and <code translate="no" class="notranslate">readConcern</code> are not specified by MongoDbStore meaning
+the collection's settings will take effect.
+<code translate="no" class="notranslate">readPreference</code> is <code translate="no" class="notranslate">primary</code> for all queries.
+Read more about <a href="https://docs.mongodb.com/manual/applications/replication/" class="reference external" rel="external noopener noreferrer" target="_blank">Replica Set Read and Write Semantics</a> in MongoDB.</p>
+</div>
+<div class="section">
+<h3 id="pdostore">
+    PdoStore
+    <a class="headerlink" href="#pdostore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The PdoStore relies on the <a href="https://en.wikipedia.org/wiki/ACID" class="reference external" rel="external noopener noreferrer" target="_blank">ACID</a> properties of the SQL engine.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>In a cluster configured with multiple primaries, ensure writes are
+synchronously propagated to every node, or always use the same node.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Some SQL engines like MySQL allow to disable the unique constraint check.
+Ensure that this is not the case <code translate="no" class="notranslate">SET unique_checks=1;</code>.</p>
+</div>
+<p>In order to purge old locks, this store uses a current datetime to define an
+expiration date reference. This mechanism relies on all server nodes to
+have synchronized clocks.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>To ensure locks don't expire prematurely; the TTLs should be set with
+enough extra time to account for any clock drift between nodes.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="postgresqlstore">
+    PostgreSqlStore
+    <a class="headerlink" href="#postgresqlstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The PdoStore relies on the <a href="https://www.postgresql.org/docs/current/explicit-locking.html" class="reference external" rel="external noopener noreferrer" target="_blank">Advisory Locks</a> properties of the PostgreSQL
+database. That means that by using <a href="lock.html#lock-store-pgsql" class="reference internal">PostgreSqlStore</a>
+the locks will be automatically released at the end of the session in case the
+client cannot unlock for any reason.</p>
+<p>If the PostgreSQL service or the machine hosting it restarts, every lock would
+be lost without notifying the running processes.</p>
+<p>If the TCP connection is lost, the PostgreSQL may release locks without
+notifying the application.</p>
+</div>
+<div class="section">
+<h3 id="redisstore">
+    RedisStore
+    <a class="headerlink" href="#redisstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The way Redis works is to store items in memory. That means that by using
+the <a href="lock.html#lock-store-redis" class="reference internal">RedisStore</a> the locks are not persisted
+and may disappear by mistake at any time.</p>
+<p>If the Redis service or the machine hosting it restarts, every locks would
+be lost without notifying the running processes.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>To avoid that someone else acquires a lock after a restart, it's recommended
+to delay service start and wait at least as long as the longest lock TTL.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Redis can be configured to persist items on disk, but this option would
+slow down writes on the service. This could go against other uses of the
+server.</p>
+</div>
+<p>When the Redis service is shared and used for multiple usages, locks could be
+removed by mistake.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>The command <code translate="no" class="notranslate">FLUSHDB</code> must not be called, or locks should be stored in a
+dedicated Redis service away from Cache.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="combinedstore">
+    CombinedStore
+    <a class="headerlink" href="#combinedstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>Combined stores allow the storage of locks across several backends. It's a common
+mistake to think that the lock mechanism will be more reliable. This is wrong.
+The <code translate="no" class="notranslate">CombinedStore</code> will be, at best, as reliable as the least reliable of
+all managed stores. As soon as one managed store returns erroneous information,
+the <code translate="no" class="notranslate">CombinedStore</code> won't be reliable.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>All concurrent processes must use the same configuration, with the same
+amount of managed stored and the same endpoint.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Instead of using a cluster of Redis or Memcached servers, it's better to use
+a <code translate="no" class="notranslate">CombinedStore</code> with a single server per managed store.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="semaphorestore">
+    SemaphoreStore
+    <a class="headerlink" href="#semaphorestore" title="Permalink to this headline">¶</a>
+</h3>
+<p>Semaphores are handled by the Kernel level. In order to be reliable, processes
+must run on the same machine, virtual machine or container. Be careful when
+updating a Kubernetes or Swarm service because for a short period of time, there
+can be two running containers in parallel.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>All concurrent processes must use the same machine. Before starting a
+concurrent process on a new machine, check that other processes are stopped
+on the old one.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When running on systemd with non-system user and option <code translate="no" class="notranslate">RemoveIPC=yes</code>
+(default value), locks are deleted by systemd when that user logs out.
+Check that process is run with a system user (UID &lt;= SYS_UID_MAX) with
+<code translate="no" class="notranslate">SYS_UID_MAX</code> defined in <code translate="no" class="notranslate">/etc/login.defs</code>, or set the option
+<code translate="no" class="notranslate">RemoveIPC=off</code> in <code translate="no" class="notranslate">/etc/systemd/logind.conf</code>.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="zookeeperstore">
+    ZookeeperStore
+    <a class="headerlink" href="#zookeeperstore" title="Permalink to this headline">¶</a>
+</h3>
+<p>The way ZookeeperStore works is by maintaining locks as ephemeral nodes on the
+server. That means that by using <a href="lock.html#lock-store-zookeeper" class="reference internal">ZookeeperStore</a>
+the locks will be automatically released at the end of the session in case the
+client cannot unlock for any reason.</p>
+<p>If the ZooKeeper service or the machine hosting it restarts, every lock would
+be lost without notifying the running processes.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>To use ZooKeeper's high-availability feature, you can setup a cluster of
+multiple servers so that in case one of the server goes down, the majority
+will still be up and serving the requests. All the available servers in the
+cluster will see the same state.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>As this store does not support multi-level node locks, since the clean up of
+intermediate nodes becomes an overhead, all locks are maintained at the root
+level.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="overall">
+    Overall
+    <a class="headerlink" href="#overall" title="Permalink to this headline">¶</a>
+</h3>
+<p>Changing the configuration of stores should be done very carefully. For
+instance, during the deployment of a new version. Processes with new
+configuration must not be started while old processes with old configuration
+are still running.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,172 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="configuring-babel">
+    Configuring Babel
+    <a class="headerlink" href="#configuring-babel" title="Permalink to this headline">¶</a>
+</h1>
+<p><a href="https://babeljs.io/" class="reference external" rel="external noopener noreferrer" target="_blank">Babel</a> is automatically configured for all <code translate="no" class="notranslate">.js</code> and <code translate="no" class="notranslate">.jsx</code> files via the
+<code translate="no" class="notranslate">babel-loader</code> with sensible defaults (e.g. with the <code translate="no" class="notranslate">@babel/preset-env</code> and
+<code translate="no" class="notranslate">@babel/preset-react</code> if requested).</p>
+<p>Need to extend the Babel configuration further? The easiest way is via
+<code translate="no" class="notranslate">configureBabel()</code>:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// webpack.config.js</span>
+<span class="hljs-comment">// ...</span>
+
+Encore
+    <span class="hljs-comment">// ...</span>
+
+    .configureBabel(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">babelConfig</span>) </span>{
+        <span class="hljs-comment">// add additional presets</span>
+        babelConfig.presets.push(<span class="hljs-string">'@babel/preset-flow'</span>);
+
+        <span class="hljs-comment">// no plugins are added by default, but you can add some</span>
+        babelConfig.plugins.push(<span class="hljs-string">'styled-jsx/babel'</span>);
+    }, {
+        <span class="hljs-comment">// node_modules is not processed through Babel by default</span>
+        <span class="hljs-comment">// but you can allow some specific modules to be processed</span>
+        <span class="hljs-attr">includeNodeModules</span>: [<span class="hljs-string">'foundation-sites'</span>],
+
+        <span class="hljs-comment">// or completely control the exclude rule (note that you</span>
+        <span class="hljs-comment">// can't use both "includeNodeModules" and "exclude" at</span>
+        <span class="hljs-comment">// the same time)</span>
+        <span class="hljs-attr">exclude</span>: <span class="hljs-regexp">/bower_components/</span>
+    })
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h2 id="configuring-browser-targets">
+    Configuring Browser Targets
+    <a class="headerlink" href="#configuring-browser-targets" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <code translate="no" class="notranslate">@babel/preset-env</code> preset rewrites your JavaScript so that the final syntax
+will work in whatever browsers you want. To configure the browsers that you need
+to support, see <a href="postcss.html#browserslist_package_config" class="reference internal">PostCSS and autoprefixing (postcss-loader)</a>.</p>
+<p>After changing your &quot;browserslist&quot; config, you will need to manually remove the babel
+cache directory:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># On Unix run this command. On Windows, clear this directory manually</span>
+<span class="hljs-prompt">$ </span>rm -rf node_modules/.cache/babel-loader/</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="creating-a-babelrc-file">
+    Creating a <code translate="no" class="notranslate">.babelrc</code> File
+    <a class="headerlink" href="#creating-a-babelrc-file" title="Permalink to this headline">¶</a>
+</h2>
+<p>Instead of calling <code translate="no" class="notranslate">configureBabel()</code>, you could create a <code translate="no" class="notranslate">.babelrc</code> file
+at the root of your project. This is a more &quot;standard&quot; way of configuring
+Babel, but it has a downside: as soon as a <code translate="no" class="notranslate">.babelrc</code> file is present,
+<strong>Encore can no longer add any Babel configuration for you</strong>. For example,
+if you call <code translate="no" class="notranslate">Encore.enableReactPreset()</code>, the <code translate="no" class="notranslate">react</code> preset will <em>not</em>
+automatically be added to Babel: you must add it yourself in <code translate="no" class="notranslate">.babelrc</code>.</p>
+<p>As soon as a <code translate="no" class="notranslate">.babelrc</code> file is present, it will take priority over the Babel
+configuration added by Encore.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

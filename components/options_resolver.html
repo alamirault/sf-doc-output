@@ -1,0 +1,2176 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-optionsresolver-component">
+    The OptionsResolver Component
+    <a class="headerlink" href="#the-optionsresolver-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The OptionsResolver component is an improved replacement for the
+<a href="https://secure.php.net/manual/en/function.array-replace.php" class="reference external" title="array_replace" rel="external noopener noreferrer" target="_blank">array_replace</a> PHP function. It allows you to create an
+options system with required options, defaults, validation (type, value),
+normalization and more.</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/options-resolver</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>Imagine you have a <code translate="no" class="notranslate">Mailer</code> class which has four options: <code translate="no" class="notranslate">host</code>,
+<code translate="no" class="notranslate">username</code>, <code translate="no" class="notranslate">password</code> and <code translate="no" class="notranslate">port</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-keyword">protected</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span> = [])</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When accessing the <code translate="no" class="notranslate">$options</code>, you need to add some boilerplate code to
+check which options are set:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sendMail</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>from</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>to</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mail</span> = ...;
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mail</span><span class="hljs-operator">-&gt;</span>setHost(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options[<span class="hljs-string">'host'</span>] ?? <span class="hljs-string">'smtp.example.org'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mail</span><span class="hljs-operator">-&gt;</span>setUsername(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options[<span class="hljs-string">'username'</span>] ?? <span class="hljs-string">'user'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mail</span><span class="hljs-operator">-&gt;</span>setPassword(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options[<span class="hljs-string">'password'</span>] ?? <span class="hljs-string">'pa$$word'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mail</span><span class="hljs-operator">-&gt;</span>setPort(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options[<span class="hljs-string">'port'</span>] ?? <span class="hljs-number">25</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Also, the default values of the options are buried in the business logic of your
+code. Use the <a href="https://secure.php.net/manual/en/function.array-replace.php" class="reference external" title="array_replace" rel="external noopener noreferrer" target="_blank">array_replace</a> to fix that:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span> = [])</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options = array_replace([
+            <span class="hljs-string">'host'</span>     =&gt; <span class="hljs-string">'smtp.example.org'</span>,
+            <span class="hljs-string">'username'</span> =&gt; <span class="hljs-string">'user'</span>,
+            <span class="hljs-string">'password'</span> =&gt; <span class="hljs-string">'pa$$word'</span>,
+            <span class="hljs-string">'port'</span>     =&gt; <span class="hljs-number">25</span>,
+        ], <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now all four options are guaranteed to be set, but you could still make an error
+like the following when using the <code translate="no" class="notranslate">Mailer</code> class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mailer</span> = <span class="hljs-keyword">new</span> Mailer([
+    <span class="hljs-string">'usernme'</span> =&gt; <span class="hljs-string">'johndoe'</span>,  <span class="hljs-comment">// 'username' is wrongly spelled as 'usernme'</span>
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>No error will be shown. In the best case, the bug will appear during testing,
+but the developer will spend time looking for the problem. In the worst case,
+the bug might not appear until it's deployed to the live system.</p>
+<p>Fortunately, the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver" rel="external noopener noreferrer" target="_blank">OptionsResolver</a>
+class helps you to fix this problem:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span> = [])</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span> = <span class="hljs-keyword">new</span> OptionsResolver();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-string">'host'</span>     =&gt; <span class="hljs-string">'smtp.example.org'</span>,
+            <span class="hljs-string">'username'</span> =&gt; <span class="hljs-string">'user'</span>,
+            <span class="hljs-string">'password'</span> =&gt; <span class="hljs-string">'pa$$word'</span>,
+            <span class="hljs-string">'port'</span>     =&gt; <span class="hljs-number">25</span>,
+        ]);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>resolve(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Like before, all options will be guaranteed to be set. Additionally, an
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/Exception/UndefinedOptionsException.php" class="reference external" title="Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException" rel="external noopener noreferrer" target="_blank">UndefinedOptionsException</a>
+is thrown if an unknown option is passed:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mailer</span> = <span class="hljs-keyword">new</span> Mailer([
+    <span class="hljs-string">'usernme'</span> =&gt; <span class="hljs-string">'johndoe'</span>,
+]);
+
+<span class="hljs-comment">// UndefinedOptionsException: The option "usernme" does not exist.</span>
+<span class="hljs-comment">// Defined options are: "host", "password", "port", "username"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The rest of your code can access the values of the options without boilerplate
+code:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sendMail</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>from</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>to</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mail</span> = ...;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mail</span><span class="hljs-operator">-&gt;</span>setHost(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options[<span class="hljs-string">'host'</span>]);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mail</span><span class="hljs-operator">-&gt;</span>setUsername(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options[<span class="hljs-string">'username'</span>]);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mail</span><span class="hljs-operator">-&gt;</span>setPassword(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options[<span class="hljs-string">'password'</span>]);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mail</span><span class="hljs-operator">-&gt;</span>setPort(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options[<span class="hljs-string">'port'</span>]);
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>It's a good practice to split the option configuration into a separate method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span> = [])</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span> = <span class="hljs-keyword">new</span> OptionsResolver();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>configureOptions(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>resolve(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-string">'host'</span>       =&gt; <span class="hljs-string">'smtp.example.org'</span>,
+            <span class="hljs-string">'username'</span>   =&gt; <span class="hljs-string">'user'</span>,
+            <span class="hljs-string">'password'</span>   =&gt; <span class="hljs-string">'pa$$word'</span>,
+            <span class="hljs-string">'port'</span>       =&gt; <span class="hljs-number">25</span>,
+            <span class="hljs-string">'encryption'</span> =&gt; <span class="hljs-keyword">null</span>,
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>First, your code becomes easier to read, especially if the constructor does more
+than processing options. Second, sub-classes may now override the
+<code translate="no" class="notranslate">configureOptions()</code> method to adjust the configuration of the options:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GoogleMailer</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>configureOptions(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-string">'host'</span> =&gt; <span class="hljs-string">'smtp.google.com'</span>,
+            <span class="hljs-string">'encryption'</span> =&gt; <span class="hljs-string">'ssl'</span>,
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="required-options">
+    Required Options
+    <a class="headerlink" href="#required-options" title="Permalink to this headline">¶</a>
+</h3>
+<p>If an option must be set by the caller, pass that option to
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_setRequired" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::setRequired()" rel="external noopener noreferrer" target="_blank">setRequired()</a>.
+For example, to make the <code translate="no" class="notranslate">host</code> option required, you can do:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setRequired(<span class="hljs-string">'host'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you omit a required option, a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/Exception/MissingOptionsException.php" class="reference external" title="Symfony\Component\OptionsResolver\Exception\MissingOptionsException" rel="external noopener noreferrer" target="_blank">MissingOptionsException</a>
+will be thrown:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mailer</span> = <span class="hljs-keyword">new</span> Mailer();
+
+<span class="hljs-comment">// MissingOptionsException: The required option "host" is missing.</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_setRequired" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::setRequired()" rel="external noopener noreferrer" target="_blank">setRequired()</a>
+method accepts a single name or an array of option names if you have more than
+one required option:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setRequired([<span class="hljs-string">'host'</span>, <span class="hljs-string">'username'</span>, <span class="hljs-string">'password'</span>]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_isRequired" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::isRequired()" rel="external noopener noreferrer" target="_blank">isRequired()</a> to find
+out if an option is required. You can use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_getRequiredOptions" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::getRequiredOptions()" rel="external noopener noreferrer" target="_blank">getRequiredOptions()</a> to
+retrieve the names of all required options:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GoogleMailer</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>configureOptions(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>);
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>isRequired(<span class="hljs-string">'host'</span>)) {
+            <span class="hljs-comment">// ...</span>
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requiredOptions</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>getRequiredOptions();
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you want to check whether a required option is still missing from the default
+options, you can use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_isMissing" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::isMissing()" rel="external noopener noreferrer" target="_blank">isMissing()</a>.
+The difference between this and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_isRequired" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::isRequired()" rel="external noopener noreferrer" target="_blank">isRequired()</a>
+is that this method will return false if a required option has already
+been set:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setRequired(<span class="hljs-string">'host'</span>);
+    }
+}
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GoogleMailer</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>configureOptions(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>isRequired(<span class="hljs-string">'host'</span>);
+        <span class="hljs-comment">// =&gt; true</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>isMissing(<span class="hljs-string">'host'</span>);
+        <span class="hljs-comment">// =&gt; true</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'host'</span>, <span class="hljs-string">'smtp.google.com'</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>isRequired(<span class="hljs-string">'host'</span>);
+        <span class="hljs-comment">// =&gt; true</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>isMissing(<span class="hljs-string">'host'</span>);
+        <span class="hljs-comment">// =&gt; false</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_getMissingOptions" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::getMissingOptions()" rel="external noopener noreferrer" target="_blank">getMissingOptions()</a> method
+lets you access the names of all missing options.</p>
+</div>
+<div class="section">
+<h3 id="type-validation">
+    Type Validation
+    <a class="headerlink" href="#type-validation" title="Permalink to this headline">¶</a>
+</h3>
+<p>You can run additional checks on the options to make sure they were passed
+correctly. To validate the types of the options, call
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_setAllowedTypes" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::setAllowedTypes()" rel="external noopener noreferrer" target="_blank">setAllowedTypes()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-comment">// specify one allowed type</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setAllowedTypes(<span class="hljs-string">'host'</span>, <span class="hljs-string">'string'</span>);
+
+        <span class="hljs-comment">// specify multiple allowed types</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setAllowedTypes(<span class="hljs-string">'port'</span>, [<span class="hljs-string">'null'</span>, <span class="hljs-string">'int'</span>]);
+
+        <span class="hljs-comment">// check all items in an array recursively for a type</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setAllowedTypes(<span class="hljs-string">'dates'</span>, <span class="hljs-string">'DateTime[]'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setAllowedTypes(<span class="hljs-string">'ports'</span>, <span class="hljs-string">'int[]'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can pass any type for which an <code translate="no" class="notranslate">is_&lt;type&gt;()</code> function is defined in PHP.
+You may also pass fully qualified class or interface names (which is checked
+using <code translate="no" class="notranslate">instanceof</code>). Additionally, you can validate all items in an array
+recursively by suffixing the type with <code translate="no" class="notranslate">[]</code>.</p>
+<p>If you pass an invalid option now, an
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/Exception/InvalidOptionsException.php" class="reference external" title="Symfony\Component\OptionsResolver\Exception\InvalidOptionsException" rel="external noopener noreferrer" target="_blank">InvalidOptionsException</a>
+is thrown:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mailer</span> = <span class="hljs-keyword">new</span> Mailer([
+    <span class="hljs-string">'host'</span> =&gt; <span class="hljs-number">25</span>,
+]);
+
+<span class="hljs-comment">// InvalidOptionsException: The option "host" with value "25" is</span>
+<span class="hljs-comment">// expected to be of type "string", but is of type "int"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In sub-classes, you can use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_addAllowedTypes" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::addAllowedTypes()" rel="external noopener noreferrer" target="_blank">addAllowedTypes()</a>
+to add additional allowed types without erasing the ones already set.</p>
+<span id="optionsresolver-validate-value"></span>
+</div>
+<div class="section">
+<h3 id="value-validation">
+    Value Validation
+    <a class="headerlink" href="#value-validation" title="Permalink to this headline">¶</a>
+</h3>
+<p>Some options can only take one of a fixed list of predefined values. For
+example, suppose the <code translate="no" class="notranslate">Mailer</code> class has a <code translate="no" class="notranslate">transport</code> option which can be
+one of <code translate="no" class="notranslate">sendmail</code>, <code translate="no" class="notranslate">mail</code> and <code translate="no" class="notranslate">smtp</code>. Use the method
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_setAllowedValues" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::setAllowedValues()" rel="external noopener noreferrer" target="_blank">setAllowedValues()</a>
+to verify that the passed option contains one of these values:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'transport'</span>, <span class="hljs-string">'sendmail'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setAllowedValues(<span class="hljs-string">'transport'</span>, [<span class="hljs-string">'sendmail'</span>, <span class="hljs-string">'mail'</span>, <span class="hljs-string">'smtp'</span>]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you pass an invalid transport, an
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/Exception/InvalidOptionsException.php" class="reference external" title="Symfony\Component\OptionsResolver\Exception\InvalidOptionsException" rel="external noopener noreferrer" target="_blank">InvalidOptionsException</a>
+is thrown:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mailer</span> = <span class="hljs-keyword">new</span> Mailer([
+    <span class="hljs-string">'transport'</span> =&gt; <span class="hljs-string">'send-mail'</span>,
+]);
+
+<span class="hljs-comment">// InvalidOptionsException: The option "transport" with value "send-mail"</span>
+<span class="hljs-comment">// is invalid. Accepted values are: "sendmail", "mail", "smtp"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>For options with more complicated validation schemes, pass a closure which
+returns <code translate="no" class="notranslate">true</code> for acceptable values and <code translate="no" class="notranslate">false</code> for invalid values:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setAllowedValues(<span class="hljs-string">'transport'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>)</span> </span>{
+    <span class="hljs-comment">// return true or false</span>
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can even use the <a href="../validation.html" class="reference internal">Validator</a> component to validate the
+input by using the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/Validation.php#method_createIsValidCallable" class="reference external" title="Symfony\Component\Validator\Validation::createIsValidCallable()" rel="external noopener noreferrer" target="_blank">createIsValidCallable()</a>
+method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span>\<span class="hljs-title">Length</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Validation</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setAllowedValues(<span class="hljs-string">'transport'</span>, Validation<span class="hljs-operator">::</span>createIsValidCallable(
+    <span class="hljs-keyword">new</span> Length([<span class="hljs-string">'min'</span> =&gt; <span class="hljs-number">10</span> ])
+));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<p>In sub-classes, you can use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_addAllowedValues" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::addAllowedValues()" rel="external noopener noreferrer" target="_blank">addAllowedValues()</a>
+to add additional allowed values without erasing the ones already set.</p>
+</div>
+<div class="section">
+<h3 id="option-normalization">
+    Option Normalization
+    <a class="headerlink" href="#option-normalization" title="Permalink to this headline">¶</a>
+</h3>
+<p>Sometimes, option values need to be normalized before you can use them. For
+instance, assume that the <code translate="no" class="notranslate">host</code> should always start with <code translate="no" class="notranslate">http://</code>. To do
+that, you can write normalizers. Normalizers are executed after validating an
+option. You can configure a normalizer by calling
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_setNormalizer" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::setNormalizer()" rel="external noopener noreferrer" target="_blank">setNormalizer()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">Options</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setNormalizer(<span class="hljs-string">'host'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Options <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>)</span> </span>{
+            <span class="hljs-keyword">if</span> (<span class="hljs-string">'http://'</span> !== substr(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>, <span class="hljs-number">0</span>, <span class="hljs-number">7</span>)) {
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span> = <span class="hljs-string">'http://'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>;
+            }
+
+            <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>;
+        });
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The normalizer receives the actual <code translate="no" class="notranslate">$value</code> and returns the normalized form.
+You see that the closure also takes an <code translate="no" class="notranslate">$options</code> parameter. This is useful
+if you need to use other options during normalization:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setNormalizer(<span class="hljs-string">'host'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Options <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>)</span> </span>{
+            <span class="hljs-keyword">if</span> (<span class="hljs-string">'http://'</span> !== substr(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>, <span class="hljs-number">0</span>, <span class="hljs-number">7</span>) &amp;&amp; <span class="hljs-string">'https://'</span> !== substr(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>, <span class="hljs-number">0</span>, <span class="hljs-number">8</span>)) {
+                <span class="hljs-keyword">if</span> (<span class="hljs-string">'ssl'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>[<span class="hljs-string">'encryption'</span>]) {
+                    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span> = <span class="hljs-string">'https://'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>;
+                } <span class="hljs-keyword">else</span> {
+                    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span> = <span class="hljs-string">'http://'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>;
+                }
+            }
+
+            <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>;
+        });
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>To normalize a new allowed value in subclasses that are being normalized
+in parent classes, use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_addNormalizer" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::addNormalizer()" rel="external noopener noreferrer" target="_blank">addNormalizer()</a> method.
+This way, the <code translate="no" class="notranslate">$value</code> argument will receive the previously normalized
+value, otherwise you can prepend the new normalizer by passing <code translate="no" class="notranslate">true</code> as
+third argument.</p>
+</div>
+<div class="section">
+<h3 id="default-values-that-depend-on-another-option">
+    Default Values that Depend on another Option
+    <a class="headerlink" href="#default-values-that-depend-on-another-option" title="Permalink to this headline">¶</a>
+</h3>
+<p>Suppose you want to set the default value of the <code translate="no" class="notranslate">port</code> option based on the
+encryption chosen by the user of the <code translate="no" class="notranslate">Mailer</code> class. More precisely, you want
+to set the port to <code translate="no" class="notranslate">465</code> if SSL is used and to <code translate="no" class="notranslate">25</code> otherwise.</p>
+<p>You can implement this feature by passing a closure as the default value of
+the <code translate="no" class="notranslate">port</code> option. The closure receives the options as arguments. Based on
+these options, you can return the desired default value:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">Options</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'encryption'</span>, <span class="hljs-keyword">null</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'port'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Options <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span> </span>{
+            <span class="hljs-keyword">if</span> (<span class="hljs-string">'ssl'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>[<span class="hljs-string">'encryption'</span>]) {
+                <span class="hljs-keyword">return</span> <span class="hljs-number">465</span>;
+            }
+
+            <span class="hljs-keyword">return</span> <span class="hljs-number">25</span>;
+        });
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>The argument of the callable must be type hinted as <code translate="no" class="notranslate">Options</code>. Otherwise,
+the callable itself is considered as the default value of the option.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The closure is only executed if the <code translate="no" class="notranslate">port</code> option isn't set by the user
+or overwritten in a subclass.</p>
+</div>
+<p>A previously set default value can be accessed by adding a second argument to
+the closure:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-string">'encryption'</span> =&gt; <span class="hljs-keyword">null</span>,
+            <span class="hljs-string">'host'</span> =&gt; <span class="hljs-string">'example.org'</span>,
+        ]);
+    }
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GoogleMailer</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>configureOptions(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'host'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Options <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>previousValue</span>)</span> </span>{
+            <span class="hljs-keyword">if</span> (<span class="hljs-string">'ssl'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>[<span class="hljs-string">'encryption'</span>]) {
+                <span class="hljs-keyword">return</span> <span class="hljs-string">'secure.example.org'</span>;
+            }
+
+            <span class="hljs-comment">// Take default value configured in the base class</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>previousValue</span>;
+        });
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As seen in the example, this feature is mostly useful if you want to reuse the
+default values set in parent classes in sub-classes.</p>
+</div>
+<div class="section">
+<h3 id="options-without-default-values">
+    Options without Default Values
+    <a class="headerlink" href="#options-without-default-values" title="Permalink to this headline">¶</a>
+</h3>
+<p>In some cases, it is useful to define an option without setting a default value.
+This is useful if you need to know whether or not the user <em>actually</em> set
+an option or not. For example, if you set the default value for an option,
+it's not possible to know whether the user passed this value or if it comes
+from the default:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'port'</span>, <span class="hljs-number">25</span>);
+    }
+
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sendMail</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>from</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>to</span>)</span>
+    </span>{
+        <span class="hljs-comment">// Is this the default value or did the caller of the class really</span>
+        <span class="hljs-comment">// set the port to 25?</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-number">25</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options[<span class="hljs-string">'port'</span>]) {
+            <span class="hljs-comment">// ...</span>
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_setDefined" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::setDefined()" rel="external noopener noreferrer" target="_blank">setDefined()</a>
+to define an option without setting a default value. Then the option will only
+be included in the resolved options if it was actually passed to
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_resolve" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::resolve()" rel="external noopener noreferrer" target="_blank">resolve()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefined(<span class="hljs-string">'port'</span>);
+    }
+
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sendMail</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>from</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>to</span>)</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (array_key_exists(<span class="hljs-string">'port'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options)) {
+            <span class="hljs-keyword">echo</span> <span class="hljs-string">'Set!'</span>;
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">echo</span> <span class="hljs-string">'Not Set!'</span>;
+        }
+    }
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mailer</span> = <span class="hljs-keyword">new</span> Mailer();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mailer</span><span class="hljs-operator">-&gt;</span>sendMail(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>from</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>to</span>);
+<span class="hljs-comment">// =&gt; Not Set!</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mailer</span> = <span class="hljs-keyword">new</span> Mailer([
+    <span class="hljs-string">'port'</span> =&gt; <span class="hljs-number">25</span>,
+]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mailer</span><span class="hljs-operator">-&gt;</span>sendMail(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>from</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>to</span>);
+<span class="hljs-comment">// =&gt; Set!</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also pass an array of option names if you want to define multiple
+options in one go:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefined([<span class="hljs-string">'port'</span>, <span class="hljs-string">'encryption'</span>]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The methods <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_isDefined" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::isDefined()" rel="external noopener noreferrer" target="_blank">isDefined()</a>
+and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_getDefinedOptions" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::getDefinedOptions()" rel="external noopener noreferrer" target="_blank">getDefinedOptions()</a>
+let you find out which options are defined:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GoogleMailer</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>configureOptions(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>);
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>isDefined(<span class="hljs-string">'host'</span>)) {
+            <span class="hljs-comment">// One of the following was called:</span>
+
+            <span class="hljs-comment">// $resolver-&gt;setDefault('host', ...);</span>
+            <span class="hljs-comment">// $resolver-&gt;setRequired('host');</span>
+            <span class="hljs-comment">// $resolver-&gt;setDefined('host');</span>
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definedOptions</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>getDefinedOptions();
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="nested-options">
+    Nested Options
+    <a class="headerlink" href="#nested-options" title="Permalink to this headline">¶</a>
+</h3>
+<p>Suppose you have an option named <code translate="no" class="notranslate">spool</code> which has two sub-options <code translate="no" class="notranslate">type</code>
+and <code translate="no" class="notranslate">path</code>. Instead of defining it as a simple array of values, you can pass a
+closure as the default value of the <code translate="no" class="notranslate">spool</code> option with a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver" rel="external noopener noreferrer" target="_blank">OptionsResolver</a> argument. Based on
+this instance, you can define the options under <code translate="no" class="notranslate">spool</code> and its desired
+default value:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'spool'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>spoolResolver</span>)</span> </span>{
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>spoolResolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+                <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'file'</span>,
+                <span class="hljs-string">'path'</span> =&gt; <span class="hljs-string">'/path/to/spool'</span>,
+            ]);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>spoolResolver</span><span class="hljs-operator">-&gt;</span>setAllowedValues(<span class="hljs-string">'type'</span>, [<span class="hljs-string">'file'</span>, <span class="hljs-string">'memory'</span>]);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>spoolResolver</span><span class="hljs-operator">-&gt;</span>setAllowedTypes(<span class="hljs-string">'path'</span>, <span class="hljs-string">'string'</span>);
+        });
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sendMail</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>from</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>to</span>)</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-string">'memory'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options[<span class="hljs-string">'spool'</span>][<span class="hljs-string">'type'</span>]) {
+            <span class="hljs-comment">// ...</span>
+        }
+    }
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mailer</span> = <span class="hljs-keyword">new</span> Mailer([
+    <span class="hljs-string">'spool'</span> =&gt; [
+        <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'memory'</span>,
+    ],
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Nested options also support required options, validation (type, value) and
+normalization of their values. If the default value of a nested option depends
+on another option defined in the parent level, add a second <code translate="no" class="notranslate">Options</code> argument
+to the closure to access to them:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'sandbox'</span>, <span class="hljs-keyword">false</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'spool'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>spoolResolver</span>, Options <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>parent</span>)</span> </span>{
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>spoolResolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+                <span class="hljs-string">'type'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>parent</span>[<span class="hljs-string">'sandbox'</span>] ? <span class="hljs-string">'memory'</span> : <span class="hljs-string">'file'</span>,
+                <span class="hljs-comment">// ...</span>
+            ]);
+        });
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>The arguments of the closure must be type hinted as <code translate="no" class="notranslate">OptionsResolver</code> and
+<code translate="no" class="notranslate">Options</code> respectively. Otherwise, the closure itself is considered as the
+default value of the option.</p>
+</div>
+<p>In same way, parent options can access to the nested options as normal arrays:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'spool'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>spoolResolver</span>)</span> </span>{
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>spoolResolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+                <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'file'</span>,
+                <span class="hljs-comment">// ...</span>
+            ]);
+        });
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'profiling'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Options <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span> </span>{
+            <span class="hljs-keyword">return</span> <span class="hljs-string">'file'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>[<span class="hljs-string">'spool'</span>][<span class="hljs-string">'type'</span>];
+        });
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The fact that an option is defined as nested means that you must pass
+an array of values to resolve it at runtime.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="prototype-options">
+    Prototype Options
+    <a class="headerlink" href="#prototype-options" title="Permalink to this headline">¶</a>
+</h3>
+<p>There are situations where you will have to resolve and validate a set of
+options that may repeat many times within another option. Let's imagine a
+<code translate="no" class="notranslate">connections</code> option that will accept an array of database connections
+with <code translate="no" class="notranslate">host</code>, <code translate="no" class="notranslate">database</code>, <code translate="no" class="notranslate">user</code> and <code translate="no" class="notranslate">password</code> each.</p>
+<p>The best way to implement this is to define the <code translate="no" class="notranslate">connections</code> option as prototype:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'connections'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>connResolver</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>connResolver</span>
+        <span class="hljs-operator">-&gt;</span>setPrototype(<span class="hljs-keyword">true</span>)
+        <span class="hljs-operator">-&gt;</span>setRequired([<span class="hljs-string">'host'</span>, <span class="hljs-string">'database'</span>])
+        <span class="hljs-operator">-&gt;</span>setDefaults([<span class="hljs-string">'user'</span> =&gt; <span class="hljs-string">'root'</span>, <span class="hljs-string">'password'</span> =&gt; <span class="hljs-keyword">null</span>]);
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>According to the prototype definition in the example above, it is possible
+to have multiple connection arrays like the following:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>resolve([
+    <span class="hljs-string">'connections'</span> =&gt; [
+        <span class="hljs-string">'default'</span> =&gt; [
+            <span class="hljs-string">'host'</span> =&gt; <span class="hljs-string">'127.0.0.1'</span>,
+            <span class="hljs-string">'database'</span> =&gt; <span class="hljs-string">'symfony'</span>,
+        ],
+        <span class="hljs-string">'test'</span> =&gt; [
+            <span class="hljs-string">'host'</span> =&gt; <span class="hljs-string">'127.0.0.1'</span>,
+            <span class="hljs-string">'database'</span> =&gt; <span class="hljs-string">'symfony_test'</span>,
+            <span class="hljs-string">'user'</span> =&gt; <span class="hljs-string">'test'</span>,
+            <span class="hljs-string">'password'</span> =&gt; <span class="hljs-string">'test'</span>,
+        ],
+        <span class="hljs-comment">// ...</span>
+    ],
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The array keys (<code translate="no" class="notranslate">default</code>, <code translate="no" class="notranslate">test</code>, etc.) of this prototype option are
+validation-free and can be any arbitrary value that helps differentiate the
+connections.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>A prototype option can only be defined inside a nested option and
+during its resolution it will expect an array of arrays.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="deprecating-the-option">
+    Deprecating the Option
+    <a class="headerlink" href="#deprecating-the-option" title="Permalink to this headline">¶</a>
+</h3>
+<p>Once an option is outdated or you decided not to maintain it anymore, you can
+deprecate it using the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_setDeprecated" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::setDeprecated()" rel="external noopener noreferrer" target="_blank">setDeprecated()</a>
+method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>
+    <span class="hljs-operator">-&gt;</span>setDefined([<span class="hljs-string">'hostname'</span>, <span class="hljs-string">'host'</span>])
+
+    <span class="hljs-comment">// this outputs the following generic deprecation message:</span>
+    <span class="hljs-comment">// Since acme/package 1.2: The option "hostname" is deprecated.</span>
+    <span class="hljs-operator">-&gt;</span>setDeprecated(<span class="hljs-string">'hostname'</span>, <span class="hljs-string">'acme/package'</span>, <span class="hljs-string">'1.2'</span>)
+
+    <span class="hljs-comment">// you can also pass a custom deprecation message (%name% placeholder is available)</span>
+    <span class="hljs-operator">-&gt;</span>setDeprecated(
+        <span class="hljs-string">'hostname'</span>,
+        <span class="hljs-string">'acme/package'</span>,
+        <span class="hljs-string">'1.2'</span>,
+        <span class="hljs-string">'The option "hostname" is deprecated, use "host" instead.'</span>
+    )
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The deprecation message will be triggered only if the option is being used
+somewhere, either its value is provided by the user or the option is evaluated
+within closures of lazy options and normalizers.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When using an option deprecated by you in your own library, you can pass
+<code translate="no" class="notranslate">false</code> as the second argument of the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/Options.php#method_offsetGet" class="reference external" title="Symfony\Component\OptionsResolver\Options::offsetGet()" rel="external noopener noreferrer" target="_blank">offsetGet()</a> method
+to not trigger the deprecation warning.</p>
+</div>
+<p>Instead of passing the message, you may also pass a closure which returns
+a string (the deprecation message) or an empty string to ignore the deprecation.
+This closure is useful to only deprecate some of the allowed types or values of
+the option:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>
+    <span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'encryption'</span>, <span class="hljs-keyword">null</span>)
+    <span class="hljs-operator">-&gt;</span>setDefault(<span class="hljs-string">'port'</span>, <span class="hljs-keyword">null</span>)
+    <span class="hljs-operator">-&gt;</span>setAllowedTypes(<span class="hljs-string">'port'</span>, [<span class="hljs-string">'null'</span>, <span class="hljs-string">'int'</span>])
+    <span class="hljs-operator">-&gt;</span>setDeprecated(<span class="hljs-string">'port'</span>, <span class="hljs-string">'acme/package'</span>, <span class="hljs-string">'1.2'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Options <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>)</span> </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">null</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-string">'Passing "null" to option "port" is deprecated, pass an integer instead.'</span>;
+        }
+
+        <span class="hljs-comment">// deprecation may also depend on another option</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-string">'ssl'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>[<span class="hljs-string">'encryption'</span>] &amp;&amp; <span class="hljs-number">456</span> !== <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-string">'Passing a different port than "456" when the "encryption" option is set to "ssl" is deprecated.'</span>;
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-string">''</span>;
+    })
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Deprecation based on the value is triggered only when the option is provided
+by the user.</p>
+</div>
+<p>This closure receives as argument the value of the option after validating it
+and before normalizing it when the option is being resolved.</p>
+</div>
+<div class="section">
+<h3 id="chaining-option-configurations">
+    Chaining Option Configurations
+    <a class="headerlink" href="#chaining-option-configurations" title="Permalink to this headline">¶</a>
+</h3>
+<p>In many cases you may need to define multiple configurations for each option.
+For example, suppose the <code translate="no" class="notranslate">InvoiceMailer</code> class has an <code translate="no" class="notranslate">host</code> option that is required
+and a <code translate="no" class="notranslate">transport</code> option which can be one of <code translate="no" class="notranslate">sendmail</code>, <code translate="no" class="notranslate">mail</code> and <code translate="no" class="notranslate">smtp</code>.
+You can improve the readability of the code avoiding to duplicate option name for
+each configuration using the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php#method_define" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver::define()" rel="external noopener noreferrer" target="_blank">define()</a>
+method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InvoiceMailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>define(<span class="hljs-string">'host'</span>)
+            <span class="hljs-operator">-&gt;</span>required()
+            <span class="hljs-operator">-&gt;</span><span class="hljs-keyword">default</span>(<span class="hljs-string">'smtp.example.org'</span>)
+            <span class="hljs-operator">-&gt;</span>allowedTypes(<span class="hljs-string">'string'</span>)
+            <span class="hljs-operator">-&gt;</span>info(<span class="hljs-string">'The IP address or hostname'</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>define(<span class="hljs-string">'transport'</span>)
+            <span class="hljs-operator">-&gt;</span>required()
+            <span class="hljs-operator">-&gt;</span><span class="hljs-keyword">default</span>(<span class="hljs-string">'transport'</span>)
+            <span class="hljs-operator">-&gt;</span>allowedValues(<span class="hljs-string">'sendmail'</span>, <span class="hljs-string">'mail'</span>, <span class="hljs-string">'smtp'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="performance-tweaks">
+    Performance Tweaks
+    <a class="headerlink" href="#performance-tweaks" title="Permalink to this headline">¶</a>
+</h3>
+<p>With the current implementation, the <code translate="no" class="notranslate">configureOptions()</code> method will be
+called for every single instance of the <code translate="no" class="notranslate">Mailer</code> class. Depending on the
+amount of option configuration and the number of created instances, this may add
+noticeable overhead to your application. If that overhead becomes a problem, you
+can change your code to do the configuration only once per class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolversByClass</span> = [];
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span> = [])</span>
+    </span>{
+        <span class="hljs-comment">// What type of Mailer is this, a Mailer, a GoogleMailer, ... ?</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span> = get_class(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>);
+
+        <span class="hljs-comment">// Was configureOptions() executed before for this class?</span>
+        <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">isset</span>(<span class="hljs-keyword">self</span><span class="hljs-operator">::$</span>resolversByClass[<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>])) {
+            <span class="hljs-keyword">self</span><span class="hljs-operator">::$</span>resolversByClass[<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>] = <span class="hljs-keyword">new</span> OptionsResolver();
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>configureOptions(<span class="hljs-keyword">self</span><span class="hljs-operator">::$</span>resolversByClass[<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>]);
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>options = <span class="hljs-keyword">self</span><span class="hljs-operator">::$</span>resolversByClass[<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>]<span class="hljs-operator">-&gt;</span>resolve(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/OptionsResolver.php" class="reference external" title="Symfony\Component\OptionsResolver\OptionsResolver" rel="external noopener noreferrer" target="_blank">OptionsResolver</a> instance
+will be created once per class and reused from that on. Be aware that this may
+lead to memory leaks in long-running applications, if the default options contain
+references to objects or object graphs. If that's the case for you, implement a
+method <code translate="no" class="notranslate">clearOptionsConfig()</code> and call it periodically:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mailer</span>
+</span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolversByClass</span> = [];
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">clearOptionsConfig</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">self</span><span class="hljs-operator">::$</span>resolversByClass = [];
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! You now have all the tools and knowledge needed to process
+options in your code.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

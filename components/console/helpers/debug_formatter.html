@@ -1,0 +1,367 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="debug-formatter-helper">
+    Debug Formatter Helper
+    <a class="headerlink" href="#debug-formatter-helper" title="Permalink to this headline">¶</a>
+</h1>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/DebugFormatterHelper.php" class="reference external" title="Symfony\Component\Console\Helper\DebugFormatterHelper" rel="external noopener noreferrer" target="_blank">DebugFormatterHelper</a> provides
+functions to output debug information when running an external program, for
+instance a process or HTTP request. For example, if you used it to output
+the results of running <code translate="no" class="notranslate">figlet symfony</code>, it might output something like
+this:</p>
+<img src="_images/debug_formatter.png" align="center" />
+<div class="section">
+<h2 id="using-the-debug-formatter">
+    Using the debug_formatter
+    <a class="headerlink" href="#using-the-debug-formatter" title="Permalink to this headline">¶</a>
+</h2>
+<p>The formatter is included in the default helper set and you can get it by
+calling <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Command/Command.php#method_getHelper" class="reference external" title="Symfony\Component\Console\Command\Command::getHelper()" rel="external noopener noreferrer" target="_blank">getHelper()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>debugFormatter</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getHelper(<span class="hljs-string">'debug_formatter'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The formatter accepts strings and returns a formatted string, which you then
+output to the console (or even log the information or do anything else).</p>
+<p>All methods of this helper have an identifier as the first argument. This is a
+unique value for each program. This way, the helper can debug information for
+multiple programs at the same time. When using the
+<a href="../../../components/process.html" class="reference internal">Process component</a>, you probably want to use
+<a href="https://secure.php.net/manual/en/function.spl-object-hash.php" class="reference external" title="spl_object_hash" rel="external noopener noreferrer" target="_blank">spl_object_hash</a>.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>This information is often too verbose to be shown by default. You can use
+<a href="../../../console/verbosity.html" class="reference internal">verbosity levels</a> to only show it when in
+debugging mode (<code translate="no" class="notranslate">-vvv</code>).</p>
+</div>
+</div>
+<div class="section">
+<h2 id="starting-a-program">
+    Starting a Program
+    <a class="headerlink" href="#starting-a-program" title="Permalink to this headline">¶</a>
+</h2>
+<p>As soon as you start a program, you can use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/DebugFormatterHelper.php#method_start" class="reference external" title="Symfony\Component\Console\Helper\DebugFormatterHelper::start()" rel="external noopener noreferrer" target="_blank">start()</a> to
+display information that the program is started:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process(...);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>debugFormatter</span><span class="hljs-operator">-&gt;</span>start(
+    spl_object_hash(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span>),
+    <span class="hljs-string">'Some process description'</span>
+));
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>run();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This will output:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">RUN Some process description</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can tweak the prefix using the third argument:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>debugFormatter</span><span class="hljs-operator">-&gt;</span>start(
+    spl_object_hash(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span>),
+    <span class="hljs-string">'Some process description'</span>,
+    <span class="hljs-string">'STARTED'</span>
+));
+<span class="hljs-comment">// will output:</span>
+<span class="hljs-comment">//  STARTED Some process description</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="output-progress-information">
+    Output Progress Information
+    <a class="headerlink" href="#output-progress-information" title="Permalink to this headline">¶</a>
+</h2>
+<p>Some programs give output while they are running. This information can be shown
+using
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/DebugFormatterHelper.php#method_progress" class="reference external" title="Symfony\Component\Console\Helper\DebugFormatterHelper::progress()" rel="external noopener noreferrer" target="_blank">progress()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">Process</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process(...);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>run(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>buffer</span>)</span> <span class="hljs-title">use</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>debugFormatter</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>debugFormatter</span><span class="hljs-operator">-&gt;</span>progress(
+            spl_object_hash(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span>),
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>buffer</span>,
+            Process<span class="hljs-operator">::</span>ERR === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span>
+        )
+    );
+});
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In case of success, this will output:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">OUT The output of the process</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>And this in case of failure:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">ERR The output of the process</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The third argument is a boolean which tells the function if the output is error
+output or not. When <code translate="no" class="notranslate">true</code>, the output is considered error output.</p>
+<p>The fourth and fifth argument allow you to override the prefix for the normal
+output and error output respectively.</p>
+</div>
+<div class="section">
+<h2 id="stopping-a-program">
+    Stopping a Program
+    <a class="headerlink" href="#stopping-a-program" title="Permalink to this headline">¶</a>
+</h2>
+<p>When a program is stopped, you can use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/DebugFormatterHelper.php#method_stop" class="reference external" title="Symfony\Component\Console\Helper\DebugFormatterHelper::stop()" rel="external noopener noreferrer" target="_blank">stop()</a> to
+notify this to the users:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>debugFormatter</span><span class="hljs-operator">-&gt;</span>stop(
+        spl_object_hash(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span>),
+        <span class="hljs-string">'Some command description'</span>,
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>isSuccessful()
+    )
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This will output:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">RES Some command description</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In case of failure, this will be in red and in case of success it will be green.</p>
+</div>
+<div class="section">
+<h2 id="using-multiple-programs">
+    Using multiple Programs
+    <a class="headerlink" href="#using-multiple-programs" title="Permalink to this headline">¶</a>
+</h2>
+<p>As said before, you can also use the helper to display more programs at the
+same time. Information about different programs will be shown in different
+colors, to make it clear which output belongs to which command.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

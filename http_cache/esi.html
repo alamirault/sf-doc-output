@@ -1,0 +1,667 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <span id="edge-side-includes"></span>
+<div class="section">
+<h1 id="working-with-edge-side-includes">
+    Working with Edge Side Includes
+    <a class="headerlink" href="#working-with-edge-side-includes" title="Permalink to this headline">¶</a>
+</h1>
+<p>Gateway caches are a great way to make your website perform better. But they
+have one limitation: they can only cache whole pages. If your pages contain
+dynamic sections, such as the user name or a shopping cart, you are out of
+luck. Fortunately, Symfony provides a solution for these cases, based on a
+technology called <a href="http://www.w3.org/TR/esi-lang" class="reference external" rel="external noopener noreferrer" target="_blank">ESI</a>, or Edge Side Includes. Akamai wrote this specification
+in 2001 and it allows specific parts of a page to have a different
+caching strategy than the main page.</p>
+<p>The ESI specification describes tags you can embed in your pages to communicate
+with the gateway cache. Only one tag is implemented in Symfony, <code translate="no" class="notranslate">include</code>,
+as this is the only useful one outside of Akamai context:</p>
+<div translate="no" class="highlight-html notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... some content --&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- Embed the content of another page here --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">esi:include</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"http://..."</span>/&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- ... more content --&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Notice from the example that each ESI tag requires a fully-qualified URL.
+An ESI tag represents a page fragment that can be fetched via the given
+URL.</p>
+</div>
+<p>When a request is handled, the gateway cache fetches the entire page from
+its cache or requests it from the backend application. If the response contains
+one or more ESI tags, these are processed in the same way. In other words,
+the gateway cache either retrieves the included page fragment from its cache
+or requests the page fragment from the backend application again. When all
+the ESI tags have been resolved, the gateway cache merges each into the main
+page and sends the final content to the client.</p>
+<p>All of this happens transparently at the gateway cache level (i.e. outside
+of your application). As you'll see, if you choose to take advantage of ESI
+tags, Symfony makes the process of including them almost effortless.</p>
+<span id="using-esi-in-symfony2"></span>
+<div class="section">
+<h2 id="using-esi-in-symfony">
+    Using ESI in Symfony
+    <a class="headerlink" href="#using-esi-in-symfony" title="Permalink to this headline">¶</a>
+</h2>
+<p>First, to use ESI, be sure to enable it in your application configuration:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-fb12c8e637ea8cf89f796c285fbf3d6cc83d2641" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-f0d7089537c5a5186ec467190b75ce122b7c8a2f" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-238cfbe616fe57e09b8e2053a6e68161f49a0dac" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-fb12c8e637ea8cf89f796c285fbf3d6cc83d2641" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/framework.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">esi:</span> <span class="hljs-literal">true</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-f0d7089537c5a5186ec467190b75ce122b7c8a2f" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/framework.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:esi</span> <span class="hljs-attr">enabled</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-238cfbe616fe57e09b8e2053a6e68161f49a0dac" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/framework.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>esi()
+        <span class="hljs-operator">-&gt;</span>enabled(<span class="hljs-keyword">true</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Now, suppose you have a page that is relatively static, except for a news
+ticker at the bottom of the content. With ESI, you can cache the news ticker
+independently of the rest of the page:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/DefaultController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DefaultController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">about</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'static/about.html.twig'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setPublic();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setMaxAge(<span class="hljs-number">600</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In this example, the response is marked as public to make the full page
+cacheable for all requests with a lifetime of ten minutes.
+Next, include the news ticker in the template by embedding an action.
+This is done via the <code translate="no" class="notranslate">render()</code> helper (for more details, see how to
+<a href="../templates.html#templates-embed-controllers" class="reference internal">embed controllers in templates</a>).</p>
+<p>As the embedded content comes from another page (or controller for that
+matter), Symfony uses the standard <code translate="no" class="notranslate">render</code> helper to configure ESI tags:</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-comment">{# templates/static/about.html.twig #}</span><span class="xml">
+
+</span><span class="hljs-comment">{# you can use a controller reference #}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ render_esi(controller('App\\Controller\\NewsController::latest', { 'maxPerPage': 5 })) }}</span><span class="xml">
+
+</span><span class="hljs-comment">{# ... or a URL #}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ render_esi(url('latest_news', { 'maxPerPage': 5 })) }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>By using the <code translate="no" class="notranslate">esi</code> renderer (via the <code translate="no" class="notranslate">render_esi()</code> Twig function), you
+tell Symfony that the action should be rendered as an ESI tag. You might be
+wondering why you would want to use a helper instead of just writing the ESI
+tag yourself. That's because using a helper makes your application work even
+if there is no gateway cache installed.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>As you'll see below, the <code translate="no" class="notranslate">maxPerPage</code> variable you pass is available
+as an argument to your controller (i.e. <code translate="no" class="notranslate">$maxPerPage</code>). The variables
+passed through <code translate="no" class="notranslate">render_esi</code> also become part of the cache key so that
+you have unique caches for each combination of variables and values.</p>
+</div>
+<p>When using the default <code translate="no" class="notranslate">render()</code> function (or setting the renderer to
+<code translate="no" class="notranslate">inline</code>), Symfony merges the included page content into the main one
+before sending the response to the client. But if you use the <code translate="no" class="notranslate">esi</code> renderer
+(i.e. call <code translate="no" class="notranslate">render_esi()</code>) <em>and</em> if Symfony detects that it's talking to a
+gateway cache that supports ESI, it generates an ESI include tag. But if there
+is no gateway cache or if it does not support ESI, Symfony will just merge
+the included page content within the main one as it would have done if you had
+used <code translate="no" class="notranslate">render()</code>.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Symfony considers that a gateway cache supports ESI if its request include
+the <code translate="no" class="notranslate">Surrogate-Capability</code> HTTP header and the value of that header
+contains the <code translate="no" class="notranslate">ESI/1.0</code> string anywhere.</p>
+</div>
+<p>The embedded action can now specify its own caching rules entirely independently
+of the main page:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-2">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-cf8fa914ffd18d7819f22b74ba782103f6d177d2" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-062dc23e08fd960e4947bdf3bd848a5022215861" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-cf8fa914ffd18d7819f22b74ba782103f6d177d2" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Controller/NewsController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">Cache</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NewsController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Cache(smaxage: 60)]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">latest</span><span class="hljs-params">(int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>maxPerPage</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-062dc23e08fd960e4947bdf3bd848a5022215861" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/NewsController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NewsController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">latest</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>maxPerPage</span>)</span>
+    </span>{
+        <span class="hljs-comment">// sets to public and adds some expiration</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setSharedMaxAge(<span class="hljs-number">60</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>In this example, the embedded action is cached publicly too because the contents
+are the same for all requests. However, in other cases you may need to make this
+response non-public and even non-cacheable, depending on your needs.</p>
+<p>Putting all the above code together, with ESI the full page cache will be valid
+for 600 seconds, but the news component cache will only last for 60 seconds.</p>
+<span id="http_cache-fragments"></span>
+<p>When using a controller reference, the ESI tag should reference the embedded
+action as an accessible URL so the gateway cache can fetch it independently of
+the rest of the page. Symfony takes care of generating a unique URL for any
+controller reference and it is able to route them properly thanks to the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/EventListener/FragmentListener.php" class="reference external" title="Symfony\Component\HttpKernel\EventListener\FragmentListener" rel="external noopener noreferrer" target="_blank">FragmentListener</a>
+that must be enabled in your configuration:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-2b7cd55e49c88b8324b955ffa0d4dcb62848a05c" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-d81e5dddf1da64e858991608fee9440f411ebfe2" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-a09ea7aae2624f9f82629f9c1db1ac9bfb9b0e42" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-2b7cd55e49c88b8324b955ffa0d4dcb62848a05c" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/framework.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">fragments:</span> <span class="hljs-string">{</span> <span class="hljs-attr">path:</span> <span class="hljs-string">/_fragment</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-d81e5dddf1da64e858991608fee9440f411ebfe2" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/framework.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:fragment</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/_fragment"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-a09ea7aae2624f9f82629f9c1db1ac9bfb9b0e42" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/framework.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>fragments()
+        <span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'/_fragment'</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>One great advantage of the ESI renderer is that you can make your application
+as dynamic as needed and at the same time, hit the application as little as
+possible.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>The fragment listener only responds to signed requests. Requests are only
+signed when using the fragment renderer and the <code translate="no" class="notranslate">render_esi</code> Twig
+function.</p>
+</div>
+<p>The <code translate="no" class="notranslate">render_esi</code> helper supports three other useful options:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">alt</code></dt>
+        
+        <dd>
+                            Used as the <code translate="no" class="notranslate">alt</code> attribute on the ESI tag, which allows you to specify an
+alternative URL to be used if the <code translate="no" class="notranslate">src</code> cannot be found.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">ignore_errors</code></dt>
+        
+        <dd>
+                            If set to true, an <code translate="no" class="notranslate">onerror</code> attribute will be added to the ESI with a value
+of <code translate="no" class="notranslate">continue</code> indicating that, in the event of a failure, the gateway cache
+will remove the ESI tag silently.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">absolute_uri</code></dt>
+        
+        <dd>
+                            If set to true, an absolute URI will be generated. <strong>default</strong>: <code translate="no" class="notranslate">false</code>
+                    </dd>
+    </dl>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">absolute_uri</code> option was introduced in Symfony 6.2.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

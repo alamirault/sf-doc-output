@@ -1,0 +1,177 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-traceable-event-dispatcher">
+    The Traceable Event Dispatcher
+    <a class="headerlink" href="#the-traceable-event-dispatcher" title="Permalink to this headline">¶</a>
+</h1>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/EventDispatcher/Debug/TraceableEventDispatcher.php" class="reference external" title="Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher" rel="external noopener noreferrer" target="_blank">TraceableEventDispatcher</a>
+is an event dispatcher that wraps any other event dispatcher and can then
+be used to determine which event listeners have been called by the dispatcher.
+Pass the event dispatcher to be wrapped and an instance of the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Stopwatch/Stopwatch.php" class="reference external" title="Symfony\Component\Stopwatch\Stopwatch" rel="external noopener noreferrer" target="_blank">Stopwatch</a> to its constructor:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">Debug</span>\<span class="hljs-title">TraceableEventDispatcher</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Stopwatch</span>\<span class="hljs-title">Stopwatch</span>;
+
+<span class="hljs-comment">// the event dispatcher to debug</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span> = ...;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>traceableEventDispatcher</span> = <span class="hljs-keyword">new</span> TraceableEventDispatcher(
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span>,
+    <span class="hljs-keyword">new</span> Stopwatch()
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, the <code translate="no" class="notranslate">TraceableEventDispatcher</code> can be used like any other event dispatcher
+to register event listeners and dispatch events:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// registers an event listener</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>eventListener</span> = ...;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>priority</span> = ...;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>traceableEventDispatcher</span><span class="hljs-operator">-&gt;</span>addListener(
+    <span class="hljs-string">'event.the_name'</span>,
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>eventListener</span>,
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>priority</span>
+);
+
+<span class="hljs-comment">// dispatches an event</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span> = ...;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>traceableEventDispatcher</span><span class="hljs-operator">-&gt;</span>dispatch(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>, <span class="hljs-string">'event.the_name'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>After your application has been processed, you can use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/EventDispatcher/Debug/TraceableEventDispatcher.php#method_getCalledListeners" class="reference external" title="Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher::getCalledListeners()" rel="external noopener noreferrer" target="_blank">getCalledListeners()</a>
+method to retrieve an array of event listeners that have been called in
+your application. Similarly, the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/EventDispatcher/Debug/TraceableEventDispatcher.php#method_getNotCalledListeners" class="reference external" title="Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher::getNotCalledListeners()" rel="external noopener noreferrer" target="_blank">getNotCalledListeners()</a>
+method returns an array of event listeners that have not been called:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>calledListeners</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>traceableEventDispatcher</span><span class="hljs-operator">-&gt;</span>getCalledListeners();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>notCalledListeners</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>traceableEventDispatcher</span><span class="hljs-operator">-&gt;</span>getNotCalledListeners();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

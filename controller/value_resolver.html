@@ -1,0 +1,766 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="extending-action-argument-resolving">
+    Extending Action Argument Resolving
+    <a class="headerlink" href="#extending-action-argument-resolving" title="Permalink to this headline">¶</a>
+</h1>
+<p>In the <a href="../controller.html" class="reference internal">controller guide</a>, you've learned that you can get the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Request.php" class="reference external" title="Symfony\Component\HttpFoundation\Request" rel="external noopener noreferrer" target="_blank">Request</a> object via an argument in
+your controller. This argument has to be type-hinted by the <code translate="no" class="notranslate">Request</code> class
+in order to be recognized. This is done via the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentResolver.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentResolver" rel="external noopener noreferrer" target="_blank">ArgumentResolver</a>. By
+creating and registering custom value resolvers, you can extend this
+functionality.</p>
+<span id="functionality-shipped-with-the-httpkernel"></span>
+<div class="section">
+<h2 id="built-in-value-resolvers">
+    Built-In Value Resolvers
+    <a class="headerlink" href="#built-in-value-resolvers" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony ships with the following value resolvers in the
+<a href="../components/http_kernel.html" class="reference internal">HttpKernel component</a>:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentResolver/BackedEnumValueResolver.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentResolver\BackedEnumValueResolver" rel="external noopener noreferrer" target="_blank">BackedEnumValueResolver</a></dt>
+        
+        <dd>
+                            <p class="first">Attempts to resolve a backed enum case from a route path parameter that matches the name of the argument.
+Leads to a 404 Not Found response if the value isn't a valid backing value for the enum type.</p>
+                            <p>For example, if your backed enum is:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Model</span>;
+
+enum Suit: string
+{
+    <span class="hljs-keyword">case</span> Hearts = <span class="hljs-string">'H'</span>;
+    <span class="hljs-keyword">case</span> Diamonds = <span class="hljs-string">'D'</span>;
+    <span class="hljs-keyword">case</span> Clubs = <span class="hljs-string">'C'</span>;
+    <span class="hljs-keyword">case</span> Spades = <span class="hljs-string">'S'</span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                            <p>And your controller contains the following:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CardController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/cards/{suit}')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">list</span><span class="hljs-params">(Suit <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>suit</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                            <p>When requesting the <code translate="no" class="notranslate">/cards/H</code> URL, the <code translate="no" class="notranslate">$suit</code> variable will store the
+<code translate="no" class="notranslate">Suit::Hearts</code> case.</p>
+                            <p>Furthermore, you can limit route parameter's allowed values to
+only one (or more) with <code translate="no" class="notranslate">EnumRequirement</code>:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Requirement</span>\<span class="hljs-title">EnumRequirement</span>;
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CardController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/cards/{suit}', requirements: [</span>
+        <span class="hljs-comment">// this allows all values defined in the Enum</span>
+        <span class="hljs-string">'suit'</span> =&gt; <span class="hljs-keyword">new</span> EnumRequirement(Suit<span class="hljs-operator">::</span>class),
+        <span class="hljs-comment">// this restricts the possible values to the Enum values listed here</span>
+        <span class="hljs-string">'suit'</span> =&gt; <span class="hljs-keyword">new</span> EnumRequirement([Suit<span class="hljs-operator">::</span>Diamonds, Suit<span class="hljs-operator">::</span>Spades]),
+    ])]
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">list</span><span class="hljs-params">(Suit <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>suit</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                            <p>The example above allows requesting only <code translate="no" class="notranslate">/cards/D</code> and <code translate="no" class="notranslate">/cards/S</code>
+URLs and leads to 404 Not Found response in two other cases.</p>
+                            <div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The <code translate="no" class="notranslate">BackedEnumValueResolver</code> and <code translate="no" class="notranslate">EnumRequirement</code> were introduced in Symfony 6.1.</p>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentResolver/RequestAttributeValueResolver.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentResolver\RequestAttributeValueResolver" rel="external noopener noreferrer" target="_blank">RequestAttributeValueResolver</a></dt>
+        
+        <dd>
+                            Attempts to find a request attribute that matches the name of the argument.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentResolver/DateTimeValueResolver.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentResolver\DateTimeValueResolver" rel="external noopener noreferrer" target="_blank">DateTimeValueResolver</a></dt>
+        
+        <dd>
+                            <p class="first">Attempts to find a request attribute that matches the name of the argument
+and injects a <code translate="no" class="notranslate">DateTimeInterface</code> object if type-hinted with a class
+extending <code translate="no" class="notranslate">DateTimeInterface</code>.</p>
+                            <p>By default any input that can be parsed as a date string by PHP is accepted.
+You can restrict how the input can be formatted with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Attribute/MapDateTime.php" class="reference external" title="Symfony\Component\HttpKernel\Attribute\MapDateTime" rel="external noopener noreferrer" target="_blank">MapDateTime</a> attribute.</p>
+                            <div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The <code translate="no" class="notranslate">DateTimeInterface</code> object is generated with the <a href="../components/clock.html" class="reference internal">Clock component</a>.
+This. gives your full control over the date and time values the controller
+receives when testing your application and using the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Clock/MockClock.php" class="reference external" title="Symfony\Component\Clock\MockClock" rel="external noopener noreferrer" target="_blank">MockClock</a> implementation.</p>
+</div>
+                            <div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The <code translate="no" class="notranslate">DateTimeValueResolver</code> and the <code translate="no" class="notranslate">MapDateTime</code> attribute were
+introduced in Symfony 6.1.</p>
+</div>
+                            <div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The use of the <a href="../components/clock.html" class="reference internal">Clock component</a> to generate the
+<code translate="no" class="notranslate">DateTimeInterface</code> object was introduced in Symfony 6.3.</p>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentResolver/RequestValueResolver.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentResolver\RequestValueResolver" rel="external noopener noreferrer" target="_blank">RequestValueResolver</a></dt>
+        
+        <dd>
+                            Injects the current <code translate="no" class="notranslate">Request</code> if type-hinted with <code translate="no" class="notranslate">Request</code> or a class
+extending <code translate="no" class="notranslate">Request</code>.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentResolver/ServiceValueResolver.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentResolver\ServiceValueResolver" rel="external noopener noreferrer" target="_blank">ServiceValueResolver</a></dt>
+        
+        <dd>
+                            Injects a service if type-hinted with a valid service class or interface. This
+works like <a href="../service_container/autowiring.html" class="reference internal">autowiring</a>.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentResolver/SessionValueResolver.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentResolver\SessionValueResolver" rel="external noopener noreferrer" target="_blank">SessionValueResolver</a></dt>
+        
+        <dd>
+                            Injects the configured session class implementing <code translate="no" class="notranslate">SessionInterface</code> if
+type-hinted with <code translate="no" class="notranslate">SessionInterface</code> or a class implementing
+<code translate="no" class="notranslate">SessionInterface</code>.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentResolver/DefaultValueResolver.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentResolver\DefaultValueResolver" rel="external noopener noreferrer" target="_blank">DefaultValueResolver</a></dt>
+        
+        <dd>
+                            Will set the default value of the argument if present and the argument
+is optional.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentResolver/UidValueResolver.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentResolver\UidValueResolver" rel="external noopener noreferrer" target="_blank">UidValueResolver</a></dt>
+        
+        <dd>
+                            <p class="first">Attempts to convert any UID values from a route path parameter into UID objects.
+Leads to a 404 Not Found response if the value isn't a valid UID.</p>
+                            <p>For example, the following will convert the token parameter into a <code translate="no" class="notranslate">UuidV4</code> object:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/DefaultController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">UuidV4</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DefaultController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/share/{token}')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">share</span><span class="hljs-params">(UuidV4 <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                            <div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The <code translate="no" class="notranslate">UidValueResolver</code> was introduced in Symfony 6.1.</p>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentResolver/VariadicValueResolver.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentResolver\VariadicValueResolver" rel="external noopener noreferrer" target="_blank">VariadicValueResolver</a></dt>
+        
+        <dd>
+                            Verifies if the request data is an array and will add all of them to the
+argument list. When the action is called, the last (variadic) argument will
+contain all the values of this array.
+                    </dd>
+    </dl>
+<p>In addition, some components, bridges and official bundles provide other value resolvers:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/Controller/UserValueResolver.php" class="reference external" title="Symfony\Component\Security\Http\Controller\UserValueResolver" rel="external noopener noreferrer" target="_blank">UserValueResolver</a></dt>
+        
+        <dd>
+                            <p class="first">Injects the object that represents the current logged in user if type-hinted
+with <code translate="no" class="notranslate">UserInterface</code>. You can also type-hint your own <code translate="no" class="notranslate">User</code> class but you
+must then add the <code translate="no" class="notranslate">#[CurrentUser]</code> attribute to the argument. Default value
+can be set to <code translate="no" class="notranslate">null</code> in case  the controller can be accessed by anonymous
+users. It requires installing the <a href="../security.html" class="reference internal">SecurityBundle</a>.</p>
+                            <p class="last">If the argument is not nullable and there is no logged in user or the logged in
+user has a user class not matching the type-hinted class, an <code translate="no" class="notranslate">AccessDeniedException</code>
+is thrown by the resolver to prevent access to the controller.</p>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Doctrine/ArgumentResolver/EntityValueResolver.php" class="reference external" title="Symfony\Bridge\Doctrine\ArgumentResolver\EntityValueResolver" rel="external noopener noreferrer" target="_blank">EntityValueResolver</a></dt>
+        
+        <dd>
+                            <p class="first">Automatically query for an entity and pass it as an argument to your controller.</p>
+                            <p>For example, the following will query the <code translate="no" class="notranslate">Product</code> entity which has <code translate="no" class="notranslate">{id}</code> as primary key:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/DefaultController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DefaultController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/product/{id}')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">share</span><span class="hljs-params">(Product <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                            <p>To learn more about the use of the <code translate="no" class="notranslate">EntityValueResolver</code>, see the dedicated
+section <a href="../doctrine.html#doctrine-entity-value-resolver" class="reference internal">Automatically Fetching Objects</a>.</p>
+                            <div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">EntityValueResolver</code> was introduced in Symfony 6.2.</p>
+</div>
+                    </dd>
+                        <dt>PSR-7 Objects Resolver:</dt>
+        
+        <dd>
+                            Injects a Symfony HttpFoundation <code translate="no" class="notranslate">Request</code> object created from a PSR-7 object
+of type <a href="https://github.com/symfony/symfony/blob/5.4/src/Psr/Http/Message/ServerRequestInterface.php" class="reference external" title="Psr\Http\Message\ServerRequestInterface" rel="external noopener noreferrer" target="_blank">ServerRequestInterface</a>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Psr/Http/Message/RequestInterface.php" class="reference external" title="Psr\Http\Message\RequestInterface" rel="external noopener noreferrer" target="_blank">RequestInterface</a> or <a href="https://github.com/symfony/symfony/blob/5.4/src/Psr/Http/Message/MessageInterface.php" class="reference external" title="Psr\Http\Message\MessageInterface" rel="external noopener noreferrer" target="_blank">MessageInterface</a>.
+It requires installing <a href="../components/psr7.html" class="reference internal">the PSR-7 Bridge</a> component.
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h2 id="adding-a-custom-value-resolver">
+    Adding a Custom Value Resolver
+    <a class="headerlink" href="#adding-a-custom-value-resolver" title="Permalink to this headline">¶</a>
+</h2>
+<p>In the next example, you'll create a value resolver to inject an ID value
+object whenever a controller argument has a type implementing
+<code translate="no" class="notranslate">IdentifierInterface</code> (e.g. <code translate="no" class="notranslate">BookingId</code>):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/BookingController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Reservation</span>\<span class="hljs-title">BookingId</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BookingController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">(BookingId <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ... do something with $id</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">ValueResolverInterface</code> was introduced in Symfony 6.2. Prior to
+6.2, you had to use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentValueResolverInterface.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface" rel="external noopener noreferrer" target="_blank">ArgumentValueResolverInterface</a>,
+which defines different methods.</p>
+</div>
+<p>Adding a new value resolver requires creating a class that implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ValueResolverInterface.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ValueResolverInterface" rel="external noopener noreferrer" target="_blank">ValueResolverInterface</a>
+and defining a service for it.</p>
+<p>This interface contains a <code translate="no" class="notranslate">resolve()</code> method, which is called for each
+argument of the controller. It receives the current <code translate="no" class="notranslate">Request</code> object and an
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/ControllerMetadata/ArgumentMetadata.php" class="reference external" title="Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata" rel="external noopener noreferrer" target="_blank">ArgumentMetadata</a>
+instance, which contains all information from the method signature.</p>
+<p>The <code translate="no" class="notranslate">resolve()</code> method should return either an empty array (if it cannot resolve
+this argument) or an array with the resolved value(s). Usually arguments are
+resolved as a single value, but variadic arguments require resolving multiple
+values. That's why you must always return an array, even for single values:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/ValueResolver/IdentifierValueResolver.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">ValueResolver</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">IdentifierInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">ValueResolverInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">ControllerMetadata</span>\<span class="hljs-title">ArgumentMetadata</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BookingIdValueResolver</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ValueResolverInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">resolve</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, ArgumentMetadata <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argument</span>)</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-comment">// get the argument type (e.g. BookingId)</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentType</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argument</span><span class="hljs-operator">-&gt;</span>getType();
+        <span class="hljs-keyword">if</span> (
+            !<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentType</span>
+            || !is_subclass_of(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentType</span>, IdentifierInterface<span class="hljs-operator">::</span>class, <span class="hljs-keyword">true</span>)
+        ) {
+            <span class="hljs-keyword">return</span> [];
+        }
+
+        <span class="hljs-comment">// get the value from the request, based on the argument name</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>get(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argument</span><span class="hljs-operator">-&gt;</span>getName());
+        <span class="hljs-keyword">if</span> (!is_string(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>)) {
+            <span class="hljs-keyword">return</span> [];
+        }
+
+        <span class="hljs-comment">// create and return the value object</span>
+        <span class="hljs-keyword">return</span> [<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentType</span><span class="hljs-operator">::</span>fromString(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>)];
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This method first checks whether it can resolve the value:</p>
+<ul>
+    <li>The argument must be type-hinted with a class implementing a custom <code translate="no" class="notranslate">IdentifierInterface</code>;</li>
+<li>The argument name (e.g. <code translate="no" class="notranslate">$id</code>) must match the name of a request
+attribute (e.g. using a <code translate="no" class="notranslate">/booking/{id}</code> route placeholder).</li>
+</ul>
+<p>When those requirements are met, the method creates a new instance of the
+custom value object and returns it as the value for this argument.</p>
+<p>That's it! Now all you have to do is add the configuration for the service
+container. This can be done by tagging the service with <code translate="no" class="notranslate">controller.argument_value_resolver</code>
+and adding a priority:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-9e1c0fc10b33fdc02193377c2651137a18bca437" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-867a31d25e18ad01c84f15fd76ccb6ae6b4f0273" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-d2a7150557ffe7b1dc97b9ee2fd63020cc41f1e3" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-9e1c0fc10b33fdc02193377c2651137a18bca437" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-attr">_defaults:</span>
+        <span class="hljs-comment"># ... be sure autowiring is enabled</span>
+        <span class="hljs-attr">autowire:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-string">App\ValueResolver\BookingIdValueResolver:</span>
+        <span class="hljs-attr">tags:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">name:</span> <span class="hljs-string">controller.argument_value_resolver,</span> <span class="hljs-attr">priority:</span> <span class="hljs-number">150</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-867a31d25e18ad01c84f15fd76ccb6ae6b4f0273" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-Instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... be sure autowiring is enabled --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">defaults</span> <span class="hljs-attr">autowire</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\ValueResolver\BookingIdValueResolver"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"controller.argument_value_resolver"</span> <span class="hljs-attr">priority</span>=<span class="hljs-string">"150"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-d2a7150557ffe7b1dc97b9ee2fd63020cc41f1e3" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">ValueResolver</span>\<span class="hljs-title">BookingIdValueResolver</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(BookingIdValueResolver<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>tag(<span class="hljs-string">'controller.argument_value_resolver'</span>, [<span class="hljs-string">'priority'</span> =&gt; <span class="hljs-number">150</span>])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>While adding a priority is optional, it's recommended to add one to make sure
+the expected value is injected. The built-in <code translate="no" class="notranslate">RequestAttributeValueResolver</code>,
+which fetches attributes from the <code translate="no" class="notranslate">Request</code>, has a priority of <code translate="no" class="notranslate">100</code>. If your
+resolver also fetches <code translate="no" class="notranslate">Request</code> attributes, set a priority of <code translate="no" class="notranslate">100</code> or more.
+Otherwise, set a priority lower than <code translate="no" class="notranslate">100</code> to make sure the argument resolver
+is not triggered when the <code translate="no" class="notranslate">Request</code> attribute is present.</p>
+<p>To ensure your resolvers are added in the right position you can run the following
+command to see which argument resolvers are present and in which order they run:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:container debug.argument_resolver.inner --show-arguments</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

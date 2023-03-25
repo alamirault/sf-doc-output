@@ -1,0 +1,1976 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-use-passwordless-login-link-authentication">
+    How to use Passwordless Login Link Authentication
+    <a class="headerlink" href="#how-to-use-passwordless-login-link-authentication" title="Permalink to this headline">¶</a>
+</h1>
+<p>Login links, also called &quot;magic links&quot;, are a passwordless authentication
+mechanism. Whenever a user wants to login, a new link is generated and sent to
+them (e.g. using an email). The link fully authenticates the user in the
+application when clicking on it.</p>
+<p>This authentication method can help you eliminate most of the customer support
+related to authentication (e.g. I forgot my password, how can I change or reset
+my password, etc.)</p>
+<div class="section">
+<h2 id="using-the-login-link-authenticator">
+    Using the Login Link Authenticator
+    <a class="headerlink" href="#using-the-login-link-authenticator" title="Permalink to this headline">¶</a>
+</h2>
+<p>This guide assumes you have setup security and have created a user object
+in your application. Follow <a href="../security.html" class="reference internal">the main security guide</a> if
+this is not yet the case.</p>
+<div class="section">
+<h3 id="1-configure-the-login-link-authenticator">
+    1) Configure the Login Link Authenticator
+    <a class="headerlink" href="#1-configure-the-login-link-authenticator" title="Permalink to this headline">¶</a>
+</h3>
+<p>The login link authenticator is configured using the <code translate="no" class="notranslate">login_link</code> option
+under the firewall. You must configure a <code translate="no" class="notranslate">check_route</code> and
+<code translate="no" class="notranslate">signature_properties</code> when enabling this authenticator:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-122093f65d867270d4175f5f25579b920456995a" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-acf65fbf6ea51113ec1c41f9e1f9139bbd00483d" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-55af61567f9b36e67e8dbcf72c5dce02e7f87239" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-122093f65d867270d4175f5f25579b920456995a" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">firewalls:</span>
+        <span class="hljs-attr">main:</span>
+            <span class="hljs-attr">login_link:</span>
+                <span class="hljs-attr">check_route:</span> <span class="hljs-string">login_check</span>
+                <span class="hljs-attr">signature_properties:</span> <span class="hljs-string">['id']</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-acf65fbf6ea51113ec1c41f9e1f9139bbd00483d" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/security
+        https://symfony.com/schema/dic/security/security-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">firewall</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">login-link</span> <span class="hljs-attr">check-route</span>=<span class="hljs-string">"login_check"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">signature-property</span>&gt;</span>id<span class="hljs-tag">&lt;/<span class="hljs-name">signature-property</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">login-link</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">firewall</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-55af61567f9b36e67e8dbcf72c5dce02e7f87239" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>firewall(<span class="hljs-string">'main'</span>)
+        <span class="hljs-operator">-&gt;</span>loginLink()
+            <span class="hljs-operator">-&gt;</span>checkRoute(<span class="hljs-string">'login_check'</span>)
+            <span class="hljs-operator">-&gt;</span>signatureProperties([<span class="hljs-string">'id'</span>])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>The <code translate="no" class="notranslate">signature_properties</code> are used to create a signed URL. This must
+contain at least one property of your <code translate="no" class="notranslate">User</code> object that uniquely
+identifies this user (e.g. the user ID). Read more about this setting
+<a href="login_link.html#security-login-link-signature" class="reference internal">further down below</a>.</p>
+<p>The <code translate="no" class="notranslate">check_route</code> must be an existing route and it will be used to
+generate the login link that will authenticate the user. You don't need a
+controller (or it can be empty) because the login link authenticator will
+intercept requests to this route:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-4">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-728da4a2d5f5335177fa4a1610c15e0d1e9da091" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-f52394a1bad68e0ddb3aa7f33550d4f7e405b3b8" aria-selected="false"
+                 tabindex="-1">
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-c25a1098224735349948e9199b179ca3d82cc8e8" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-aae87fd2372994a98b35dcf9d6440f225e7fda0e" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-728da4a2d5f5335177fa4a1610c15e0d1e9da091" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Controller/SecurityController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SecurityController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/login_check', name: 'login_check')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">check</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> \LogicException(<span class="hljs-string">'This code should never be reached'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-f52394a1bad68e0ddb3aa7f33550d4f7e405b3b8" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="display: none">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/routes.yaml</span>
+
+<span class="hljs-comment"># ...</span>
+<span class="hljs-attr">login_check:</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">/login_check</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-c25a1098224735349948e9199b179ca3d82cc8e8" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/routes.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">routes</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/routing"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/routing
+        https://symfony.com/schema/routing/routing-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">route</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"login_check"</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/login_check"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">routes</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-aae87fd2372994a98b35dcf9d6440f225e7fda0e" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/routes.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">DefaultController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">RoutingConfigurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(RoutingConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'login_check'</span>, <span class="hljs-string">'/login_check'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h3 id="2-generate-the-login-link">
+    2) Generate the Login Link
+    <a class="headerlink" href="#2-generate-the-login-link" title="Permalink to this headline">¶</a>
+</h3>
+<p>Now that the authenticator is able to check the login links, you must
+create a page where a user can request a login link and log in to your
+website.</p>
+<p>The login link can be generated using the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/LoginLink/LoginLinkHandlerInterface.php" class="reference external" title="Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface" rel="external noopener noreferrer" target="_blank">LoginLinkHandlerInterface</a>.
+The correct login link handler is autowired for you when type-hinting for
+this interface:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/SecurityController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repository</span>\<span class="hljs-title">UserRepository</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">LoginLink</span>\<span class="hljs-title">LoginLinkHandlerInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SecurityController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/login', name: 'login')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">requestLoginLink</span><span class="hljs-params">(LoginLinkHandlerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkHandler</span>, UserRepository <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userRepository</span>, Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>
+    </span>{
+        <span class="hljs-comment">// check if login form is submitted</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>isMethod(<span class="hljs-string">'POST'</span>)) {
+            <span class="hljs-comment">// load the user in some way (e.g. using the form input)</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>request<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'email'</span>);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userRepository</span><span class="hljs-operator">-&gt;</span>findOneBy([<span class="hljs-string">'email'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span>]);
+
+            <span class="hljs-comment">// create a login link for $user this returns an instance</span>
+            <span class="hljs-comment">// of LoginLinkDetails</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkDetails</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkHandler</span><span class="hljs-operator">-&gt;</span>createLoginLink(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLink</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkDetails</span><span class="hljs-operator">-&gt;</span>getUrl();
+
+            <span class="hljs-comment">// ... send the link and return a response (see next section)</span>
+        }
+
+        <span class="hljs-comment">// if it's not submitted, render the "login" form</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'security/login.html.twig'</span>);
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/security/login.html.twig #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">extends</span></span> 'base.html.twig' %}</span><span class="xml">
+
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> body %}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">action</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ path('login') }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"POST"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"email"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"email"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"submit"</span>&gt;</span>Send Login Link<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In this controller, the user is submitting their email address to the
+controller. Based on this property, the correct user is loaded and a login
+link is created using
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/LoginLink/LoginLinkHandlerInterface.php#method_createLoginLink" class="reference external" title="Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface::createLoginLink()" rel="external noopener noreferrer" target="_blank">createLoginLink()</a>.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>It is important to send this link to the user and <strong>not show it directly</strong>,
+as that would allow anyone to login. For instance, use the
+<a href="../mailer.html" class="reference internal">mailer</a> component to mail the login link to the user.
+Or use the  component to send an SMS to the
+user's device.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="3-send-the-login-link-to-the-user">
+    3) Send the Login Link to the User
+    <a class="headerlink" href="#3-send-the-login-link-to-the-user" title="Permalink to this headline">¶</a>
+</h3>
+<p>Now the link is created, it needs to be sent to the user. Anyone with the
+link is able to login as this user, so you need to make sure to send it to
+a known device of them (e.g. using e-mail or SMS).</p>
+<p>You can send the link using any library or method. However the login link
+authenticator provides integration with the <a href="../notifier.html" class="reference internal">Notifier component</a>.
+Use the special <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/LoginLink/LoginLinkNotification.php" class="reference external" title="Symfony\Component\Security\Http\LoginLink\LoginLinkNotification" rel="external noopener noreferrer" target="_blank">LoginLinkNotification</a>
+to create a notification and send it to the user's email address or phone
+number:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/SecurityController.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">NotifierInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Recipient</span>\<span class="hljs-title">Recipient</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">LoginLink</span>\<span class="hljs-title">LoginLinkNotification</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SecurityController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/login', name: 'login')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">requestLoginLink</span><span class="hljs-params">(NotifierInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>notifier</span>, LoginLinkHandlerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkHandler</span>, UserRepository <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userRepository</span>, Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>isMethod(<span class="hljs-string">'POST'</span>)) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>request<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'email'</span>);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userRepository</span><span class="hljs-operator">-&gt;</span>findOneBy([<span class="hljs-string">'email'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span>]);
+
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkDetails</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkHandler</span><span class="hljs-operator">-&gt;</span>createLoginLink(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>);
+
+            <span class="hljs-comment">// create a notification based on the login link details</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>notification</span> = <span class="hljs-keyword">new</span> LoginLinkNotification(
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkDetails</span>,
+                <span class="hljs-string">'Welcome to MY WEBSITE!'</span> <span class="hljs-comment">// email subject</span>
+            );
+            <span class="hljs-comment">// create a recipient for this user</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>recipient</span> = <span class="hljs-keyword">new</span> Recipient(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span><span class="hljs-operator">-&gt;</span>getEmail());
+
+            <span class="hljs-comment">// send the notification to the user</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>notifier</span><span class="hljs-operator">-&gt;</span>send(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>notification</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>recipient</span>);
+
+            <span class="hljs-comment">// render a "Login link is sent!" page</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'security/login_link_sent.html.twig'</span>);
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'security/login.html.twig'</span>);
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>This integration requires the <a href="../notifier.html" class="reference internal">Notifier</a> and
+<a href="../mailer.html" class="reference internal">Mailer</a> components to be installed and configured.
+Install all required packages using:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/mailer symfony/notifier \
+    symfony/twig-bundle twig/extra-bundle \
+    twig/cssinliner-extra twig/inky-extra</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<p>This will send an email like this to the user:</p>
+<img src="_images/login_link_email.png" align="center" />
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can customize this e-mail template by extending the
+<code translate="no" class="notranslate">LoginLinkNotification</code> and configuring another <code translate="no" class="notranslate">htmlTemplate</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Notifier/CustomLoginLinkNotification</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Notifier</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">LoginLink</span>\<span class="hljs-title">LoginLinkNotification</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CustomLoginLinkNotification</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">LoginLinkNotification</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">asEmailMessage</span><span class="hljs-params">(EmailRecipientInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>recipient</span>, string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>transport</span> = null)</span>: ?<span class="hljs-title">EmailMessage</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>emailMessage</span> = <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>asEmailMessage(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>recipient</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>transport</span>);
+
+        <span class="hljs-comment">// get the NotificationEmail object and override the template</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>emailMessage</span><span class="hljs-operator">-&gt;</span>getMessage();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span><span class="hljs-operator">-&gt;</span>htmlTemplate(<span class="hljs-string">'emails/custom_login_link_email.html.twig'</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>emailMessage</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, use this new <code translate="no" class="notranslate">CustomLoginLinkNotification</code> in the controller
+instead.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="important-considerations">
+    Important Considerations
+    <a class="headerlink" href="#important-considerations" title="Permalink to this headline">¶</a>
+</h2>
+<p>Login links are a convenient way of authenticating users, but it is also
+considered less secure than a traditional username and password form. It is
+not recommended to use login links in security critical applications.</p>
+<p>However, the implementation in Symfony does have a couple extension points
+to make the login links more secure. In this section, the most important
+configuration decisions are discussed:</p>
+<ul>
+    <li><a href="login_link.html#limit-login-link-lifetime" class="reference internal">Limit Login Link Lifetime</a></li>
+<li><a href="login_link.html#invalidate-login-links" class="reference internal">Invalidate Login Links</a></li>
+<li><a href="login_link.html#allow-a-link-to-only-be-used-once" class="reference internal">Allow a Link to only be Used Once</a></li>
+</ul>
+<span id="login-link-lifetime"></span>
+<div class="section">
+<h3 id="limit-login-link-lifetime">
+    Limit Login Link Lifetime
+    <a class="headerlink" href="#limit-login-link-lifetime" title="Permalink to this headline">¶</a>
+</h3>
+<p>It is important for login links to have a limited lifetime. This reduces
+the risk that someone can intercept the link and use it to login as
+somebody else. By default, Symfony defines a lifetime of 10 minutes (600
+seconds). You can customize this using the <code translate="no" class="notranslate">lifetime</code> option:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-3775b4bcae721470a60acb52693e423b5c4a4d2e" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-cf48a5ff67700d9577b89a447aa1db1270b336df" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-b78c8bd2912f319e3e497b1f0c37c06b92c7dae6" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-3775b4bcae721470a60acb52693e423b5c4a4d2e" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">firewalls:</span>
+        <span class="hljs-attr">main:</span>
+            <span class="hljs-attr">login_link:</span>
+                <span class="hljs-attr">check_route:</span> <span class="hljs-string">login_check</span>
+                <span class="hljs-comment"># lifetime in seconds</span>
+                <span class="hljs-attr">lifetime:</span> <span class="hljs-number">300</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-cf48a5ff67700d9577b89a447aa1db1270b336df" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/security
+        https://symfony.com/schema/dic/security/security-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">firewall</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- lifetime: lifetime in seconds --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">login-link</span> <span class="hljs-attr">check-route</span>=<span class="hljs-string">"login_check"</span>
+                <span class="hljs-attr">lifetime</span>=<span class="hljs-string">"300"</span>
+            /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">firewall</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-b78c8bd2912f319e3e497b1f0c37c06b92c7dae6" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>firewall(<span class="hljs-string">'main'</span>)
+        <span class="hljs-operator">-&gt;</span>loginLink()
+            <span class="hljs-operator">-&gt;</span>checkRoute(<span class="hljs-string">'login_check'</span>)
+            <span class="hljs-comment">// lifetime in seconds</span>
+            <span class="hljs-operator">-&gt;</span>lifetime(<span class="hljs-number">300</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can also <a href="login_link.html#customizing-link-lifetime" class="reference internal">customize the lifetime per link</a>.</p>
+</div>
+<span id="security-login-link-signature"></span>
+</div>
+<div class="section">
+<h3 id="invalidate-login-links">
+    Invalidate Login Links
+    <a class="headerlink" href="#invalidate-login-links" title="Permalink to this headline">¶</a>
+</h3>
+<p>Symfony uses signed URLs to implement login links. The advantage of this is
+that valid links do not have to be stored in a database. The signed URLs
+allow Symfony to still invalidate already sent login links when important
+information changes (e.g. a user's email address).</p>
+<p>The signed URL contains 3 parameters:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">expires</code></dt>
+        
+        <dd>
+                            The UNIX timestamp when the link expires.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">user</code></dt>
+        
+        <dd>
+                            The value returned from <code translate="no" class="notranslate">$user-&gt;getUserIdentifier()</code> for this user.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">hash</code></dt>
+        
+        <dd>
+                            A hash of <code translate="no" class="notranslate">expires</code>, <code translate="no" class="notranslate">user</code> and any configured signature
+properties. Whenever these change, the hash changes and previous login
+links are invalidated.
+                    </dd>
+    </dl>
+<p>For a user that returns <code translate="no" class="notranslate">user@example.com</code> on <code translate="no" class="notranslate">$user-&gt;getUserIdentifier()</code>
+call, the generated login link looks like this:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">http://example.com/login_check?user=user@example.com&amp;expires=1675707377&amp;hash=f0Jbda56Y...A5sUCI~TQF701fwJ...7m2n4A~</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can add more properties to the <code translate="no" class="notranslate">hash</code> by using the
+<code translate="no" class="notranslate">signature_properties</code> option:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-28fb3fab407cdd7792aca2c49d12293676d92565" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-709a9d37bad6c351f621f8d2a616fd6b2cb09f0b" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-0d79b86cd8857ef39c0c0da57616af0275e23077" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-28fb3fab407cdd7792aca2c49d12293676d92565" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">firewalls:</span>
+        <span class="hljs-attr">main:</span>
+            <span class="hljs-attr">login_link:</span>
+                <span class="hljs-attr">check_route:</span> <span class="hljs-string">login_check</span>
+                <span class="hljs-attr">signature_properties:</span> <span class="hljs-string">[id,</span> <span class="hljs-string">email]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-709a9d37bad6c351f621f8d2a616fd6b2cb09f0b" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/security
+        https://symfony.com/schema/dic/security/security-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">firewall</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">login-link</span> <span class="hljs-attr">check-route</span>=<span class="hljs-string">"login_check"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">signature-property</span>&gt;</span>id<span class="hljs-tag">&lt;/<span class="hljs-name">signature-property</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">signature-property</span>&gt;</span>email<span class="hljs-tag">&lt;/<span class="hljs-name">signature-property</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">login-link</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">firewall</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-0d79b86cd8857ef39c0c0da57616af0275e23077" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>firewall(<span class="hljs-string">'main'</span>)
+        <span class="hljs-operator">-&gt;</span>loginLink()
+            <span class="hljs-operator">-&gt;</span>checkRoute(<span class="hljs-string">'login_check'</span>)
+            <span class="hljs-operator">-&gt;</span>signatureProperties([<span class="hljs-string">'id'</span>, <span class="hljs-string">'email'</span>])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>The properties are fetched from the user object using the
+<a href="../components/property_access.html" class="reference internal">PropertyAccess component</a> (e.g. using
+<code translate="no" class="notranslate">getEmail()</code> or a public <code translate="no" class="notranslate">$email</code> property in this example).</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can also use the signature properties to add very advanced
+invalidating logic to your login links. For instance, if you store a
+<code translate="no" class="notranslate">$lastLinkRequestedAt</code> property on your users that you update in the
+<code translate="no" class="notranslate">requestLoginLink()</code> controller, you can invalidate all login links
+whenever a user requests a new link.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="configure-a-maximum-use-of-a-link">
+    Configure a Maximum Use of a Link
+    <a class="headerlink" href="#configure-a-maximum-use-of-a-link" title="Permalink to this headline">¶</a>
+</h3>
+<p>It is a common characteristic of login links to limit the number of times
+it can be used. Symfony can support this by storing used login links in the
+cache. Enable this support by setting the <code translate="no" class="notranslate">max_uses</code> option:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-919cf5daf5adb48fada08789457973c437e1c4ff" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-359595a94413273b48b3dbe6af9aab89b76d9016" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-2682a457175744c9e09f5ffd6032470728bfa064" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-919cf5daf5adb48fada08789457973c437e1c4ff" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">firewalls:</span>
+        <span class="hljs-attr">main:</span>
+            <span class="hljs-attr">login_link:</span>
+                <span class="hljs-attr">check_route:</span> <span class="hljs-string">login_check</span>
+                <span class="hljs-comment"># only allow the link to be used 3 times</span>
+                <span class="hljs-attr">max_uses:</span> <span class="hljs-number">3</span>
+
+                <span class="hljs-comment"># optionally, configure the cache pool</span>
+                <span class="hljs-comment">#used_link_cache: 'cache.redis'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-359595a94413273b48b3dbe6af9aab89b76d9016" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/security
+        https://symfony.com/schema/dic/security/security-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">firewall</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- max-uses: only allow the link to be used 3 times
+                 used-link-cache: optionally, configure the cache pool --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">login-link</span> <span class="hljs-attr">check-route</span>=<span class="hljs-string">"login_check"</span>
+                <span class="hljs-attr">max-uses</span>=<span class="hljs-string">"3"</span>
+                <span class="hljs-attr">used-link-cache</span>=<span class="hljs-string">"cache.redis"</span>
+            /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">firewall</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-2682a457175744c9e09f5ffd6032470728bfa064" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>firewall(<span class="hljs-string">'main'</span>)
+        <span class="hljs-operator">-&gt;</span>loginLink()
+            <span class="hljs-operator">-&gt;</span>checkRoute(<span class="hljs-string">'login_check'</span>)
+
+            <span class="hljs-comment">// only allow the link to be used 3 times</span>
+            <span class="hljs-operator">-&gt;</span>maxUses(<span class="hljs-number">3</span>)
+
+            <span class="hljs-comment">// optionally, configure the cache pool</span>
+            <span class="hljs-comment">//-&gt;usedLinkCache('cache.redis')</span>
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Make sure there is enough space left in the cache, otherwise invalid links
+can no longer be stored (and thus become valid again). Expired invalid
+links are automatically removed from the cache.</p>
+<p>The cache pools are not cleared by the <code translate="no" class="notranslate">cache:clear</code> command, but
+removing <code translate="no" class="notranslate">var/cache/</code> manually may remove the cache if the cache
+component is configured to store its cache in that location. Read the
+<a href="../cache.html" class="reference internal">Cache</a> guide for more information.</p>
+<div class="section">
+<h4 id="allow-a-link-to-only-be-used-once">
+    Allow a Link to only be Used Once
+    <a class="headerlink" href="#allow-a-link-to-only-be-used-once" title="Permalink to this headline">¶</a>
+</h4>
+<p>When setting <code translate="no" class="notranslate">max_uses</code> to <code translate="no" class="notranslate">1</code>, you must take extra precautions to
+make it work as expected. Email providers and browsers often load a
+preview of the links, meaning that the link is already invalidated by
+the preview loader.</p>
+<p>In order to solve this issue, first set the <code translate="no" class="notranslate">check_post_only</code> option let
+the authenticator only handle HTTP POST methods:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-edfad576fbc20314e44a83f57d68d89931927a1e" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-e4793ad3351b7536381e0211e661bca902882eab" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-9aa3c092e2cc29cf509c2c632ef5cefe0a13b269" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-edfad576fbc20314e44a83f57d68d89931927a1e" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">firewalls:</span>
+        <span class="hljs-attr">main:</span>
+            <span class="hljs-attr">login_link:</span>
+                <span class="hljs-attr">check_route:</span> <span class="hljs-string">login_check</span>
+                <span class="hljs-attr">check_post_only:</span> <span class="hljs-literal">true</span>
+                <span class="hljs-attr">max_uses:</span> <span class="hljs-number">1</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-e4793ad3351b7536381e0211e661bca902882eab" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/security
+        https://symfony.com/schema/dic/security/security-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">firewall</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">login-link</span> <span class="hljs-attr">check-route</span>=<span class="hljs-string">"login_check"</span>
+                <span class="hljs-attr">check-post-only</span>=<span class="hljs-string">"true"</span>
+                <span class="hljs-attr">max-uses</span>=<span class="hljs-string">"1"</span>
+            /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">firewall</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-9aa3c092e2cc29cf509c2c632ef5cefe0a13b269" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>firewall(<span class="hljs-string">'main'</span>)
+        <span class="hljs-operator">-&gt;</span>loginLink()
+            <span class="hljs-operator">-&gt;</span>checkRoute(<span class="hljs-string">'login_check'</span>)
+            <span class="hljs-operator">-&gt;</span>checkPostOnly(<span class="hljs-keyword">true</span>)
+            <span class="hljs-operator">-&gt;</span>maxUses(<span class="hljs-number">1</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Then, use the <code translate="no" class="notranslate">check_route</code> controller to render a page that lets the
+user create this POST request (e.g. by clicking a button):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/SecurityController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Generator</span>\<span class="hljs-title">UrlGeneratorInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SecurityController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/login_check', name: 'login_check')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">check</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>
+    </span>{
+        <span class="hljs-comment">// get the login link query parameters</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expires</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>query<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'expires'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>username</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>query<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'user'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hash</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>query<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'hash'</span>);
+
+        <span class="hljs-comment">// and render a template with the button</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'security/process_login_link.html.twig'</span>, [
+            <span class="hljs-string">'expires'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expires</span>,
+            <span class="hljs-string">'user'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>username</span>,
+            <span class="hljs-string">'hash'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hash</span>,
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/security/process_login_link.html.twig #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">extends</span></span> 'base.html.twig' %}</span><span class="xml">
+
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> body %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>Hi! You are about to login to ...<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- for instance, use a form with hidden fields to
+         create the POST request ---&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">action</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ path('login_check') }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"POST"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"hidden"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"expires"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ expires }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"hidden"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"user"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ user }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"hidden"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"hash"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ hash }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"submit"</span>&gt;</span>Continue<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h3 id="hashing-strategy">
+    Hashing Strategy
+    <a class="headerlink" href="#hashing-strategy" title="Permalink to this headline">¶</a>
+</h3>
+<p>Internally, the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/LoginLink/LoginLinkHandler.php" class="reference external" title="Symfony\Component\Security\Http\LoginLink\LoginLinkHandler" rel="external noopener noreferrer" target="_blank">LoginLinkHandler</a>
+implementation uses the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Core/Signature/SignatureHasher.php" class="reference external" title="Symfony\Component\Security\Core\Signature\SignatureHasher" rel="external noopener noreferrer" target="_blank">SignatureHasher</a> to create the
+hash contained in the login link.</p>
+<p>This hasher creates a first hash with the expiration
+date of the link, the values of the configured signature properties and the
+user identifier. The used hashing algorithm is SHA-256.</p>
+<p>Once this first hash is processed and encoded in Base64, a new one is created
+from the first hash value and the <code translate="no" class="notranslate">kernel.secret</code> container parameter. This
+allows Symfony to sign this final hash, which is contained in the login URL.
+The final hash is also a Base64 encoded SHA-256 hash.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="customizing-the-success-handler">
+    Customizing the Success Handler
+    <a class="headerlink" href="#customizing-the-success-handler" title="Permalink to this headline">¶</a>
+</h2>
+<p>Sometimes, the default success handling does not fit your use-case (e.g.
+when you need to generate and return an API key). To customize how the
+success handler behaves, create your own handler as a class that implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/Authentication/AuthenticationSuccessHandlerInterface.php" class="reference external" title="Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface" rel="external noopener noreferrer" target="_blank">AuthenticationSuccessHandlerInterface</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Security/Authentication/AuthenticationSuccessHandler.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Authentication</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">JsonResponse</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Authentication</span>\<span class="hljs-title">Token</span>\<span class="hljs-title">TokenInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Authentication</span>\<span class="hljs-title">AuthenticationSuccessHandlerInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AuthenticationSuccessHandler</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">AuthenticationSuccessHandlerInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onAuthenticationSuccess</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, TokenInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span>)</span>: <span class="hljs-title">JsonResponse</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span><span class="hljs-operator">-&gt;</span>getUser();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userApiToken</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span><span class="hljs-operator">-&gt;</span>getApiToken();
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> JsonResponse([<span class="hljs-string">'apiToken'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userApiToken</span>]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, configure this service ID as the <code translate="no" class="notranslate">success_handler</code>:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-00123e418ade8e64d4d9532207ca0f56dd4ea096" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-2627ffc21649703e20e120705b972c9245fe55e2" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-3bda7313e558165a76ee93e8b12e300b1b89e39e" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-00123e418ade8e64d4d9532207ca0f56dd4ea096" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">firewalls:</span>
+        <span class="hljs-attr">main:</span>
+            <span class="hljs-attr">login_link:</span>
+                <span class="hljs-attr">check_route:</span> <span class="hljs-string">login_check</span>
+                <span class="hljs-attr">lifetime:</span> <span class="hljs-number">600</span>
+                <span class="hljs-attr">max_uses:</span> <span class="hljs-number">1</span>
+                <span class="hljs-attr">success_handler:</span> <span class="hljs-string">App\Security\Authentication\AuthenticationSuccessHandler</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-2627ffc21649703e20e120705b972c9245fe55e2" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/security
+        https://symfony.com/schema/dic/security/security-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">firewall</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">login-link</span> <span class="hljs-attr">check-route</span>=<span class="hljs-string">"login_check"</span>
+                <span class="hljs-attr">check-post-only</span>=<span class="hljs-string">"true"</span>
+                <span class="hljs-attr">max-uses</span>=<span class="hljs-string">"1"</span>
+                <span class="hljs-attr">lifetime</span>=<span class="hljs-string">"600"</span>
+                <span class="hljs-attr">success-handler</span>=<span class="hljs-string">"App\Security\Authentication\AuthenticationSuccessHandler"</span>
+            /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">firewall</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-3bda7313e558165a76ee93e8b12e300b1b89e39e" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Authentication</span>\<span class="hljs-title">AuthenticationSuccessHandler</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>firewall(<span class="hljs-string">'main'</span>)
+        <span class="hljs-operator">-&gt;</span>loginLink()
+            <span class="hljs-operator">-&gt;</span>checkRoute(<span class="hljs-string">'login_check'</span>)
+            <span class="hljs-operator">-&gt;</span>lifetime(<span class="hljs-number">600</span>)
+            <span class="hljs-operator">-&gt;</span>maxUses(<span class="hljs-number">1</span>)
+            <span class="hljs-operator">-&gt;</span>successHandler(AuthenticationSuccessHandler<span class="hljs-operator">::</span>class)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you want to customize the default failure handling, use the
+<code translate="no" class="notranslate">failure_handler</code> option and create a class that implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/Authentication/AuthenticationFailureHandlerInterface.php" class="reference external" title="Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface" rel="external noopener noreferrer" target="_blank">AuthenticationFailureHandlerInterface</a>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="customizing-the-login-link">
+    Customizing the Login Link
+    <a class="headerlink" href="#customizing-the-login-link" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <code translate="no" class="notranslate">createLoginLink()</code> method accepts a second optional argument to pass the
+<code translate="no" class="notranslate">Request</code> object used when generating the login link. This allows to customize
+features such as the locale used to generate the link:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/SecurityController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">LoginLink</span>\<span class="hljs-title">LoginLinkHandlerInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SecurityController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/login', name: 'login')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">requestLoginLink</span><span class="hljs-params">(LoginLinkHandlerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkHandler</span>, Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>
+    </span>{
+        <span class="hljs-comment">// check if login form is submitted</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>isMethod(<span class="hljs-string">'POST'</span>)) {
+            <span class="hljs-comment">// ... load the user in some way</span>
+
+            <span class="hljs-comment">// clone and customize Request</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userRequest</span> = <span class="hljs-keyword">clone</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>;
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userRequest</span><span class="hljs-operator">-&gt;</span>setLocale(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span><span class="hljs-operator">-&gt;</span>getLocale() ?? <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getDefaultLocale());
+
+            <span class="hljs-comment">// create a login link for $user (this returns an instance of LoginLinkDetails)</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkDetails</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkHandler</span><span class="hljs-operator">-&gt;</span>createLoginLink(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userRequest</span>);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLink</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkDetails</span><span class="hljs-operator">-&gt;</span>getUrl();
+
+            <span class="hljs-comment">// ...</span>
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'security/login.html.twig'</span>);
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="customizing-link-lifetime"></span>
+<p>By default, generated links use <a href="login_link.html#login-link-lifetime" class="reference internal">the lifetime configured globally</a>
+but you can change the lifetime per link using the third argument of the
+<code translate="no" class="notranslate">createLoginLink()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// the third optional argument is the lifetime in seconds</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkDetails</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkHandler</span><span class="hljs-operator">-&gt;</span>createLoginLink(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>, <span class="hljs-keyword">null</span>, <span class="hljs-number">60</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLink</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loginLinkDetails</span><span class="hljs-operator">-&gt;</span>getUrl();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The argument to customize the link lifetime was introduced in Symfony 6.2.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

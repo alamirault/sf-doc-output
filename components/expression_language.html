@@ -1,0 +1,828 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-expressionlanguage-component">
+    The ExpressionLanguage Component
+    <a class="headerlink" href="#the-expressionlanguage-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The ExpressionLanguage component provides an engine that can compile and
+evaluate expressions. An expression is a one-liner that returns a value
+(mostly, but not limited to, Booleans).</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/expression-language</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+<p>How can the Expression Engine Help Me?</p>
+<span id="how-can-the-expression-engine-help-me"></span>
+</div>
+<div class="section">
+<h2 id="how-can-the-expression-language-help-me">
+    How can the Expression Language Help Me?
+    <a class="headerlink" href="#how-can-the-expression-language-help-me" title="Permalink to this headline">¶</a>
+</h2>
+<p>The purpose of the component is to allow users to use expressions inside
+configuration for more complex logic. For some examples, the Symfony Framework
+uses expressions in security, for validation rules and in route matching.</p>
+<p>Besides using the component in the framework itself, the ExpressionLanguage
+component is a perfect candidate for the foundation of a <em>business rule engine</em>.
+The idea is to let the webmaster of a website configure things in a dynamic
+way without using PHP and without introducing security problems:</p>
+<span id="component-expression-language-examples"></span>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text"># Get the special price if
+user.getGroup() in ['good_customers', 'collaborator']
+
+# Promote article to the homepage when
+article.commentCount &gt; 100 and article.category not in [&quot;misc&quot;]
+
+# Send an alert when
+product.stock &lt; 15</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Expressions can be seen as a very restricted PHP sandbox and are immune to
+external injections as you must explicitly declare which variables are available
+in an expression.</p>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>The ExpressionLanguage component can compile and evaluate expressions.
+Expressions are one-liners that often return a Boolean, which can be used
+by the code executing the expression in an <code translate="no" class="notranslate">if</code> statement. A simple example
+of an expression is <code translate="no" class="notranslate">1 + 2</code>. You can also use more complicated expressions,
+such as <code translate="no" class="notranslate">someArray[3].someMethod(&#039;bar&#039;)</code>.</p>
+<p>The component provides 2 ways to work with expressions:</p>
+<ul>
+    <li><strong>evaluation</strong>: the expression is evaluated without being compiled to PHP;</li>
+<li><strong>compile</strong>: the expression is compiled to PHP, so it can be cached and
+evaluated.</li>
+</ul>
+<p>The main class of the component is
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/ExpressionLanguage.php" class="reference external" title="Symfony\Component\ExpressionLanguage\ExpressionLanguage" rel="external noopener noreferrer" target="_blank">ExpressionLanguage</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ExpressionLanguage</span>\<span class="hljs-title">ExpressionLanguage</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span> = <span class="hljs-keyword">new</span> ExpressionLanguage();
+
+var_dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span><span class="hljs-operator">-&gt;</span>evaluate(<span class="hljs-string">'1 + 2'</span>)); <span class="hljs-comment">// displays 3</span>
+
+var_dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span><span class="hljs-operator">-&gt;</span>compile(<span class="hljs-string">'1 + 2'</span>)); <span class="hljs-comment">// displays (1 + 2)</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>See <a href="../reference/formats/expression_language.html" class="reference internal">The Expression Syntax</a> to learn the syntax of
+the ExpressionLanguage component.</p>
+</div>
+<div class="section">
+<h3 id="null-coalescing-operator">
+    Null Coalescing Operator
+    <a class="headerlink" href="#null-coalescing-operator" title="Permalink to this headline">¶</a>
+</h3>
+<p>This is the same as the PHP <a href="expression_language.html#null-coalescing-operator" class="reference internal">null-coalescing operator</a>, which combines
+the ternary operator and <code translate="no" class="notranslate">isset()</code>. It returns the left hand-side if it exists
+and it's not <code translate="no" class="notranslate">null</code>; otherwise it returns the right hand-side. Note that you
+can chain multiple coalescing operators.</p>
+<ul>
+    <li><code translate="no" class="notranslate">foo ?? &#039;no&#039;</code></li>
+<li><code translate="no" class="notranslate">foo.baz ?? &#039;no&#039;</code></li>
+<li><code translate="no" class="notranslate">foo[3] ?? &#039;no&#039;</code></li>
+<li><code translate="no" class="notranslate">foo.baz ?? foo[&#039;baz&#039;] ?? &#039;no&#039;</code></li>
+</ul>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The null-coalescing operator was introduced in Symfony 6.2.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="passing-in-variables">
+    Passing in Variables
+    <a class="headerlink" href="#passing-in-variables" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can also pass variables into the expression, which can be of any valid
+PHP type (including objects):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ExpressionLanguage</span>\<span class="hljs-title">ExpressionLanguage</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span> = <span class="hljs-keyword">new</span> ExpressionLanguage();
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Apple</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>variety</span>;
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>apple</span> = <span class="hljs-keyword">new</span> Apple();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>apple</span><span class="hljs-operator">-&gt;</span>variety = <span class="hljs-string">'Honeycrisp'</span>;
+
+var_dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span><span class="hljs-operator">-&gt;</span>evaluate(
+    <span class="hljs-string">'fruit.variety'</span>,
+    [
+        <span class="hljs-string">'fruit'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>apple</span>,
+    ]
+)); <span class="hljs-comment">// displays "Honeycrisp"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When using this component inside a Symfony application, certain objects and
+variables are automatically injected by Symfony so you can use them in your
+expressions (e.g. the request, the current user, etc.):</p>
+<ul>
+    <li><a href="../security/expressions.html" class="reference internal">Variables available in security expressions</a>;</li>
+<li><a href="../service_container/expression_language.html" class="reference internal">Variables available in service container expressions</a>;</li>
+<li><a href="../routing.html#routing-matching-expressions" class="reference internal">Variables available in routing expressions</a>.</li>
+</ul>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When using variables in expressions, avoid passing untrusted data into the
+array of variables. If you can't avoid that, sanitize non-alphanumeric
+characters in untrusted data to prevent malicious users from injecting
+control characters and altering the expression.</p>
+</div>
+<span id="expression-language-caching"></span>
+</div>
+<div class="section">
+<h2 id="caching">
+    Caching
+    <a class="headerlink" href="#caching" title="Permalink to this headline">¶</a>
+</h2>
+<p>The ExpressionLanguage component provides a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/ExpressionLanguage.php#method_compile" class="reference external" title="Symfony\Component\ExpressionLanguage\ExpressionLanguage::compile()" rel="external noopener noreferrer" target="_blank">compile()</a>
+method to be able to cache the expressions in plain PHP. But internally, the
+component also caches the parsed expressions, so duplicated expressions can be
+compiled/evaluated quicker.</p>
+<div class="section">
+<h4 id="the-workflow">
+    The Workflow
+    <a class="headerlink" href="#the-workflow" title="Permalink to this headline">¶</a>
+</h4>
+<p>Both <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/ExpressionLanguage.php#method_evaluate" class="reference external" title="Symfony\Component\ExpressionLanguage\ExpressionLanguage::evaluate()" rel="external noopener noreferrer" target="_blank">evaluate()</a>
+and <code translate="no" class="notranslate">compile()</code> need to do some things before each can provide the return
+values. For <code translate="no" class="notranslate">evaluate()</code>, this overhead is even bigger.</p>
+<p>Both methods need to tokenize and parse the expression. This is done by the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/ExpressionLanguage.php#method_parse" class="reference external" title="Symfony\Component\ExpressionLanguage\ExpressionLanguage::parse()" rel="external noopener noreferrer" target="_blank">parse()</a>
+method. It  returns a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/ParsedExpression.php" class="reference external" title="Symfony\Component\ExpressionLanguage\ParsedExpression" rel="external noopener noreferrer" target="_blank">ParsedExpression</a>.
+Now, the <code translate="no" class="notranslate">compile()</code> method just returns the string conversion of this object.
+The <code translate="no" class="notranslate">evaluate()</code> method needs to loop through the &quot;nodes&quot; (pieces of an
+expression saved in the <code translate="no" class="notranslate">ParsedExpression</code>) and evaluate them on the fly.</p>
+<p>To save time, the <code translate="no" class="notranslate">ExpressionLanguage</code> caches the <code translate="no" class="notranslate">ParsedExpression</code> so
+it can skip the tokenization and parsing steps with duplicate expressions. The
+caching is done by a PSR-6 <a href="https://github.com/php-fig/cache/blob/master/src/CacheItemPoolInterface.php" class="reference external" rel="external noopener noreferrer" target="_blank">CacheItemPoolInterface</a> instance (by default, it
+uses an <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/ArrayAdapter.php" class="reference external" title="Symfony\Component\Cache\Adapter\ArrayAdapter" rel="external noopener noreferrer" target="_blank">ArrayAdapter</a>). You can
+customize this by creating a custom cache pool or using one of the available
+ones and injecting this using the constructor:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">RedisAdapter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ExpressionLanguage</span>\<span class="hljs-title">ExpressionLanguage</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span> = <span class="hljs-keyword">new</span> RedisAdapter(...);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span> = <span class="hljs-keyword">new</span> ExpressionLanguage(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>See the <a href="cache.html" class="reference internal">The Cache Component</a> documentation for more information about
+available cache adapters.</p>
+</div>
+</div>
+<div class="section">
+<h4 id="using-parsed-and-serialized-expressions">
+    Using Parsed and Serialized Expressions
+    <a class="headerlink" href="#using-parsed-and-serialized-expressions" title="Permalink to this headline">¶</a>
+</h4>
+<p>Both <code translate="no" class="notranslate">evaluate()</code> and <code translate="no" class="notranslate">compile()</code> can handle <code translate="no" class="notranslate">ParsedExpression</code> and
+<code translate="no" class="notranslate">SerializedParsedExpression</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// the parse() method returns a ParsedExpression</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expression</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span><span class="hljs-operator">-&gt;</span>parse(<span class="hljs-string">'1 + 4'</span>, []);
+
+var_dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span><span class="hljs-operator">-&gt;</span>evaluate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expression</span>)); <span class="hljs-comment">// prints 5</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ExpressionLanguage</span>\<span class="hljs-title">SerializedParsedExpression</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expression</span> = <span class="hljs-keyword">new</span> SerializedParsedExpression(
+    <span class="hljs-string">'1 + 4'</span>,
+    serialize(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span><span class="hljs-operator">-&gt;</span>parse(<span class="hljs-string">'1 + 4'</span>, [])<span class="hljs-operator">-&gt;</span>getNodes())
+);
+
+var_dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span><span class="hljs-operator">-&gt;</span>evaluate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expression</span>)); <span class="hljs-comment">// prints 5</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="expression-language-ast"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="ast-dumping-and-editing">
+    AST Dumping and Editing
+    <a class="headerlink" href="#ast-dumping-and-editing" title="Permalink to this headline">¶</a>
+</h2>
+<p>It's difficult to manipulate or inspect the expressions created with the ExpressionLanguage
+component, because the expressions are plain strings. A better approach is to
+turn those expressions into an AST. In computer science, <a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree" class="reference external" rel="external noopener noreferrer" target="_blank">AST</a> (<em>Abstract
+Syntax Tree</em>) is <em>&quot;a tree representation of the structure of source code written
+in a programming language&quot;</em>. In Symfony, a ExpressionLanguage AST is a set of
+nodes that contain PHP classes representing the given expression.</p>
+<div class="section">
+<h4 id="dumping-the-ast">
+    Dumping the AST
+    <a class="headerlink" href="#dumping-the-ast" title="Permalink to this headline">¶</a>
+</h4>
+<p>Call the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/ExpressionLanguage.php#method_getNodes" class="reference external" title="Symfony\Component\ExpressionLanguage\ExpressionLanguage::getNodes()" rel="external noopener noreferrer" target="_blank">getNodes()</a>
+method after parsing any expression to get its AST:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ExpressionLanguage</span>\<span class="hljs-title">ExpressionLanguage</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ast</span> = (<span class="hljs-keyword">new</span> ExpressionLanguage())
+    <span class="hljs-operator">-&gt;</span>parse(<span class="hljs-string">'1 + 2'</span>, [])
+    <span class="hljs-operator">-&gt;</span>getNodes()
+;
+
+<span class="hljs-comment">// dump the AST nodes for inspection</span>
+var_dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ast</span>);
+
+<span class="hljs-comment">// dump the AST nodes as a string representation</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>astAsString</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ast</span><span class="hljs-operator">-&gt;</span>dump();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h4 id="manipulating-the-ast">
+    Manipulating the AST
+    <a class="headerlink" href="#manipulating-the-ast" title="Permalink to this headline">¶</a>
+</h4>
+<p>The nodes of the AST can also be dumped into a PHP array of nodes to allow
+manipulating them. Call the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/ExpressionLanguage.php#method_toArray" class="reference external" title="Symfony\Component\ExpressionLanguage\ExpressionLanguage::toArray()" rel="external noopener noreferrer" target="_blank">toArray()</a>
+method to turn the AST into an array:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>astAsArray</span> = (<span class="hljs-keyword">new</span> ExpressionLanguage())
+    <span class="hljs-operator">-&gt;</span>parse(<span class="hljs-string">'1 + 2'</span>, [])
+    <span class="hljs-operator">-&gt;</span>getNodes()
+    <span class="hljs-operator">-&gt;</span>toArray()
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="expression-language-extending"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="extending-the-expressionlanguage">
+    Extending the ExpressionLanguage
+    <a class="headerlink" href="#extending-the-expressionlanguage" title="Permalink to this headline">¶</a>
+</h2>
+<p>The ExpressionLanguage can be extended by adding custom functions. For
+instance, in the Symfony Framework, the security has custom functions to check
+the user's role.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you want to learn how to use functions in an expression, read
+&quot;<a href="../reference/formats/expression_language.html#component-expression-functions" class="reference internal">The Expression Syntax</a>&quot;.</p>
+</div>
+<div class="section">
+<h4 id="registering-functions">
+    Registering Functions
+    <a class="headerlink" href="#registering-functions" title="Permalink to this headline">¶</a>
+</h4>
+<p>Functions are registered on each specific <code translate="no" class="notranslate">ExpressionLanguage</code> instance.
+That means the functions can be used in any expression executed by that
+instance.</p>
+<p>To register a function, use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/ExpressionLanguage.php#method_register" class="reference external" title="Symfony\Component\ExpressionLanguage\ExpressionLanguage::register()" rel="external noopener noreferrer" target="_blank">register()</a>.
+This method has 3 arguments:</p>
+<ul>
+    <li><strong>name</strong> - The name of the function in an expression;</li>
+<li><strong>compiler</strong> - A function executed when compiling an expression using the
+function;</li>
+<li><strong>evaluator</strong> - A function executed when the expression is evaluated.</li>
+</ul>
+<p>Example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ExpressionLanguage</span>\<span class="hljs-title">ExpressionLanguage</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span> = <span class="hljs-keyword">new</span> ExpressionLanguage();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span><span class="hljs-operator">-&gt;</span>register(<span class="hljs-string">'lowercase'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>str</span>)</span> </span>{
+    <span class="hljs-keyword">return</span> sprintf(<span class="hljs-string">'(is_string(%1$s) ? strtolower(%1$s) : %1$s)'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>str</span>);
+}, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>arguments</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>str</span>)</span> </span>{
+    <span class="hljs-keyword">if</span> (!is_string(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>str</span>)) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>str</span>;
+    }
+
+    <span class="hljs-keyword">return</span> strtolower(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>str</span>);
+});
+
+var_dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span><span class="hljs-operator">-&gt;</span>evaluate(<span class="hljs-string">'lowercase("HELLO")'</span>));
+<span class="hljs-comment">// this will print: hello</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In addition to the custom function arguments, the <strong>evaluator</strong> is passed an
+<code translate="no" class="notranslate">arguments</code> variable as its first argument, which is equal to the second
+argument of <code translate="no" class="notranslate">evaluate()</code> (e.g. the &quot;values&quot; when evaluating an expression).</p>
+<span id="components-expression-language-provider"></span>
+</div>
+<div class="section">
+<h4 id="using-expression-providers">
+    Using Expression Providers
+    <a class="headerlink" href="#using-expression-providers" title="Permalink to this headline">¶</a>
+</h4>
+<p>When you use the <code translate="no" class="notranslate">ExpressionLanguage</code> class in your library, you often want
+to add custom functions. To do so, you can create a new expression provider by
+creating a class that implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/ExpressionFunctionProviderInterface.php" class="reference external" title="Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface" rel="external noopener noreferrer" target="_blank">ExpressionFunctionProviderInterface</a>.</p>
+<p>This interface requires one method:
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/ExpressionFunctionProviderInterface.php#method_getFunctions" class="reference external" title="Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface::getFunctions()" rel="external noopener noreferrer" target="_blank">getFunctions()</a>,
+which returns an array of expression functions (instances of
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/ExpressionFunction.php" class="reference external" title="Symfony\Component\ExpressionLanguage\ExpressionFunction" rel="external noopener noreferrer" target="_blank">ExpressionFunction</a>) to
+register:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ExpressionLanguage</span>\<span class="hljs-title">ExpressionFunction</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ExpressionLanguage</span>\<span class="hljs-title">ExpressionFunctionProviderInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StringExpressionLanguageProvider</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ExpressionFunctionProviderInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getFunctions</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-keyword">new</span> ExpressionFunction(<span class="hljs-string">'lowercase'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>str</span>)</span> </span>{
+                <span class="hljs-keyword">return</span> sprintf(<span class="hljs-string">'(is_string(%1$s) ? strtolower(%1$s) : %1$s)'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>str</span>);
+            }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>arguments</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>str</span>)</span> </span>{
+                <span class="hljs-keyword">if</span> (!is_string(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>str</span>)) {
+                    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>str</span>;
+                }
+
+                <span class="hljs-keyword">return</span> strtolower(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>str</span>);
+            }),
+        ];
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>To create an expression function from a PHP function with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/ExpressionFunction.php#method_fromPhp" class="reference external" title="Symfony\Component\ExpressionLanguage\ExpressionFunction::fromPhp()" rel="external noopener noreferrer" target="_blank">fromPhp()</a> static method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">ExpressionFunction<span class="hljs-operator">::</span>fromPhp(<span class="hljs-string">'strtoupper'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Namespaced functions are supported, but they require a second argument to
+define the name of the expression:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">ExpressionFunction<span class="hljs-operator">::</span>fromPhp(<span class="hljs-string">'My\strtoupper'</span>, <span class="hljs-string">'my_strtoupper'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<p>You can register providers using
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/ExpressionLanguage.php#method_registerProvider" class="reference external" title="Symfony\Component\ExpressionLanguage\ExpressionLanguage::registerProvider()" rel="external noopener noreferrer" target="_blank">registerProvider()</a>
+or by using the second argument of the constructor:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ExpressionLanguage</span>\<span class="hljs-title">ExpressionLanguage</span>;
+
+<span class="hljs-comment">// using the constructor</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span> = <span class="hljs-keyword">new</span> ExpressionLanguage(<span class="hljs-keyword">null</span>, [
+    <span class="hljs-keyword">new</span> StringExpressionLanguageProvider(),
+    <span class="hljs-comment">// ...</span>
+]);
+
+<span class="hljs-comment">// using registerProvider()</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expressionLanguage</span><span class="hljs-operator">-&gt;</span>registerProvider(<span class="hljs-keyword">new</span> StringExpressionLanguageProvider());</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>It is recommended to create your own <code translate="no" class="notranslate">ExpressionLanguage</code> class in your
+library. Now you can add the extension by overriding the constructor:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">CacheItemPoolInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ExpressionLanguage</span>\<span class="hljs-title">ExpressionLanguage</span> <span class="hljs-title">as</span> <span class="hljs-title">BaseExpressionLanguage</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExpressionLanguage</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseExpressionLanguage</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(CacheItemPoolInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span> = null, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>providers</span> = [])</span>
+    </span>{
+        <span class="hljs-comment">// prepends the default provider to let users override it</span>
+        array_unshift(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>providers</span>, <span class="hljs-keyword">new</span> StringExpressionLanguageProvider());
+
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>__construct(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>providers</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

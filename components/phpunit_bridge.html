@@ -1,0 +1,2056 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-phpunit-bridge">
+    The PHPUnit Bridge
+    <a class="headerlink" href="#the-phpunit-bridge" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The PHPUnit Bridge provides utilities to report legacy tests and usage of
+deprecated code and helpers for mocking native functions related to time,
+DNS and class existence.</p>
+</blockquote>
+<p>It comes with the following features:</p>
+<ul>
+    <li>Forces the tests to use a consistent locale (<code translate="no" class="notranslate">C</code>) (if you create
+locale-sensitive tests, use PHPUnit's <code translate="no" class="notranslate">setLocale()</code> method);</li>
+<li>Auto-register <code translate="no" class="notranslate">class_exists</code> to load Doctrine annotations (when used);</li>
+<li>It displays the whole list of deprecated features used in the application;</li>
+<li>Displays the stack trace of a deprecation on-demand;</li>
+<li>Provides a <code translate="no" class="notranslate">ClockMock</code>, <code translate="no" class="notranslate">DnsMock</code> and <code translate="no" class="notranslate">ClassExistsMock</code> classes for tests
+sensitive to time, network or class existence;</li>
+<li>Provides a modified version of PHPUnit that allows 1. separating the
+dependencies of your app from those of phpunit to prevent any unwanted
+constraints to apply; 2. running tests in parallel when a test suite is split
+in several phpunit.xml files; 3. recording and replaying skipped tests;</li>
+<li>It allows to create tests that are compatible with multiple PHPUnit versions
+(because it provides polyfills for missing methods, namespaced aliases for
+non-namespaced classes, etc.).</li>
+</ul>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require --dev symfony/phpunit-bridge</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The PHPUnit bridge is designed to work with all maintained versions of
+Symfony components, even across different major versions of them. You should
+always use its very latest stable major version to get the most accurate
+deprecation report.</p>
+</div>
+<p>If you plan to <a href="phpunit_bridge.html#write-assertions-about-deprecations" class="reference internal">write assertions about deprecations</a> and use the regular
+PHPUnit script (not the modified PHPUnit script provided by Symfony), you have
+to register a new <a href="https://phpunit.de/manual/current/en/appendixes.configuration.html#appendixes.configuration.test-listeners" class="reference external" rel="external noopener noreferrer" target="_blank">test listener</a> called <code translate="no" class="notranslate">SymfonyTestsListener</code>:</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- http://phpunit.de/manual/6.0/en/appendixes.configuration.html --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">phpunit</span> <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:noNamespaceSchemaLocation</span>=<span class="hljs-string">"https://schema.phpunit.de/6.0/phpunit.xsd"</span>
+&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">listeners</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">listener</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"Symfony\Bridge\PhpUnit\SymfonyTestsListener"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">listeners</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">phpunit</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>This article explains how to use the PhpUnitBridge features as an independent
+component in any PHP application. Read the <a href="../testing.html" class="reference internal">Testing</a> article to learn
+about how to use it in Symfony applications.</p>
+</div>
+<p>Once the component is installed, a <code translate="no" class="notranslate">simple-phpunit</code> script is created in the
+<code translate="no" class="notranslate">vendor/</code> directory to run tests. This script wraps the original PHPUnit binary
+to provide more features:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span><span class="hljs-built_in">cd</span> my-project/
+<span class="hljs-prompt">$ </span>./vendor/bin/simple-phpunit</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>After running your PHPUnit tests, you will get a report similar to this one:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>./vendor/bin/simple-phpunit
+  PHPUnit by Sebastian Bergmann.
+
+  Configuration <span class="hljs-built_in">read</span> from &lt;your-project&gt;/phpunit.xml.dist
+  .................
+
+  Time: 1.77 seconds, Memory: 5.75Mb
+
+  OK (17 tests, 21 assertions)
+
+  Remaining deprecation notices (2)
+
+  getEntityManager is deprecated since Symfony 2.1. Use getManager instead: 2x
+    1x <span class="hljs-keyword">in</span> DefaultControllerTest::testPublicUrls from App\Tests\Controller
+    1x <span class="hljs-keyword">in</span> BlogControllerTest::testIndex from App\Tests\Controller</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The summary includes:</p>
+<dl>
+                        <dt><strong>Unsilenced</strong></dt>
+        
+        <dd>
+                            Reports deprecation notices that were triggered without the recommended
+<a href="https://www.php.net/manual/en/language.operators.errorcontrol.php" class="reference external" rel="external noopener noreferrer" target="_blank">@-silencing operator</a>.
+                    </dd>
+                        <dt><strong>Legacy</strong></dt>
+        
+        <dd>
+                            Deprecation notices denote tests that explicitly test some legacy features.
+                    </dd>
+                        <dt><strong>Remaining/Other</strong></dt>
+        
+        <dd>
+                            Deprecation notices are all other (non-legacy) notices, grouped by message,
+test class and method.
+                    </dd>
+    </dl>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you don't want to use the <code translate="no" class="notranslate">simple-phpunit</code> script, register the following
+<a href="https://phpunit.de/manual/current/en/extending-phpunit.html#extending-phpunit.PHPUnit_Framework_TestListener" class="reference external" rel="external noopener noreferrer" target="_blank">PHPUnit event listener</a> in your PHPUnit configuration file to get the same
+report about deprecations (which is created by a <a href="https://www.php.net/manual/en/book.errorfunc.php" class="reference external" rel="external noopener noreferrer" target="_blank">PHP error handler</a>
+called <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/PhpUnit/DeprecationErrorHandler.php" class="reference external" title="Symfony\Bridge\PhpUnit\DeprecationErrorHandler" rel="external noopener noreferrer" target="_blank">DeprecationErrorHandler</a>):</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- phpunit.xml.dist --&gt;</span>
+<span class="hljs-comment">&lt;!-- ... --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">listeners</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">listener</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"Symfony\Bridge\PhpUnit\SymfonyTestsListener"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">listeners</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="running-tests-in-parallel">
+    Running Tests in Parallel
+    <a class="headerlink" href="#running-tests-in-parallel" title="Permalink to this headline">¶</a>
+</h2>
+<p>The modified PHPUnit script allows running tests in parallel by providing
+a directory containing multiple test suites with their own <code translate="no" class="notranslate">phpunit.xml.dist</code>.</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">├── tests/
+│   ├── Functional/
+│   │   ├── ...
+│   │   └── phpunit.xml.dist
+│   ├── Unit/
+│   │   ├── ...
+│   │   └── phpunit.xml.dist</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>./vendor/bin/simple-phpunit tests/</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The modified PHPUnit script will recursively go through the provided directory,
+up to a depth of 3 subdirectories or the value specified by the environment variable
+<code translate="no" class="notranslate">SYMFONY_PHPUNIT_MAX_DEPTH</code>, looking for <code translate="no" class="notranslate">phpunit.xml.dist</code> files and then
+running each suite it finds in parallel, collecting their output and displaying
+each test suite's results in their own section.</p>
+</div>
+<div class="section">
+<h2 id="trigger-deprecation-notices">
+    Trigger Deprecation Notices
+    <a class="headerlink" href="#trigger-deprecation-notices" title="Permalink to this headline">¶</a>
+</h2>
+<p>Deprecation notices can be triggered by using <code translate="no" class="notranslate">trigger_deprecation</code> from
+the <code translate="no" class="notranslate">symfony/deprecation-contracts</code> package:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// indicates something is deprecated since version 1.3 of vendor-name/packagename</span>
+trigger_deprecation(<span class="hljs-string">'vendor-name/package-name'</span>, <span class="hljs-string">'1.3'</span>, <span class="hljs-string">'Your deprecation message'</span>);
+
+<span class="hljs-comment">// you can also use printf format (all arguments after the message will be used)</span>
+trigger_deprecation(<span class="hljs-string">'...'</span>, <span class="hljs-string">'1.3'</span>, <span class="hljs-string">'Value "%s" is deprecated, use ...  instead.'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="mark-tests-as-legacy">
+    Mark Tests as Legacy
+    <a class="headerlink" href="#mark-tests-as-legacy" title="Permalink to this headline">¶</a>
+</h2>
+<p>There are three ways to mark a test as legacy:</p>
+<ul>
+    <li>(<strong>Recommended</strong>) Add the <code translate="no" class="notranslate">@group legacy</code> annotation to its class or method;</li>
+<li>Make its class name start with the <code translate="no" class="notranslate">Legacy</code> prefix;</li>
+<li>Make its method name start with <code translate="no" class="notranslate">testLegacy*()</code> instead of <code translate="no" class="notranslate">test*()</code>.</li>
+</ul>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If your data provider calls code that would usually trigger a deprecation,
+you can prefix its name with <code translate="no" class="notranslate">provideLegacy</code> or <code translate="no" class="notranslate">getLegacy</code> to silence
+these deprecations. If your data provider does not execute deprecated
+code, it is not required to choose a special naming just because the
+test being fed by the data provider is marked as legacy.</p>
+<p>Also be aware that choosing one of the two legacy prefixes will not mark
+tests as legacy that make use of this data provider. You still have to
+mark them as legacy tests explicitly.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="configuration">
+    Configuration
+    <a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a>
+</h2>
+<p>In case you need to inspect the stack trace of a particular deprecation
+triggered by your unit tests, you can set the <code translate="no" class="notranslate">SYMFONY_DEPRECATIONS_HELPER</code>
+<a href="https://phpunit.de/manual/current/en/appendixes.configuration.html#appendixes.configuration.php-ini-constants-variables" class="reference external" rel="external noopener noreferrer" target="_blank">environment variable</a> to a regular expression that matches this deprecation's
+message, enclosed with <code translate="no" class="notranslate">/</code>. For example, with:</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- http://phpunit.de/manual/6.0/en/appendixes.configuration.html --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">phpunit</span> <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:noNamespaceSchemaLocation</span>=<span class="hljs-string">"https://schema.phpunit.de/6.0/phpunit.xsd"</span>
+&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">php</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">server</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"KERNEL_CLASS"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"App\Kernel"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"SYMFONY_DEPRECATIONS_HELPER"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"/foobar/"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">php</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">phpunit</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p><a href="https://phpunit.de" class="reference external" rel="external noopener noreferrer" target="_blank">PHPUnit</a> will stop your test suite once a deprecation notice is triggered whose
+message contains the <code translate="no" class="notranslate">&quot;foobar&quot;</code> string.</p>
+<div class="section">
+<h3 id="making-tests-fail">
+    Making Tests Fail
+    <a class="headerlink" href="#making-tests-fail" title="Permalink to this headline">¶</a>
+</h3>
+<p>By default, any non-legacy-tagged or any non-silenced (<a href="https://www.php.net/manual/en/language.operators.errorcontrol.php" class="reference external" rel="external noopener noreferrer" target="_blank">@-silencing operator</a>)
+deprecation notices will make tests fail. Alternatively, you can configure
+an arbitrary threshold by setting <code translate="no" class="notranslate">SYMFONY_DEPRECATIONS_HELPER</code> to
+<code translate="no" class="notranslate">max[total]=320</code> for instance. It will make the tests fail only if a
+higher number of deprecation notices is reached (<code translate="no" class="notranslate">0</code> is the default
+value).</p>
+<p>You can have even finer-grained control by using other keys of the <code translate="no" class="notranslate">max</code>
+array, which are <code translate="no" class="notranslate">self</code>, <code translate="no" class="notranslate">direct</code>, and <code translate="no" class="notranslate">indirect</code>. The
+<code translate="no" class="notranslate">SYMFONY_DEPRECATIONS_HELPER</code> environment variable accepts a URL-encoded
+string, meaning you can combine thresholds and any other configuration setting,
+like this: <code translate="no" class="notranslate">SYMFONY_DEPRECATIONS_HELPER=&#039;max[total]=42&amp;max[self]=0&amp;verbose=0&#039;</code></p>
+<div class="section">
+<h4 id="internal-deprecations">
+    Internal deprecations
+    <a class="headerlink" href="#internal-deprecations" title="Permalink to this headline">¶</a>
+</h4>
+<p>When you maintain a library, having the test suite fail as soon as a dependency
+introduces a new deprecation is not desirable, because it shifts the burden of
+fixing that deprecation to any contributor that happens to submit a pull request
+shortly after a new vendor release is made with that deprecation.</p>
+<p>To mitigate this, you can either use tighter requirements, in the hope that
+dependencies will not introduce deprecations in a patch version, or even commit
+the <code translate="no" class="notranslate">composer.lock</code> file, which would create another class of issues.
+Libraries will often use <code translate="no" class="notranslate">SYMFONY_DEPRECATIONS_HELPER=max[total]=999999</code>
+because of this. This has the drawback of allowing contributions that introduce
+deprecations but:</p>
+<ul>
+    <li>forget to fix the deprecated calls if there are any;</li>
+<li>forget to mark appropriate tests with the <code translate="no" class="notranslate">@group legacy</code> annotations.</li>
+</ul>
+<p>By using <code translate="no" class="notranslate">SYMFONY_DEPRECATIONS_HELPER=max[self]=0</code>, deprecations that are
+triggered outside the <code translate="no" class="notranslate">vendors</code> directory will be accounted for separately,
+while deprecations triggered from a library inside it will not (unless you reach
+999999 of these), giving you the best of both worlds.</p>
+</div>
+<div class="section">
+<h4 id="direct-and-indirect-deprecations">
+    Direct and Indirect Deprecations
+    <a class="headerlink" href="#direct-and-indirect-deprecations" title="Permalink to this headline">¶</a>
+</h4>
+<p>When working on a project, you might be more interested in <code translate="no" class="notranslate">max[direct]</code>.
+Let's say you want to fix deprecations as soon as they appear. A problem many
+developers experience is that some dependencies they have tend to lag behind
+their own dependencies, meaning they do not fix deprecations as soon as
+possible, which means you should create a pull request on the outdated vendor,
+and ignore these deprecations until your pull request is merged.</p>
+<p>The <code translate="no" class="notranslate">max[direct]</code> config allows you to put a threshold on direct deprecations
+only, allowing you to notice when <em>your code</em> is using deprecated APIs, and to
+keep up with the changes. You can still use <code translate="no" class="notranslate">max[indirect]</code> if you want to
+keep indirect deprecations under a given threshold.</p>
+<p>Here is a summary that should help you pick the right configuration:</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Value</th>
+                                            <th>Recommended situation</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td>max[total]=0</td>
+                                    <td>Recommended for actively maintained projects
+with robust/no dependencies</td>
+                            </tr>
+                    <tr>
+                                    <td>max[direct]=0</td>
+                                    <td>Recommended for projects with dependencies
+that fail to keep up with new deprecations.</td>
+                            </tr>
+                    <tr>
+                                    <td>max[self]=0</td>
+                                    <td>Recommended for libraries that use
+the deprecation system themselves and
+cannot afford to use one of the modes above.</td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+</div>
+<div class="section">
+<h4 id="ignoring-deprecations">
+    Ignoring Deprecations
+    <a class="headerlink" href="#ignoring-deprecations" title="Permalink to this headline">¶</a>
+</h4>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The <code translate="no" class="notranslate">ignoreFile</code> feature was introduced in Symfony 6.1.</p>
+</div>
+<p>If your application has some deprecations that you can't fix for some reasons,
+you can tell Symfony to ignore them.</p>
+<p>You need first to create a text file where each line is a deprecation to ignore
+defined as a regular expression. Lines beginning with a hash (<code translate="no" class="notranslate">#</code>) are
+considered comments:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># This file contains patterns to be ignored while testing for use of</span>
+<span class="hljs-comment"># deprecated code.</span>
+
+%The <span class="hljs-string">"Symfony\\Component\\Validator\\Context\\ExecutionContextInterface::.*\(\)"</span> method is considered internal Used by the validator engine\. (Should not be called by user\W+code\. )?It may change without further notice\. You should not extend it from <span class="hljs-string">"[^"</span>]+<span class="hljs-string">"\.%
+%The "</span>PHPUnit\\Framework\\TestCase::addWarning\(\)<span class="hljs-string">" method is considered internal%</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, you can run the following command to use that file and ignore those deprecations:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>SYMFONY_DEPRECATIONS_HELPER=<span class="hljs-string">'ignoreFile=./tests/baseline-ignore'</span> ./vendor/bin/simple-phpunit</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h4 id="baseline-deprecations">
+    Baseline Deprecations
+    <a class="headerlink" href="#baseline-deprecations" title="Permalink to this headline">¶</a>
+</h4>
+<p>You can also take a snapshot of deprecations currently triggered by your application
+code, and ignore those during your test runs, still reporting newly added ones.
+The trick is to create a file with the allowed deprecations and define it as the
+&quot;deprecation baseline&quot;. Deprecations inside that file are ignored but the rest of
+deprecations are still reported.</p>
+<p>First, generate the file with the allowed deprecations (run the same command
+whenever you want to update the existing file):</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>SYMFONY_DEPRECATIONS_HELPER=<span class="hljs-string">'generateBaseline=true&amp;baselineFile=./tests/allowed.json'</span> ./vendor/bin/simple-phpunit</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This command stores all the deprecations reported while running tests in the
+given file path and encoded in JSON.</p>
+<p>Then, you can run the following command to use that file and ignore those deprecations:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>SYMFONY_DEPRECATIONS_HELPER=<span class="hljs-string">'baselineFile=./tests/allowed.json'</span> ./vendor/bin/simple-phpunit</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h3 id="disabling-the-verbose-output">
+    Disabling the Verbose Output
+    <a class="headerlink" href="#disabling-the-verbose-output" title="Permalink to this headline">¶</a>
+</h3>
+<p>By default, the bridge will display a detailed output with the number of
+deprecations and where they arise. If this is too much for you, you can use
+<code translate="no" class="notranslate">SYMFONY_DEPRECATIONS_HELPER=verbose=0</code> to turn the verbose output off.</p>
+<p>It's also possible to change verbosity per deprecation type. For example, using
+<code translate="no" class="notranslate">quiet[]=indirect&amp;quiet[]=other</code> will hide details for deprecations of types
+&quot;indirect&quot; and &quot;other&quot;.</p>
+</div>
+<div class="section">
+<h3 id="disabling-the-deprecation-helper">
+    Disabling the Deprecation Helper
+    <a class="headerlink" href="#disabling-the-deprecation-helper" title="Permalink to this headline">¶</a>
+</h3>
+<p>Set the <code translate="no" class="notranslate">SYMFONY_DEPRECATIONS_HELPER</code> environment variable to <code translate="no" class="notranslate">disabled=1</code>
+to completely disable the deprecation helper. This is useful to make use of the
+rest of features provided by this component without getting errors or messages
+related to deprecations.</p>
+</div>
+<div class="section">
+<h3 id="deprecation-notices-at-autoloading-time">
+    Deprecation Notices at Autoloading Time
+    <a class="headerlink" href="#deprecation-notices-at-autoloading-time" title="Permalink to this headline">¶</a>
+</h3>
+<p>By default, the PHPUnit Bridge uses <code translate="no" class="notranslate">DebugClassLoader</code> from the
+<a href="https://github.com/symfony/error-handler" class="reference external" rel="external noopener noreferrer" target="_blank">ErrorHandler component</a> to throw deprecation notices at class autoloading
+time. This can be disabled with the <code translate="no" class="notranslate">debug-class-loader</code> option.</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- phpunit.xml.dist --&gt;</span>
+<span class="hljs-comment">&lt;!-- ... --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">listeners</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">listener</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"Symfony\Bridge\PhpUnit\SymfonyTestsListener"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">arguments</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">array</span>&gt;</span>
+                <span class="hljs-comment">&lt;!-- set this option to 0 to disable the DebugClassLoader integration --&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">element</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"debug-class-loader"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">integer</span>&gt;</span>0<span class="hljs-tag">&lt;/<span class="hljs-name">integer</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">element</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">array</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">arguments</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">listener</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">listeners</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="compile-time-deprecations">
+    Compile-time Deprecations
+    <a class="headerlink" href="#compile-time-deprecations" title="Permalink to this headline">¶</a>
+</h3>
+<p>Use the <code translate="no" class="notranslate">debug:container</code> command to list the deprecations generated during
+the compiling and warming up of the container:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:container --deprecations</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="log-deprecations">
+    Log Deprecations
+    <a class="headerlink" href="#log-deprecations" title="Permalink to this headline">¶</a>
+</h3>
+<p>For turning the verbose output off and write it to a log file instead you can use
+<code translate="no" class="notranslate">SYMFONY_DEPRECATIONS_HELPER=&#039;logFile=/path/deprecations.log&#039;</code>.</p>
+<span id="write-assertions-about-deprecations"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="write-assertions-about-deprecations">
+    Write Assertions about Deprecations
+    <a class="headerlink" href="#write-assertions-about-deprecations" title="Permalink to this headline">¶</a>
+</h2>
+<p>When adding deprecations to your code, you might like writing tests that verify
+that they are triggered as required. To do so, the bridge provides the
+<code translate="no" class="notranslate">expectDeprecation()</code> method that you can use on your test methods.
+It requires you to pass the expected message, given in the same format as for
+the <a href="https://phpunit.de/manual/current/en/appendixes.assertions.html#appendixes.assertions.assertStringMatchesFormat" class="reference external" rel="external noopener noreferrer" target="_blank">PHPUnit's assertStringMatchesFormat()</a> method. If you expect more than one
+deprecation message for a given test method, you can use the method several
+times (order matters):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">PhpUnit</span>\<span class="hljs-title">ExpectDeprecationTrait</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">ExpectDeprecationTrait</span>;
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@group</span> legacy
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testDeprecatedCode</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// test some code that triggers the following deprecation:</span>
+        <span class="hljs-comment">// trigger_deprecation('vendor-name/package-name', '5.1', 'This "Foo" method is deprecated.');</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>expectDeprecation(<span class="hljs-string">'Since vendor-name/package-name 5.1: This "%s" method is deprecated'</span>);
+
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-comment">// test some code that triggers the following deprecation:</span>
+        <span class="hljs-comment">// trigger_deprecation('vendor-name/package-name', '4.4', 'The second argument of the "Bar" method is deprecated.');</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>expectDeprecation(<span class="hljs-string">'Since vendor-name/package-name 4.4: The second argument of the "%s" method is deprecated.'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="display-the-full-stack-trace">
+    Display the Full Stack Trace
+    <a class="headerlink" href="#display-the-full-stack-trace" title="Permalink to this headline">¶</a>
+</h2>
+<p>By default, the PHPUnit Bridge displays only deprecation messages.
+To show the full stack trace related to a deprecation, set the value of <code translate="no" class="notranslate">SYMFONY_DEPRECATIONS_HELPER</code>
+to a regular expression matching the deprecation message.</p>
+<p>For example, if the following deprecation notice is thrown:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash">1x: Doctrine\Common\ClassLoader is deprecated.
+  1x <span class="hljs-keyword">in</span> EntityTypeTest::setUp from Symfony\Bridge\Doctrine\Tests\Form\Type</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Running the following command will display the full stack trace:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>SYMFONY_DEPRECATIONS_HELPER=<span class="hljs-string">'/Doctrine\\Common\\ClassLoader is deprecated\./'</span> ./vendor/bin/simple-phpunit</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="testing-with-multiple-phpunit-versions">
+    Testing with Multiple PHPUnit Versions
+    <a class="headerlink" href="#testing-with-multiple-phpunit-versions" title="Permalink to this headline">¶</a>
+</h2>
+<p>When testing a library that has to be compatible with several versions of PHP,
+the test suite cannot use the latest versions of PHPUnit because:</p>
+<ul>
+    <li>PHPUnit 8 deprecated several methods in favor of other methods which are not
+available in older versions (e.g. PHPUnit 4);</li>
+<li>PHPUnit 8 added the <code translate="no" class="notranslate">void</code> return type to the <code translate="no" class="notranslate">setUp()</code> method, which is
+not compatible with PHP 5.5;</li>
+<li>PHPUnit switched to namespaced classes starting from PHPUnit 6, so tests must
+work with and without namespaces.</li>
+</ul>
+<div class="section">
+<h3 id="polyfills-for-the-unavailable-methods">
+    Polyfills for the Unavailable Methods
+    <a class="headerlink" href="#polyfills-for-the-unavailable-methods" title="Permalink to this headline">¶</a>
+</h3>
+<p>When using the <code translate="no" class="notranslate">simple-phpunit</code> script, PHPUnit Bridge injects polyfills for
+most methods of the <code translate="no" class="notranslate">TestCase</code> and <code translate="no" class="notranslate">Assert</code> classes (e.g. <code translate="no" class="notranslate">expectException()</code>,
+<code translate="no" class="notranslate">expectExceptionMessage()</code>, <code translate="no" class="notranslate">assertContainsEquals()</code>, etc.). This allows writing
+test cases using the latest best practices while still remaining compatible with
+older PHPUnit versions.</p>
+</div>
+<div class="section">
+<h3 id="removing-the-void-return-type">
+    Removing the Void Return Type
+    <a class="headerlink" href="#removing-the-void-return-type" title="Permalink to this headline">¶</a>
+</h3>
+<p>When running the <code translate="no" class="notranslate">simple-phpunit</code> script with the <code translate="no" class="notranslate">SYMFONY_PHPUNIT_REMOVE_RETURN_TYPEHINT</code>
+environment variable set to <code translate="no" class="notranslate">1</code>, the PHPUnit bridge will alter the code of
+PHPUnit to remove the return type (introduced in PHPUnit 8) from <code translate="no" class="notranslate">setUp()</code>,
+<code translate="no" class="notranslate">tearDown()</code>, <code translate="no" class="notranslate">setUpBeforeClass()</code> and <code translate="no" class="notranslate">tearDownAfterClass()</code> methods.
+This allows you to write a test compatible with both PHP 5 and PHPUnit 8.</p>
+</div>
+<div class="section">
+<h3 id="using-namespaced-phpunit-classes">
+    Using Namespaced PHPUnit Classes
+    <a class="headerlink" href="#using-namespaced-phpunit-classes" title="Permalink to this headline">¶</a>
+</h3>
+<p>The PHPUnit bridge adds namespaced class aliases for most of the PHPUnit classes
+declared without namespaces (e.g. <code translate="no" class="notranslate">PHPUnit_Framework_Assert</code>), allowing you to
+always use the namespaced class declaration even when the test is executed with
+PHPUnit 4.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="time-sensitive-tests">
+    Time-sensitive Tests
+    <a class="headerlink" href="#time-sensitive-tests" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="use-case">
+    Use Case
+    <a class="headerlink" href="#use-case" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you have this kind of time-related tests:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Stopwatch</span>\<span class="hljs-title">Stopwatch</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testSomething</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stopwatch</span> = <span class="hljs-keyword">new</span> Stopwatch();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stopwatch</span><span class="hljs-operator">-&gt;</span>start(<span class="hljs-string">'event_name'</span>);
+        sleep(<span class="hljs-number">10</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>duration</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stopwatch</span><span class="hljs-operator">-&gt;</span>stop(<span class="hljs-string">'event_name'</span>)<span class="hljs-operator">-&gt;</span>getDuration();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertEquals(<span class="hljs-number">10000</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>duration</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You calculated the duration time of your process using the Stopwatch utilities to
+<a href="../performance.html#profiling-applications" class="reference internal">profile Symfony applications</a>. However, depending
+on the load of the server or the processes running on your local machine, the
+<code translate="no" class="notranslate">$duration</code> could for example be <code translate="no" class="notranslate">10.000023s</code> instead of <code translate="no" class="notranslate">10s</code>.</p>
+<p>This kind of tests are called transient tests: they are failing randomly
+depending on spurious and external circumstances. They are often cause trouble
+when using public continuous integration services like <a href="https://travis-ci.org/" class="reference external" rel="external noopener noreferrer" target="_blank">Travis CI</a>.</p>
+</div>
+<div class="section">
+<h3 id="clock-mocking">
+    Clock Mocking
+    <a class="headerlink" href="#clock-mocking" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/PhpUnit/ClockMock.php" class="reference external" title="Symfony\Bridge\PhpUnit\ClockMock" rel="external noopener noreferrer" target="_blank">ClockMock</a> class provided by this bridge
+allows you to mock the PHP's built-in time functions <code translate="no" class="notranslate">time()</code>, <code translate="no" class="notranslate">microtime()</code>,
+<code translate="no" class="notranslate">sleep()</code>, <code translate="no" class="notranslate">usleep()</code>, <code translate="no" class="notranslate">gmdate()</code>, and <code translate="no" class="notranslate">hrtime()`. Additionally the
+function </code>date()`` is mocked so it uses the mocked time if no timestamp is
+specified.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>Support for mocking the <code translate="no" class="notranslate">hrtime()</code> function was introduced in Symfony 6.2.</p>
+</div>
+<p>Other functions with an optional timestamp parameter that defaults to <code translate="no" class="notranslate">time()</code>
+will still use the system time instead of the mocked time. This means that you
+may need to change some code in your tests. For example, instead of <code translate="no" class="notranslate">new DateTime()</code>,
+you should use <code translate="no" class="notranslate">DateTime::createFromFormat(&#039;U&#039;, (string) time())</code> to use the mocked
+<code translate="no" class="notranslate">time()</code> function.</p>
+<p>To use the <code translate="no" class="notranslate">ClockMock</code> class in your test, add the <code translate="no" class="notranslate">@group time-sensitive</code>
+annotation to its class or methods. This annotation only works when executing
+PHPUnit using the <code translate="no" class="notranslate">vendor/bin/simple-phpunit</code> script or when registering the
+following listener in your PHPUnit configuration:</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- phpunit.xml.dist --&gt;</span>
+<span class="hljs-comment">&lt;!-- ... --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">listeners</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">listener</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"\Symfony\Bridge\PhpUnit\SymfonyTestsListener"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">listeners</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you don't want to use the <code translate="no" class="notranslate">@group time-sensitive</code> annotation, you can
+register the <code translate="no" class="notranslate">ClockMock</code> class manually by calling
+<code translate="no" class="notranslate">ClockMock::register(__CLASS__)</code> and <code translate="no" class="notranslate">ClockMock::withClockMock(true)</code>
+before the test and <code translate="no" class="notranslate">ClockMock::withClockMock(false)</code> after the test.</p>
+</div>
+<p>As a result, the following is guaranteed to work and is no longer a transient
+test:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Stopwatch</span>\<span class="hljs-title">Stopwatch</span>;
+
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@group</span> time-sensitive
+ */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testSomething</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stopwatch</span> = <span class="hljs-keyword">new</span> Stopwatch();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stopwatch</span><span class="hljs-operator">-&gt;</span>start(<span class="hljs-string">'event_name'</span>);
+        sleep(<span class="hljs-number">10</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>duration</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stopwatch</span><span class="hljs-operator">-&gt;</span>stop(<span class="hljs-string">'event_name'</span>)<span class="hljs-operator">-&gt;</span>getDuration();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertEquals(<span class="hljs-number">10000</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>duration</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>And that's all!</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Time-based function mocking follows the <a href="https://www.php.net/manual/en/language.namespaces.rules.php" class="reference external" rel="external noopener noreferrer" target="_blank">PHP namespace resolutions rules</a>
+so &quot;fully qualified function calls&quot; (e.g <code translate="no" class="notranslate">\time()</code>) cannot be mocked.</p>
+</div>
+<p>The <code translate="no" class="notranslate">@group time-sensitive</code> annotation is equivalent to calling
+<code translate="no" class="notranslate">ClockMock::register(MyTest::class)</code>. If you want to mock a function used in a
+different class, do it explicitly using <code translate="no" class="notranslate">ClockMock::register(MyClass::class)</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// the class that uses the time() function to be mocked</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getTimeInHours</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> time() / <span class="hljs-number">3600</span>;
+    }
+}
+
+<span class="hljs-comment">// the test that mocks the external time() function explicitly</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">MyClass</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">PhpUnit</span>\<span class="hljs-title">ClockMock</span>;
+
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@group</span> time-sensitive
+ */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testGetTimeInHours</span><span class="hljs-params">()</span>
+    </span>{
+        ClockMock<span class="hljs-operator">::</span>register(MyClass<span class="hljs-operator">::</span>class);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>my</span> = <span class="hljs-keyword">new</span> MyClass();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>result</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>my</span><span class="hljs-operator">-&gt;</span>getTimeInHours();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertEquals(time() / <span class="hljs-number">3600</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>result</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>An added bonus of using the <code translate="no" class="notranslate">ClockMock</code> class is that time passes
+instantly. Using PHP's <code translate="no" class="notranslate">sleep(10)</code> will make your test wait for 10
+actual seconds (more or less). In contrast, the <code translate="no" class="notranslate">ClockMock</code> class
+advances the internal clock the given number of seconds without actually
+waiting that time, so your test will execute 10 seconds faster.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="dns-sensitive-tests">
+    DNS-sensitive Tests
+    <a class="headerlink" href="#dns-sensitive-tests" title="Permalink to this headline">¶</a>
+</h2>
+<p>Tests that make network connections, for example to check the validity of a DNS
+record, can be slow to execute and unreliable due to the conditions of the
+network. For that reason, this component also provides mocks for these PHP
+functions:</p>
+<ul>
+    <li><a href="https://secure.php.net/manual/en/function.checkdnsrr.php" class="reference external" title="checkdnsrr" rel="external noopener noreferrer" target="_blank">checkdnsrr</a></li>
+<li><a href="https://secure.php.net/manual/en/function.dns-check-record.php" class="reference external" title="dns_check_record" rel="external noopener noreferrer" target="_blank">dns_check_record</a></li>
+<li><a href="https://secure.php.net/manual/en/function.getmxrr.php" class="reference external" title="getmxrr" rel="external noopener noreferrer" target="_blank">getmxrr</a></li>
+<li><a href="https://secure.php.net/manual/en/function.dns-get-mx.php" class="reference external" title="dns_get_mx" rel="external noopener noreferrer" target="_blank">dns_get_mx</a></li>
+<li><a href="https://secure.php.net/manual/en/function.gethostbyaddr.php" class="reference external" title="gethostbyaddr" rel="external noopener noreferrer" target="_blank">gethostbyaddr</a></li>
+<li><a href="https://secure.php.net/manual/en/function.gethostbyname.php" class="reference external" title="gethostbyname" rel="external noopener noreferrer" target="_blank">gethostbyname</a></li>
+<li><a href="https://secure.php.net/manual/en/function.gethostbynamel.php" class="reference external" title="gethostbynamel" rel="external noopener noreferrer" target="_blank">gethostbynamel</a></li>
+<li><a href="https://secure.php.net/manual/en/function.dns-get-record.php" class="reference external" title="dns_get_record" rel="external noopener noreferrer" target="_blank">dns_get_record</a></li>
+</ul>
+<div class="section">
+<h3 id="use-case">
+    Use Case
+    <a class="headerlink" href="#use-case" title="Permalink to this headline">¶</a>
+</h3>
+<p>Consider the following example that tests a custom class called <code translate="no" class="notranslate">DomainValidator</code>
+which defines a <code translate="no" class="notranslate">checkDnsRecord</code> option to also validate that a domain is
+associated to a valid host:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">DomainValidator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testEmail</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span> = <span class="hljs-keyword">new</span> DomainValidator([<span class="hljs-string">'checkDnsRecord'</span> =&gt; <span class="hljs-keyword">true</span>]);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isValid</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span><span class="hljs-operator">-&gt;</span>validate(<span class="hljs-string">'example.com'</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In order to avoid making a real network connection, add the <code translate="no" class="notranslate">@group dns-sensitive</code>
+annotation to the class and use the <code translate="no" class="notranslate">DnsMock::withMockedHosts()</code> to configure
+the data you expect to get for the given hosts:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">DomainValidator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">PhpUnit</span>\<span class="hljs-title">DnsMock</span>;
+
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@group</span> dns-sensitive
+ */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DomainValidatorTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testEmails</span><span class="hljs-params">()</span>
+    </span>{
+        DnsMock<span class="hljs-operator">::</span>withMockedHosts([
+            <span class="hljs-string">'example.com'</span> =&gt; [[<span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'A'</span>, <span class="hljs-string">'ip'</span> =&gt; <span class="hljs-string">'1.2.3.4'</span>]],
+        ]);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span> = <span class="hljs-keyword">new</span> DomainValidator([<span class="hljs-string">'checkDnsRecord'</span> =&gt; <span class="hljs-keyword">true</span>]);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isValid</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span><span class="hljs-operator">-&gt;</span>validate(<span class="hljs-string">'example.com'</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">withMockedHosts()</code> method configuration is defined as an array. The keys
+are the mocked hosts and the values are arrays of DNS records in the same format
+returned by <a href="https://secure.php.net/manual/en/function.dns-get-record.php" class="reference external" title="dns_get_record" rel="external noopener noreferrer" target="_blank">dns_get_record</a>, so you can simulate diverse network
+conditions:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">DnsMock<span class="hljs-operator">::</span>withMockedHosts([
+    <span class="hljs-string">'example.com'</span> =&gt; [
+        [
+            <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'A'</span>,
+            <span class="hljs-string">'ip'</span> =&gt; <span class="hljs-string">'1.2.3.4'</span>,
+        ],
+        [
+            <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'AAAA'</span>,
+            <span class="hljs-string">'ipv6'</span> =&gt; <span class="hljs-string">'::12'</span>,
+        ],
+    ],
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="class-existence-based-tests">
+    Class Existence Based Tests
+    <a class="headerlink" href="#class-existence-based-tests" title="Permalink to this headline">¶</a>
+</h2>
+<p>Tests that behave differently depending on existing classes, for example Composer's
+development dependencies, are often hard to test for the alternate case. For that
+reason, this component also provides mocks for these PHP functions:</p>
+<ul>
+    <li><a href="https://secure.php.net/manual/en/function.class-exists.php" class="reference external" title="class_exists" rel="external noopener noreferrer" target="_blank">class_exists</a></li>
+<li><a href="https://secure.php.net/manual/en/function.interface-exists.php" class="reference external" title="interface_exists" rel="external noopener noreferrer" target="_blank">interface_exists</a></li>
+<li><a href="https://secure.php.net/manual/en/function.trait-exists.php" class="reference external" title="trait_exists" rel="external noopener noreferrer" target="_blank">trait_exists</a></li>
+<li><a href="https://secure.php.net/manual/en/function.enum-exists.php" class="reference external" title="enum_exists" rel="external noopener noreferrer" target="_blank">enum_exists</a></li>
+</ul>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The <code translate="no" class="notranslate">enum_exists</code> function was introduced in Symfony 6.3.</p>
+</div>
+<div class="section">
+<h3 id="use-case">
+    Use Case
+    <a class="headerlink" href="#use-case" title="Permalink to this headline">¶</a>
+</h3>
+<p>Consider the following example that relies on the <code translate="no" class="notranslate">Vendor\DependencyClass</code> to
+toggle a behavior:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Vendor</span>\<span class="hljs-title">DependencyClass</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hello</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (class_exists(DependencyClass<span class="hljs-operator">::</span>class)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-string">'The dependency behavior.'</span>;
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'The default behavior.'</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>A regular test case for <code translate="no" class="notranslate">MyClass</code> (assuming the development dependencies
+are installed during tests) would look like:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">MyClass</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClassTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testHello</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span> = <span class="hljs-keyword">new</span> MyClass();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>result</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span><span class="hljs-operator">-&gt;</span>hello(); <span class="hljs-comment">// "The dependency behavior."</span>
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In order to test the default behavior instead use the
+<code translate="no" class="notranslate">ClassExistsMock::withMockedClasses()</code> to configure the expected
+classes, interfaces and/or traits for the code to run:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">MyClass</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Vendor</span>\<span class="hljs-title">DependencyClass</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClassTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testHelloDefault</span><span class="hljs-params">()</span>
+    </span>{
+        ClassExistsMock<span class="hljs-operator">::</span>register(MyClass<span class="hljs-operator">::</span>class);
+        ClassExistsMock<span class="hljs-operator">::</span>withMockedClasses([DependencyClass<span class="hljs-operator">::</span>class =&gt; <span class="hljs-keyword">false</span>]);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span> = <span class="hljs-keyword">new</span> MyClass();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>result</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span><span class="hljs-operator">-&gt;</span>hello(); <span class="hljs-comment">// "The default behavior."</span>
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Note that mocking a class with <code translate="no" class="notranslate">ClassExistsMock::withMockedClasses()</code>
+will make <a href="https://secure.php.net/manual/en/function.class-exists.php" class="reference external" title="class_exists" rel="external noopener noreferrer" target="_blank">class_exists</a>, <a href="https://secure.php.net/manual/en/function.interface-exists.php" class="reference external" title="interface_exists" rel="external noopener noreferrer" target="_blank">interface_exists</a>
+and <a href="https://secure.php.net/manual/en/function.trait-exists.php" class="reference external" title="trait_exists" rel="external noopener noreferrer" target="_blank">trait_exists</a> return true.</p>
+<p>To register an enumeration and mock <a href="https://secure.php.net/manual/en/function.enum-exists.php" class="reference external" title="enum_exists" rel="external noopener noreferrer" target="_blank">enum_exists</a>,
+<code translate="no" class="notranslate">ClassExistsMock::withMockedEnums()</code> must be used. Note that, like in
+PHP 8.1 and later, calling <code translate="no" class="notranslate">class_exists</code> on a enum will return <code translate="no" class="notranslate">true</code>.
+That's why calling <code translate="no" class="notranslate">ClassExistsMock::withMockedEnums()</code> will also register the enum
+as a mocked class.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The <code translate="no" class="notranslate">enum_exists</code> function was introduced in Symfony 6.3.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="troubleshooting">
+    Troubleshooting
+    <a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <code translate="no" class="notranslate">@group time-sensitive</code> and <code translate="no" class="notranslate">@group dns-sensitive</code> annotations work
+&quot;by convention&quot; and assume that the namespace of the tested class can be
+obtained just by removing the <code translate="no" class="notranslate">Tests\</code> part from the test namespace. I.e.
+if your test cases fully-qualified class name (FQCN) is
+<code translate="no" class="notranslate">App\Tests\Watch\DummyWatchTest</code>, it assumes the tested class namespace
+is <code translate="no" class="notranslate">App\Watch</code>.</p>
+<p>If this convention doesn't work for your application, configure the mocked
+namespaces in the <code translate="no" class="notranslate">phpunit.xml</code> file, as done for example in the
+<a href="http_kernel.html" class="reference internal">HttpKernel Component</a>:</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- http://phpunit.de/manual/4.1/en/appendixes.configuration.html --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">phpunit</span> <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:noNamespaceSchemaLocation</span>=<span class="hljs-string">"https://schema.phpunit.de/4.1/phpunit.xsd"</span>
+&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">listeners</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">listener</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"Symfony\Bridge\PhpUnit\SymfonyTestsListener"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">arguments</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">array</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">element</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"time-sensitive"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">string</span>&gt;</span>Symfony\Component\HttpFoundation<span class="hljs-tag">&lt;/<span class="hljs-name">string</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">element</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">array</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">arguments</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">listener</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">listeners</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">phpunit</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Under the hood, a PHPUnit listener injects the mocked functions in the tested
+classes' namespace. In order to work as expected, the listener has to run before
+the tested class ever runs.</p>
+<p>By default, the mocked functions are created when the annotation are found and
+the corresponding tests are run. Depending on how your tests are constructed,
+this might be too late.</p>
+<p>You can either:</p>
+<ul>
+    <li>Declare the namespaces of the tested classes in your <code translate="no" class="notranslate">phpunit.xml.dist</code>;</li>
+<li>Register the namespaces at the end of the <code translate="no" class="notranslate">config/bootstrap.php</code> file.</li>
+</ul>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- phpunit.xml.dist --&gt;</span>
+<span class="hljs-comment">&lt;!-- ... --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">listeners</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">listener</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"Symfony\Bridge\PhpUnit\SymfonyTestsListener"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">arguments</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">array</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">element</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"time-sensitive"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">string</span>&gt;</span>Acme\MyClassTest<span class="hljs-tag">&lt;/<span class="hljs-name">string</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">element</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">array</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">arguments</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">listener</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">listeners</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/bootstrap.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">PhpUnit</span>\<span class="hljs-title">ClockMock</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-string">'test'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'APP_ENV'</span>]) {
+    ClockMock<span class="hljs-operator">::</span>register(<span class="hljs-string">'Acme\\MyClassTest\\'</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="modified-phpunit-script">
+    Modified PHPUnit script
+    <a class="headerlink" href="#modified-phpunit-script" title="Permalink to this headline">¶</a>
+</h2>
+<p>This bridge provides a modified version of PHPUnit that you can call by using
+its <code translate="no" class="notranslate">bin/simple-phpunit</code> command. It has the following features:</p>
+<ul>
+    <li>Works with a standalone vendor directory that doesn't conflict with yours;</li>
+<li>Does not embed <code translate="no" class="notranslate">prophecy</code> to prevent any conflicts with its dependencies;</li>
+<li>Collects and replays skipped tests when the <code translate="no" class="notranslate">SYMFONY_PHPUNIT_SKIPPED_TESTS</code>
+env var is defined: the env var should specify a file name that will be used for
+storing skipped tests on a first run, and replay them on the second run;</li>
+<li>Parallelizes test suites execution when given a directory as argument, scanning
+this directory for <code translate="no" class="notranslate">phpunit.xml.dist</code> files up to <code translate="no" class="notranslate">SYMFONY_PHPUNIT_MAX_DEPTH</code>
+levels (specified as an env var, defaults to <code translate="no" class="notranslate">3</code>);</li>
+</ul>
+<p>The script writes the modified PHPUnit it builds in a directory that can be
+configured by the <code translate="no" class="notranslate">SYMFONY_PHPUNIT_DIR</code> env var, or in the same directory as
+the <code translate="no" class="notranslate">simple-phpunit</code> if it is not provided. It's also possible to set this
+env var in the <code translate="no" class="notranslate">phpunit.xml.dist</code> file.</p>
+<p>If you have installed the bridge through Composer, you can run it by calling e.g.:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>vendor/bin/simple-phpunit</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>It's possible to change the PHPUnit version by setting the
+<code translate="no" class="notranslate">SYMFONY_PHPUNIT_VERSION</code> env var in the <code translate="no" class="notranslate">phpunit.xml.dist</code> file (e.g.
+<code translate="no" class="notranslate">&lt;server name=&quot;SYMFONY_PHPUNIT_VERSION&quot; value=&quot;5.5&quot;/&gt;</code>). This is the
+preferred method as it can be committed to your version control repository.</p>
+<p>It's also possible to set <code translate="no" class="notranslate">SYMFONY_PHPUNIT_VERSION</code> as a real env var
+(not defined in a <a href="../configuration.html#config-dot-env" class="reference internal">dotenv file</a>).</p>
+<p>In the same way, <code translate="no" class="notranslate">SYMFONY_MAX_PHPUNIT_VERSION</code> will set the maximum version
+of PHPUnit to be considered. This is useful when testing a framework that does
+not support the latest version(s) of PHPUnit.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you still need to use <code translate="no" class="notranslate">prophecy</code> (but not <code translate="no" class="notranslate">symfony/yaml</code>),
+then set the <code translate="no" class="notranslate">SYMFONY_PHPUNIT_REMOVE</code> env var to <code translate="no" class="notranslate">symfony/yaml</code>.</p>
+<p>It's also possible to set this env var in the <code translate="no" class="notranslate">phpunit.xml.dist</code> file.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>It is also possible to require additional packages that will be installed along
+with the rest of the needed PHPUnit packages using the <code translate="no" class="notranslate">SYMFONY_PHPUNIT_REQUIRE</code>
+env variable. This is specially useful for installing PHPUnit plugins without
+having to add them to your main <code translate="no" class="notranslate">composer.json</code> file. The required packages
+need to be separated with a space.</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- phpunit.xml.dist --&gt;</span>
+<span class="hljs-comment">&lt;!-- ... --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">php</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"SYMFONY_PHPUNIT_REQUIRE"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"vendor/name:^1.2 vendor/name2:^3"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">php</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="code-coverage-listener">
+    Code Coverage Listener
+    <a class="headerlink" href="#code-coverage-listener" title="Permalink to this headline">¶</a>
+</h2>
+<p>By default, the code coverage is computed with the following rule: if a line of
+code is executed, then it is marked as covered. The test which executes a
+line of code is therefore marked as &quot;covering the line of code&quot;. This can be
+misleading.</p>
+<p>Consider the following example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bar</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">barMethod</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'bar'</span>;
+    }
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private Bar <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bar</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fooMethod</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>bar<span class="hljs-operator">-&gt;</span>barMethod();
+
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'bar'</span>;
+    }
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FooTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bar</span> = <span class="hljs-keyword">new</span> Bar();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = <span class="hljs-keyword">new</span> Foo(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bar</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertSame(<span class="hljs-string">'bar'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span><span class="hljs-operator">-&gt;</span>fooMethod());
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">FooTest::test</code> method executes every single line of code of both <code translate="no" class="notranslate">Foo</code>
+and <code translate="no" class="notranslate">Bar</code> classes, but <code translate="no" class="notranslate">Bar</code> is not truly tested. The <code translate="no" class="notranslate">CoverageListener</code>
+aims to fix this behavior by adding the appropriate <a href="https://phpunit.de/manual/current/en/appendixes.annotations.html#appendixes.annotations.covers" class="reference external" rel="external noopener noreferrer" target="_blank">@covers</a> annotation on
+each test class.</p>
+<p>If a test class already defines the <code translate="no" class="notranslate">@covers</code> annotation, this listener does
+nothing. Otherwise, it tries to find the code related to the test by removing
+the <code translate="no" class="notranslate">Test</code> part of the classname: <code translate="no" class="notranslate">My\Namespace\Tests\FooTest</code> -&gt;
+<code translate="no" class="notranslate">My\Namespace\Foo</code>.</p>
+<div class="section">
+<h3 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h3>
+<p>Add the following configuration to the <code translate="no" class="notranslate">phpunit.xml.dist</code> file:</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- http://phpunit.de/manual/6.0/en/appendixes.configuration.html --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">phpunit</span> <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:noNamespaceSchemaLocation</span>=<span class="hljs-string">"https://schema.phpunit.de/6.0/phpunit.xsd"</span>
+&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">listeners</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">listener</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"Symfony\Bridge\PhpUnit\CoverageListener"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">listeners</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">phpunit</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If the logic used to find the related code is too simple or doesn't work for
+your application, you can use your own SUT (System Under Test) solver:</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">listeners</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">listener</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"Symfony\Bridge\PhpUnit\CoverageListener"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">arguments</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">string</span>&gt;</span>My\Namespace\SutSolver::solve<span class="hljs-tag">&lt;/<span class="hljs-name">string</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">arguments</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">listener</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">listeners</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">My\Namespace\SutSolver::solve</code> can be any PHP callable and receives the
+current test as its first argument.</p>
+<p>Finally, the listener can also display warning messages when the SUT solver does
+not find the SUT:</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">listeners</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">listener</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"Symfony\Bridge\PhpUnit\CoverageListener"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">arguments</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">null</span>/&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">boolean</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">boolean</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">arguments</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">listener</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">listeners</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

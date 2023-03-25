@@ -1,0 +1,155 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="caching-based-on-resources">
+    Caching based on Resources
+    <a class="headerlink" href="#caching-based-on-resources" title="Permalink to this headline">¶</a>
+</h1>
+<p>When all configuration resources are loaded, you may want to process the
+configuration values and combine them all in one file. This file acts
+like a cache. Its contents don’t have to be regenerated every time the
+application runs – only when the configuration resources are modified.</p>
+<p>For example, the Symfony Routing component allows you to load all routes,
+and then dump a URL matcher or a URL generator based on these routes. In
+this case, when one of the resources is modified (and you are working
+in a development environment), the generated file should be invalidated
+and regenerated. This can be accomplished by making use of the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/ConfigCache.php" class="reference external" title="Symfony\Component\Config\ConfigCache" rel="external noopener noreferrer" target="_blank">ConfigCache</a> class.</p>
+<p>The example below shows you how to collect resources, then generate some
+code based on the resources that were loaded and write this code to the
+cache. The cache also receives the collection of resources that were used
+for generating the code. By looking at the &quot;last modified&quot; timestamp of
+these resources, the cache can tell if it is still fresh or that its contents
+should be regenerated:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">ConfigCache</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">Resource</span>\<span class="hljs-title">FileResource</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cachePath</span> = <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/cache/appUserMatcher.php'</span>;
+
+<span class="hljs-comment">// the second argument indicates whether or not you want to use debug mode</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userMatcherCache</span> = <span class="hljs-keyword">new</span> ConfigCache(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cachePath</span>, <span class="hljs-keyword">true</span>);
+
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userMatcherCache</span><span class="hljs-operator">-&gt;</span>isFresh()) {
+    <span class="hljs-comment">// fill this with an array of 'users.yaml' file paths</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yamlUserFiles</span> = ...;
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resources</span> = [];
+
+    <span class="hljs-keyword">foreach</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yamlUserFiles</span> <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yamlUserFile</span>) {
+        <span class="hljs-comment">// see the article "Loading resources" to</span>
+        <span class="hljs-comment">// know where $delegatingLoader comes from</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>delegatingLoader</span><span class="hljs-operator">-&gt;</span>load(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yamlUserFile</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resources</span>[] = <span class="hljs-keyword">new</span> FileResource(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yamlUserFile</span>);
+    }
+
+    <span class="hljs-comment">// the code for the UserMatcher is generated elsewhere</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>code</span> = ...;
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userMatcherCache</span><span class="hljs-operator">-&gt;</span>write(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>code</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resources</span>);
+}
+
+<span class="hljs-comment">// you may want to require the cached code:</span>
+<span class="hljs-keyword">require</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cachePath</span>;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In debug mode, a <code translate="no" class="notranslate">.meta</code> file will be created in the same directory as
+the cache file itself. This <code translate="no" class="notranslate">.meta</code> file contains the serialized resources,
+whose timestamps are used to determine if the cache is still fresh. When
+not in debug mode, the cache is considered to be &quot;fresh&quot; as soon as it exists,
+and therefore no <code translate="no" class="notranslate">.meta</code> file will be generated.</p>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

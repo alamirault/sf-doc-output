@@ -1,0 +1,1120 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="building-your-own-framework-with-the-microkerneltrait">
+    Building your own Framework with the MicroKernelTrait
+    <a class="headerlink" href="#building-your-own-framework-with-the-microkerneltrait" title="Permalink to this headline">¶</a>
+</h1>
+<p>The default <code translate="no" class="notranslate">Kernel</code> class included in Symfony applications uses a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Kernel/MicroKernelTrait.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait" rel="external noopener noreferrer" target="_blank">MicroKernelTrait</a> to configure
+the bundles, the routes and the service container in the same class.</p>
+<p>This micro-kernel approach is flexible, allowing you to control your application
+structure and features.</p>
+<div class="section">
+<h2 id="a-single-file-symfony-application">
+    A Single-File Symfony Application
+    <a class="headerlink" href="#a-single-file-symfony-application" title="Permalink to this headline">¶</a>
+</h2>
+<p>Start with a completely empty directory and install these Symfony components
+via Composer:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/config symfony/http-kernel \
+  symfony/http-foundation symfony/routing \
+  symfony/dependency-injection symfony/framework-bundle</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Next, create an <code translate="no" class="notranslate">index.php</code> file that defines the kernel class and runs it:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-2">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-fc840fa29f3c97b3991819d9cbf5a588de8c2de8" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-eeb339f4ca199b484036c0d28e7737dab651ee8e" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-fc840fa29f3c97b3991819d9cbf5a588de8c2de8" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// index.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Kernel</span>\<span class="hljs-title">MicroKernelTrait</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">ContainerConfigurator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">JsonResponse</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Kernel</span> <span class="hljs-title">as</span> <span class="hljs-title">BaseKernel</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+
+<span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Kernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseKernel</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">MicroKernelTrait</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">registerBundles</span><span class="hljs-params">()</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-keyword">new</span> Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
+        ];
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureContainer</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// PHP equivalent of config/packages/framework.yaml</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>extension(<span class="hljs-string">'framework'</span>, [
+            <span class="hljs-string">'secret'</span> =&gt; <span class="hljs-string">'S0ME_SECRET'</span>
+        ]);
+    }
+
+    <span class="hljs-comment">#[Route('/random/{limit}', name='random_number')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">randomNumber</span><span class="hljs-params">(int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>limit</span>)</span>: <span class="hljs-title">JsonResponse</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> JsonResponse([
+            <span class="hljs-string">'number'</span> =&gt; random_int(<span class="hljs-number">0</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>limit</span>),
+        ]);
+    }
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span> = <span class="hljs-keyword">new</span> Kernel(<span class="hljs-string">'dev'</span>, <span class="hljs-keyword">true</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>terminate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-eeb339f4ca199b484036c0d28e7737dab651ee8e" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// index.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Kernel</span>\<span class="hljs-title">MicroKernelTrait</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">ContainerConfigurator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">JsonResponse</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Kernel</span> <span class="hljs-title">as</span> <span class="hljs-title">BaseKernel</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">RoutingConfigurator</span>;
+
+<span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Kernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseKernel</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">MicroKernelTrait</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">registerBundles</span><span class="hljs-params">()</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-keyword">new</span> Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
+        ];
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureContainer</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// PHP equivalent of config/packages/framework.yaml</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>extension(<span class="hljs-string">'framework'</span>, [
+            <span class="hljs-string">'secret'</span> =&gt; <span class="hljs-string">'S0ME_SECRET'</span>
+        ]);
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureRoutes</span><span class="hljs-params">(RoutingConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'random_number'</span>, <span class="hljs-string">'/random/{limit}'</span>)<span class="hljs-operator">-&gt;</span>controller([<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>, <span class="hljs-string">'randomNumber'</span>]);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">randomNumber</span><span class="hljs-params">(int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>limit</span>)</span>: <span class="hljs-title">JsonResponse</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> JsonResponse([
+            <span class="hljs-string">'number'</span> =&gt; random_int(<span class="hljs-number">0</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>limit</span>),
+        ]);
+    }
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span> = <span class="hljs-keyword">new</span> Kernel(<span class="hljs-string">'dev'</span>, <span class="hljs-keyword">true</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>terminate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The PHP attributes notation has been introduced in Symfony 6.1.</p>
+</div>
+<p>That's it! To test it, start the <a href="../setup/symfony_server.html" class="reference internal">Symfony Local Web Server</a>:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>symfony server:start</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then see the JSON response in your browser: <a href="http://localhost:8000/random/10" class="reference external" rel="external noopener noreferrer" target="_blank">http://localhost:8000/random/10</a></p>
+</div>
+<div class="section">
+<h2 id="the-methods-of-a-micro-kernel">
+    The Methods of a &quot;Micro&quot; Kernel
+    <a class="headerlink" href="#the-methods-of-a-micro-kernel" title="Permalink to this headline">¶</a>
+</h2>
+<p>When you use the <code translate="no" class="notranslate">MicroKernelTrait</code>, your kernel needs to have exactly three methods
+that define your bundles, your services and your routes:</p>
+<dl>
+                        <dt><strong>registerBundles()</strong></dt>
+        
+        <dd>
+                            This is the same <code translate="no" class="notranslate">registerBundles()</code> that you see in a normal kernel.
+                    </dd>
+                        <dt><strong>configureContainer(ContainerConfigurator $containerConfigurator)</strong></dt>
+        
+        <dd>
+                            This method builds and configures the container. In practice, you will use
+<code translate="no" class="notranslate">extension()</code> to configure different bundles (this is the equivalent
+of what you see in a normal <code translate="no" class="notranslate">config/packages/*</code> file). You can also register
+services directly in PHP or load external configuration files (shown below).
+                    </dd>
+                        <dt><strong>configureRoutes(RoutingConfigurator $routes)</strong></dt>
+        
+        <dd>
+                            Your job in this method is to add routes to the application. The
+<code translate="no" class="notranslate">RoutingConfigurator</code> has methods that make adding routes in PHP more
+fun. You can also load external routing files (shown below).
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h2 id="adding-interfaces-to-micro-kernel">
+    Adding Interfaces to &quot;Micro&quot; Kernel
+    <a class="headerlink" href="#adding-interfaces-to-micro-kernel" title="Permalink to this headline">¶</a>
+</h2>
+<p>When using the <code translate="no" class="notranslate">MicroKernelTrait</code>, you can also implement the
+<code translate="no" class="notranslate">CompilerPassInterface</code> to automatically register the kernel itself as a
+compiler pass as explained in the dedicated
+<a href="../service_container/compiler_passes.html#kernel-as-compiler-pass" class="reference internal">compiler pass section</a>.</p>
+<p>It is also possible to implement the <code translate="no" class="notranslate">EventSubscriberInterface</code> to handle
+events directly from the kernel, again it will be registered automatically:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">Danger</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventSubscriberInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ExceptionEvent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">KernelEvents</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Kernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseKernel</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">EventSubscriberInterface</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">MicroKernelTrait</span>;
+
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelException</span><span class="hljs-params">(ExceptionEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getException() <span class="hljs-keyword">instanceof</span> Danger) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setResponse(<span class="hljs-keyword">new</span> Response(<span class="hljs-string">'It\'s dangerous to go alone. Take this ⚔'</span>));
+        }
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubscribedEvents</span><span class="hljs-params">()</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            KernelEvents<span class="hljs-operator">::</span><span class="hljs-keyword">EXCEPTION</span> =&gt; <span class="hljs-string">'onKernelException'</span>,
+        ];
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="advanced-example-twig-annotations-and-the-web-debug-toolbar">
+    Advanced Example: Twig, Annotations and the Web Debug Toolbar
+    <a class="headerlink" href="#advanced-example-twig-annotations-and-the-web-debug-toolbar" title="Permalink to this headline">¶</a>
+</h2>
+<p>The purpose of the <code translate="no" class="notranslate">MicroKernelTrait</code> is <em>not</em> to have a single-file application.
+Instead, its goal is to give you the power to choose your bundles and structure.</p>
+<p>First, you'll probably want to put your PHP classes in an <code translate="no" class="notranslate">src/</code> directory. Configure
+your <code translate="no" class="notranslate">composer.json</code> file to load from there:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"require"</span>: {
+        <span class="hljs-attr">"..."</span>: <span class="hljs-string">"..."</span>
+    },
+    <span class="hljs-attr">"autoload"</span>: {
+        <span class="hljs-attr">"psr-4"</span>: {
+            <span class="hljs-attr">"App\\"</span>: <span class="hljs-string">"src/"</span>
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, run <code translate="no" class="notranslate">composer dump-autoload</code> to dump your new autoload config.</p>
+<p>Now, suppose you want to define a custom configuration for your app,
+use Twig and load routes via annotations. Instead of putting <em>everything</em>
+in <code translate="no" class="notranslate">index.php</code>, create a new <code translate="no" class="notranslate">src/Kernel.php</code> to hold the kernel.
+Now it looks like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Kernel.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">AppExtension</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Kernel</span>\<span class="hljs-title">MicroKernelTrait</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">ContainerConfigurator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Kernel</span> <span class="hljs-title">as</span> <span class="hljs-title">BaseKernel</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">RoutingConfigurator</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Kernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseKernel</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">MicroKernelTrait</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">registerBundles</span><span class="hljs-params">()</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bundles</span> = [
+            <span class="hljs-keyword">new</span> \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
+            <span class="hljs-keyword">new</span> \Symfony\Bundle\TwigBundle\TwigBundle(),
+        ];
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-string">'dev'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getEnvironment()) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bundles</span>[] = <span class="hljs-keyword">new</span> \Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bundles</span>;
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">build</span><span class="hljs-params">(ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>registerExtension(<span class="hljs-keyword">new</span> AppExtension());
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureContainer</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../config/framework.yaml'</span>);
+
+        <span class="hljs-comment">// register all classes in /src/ as service</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services()
+            <span class="hljs-operator">-&gt;</span>load(<span class="hljs-string">'App\\'</span>, <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/*'</span>)
+            <span class="hljs-operator">-&gt;</span>autowire()
+            <span class="hljs-operator">-&gt;</span>autoconfigure()
+        ;
+
+        <span class="hljs-comment">// configure WebProfilerBundle only if the bundle is enabled</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>bundles[<span class="hljs-string">'WebProfilerBundle'</span>])) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>extension(<span class="hljs-string">'web_profiler'</span>, [
+                <span class="hljs-string">'toolbar'</span> =&gt; <span class="hljs-keyword">true</span>,
+                <span class="hljs-string">'intercept_redirects'</span> =&gt; <span class="hljs-keyword">false</span>,
+            ]);
+        }
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureRoutes</span><span class="hljs-params">(RoutingConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// import the WebProfilerRoutes, only if the bundle is enabled</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>bundles[<span class="hljs-string">'WebProfilerBundle'</span>])) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'@WebProfilerBundle/Resources/config/routing/wdt.xml'</span>)<span class="hljs-operator">-&gt;</span>prefix(<span class="hljs-string">'/_wdt'</span>);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'@WebProfilerBundle/Resources/config/routing/profiler.xml'</span>)<span class="hljs-operator">-&gt;</span>prefix(<span class="hljs-string">'/_profiler'</span>);
+        }
+
+        <span class="hljs-comment">// load the routes defined as PHP attributes</span>
+        <span class="hljs-comment">// (use 'annotation' as the second argument if you define routes as annotations)</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/Controller/'</span>, <span class="hljs-string">'attribute'</span>);
+    }
+
+    <span class="hljs-comment">// optional, to use the standard Symfony cache directory</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getCacheDir</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../var/cache/'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getEnvironment();
+    }
+
+    <span class="hljs-comment">// optional, to use the standard Symfony logs directory</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getLogDir</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../var/log'</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Before continuing, run this command to add support for the new dependencies:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/yaml symfony/twig-bundle symfony/web-profiler-bundle doctrine/annotations</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Next, create a new extension class that defines your app configuration and
+add a service conditionally based on the <code translate="no" class="notranslate">foo</code> value:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/DependencyInjection/AppExtension.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">DependencyInjection</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">Definition</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">DefinitionConfigurator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">AbstractExtension</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">ContainerConfigurator</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractExtension</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configure</span><span class="hljs-params">(DefinitionConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>rootNode()
+            <span class="hljs-operator">-&gt;</span>children()
+                <span class="hljs-operator">-&gt;</span>booleanNode(<span class="hljs-string">'foo'</span>)<span class="hljs-operator">-&gt;</span>defaultTrue()<span class="hljs-operator">-&gt;</span>end()
+            <span class="hljs-operator">-&gt;</span>end();
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadExtension</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span>, ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>, ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span>[<span class="hljs-string">'foo'</span>]) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>register(<span class="hljs-string">'foo_service'</span>, \stdClass<span class="hljs-operator">::</span>class);
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The <code translate="no" class="notranslate">AbstractExtension</code> class was introduced in Symfony 6.1.</p>
+</div>
+<p>Unlike the previous kernel, this loads an external <code translate="no" class="notranslate">config/framework.yaml</code> file,
+because the configuration started to get bigger:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-a28cf496cb01c4e09e76f6b74489978a8f0b651d" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-3ffa07508e9e0edbd9c15a7f01ed2421b850ca19" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-41f6a9b64af7c53cd36525bdfdd5ca277655cec8" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-a28cf496cb01c4e09e76f6b74489978a8f0b651d" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/framework.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">secret:</span> <span class="hljs-string">S0ME_SECRET</span>
+    <span class="hljs-attr">profiler:</span> <span class="hljs-string">{</span> <span class="hljs-attr">only_exceptions:</span> <span class="hljs-literal">false</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-3ffa07508e9e0edbd9c15a7f01ed2421b850ca19" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/framework.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span> <span class="hljs-attr">secret</span>=<span class="hljs-string">"S0ME_SECRET"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:profiler</span> <span class="hljs-attr">only-exceptions</span>=<span class="hljs-string">"false"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-41f6a9b64af7c53cd36525bdfdd5ca277655cec8" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/framework.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>
+        <span class="hljs-operator">-&gt;</span>secret(<span class="hljs-string">'SOME_SECRET'</span>)
+        <span class="hljs-operator">-&gt;</span>profiler()
+            <span class="hljs-operator">-&gt;</span>onlyExceptions(<span class="hljs-keyword">false</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>This also loads annotation routes from an <code translate="no" class="notranslate">src/Controller/</code> directory, which
+has one file in it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/MicroController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MicroController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/random/{limit}')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">randomNumber</span><span class="hljs-params">(int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>limit</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>number</span> = random_int(<span class="hljs-number">0</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>limit</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'micro/random.html.twig'</span>, [
+            <span class="hljs-string">'number'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>number</span>,
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Template files should live in the <code translate="no" class="notranslate">templates/</code> directory at the root of your project.
+This template lives at <code translate="no" class="notranslate">templates/micro/random.html.twig</code>:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-comment">&lt;!-- templates/micro/random.html.twig --&gt;</span>
+<span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Random action<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span></span><span class="hljs-template-variable">{{ number }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Finally, you need a front controller to boot and run the application. Create a
+<code translate="no" class="notranslate">public/index.php</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// public/index.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Kernel</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Common</span>\<span class="hljs-title">Annotations</span>\<span class="hljs-title">AnnotationRegistry</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span> = <span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../vendor/autoload.php'</span>;
+<span class="hljs-comment">// auto-load annotations</span>
+AnnotationRegistry<span class="hljs-operator">::</span>registerLoader([<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span>, <span class="hljs-string">'loadClass'</span>]);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span> = <span class="hljs-keyword">new</span> Kernel(<span class="hljs-string">'dev'</span>, <span class="hljs-keyword">true</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>terminate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! This <code translate="no" class="notranslate">/random/10</code> URL will work, Twig will render, and you'll even
+get the web debug toolbar to show up at the bottom. The final structure looks like
+this:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">your-project/
+├─ config/
+│  └─ framework.yaml
+├─ public/
+|  └─ index.php
+├─ src/
+|  ├─ Controller
+|  |  └─ MicroController.php
+|  └─ Kernel.php
+├─ templates/
+|  └─ micro/
+|     └─ random.html.twig
+├─ var/
+|  ├─ cache/
+│  └─ log/
+├─ vendor/
+│  └─ ...
+├─ composer.json
+└─ composer.lock</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As before you can use the <a href="../setup/symfony_server.html" class="reference internal">Symfony Local Web Server</a>:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>symfony server:start</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then visit the page in your browser: <a href="http://localhost:8000/random/10" class="reference external" rel="external noopener noreferrer" target="_blank">http://localhost:8000/random/10</a></p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

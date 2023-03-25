@@ -1,0 +1,186 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="preventing-duplication-by-splitting-shared-code-into-separate-files">
+    Preventing Duplication by &quot;Splitting&quot; Shared Code into Separate Files
+    <a class="headerlink" href="#preventing-duplication-by-splitting-shared-code-into-separate-files" title="Permalink to this headline">¶</a>
+</h1>
+<p>Suppose you have multiple entry files and <em>each</em> requires <code translate="no" class="notranslate">jquery</code>. In this
+case, <em>each</em> output file will contain jQuery, making your files much larger than
+necessary. To solve this, you can ask webpack to analyze your files and <em>split</em> them
+into additional files, which will contain &quot;shared&quot; code.</p>
+<p>To enable this, call <code translate="no" class="notranslate">splitEntryChunks()</code>:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">// webpack.config.js
+  Encore
+      // ...
+
+      // multiple entry files, which probably import the same code
+      .addEntry('app', './assets/app.js')
+      .addEntry('homepage', './assets/homepage.js')
+      .addEntry('blog', './assets/blog.js')
+      .addEntry('store', './assets/store.js')
+
+<span class="hljs-addition">+     .splitEntryChunks()</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, each output file (e.g. <code translate="no" class="notranslate">homepage.js</code>) <em>may</em> be split into multiple file
+(e.g. <code translate="no" class="notranslate">homepage.js</code> &amp; <code translate="no" class="notranslate">vendors-node_modules_jquery_dist_jquery_js.js</code> - the
+filename of the second will be less obvious when you build for production). This
+means that you <em>may</em> need to include <em>multiple</em> <code translate="no" class="notranslate">script</code> tags (or <code translate="no" class="notranslate">link</code> tags
+for CSS) in your template. Encore creates an <a href="simple-example.html#encore-entrypointsjson-simple-description" class="reference internal">entrypoints.json</a>
+file that lists exactly which CSS and JavaScript files are needed for each entry.</p>
+<p>If you're using the <code translate="no" class="notranslate">encore_entry_link_tags()</code> and <code translate="no" class="notranslate">encore_entry_script_tags()</code>
+Twig functions from WebpackEncoreBundle, you don't need to do anything else! These
+functions automatically read this file and render as many <code translate="no" class="notranslate">script</code> or <code translate="no" class="notranslate">link</code>
+tags as needed:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{#
+    May now render multiple script tags:
+        &lt;script src="/build/runtime.js" defer&gt;&lt;/script&gt;
+        &lt;script src="/build/vendors-node_modules_jquery_dist_jquery_js.js" defer&gt;&lt;/script&gt;
+        &lt;script src="/build/homepage.js" defer&gt;&lt;/script&gt;
+#}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ encore_entry_script_tags('homepage') }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h2 id="controlling-how-assets-are-split">
+    Controlling how Assets are Split
+    <a class="headerlink" href="#controlling-how-assets-are-split" title="Permalink to this headline">¶</a>
+</h2>
+<p>The logic for <em>when</em> and <em>how</em> to split the files is controlled by the
+<a href="https://webpack.js.org/plugins/split-chunks-plugin/" class="reference external" rel="external noopener noreferrer" target="_blank">SplitChunksPlugin from Webpack</a>. You can control the configuration passed to
+this plugin with the <code translate="no" class="notranslate">configureSplitChunks()</code> function:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">// webpack.config.js
+  Encore
+      // ...
+
+      .splitEntryChunks()
+<span class="hljs-addition">+     .configureSplitChunks(function(splitChunks) {</span>
+<span class="hljs-addition">+         // change the configuration</span>
+<span class="hljs-addition">+         splitChunks.minSize = 0;</span>
+<span class="hljs-addition">+     })</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

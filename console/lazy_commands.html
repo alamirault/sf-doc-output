@@ -1,0 +1,213 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-make-commands-lazily-loaded">
+    How to Make Commands Lazily Loaded
+    <a class="headerlink" href="#how-to-make-commands-lazily-loaded" title="Permalink to this headline">¶</a>
+</h1>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you are using the Symfony full-stack framework, you are probably looking for
+details about <a href="commands_as_services.html#console-command-service-lazy-loading" class="reference internal">creating lazy commands</a></p>
+</div>
+<p>The traditional way of adding commands to your application is to use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Application.php#method_add" class="reference external" title="Symfony\Component\Console\Application::add()" rel="external noopener noreferrer" target="_blank">add()</a>, which expects a
+<code translate="no" class="notranslate">Command</code> instance as an argument.</p>
+<p>In order to lazy-load commands, you need to register an intermediate loader
+which will be responsible for returning <code translate="no" class="notranslate">Command</code> instances:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">HeavyCommand</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Application</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">CommandLoader</span>\<span class="hljs-title">FactoryCommandLoader</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>commandLoader</span> = <span class="hljs-keyword">new</span> FactoryCommandLoader([
+    <span class="hljs-string">'app:heavy'</span> =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> HeavyCommand(); },
+]);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span> = <span class="hljs-keyword">new</span> Application();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>setCommandLoader(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>commandLoader</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>run();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This way, the <code translate="no" class="notranslate">HeavyCommand</code> instance will be created only when the <code translate="no" class="notranslate">app:heavy</code>
+command is actually called.</p>
+<p>This example makes use of the built-in
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/CommandLoader/FactoryCommandLoader.php" class="reference external" title="Symfony\Component\Console\CommandLoader\FactoryCommandLoader" rel="external noopener noreferrer" target="_blank">FactoryCommandLoader</a> class,
+but the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Application.php#method_setCommandLoader" class="reference external" title="Symfony\Component\Console\Application::setCommandLoader()" rel="external noopener noreferrer" target="_blank">setCommandLoader()</a>
+method accepts any
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/CommandLoader/CommandLoaderInterface.php" class="reference external" title="Symfony\Component\Console\CommandLoader\CommandLoaderInterface" rel="external noopener noreferrer" target="_blank">CommandLoaderInterface</a>
+instance so you can use your own implementation.</p>
+<div class="section">
+<h2 id="built-in-command-loaders">
+    Built-in Command Loaders
+    <a class="headerlink" href="#built-in-command-loaders" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="factorycommandloader">
+    <code translate="no" class="notranslate">FactoryCommandLoader</code>
+    <a class="headerlink" href="#factorycommandloader" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/CommandLoader/FactoryCommandLoader.php" class="reference external" title="Symfony\Component\Console\CommandLoader\FactoryCommandLoader" rel="external noopener noreferrer" target="_blank">FactoryCommandLoader</a>
+class provides a way of getting commands lazily loaded as it takes an
+array of <code translate="no" class="notranslate">Command</code> factories as its only constructor argument:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">CommandLoader</span>\<span class="hljs-title">FactoryCommandLoader</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>commandLoader</span> = <span class="hljs-keyword">new</span> FactoryCommandLoader([
+    <span class="hljs-string">'app:foo'</span> =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> FooCommand(); },
+    <span class="hljs-string">'app:bar'</span> =&gt; [BarCommand<span class="hljs-operator">::</span>class, <span class="hljs-string">'create'</span>],
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Factories can be any PHP callable and will be executed each time
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/CommandLoader/FactoryCommandLoader.php#method_get" class="reference external" title="Symfony\Component\Console\CommandLoader\FactoryCommandLoader::get()" rel="external noopener noreferrer" target="_blank">get()</a>
+is called.</p>
+</div>
+<div class="section">
+<h3 id="containercommandloader">
+    <code translate="no" class="notranslate">ContainerCommandLoader</code>
+    <a class="headerlink" href="#containercommandloader" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/CommandLoader/ContainerCommandLoader.php" class="reference external" title="Symfony\Component\Console\CommandLoader\ContainerCommandLoader" rel="external noopener noreferrer" target="_blank">ContainerCommandLoader</a>
+class can be used to load commands from a PSR-11 container. As such, its
+constructor takes a PSR-11 <code translate="no" class="notranslate">ContainerInterface</code> implementation as its first
+argument and a command map as its last argument. The command map must be an array
+with command names as keys and service identifiers as values:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">CommandLoader</span>\<span class="hljs-title">ContainerCommandLoader</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span> = <span class="hljs-keyword">new</span> ContainerBuilder();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>register(FooCommand<span class="hljs-operator">::</span>class, FooCommand<span class="hljs-operator">::</span>class);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>compile();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>commandLoader</span> = <span class="hljs-keyword">new</span> ContainerCommandLoader(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>, [
+    <span class="hljs-string">'app:foo'</span> =&gt; FooCommand<span class="hljs-operator">::</span>class,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Like this, executing the <code translate="no" class="notranslate">app:foo</code> command will load the <code translate="no" class="notranslate">FooCommand</code> service
+by calling <code translate="no" class="notranslate">$containerBuilder-&gt;get(FooCommand::class)</code>.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

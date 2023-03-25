@@ -1,0 +1,584 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <span id="component-cache-cache-pools"></span>
+<div class="section">
+<h1 id="cache-pools-and-supported-adapters">
+    Cache Pools and Supported Adapters
+    <a class="headerlink" href="#cache-pools-and-supported-adapters" title="Permalink to this headline">¶</a>
+</h1>
+<p>Cache Pools are the logical repositories of cache items. They perform all the
+common operations on items, such as saving them or looking for them. Cache pools
+are independent of the actual cache implementation. Therefore, applications
+can keep using the same cache pool even if the underlying cache mechanism
+changes from a file system based cache to a Redis or database based cache.</p>
+<span id="component-cache-creating-cache-pools"></span>
+<div class="section">
+<h2 id="creating-cache-pools">
+    Creating Cache Pools
+    <a class="headerlink" href="#creating-cache-pools" title="Permalink to this headline">¶</a>
+</h2>
+<p>Cache Pools are created through the <strong>cache adapters</strong>, which are classes that
+implement both <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Contracts/Cache/CacheInterface.php" class="reference external" title="Symfony\Contracts\Cache\CacheInterface" rel="external noopener noreferrer" target="_blank">CacheInterface</a> and
+<code translate="no" class="notranslate">Psr\Cache\CacheItemPoolInterface</code>. This component provides several adapters
+ready to use in your applications.</p>
+<div class="toctree-wrapper toc-size-lg"><ul class="toctree toctree-level-1 toctree-length-12"><li><a href="../../components/cache/adapters/apcu_adapter.html">APCu Cache Adapter</a></li><li><a href="../../components/cache/adapters/array_cache_adapter.html">Array Cache Adapter</a></li><li><a href="../../components/cache/adapters/chain_adapter.html">Chain Cache Adapter</a></li><li><a href="../../components/cache/adapters/couchbasebucket_adapter.html">Couchbase Bucket Cache Adapter</a></li><li><a href="../../components/cache/adapters/couchbasecollection_adapter.html">Couchbase Collection Cache Adapter</a></li><li><a href="../../components/cache/adapters/filesystem_adapter.html">Filesystem Cache Adapter</a></li><li><a href="../../components/cache/adapters/memcached_adapter.html">Memcached Cache Adapter</a></li><li><a href="../../components/cache/adapters/pdo_doctrine_dbal_adapter.html">PDO & Doctrine DBAL Cache Adapter</a></li><li><a href="../../components/cache/adapters/php_array_cache_adapter.html">PHP Array Cache Adapter</a></li><li><a href="../../components/cache/adapters/php_files_adapter.html">PHP Files Cache Adapter</a></li><li><a href="../../components/cache/adapters/proxy_adapter.html">Proxy Cache Adapter</a></li><li><a href="../../components/cache/adapters/redis_adapter.html">Redis Cache Adapter</a></li></ul></div>
+</div>
+<div class="section">
+<h2 id="using-the-cache-contracts">
+    Using the Cache Contracts
+    <a class="headerlink" href="#using-the-cache-contracts" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Contracts/Cache/CacheInterface.php" class="reference external" title="Symfony\Contracts\Cache\CacheInterface" rel="external noopener noreferrer" target="_blank">CacheInterface</a> allows fetching, storing
+and deleting cache items using only two methods and a callback:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">FilesystemAdapter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">ItemInterface</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span> = <span class="hljs-keyword">new</span> FilesystemAdapter();
+
+<span class="hljs-comment">// The callable will only be executed on a cache miss.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'my_cache_key'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ItemInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>item</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>item</span><span class="hljs-operator">-&gt;</span>expiresAfter(<span class="hljs-number">3600</span>);
+
+    <span class="hljs-comment">// ... do some HTTP request or heavy computations</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>computedValue</span> = <span class="hljs-string">'foobar'</span>;
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>computedValue</span>;
+});
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>; <span class="hljs-comment">// 'foobar'</span>
+
+<span class="hljs-comment">// ... and to remove the cache key</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>delete(<span class="hljs-string">'my_cache_key'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Out of the box, using this interface provides stampede protection via locking
+and early expiration. Early expiration can be controlled via the third &quot;beta&quot;
+argument of the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Contracts/Cache/CacheInterface.php#method_get" class="reference external" title="Symfony\Contracts\Cache\CacheInterface::get()" rel="external noopener noreferrer" target="_blank">get()</a> method.
+See the <a href="../../components/cache.html" class="reference internal">The Cache Component</a> article for more information.</p>
+<p>Early expiration can be detected inside the callback by calling the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Contracts/Cache/ItemInterface.php#method_isHit" class="reference external" title="Symfony\Contracts\Cache\ItemInterface::isHit()" rel="external noopener noreferrer" target="_blank">isHit()</a> method: if this
+returns <code translate="no" class="notranslate">true</code>, it means we are currently recomputing a value ahead of its
+expiration date.</p>
+<p>For advanced use cases, the callback can accept a second <code translate="no" class="notranslate">bool &amp;$save</code>
+argument passed by reference. By setting <code translate="no" class="notranslate">$save</code> to <code translate="no" class="notranslate">false</code> inside the
+callback, you can instruct the cache pool that the returned value <em>should not</em>
+be stored in the backend.</p>
+</div>
+<div class="section">
+<h2 id="using-psr-6">
+    Using PSR-6
+    <a class="headerlink" href="#using-psr-6" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="looking-for-cache-items">
+    Looking for Cache Items
+    <a class="headerlink" href="#looking-for-cache-items" title="Permalink to this headline">¶</a>
+</h3>
+<p>Cache Pools define three methods to look for cache items. The most common method
+is <code translate="no" class="notranslate">getItem($key)</code>, which returns the cache item identified by the given key:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">FilesystemAdapter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span> = <span class="hljs-keyword">new</span> FilesystemAdapter(<span class="hljs-string">'app.cache'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>latestNews</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>getItem(<span class="hljs-string">'latest_news'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If no item is defined for the given key, the method doesn't return a <code translate="no" class="notranslate">null</code>
+value but an empty object which implements the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/CacheItem.php" class="reference external" title="Symfony\Component\Cache\CacheItem" rel="external noopener noreferrer" target="_blank">CacheItem</a>
+class.</p>
+<p>If you need to fetch several cache items simultaneously, use instead the
+<code translate="no" class="notranslate">getItems([$key1, $key2, ...])</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stocks</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>getItems([<span class="hljs-string">'AAPL'</span>, <span class="hljs-string">'FB'</span>, <span class="hljs-string">'GOOGL'</span>, <span class="hljs-string">'MSFT'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Again, if any of the keys doesn't represent a valid cache item, you won't get
+a <code translate="no" class="notranslate">null</code> value but an empty <code translate="no" class="notranslate">CacheItem</code> object.</p>
+<p>The last method related to fetching cache items is <code translate="no" class="notranslate">hasItem($key)</code>, which
+returns <code translate="no" class="notranslate">true</code> if there is a cache item identified by the given key:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hasBadges</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>hasItem(<span class="hljs-string">'user_'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userId</span>.<span class="hljs-string">'_badges'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="saving-cache-items">
+    Saving Cache Items
+    <a class="headerlink" href="#saving-cache-items" title="Permalink to this headline">¶</a>
+</h3>
+<p>The most common method to save cache items is
+<code translate="no" class="notranslate">Psr\Cache\CacheItemPoolInterface::save</code>, which stores the
+item in the cache immediately (it returns <code translate="no" class="notranslate">true</code> if the item was saved or
+<code translate="no" class="notranslate">false</code> if some error occurred):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userFriends</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>getItem(<span class="hljs-string">'user_'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userId</span>.<span class="hljs-string">'_friends'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userFriends</span><span class="hljs-operator">-&gt;</span>set(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span><span class="hljs-operator">-&gt;</span>getFriends());
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isSaved</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>save(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userFriends</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Sometimes you may prefer to not save the objects immediately in order to
+increase the application performance. In those cases, use the
+<code translate="no" class="notranslate">Psr\Cache\CacheItemPoolInterface::saveDeferred</code> method to mark cache
+items as &quot;ready to be persisted&quot; and then call to
+<code translate="no" class="notranslate">Psr\Cache\CacheItemPoolInterface::commit</code> method when you are ready
+to persist them all:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isQueued</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>saveDeferred(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userFriends</span>);
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isQueued</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>saveDeferred(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userPreferences</span>);
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isQueued</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>saveDeferred(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userRecentProducts</span>);
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isSaved</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>commit();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">saveDeferred()</code> method returns <code translate="no" class="notranslate">true</code> when the cache item has been
+successfully added to the &quot;persist queue&quot; and <code translate="no" class="notranslate">false</code> otherwise. The <code translate="no" class="notranslate">commit()</code>
+method returns <code translate="no" class="notranslate">true</code> when all the pending items are successfully saved or
+<code translate="no" class="notranslate">false</code> otherwise.</p>
+</div>
+<div class="section">
+<h3 id="removing-cache-items">
+    Removing Cache Items
+    <a class="headerlink" href="#removing-cache-items" title="Permalink to this headline">¶</a>
+</h3>
+<p>Cache Pools include methods to delete a cache item, some of them or all of them.
+The most common is <code translate="no" class="notranslate">Psr\Cache\CacheItemPoolInterface::deleteItem</code>,
+which deletes the cache item identified by the given key (it returns <code translate="no" class="notranslate">true</code>
+when the item is successfully deleted or doesn't exist and <code translate="no" class="notranslate">false</code> otherwise):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isDeleted</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>deleteItem(<span class="hljs-string">'user_'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userId</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Use the <code translate="no" class="notranslate">Psr\Cache\CacheItemPoolInterface::deleteItems</code> method to
+delete several cache items simultaneously (it returns <code translate="no" class="notranslate">true</code> only if all the
+items have been deleted, even when any or some of them don't exist):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>areDeleted</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>deleteItems([<span class="hljs-string">'category1'</span>, <span class="hljs-string">'category2'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Finally, to remove all the cache items stored in the pool, use the
+<code translate="no" class="notranslate">Psr\Cache\CacheItemPoolInterface::clear</code> method (which returns <code translate="no" class="notranslate">true</code>
+when all items are successfully deleted):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cacheIsEmpty</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>clear();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If the cache component is used inside a Symfony application, you can remove
+items from cache pools using the following commands (which reside within
+the <a href="../../reference/configuration/framework.html#framework-bundle-configuration" class="reference internal">framework bundle</a>):</p>
+<p>To remove <em>one specific item</em> from the <em>given pool</em>:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console cache:pool:delete &lt;cache-pool-name&gt; &lt;cache-key-name&gt;
+
+<span class="hljs-comment"># deletes the "cache_key" item from the "cache.app" pool</span>
+<span class="hljs-prompt">$ </span>php bin/console cache:pool:delete cache.app cache_key</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also remove <em>all items</em> from the <em>given pool(s)</em>:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console cache:pool:clear &lt;cache-pool-name&gt;
+
+<span class="hljs-comment"># clears the "cache.app" pool</span>
+<span class="hljs-prompt">$ </span>php bin/console cache:pool:clear cache.app
+
+<span class="hljs-comment"># clears the "cache.validation" and "cache.app" pool</span>
+<span class="hljs-prompt">$ </span>php bin/console cache:pool:clear cache.validation cache.app</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<span id="component-cache-cache-pool-prune"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="pruning-cache-items">
+    Pruning Cache Items
+    <a class="headerlink" href="#pruning-cache-items" title="Permalink to this headline">¶</a>
+</h2>
+<p>Some cache pools do not include an automated mechanism for pruning expired cache items.
+For example, the <a href="../../components/cache/adapters/filesystem_adapter.html#component-cache-filesystem-adapter" class="reference internal">FilesystemAdapter</a> cache
+does not remove expired cache items <em>until an item is explicitly requested and determined to
+be expired</em>, for example, via a call to <code translate="no" class="notranslate">Psr\Cache\CacheItemPoolInterface::getItem</code>.
+Under certain workloads, this can cause stale cache entries to persist well past their
+expiration, resulting in a sizable consumption of wasted disk or memory space from excess,
+expired cache items.</p>
+<p>This shortcoming has been solved through the introduction of
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/PruneableInterface.php" class="reference external" title="Symfony\Component\Cache\PruneableInterface" rel="external noopener noreferrer" target="_blank">PruneableInterface</a>, which defines the abstract method
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/PruneableInterface.php#method_prune" class="reference external" title="Symfony\Component\Cache\PruneableInterface::prune()" rel="external noopener noreferrer" target="_blank">prune()</a>. The
+<a href="../../components/cache/adapters/chain_adapter.html#component-cache-chain-adapter" class="reference internal">ChainAdapter</a>,
+<a href="../../components/cache/adapters/filesystem_adapter.html#component-cache-filesystem-adapter" class="reference internal">FilesystemAdapter</a>,
+<a href="../../components/cache/adapters/pdo_doctrine_dbal_adapter.html#pdo-doctrine-adapter" class="reference internal">PdoAdapter</a>, and
+<a href="../../components/cache/adapters/php_files_adapter.html#component-cache-files-adapter" class="reference internal">PhpFilesAdapter</a> all implement this new interface,
+allowing manual removal of stale cache items:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">FilesystemAdapter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span> = <span class="hljs-keyword">new</span> FilesystemAdapter(<span class="hljs-string">'app.cache'</span>);
+<span class="hljs-comment">// ... do some set and get operations</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>prune();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <a href="../../components/cache/adapters/chain_adapter.html#component-cache-chain-adapter" class="reference internal">ChainAdapter</a> implementation does not directly
+contain any pruning logic itself. Instead, when calling the chain adapter's
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/ChainAdapter.php#method_prune" class="reference external" title="Symfony\Component\Cache\Adapter\ChainAdapter::prune()" rel="external noopener noreferrer" target="_blank">prune()</a> method, the call is delegated to all
+its compatible cache adapters (and those that do not implement <code translate="no" class="notranslate">PruneableInterface</code> are
+silently ignored):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">ApcuAdapter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">ChainAdapter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">FilesystemAdapter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">PdoAdapter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">PhpFilesAdapter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span> = <span class="hljs-keyword">new</span> ChainAdapter([
+    <span class="hljs-keyword">new</span> ApcuAdapter(),       <span class="hljs-comment">// does NOT implement PruneableInterface</span>
+    <span class="hljs-keyword">new</span> FilesystemAdapter(), <span class="hljs-comment">// DOES implement PruneableInterface</span>
+    <span class="hljs-keyword">new</span> PdoAdapter(),        <span class="hljs-comment">// DOES implement PruneableInterface</span>
+    <span class="hljs-keyword">new</span> PhpFilesAdapter(),   <span class="hljs-comment">// DOES implement PruneableInterface</span>
+    <span class="hljs-comment">// ...</span>
+]);
+
+<span class="hljs-comment">// prune will proxy the call to PdoAdapter, FilesystemAdapter and PhpFilesAdapter,</span>
+<span class="hljs-comment">// while silently skipping ApcuAdapter</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>prune();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If the cache component is used inside a Symfony application, you can prune
+<em>all items</em> from <em>all pools</em> using the following command (which resides within
+the <a href="../../reference/configuration/framework.html#framework-bundle-configuration" class="reference internal">framework bundle</a>):</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console cache:pool:prune</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

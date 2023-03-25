@@ -1,0 +1,2379 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="workflow">
+    Workflow
+    <a class="headerlink" href="#workflow" title="Permalink to this headline">¶</a>
+</h1>
+<p>Using the Workflow component inside a Symfony application requires knowing first
+some basic theory and concepts about workflows and state machines.
+<a href="workflow/workflow-and-state-machine.html" class="reference internal">Read this article</a> for a quick overview.</p>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<p>In applications using <a href="setup.html#symfony-flex" class="reference internal">Symfony Flex</a>, run this command to
+install the workflow feature before using it:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/workflow</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="configuration">
+    Configuration
+    <a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a>
+</h2>
+<p>To see all configuration options, if you are using the component inside a
+Symfony project run this command:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console config:dump-reference framework workflows</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="creating-a-workflow">
+    Creating a Workflow
+    <a class="headerlink" href="#creating-a-workflow" title="Permalink to this headline">¶</a>
+</h2>
+<p>A workflow is a process or a lifecycle that your objects go through. Each
+step or stage in the process is called a <em>place</em>. You also define <em>transitions</em>,
+which describe the action needed to get from one place to another.</p>
+<img src="_images/states_transitions.png" />
+<p>A set of places and transitions creates a <strong>definition</strong>. A workflow needs
+a <code translate="no" class="notranslate">Definition</code> and a way to write the states to the objects (i.e. an
+instance of a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/MarkingStore/MarkingStoreInterface.php" class="reference external" title="Symfony\Component\Workflow\MarkingStore\MarkingStoreInterface" rel="external noopener noreferrer" target="_blank">MarkingStoreInterface</a>.)</p>
+<p>Consider the following example for a blog post. A post can have these places:
+<code translate="no" class="notranslate">draft</code>, <code translate="no" class="notranslate">reviewed</code>, <code translate="no" class="notranslate">rejected</code>, <code translate="no" class="notranslate">published</code>. You could define the workflow as
+follows:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-ee253a2063cc805244b99f764b6b5687d14c968e" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-61228869306cae812276f76124b4247299062e4a" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-021de578b70f02c877083ebb0419dda00526708b" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-ee253a2063cc805244b99f764b6b5687d14c968e" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/workflow.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">workflows:</span>
+        <span class="hljs-attr">blog_publishing:</span>
+            <span class="hljs-attr">type:</span> <span class="hljs-string">'workflow'</span> <span class="hljs-comment"># or 'state_machine'</span>
+            <span class="hljs-attr">audit_trail:</span>
+                <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span>
+            <span class="hljs-attr">marking_store:</span>
+                <span class="hljs-attr">type:</span> <span class="hljs-string">'method'</span>
+                <span class="hljs-attr">property:</span> <span class="hljs-string">'currentPlace'</span>
+            <span class="hljs-attr">supports:</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-string">App\Entity\BlogPost</span>
+            <span class="hljs-attr">initial_marking:</span> <span class="hljs-string">draft</span>
+            <span class="hljs-attr">places:</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-string">draft</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-string">reviewed</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-string">rejected</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-string">published</span>
+            <span class="hljs-attr">transitions:</span>
+                <span class="hljs-attr">to_review:</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">draft</span>
+                    <span class="hljs-attr">to:</span>   <span class="hljs-string">reviewed</span>
+                <span class="hljs-attr">publish:</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">reviewed</span>
+                    <span class="hljs-attr">to:</span>   <span class="hljs-string">published</span>
+                <span class="hljs-attr">reject:</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">reviewed</span>
+                    <span class="hljs-attr">to:</span>   <span class="hljs-string">rejected</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-61228869306cae812276f76124b4247299062e4a" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/workflow.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+    https://symfony.com/schema/dic/services/services-1.0.xsd
+    http://symfony.com/schema/dic/symfony
+    https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- or type="state_machine" --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:workflow</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"blog_publishing"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"workflow"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:audit-trail</span> <span class="hljs-attr">enabled</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:marking-store</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"single_state"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:argument</span>&gt;</span>currentPlace<span class="hljs-tag">&lt;/<span class="hljs-name">framework:argument</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:marking-store</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:support</span>&gt;</span>App\Entity\BlogPost<span class="hljs-tag">&lt;/<span class="hljs-name">framework:support</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:initial-marking</span>&gt;</span>draft<span class="hljs-tag">&lt;/<span class="hljs-name">framework:initial-marking</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:place</span>&gt;</span>draft<span class="hljs-tag">&lt;/<span class="hljs-name">framework:place</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:place</span>&gt;</span>reviewed<span class="hljs-tag">&lt;/<span class="hljs-name">framework:place</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:place</span>&gt;</span>rejected<span class="hljs-tag">&lt;/<span class="hljs-name">framework:place</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:place</span>&gt;</span>published<span class="hljs-tag">&lt;/<span class="hljs-name">framework:place</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"to_review"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>draft<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>reviewed<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"publish"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>reviewed<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>published<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"reject"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>reviewed<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>rejected<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:workflow</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-021de578b70f02c877083ebb0419dda00526708b" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/workflow.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">BlogPost</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>workflows()<span class="hljs-operator">-&gt;</span>workflows(<span class="hljs-string">'blog_publishing'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span>
+        <span class="hljs-operator">-&gt;</span>type(<span class="hljs-string">'workflow'</span>) <span class="hljs-comment">// or 'state_machine'</span>
+        <span class="hljs-operator">-&gt;</span>supports([BlogPost<span class="hljs-operator">::</span>class])
+        <span class="hljs-operator">-&gt;</span>initialMarking([<span class="hljs-string">'draft'</span>]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>auditTrail()<span class="hljs-operator">-&gt;</span>enabled(<span class="hljs-keyword">true</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>markingStore()
+        <span class="hljs-operator">-&gt;</span>type(<span class="hljs-string">'method'</span>)
+        <span class="hljs-operator">-&gt;</span>property(<span class="hljs-string">'currentPlace'</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>place()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'draft'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>place()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'reviewed'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>place()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'rejected'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>place()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'published'</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'to_review'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'draft'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'reviewed'</span>]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'publish'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'reviewed'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'published'</span>]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'reject'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'reviewed'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'rejected'</span>]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you are creating your first workflows, consider using the <code translate="no" class="notranslate">workflow:dump</code>
+command to <a href="workflow/dumping-workflows.html" class="reference internal">debug the workflow contents</a>.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can use PHP constants in YAML files via the <code translate="no" class="notranslate">!php/const </code> notation.
+E.g. you can use <code translate="no" class="notranslate">!php/const App\Entity\BlogPost::STATE_DRAFT</code> instead of
+<code translate="no" class="notranslate">&#039;draft&#039;</code> or <code translate="no" class="notranslate">!php/const App\Entity\BlogPost::TRANSITION_TO_REVIEW</code>
+instead of <code translate="no" class="notranslate">&#039;to_review&#039;</code>.</p>
+</div>
+<p>The configured property will be used via its implemented getter/setter methods by the marking store:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Entity/BlogPost.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlogPost</span>
+</span>{
+    <span class="hljs-comment">// the configured marking store property must be declared</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>currentPlace</span>;
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>title</span>;
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>content</span>;
+
+    <span class="hljs-comment">// getter/setter methods must exist for property access by the marking store</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getCurrentPlace</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>currentPlace;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setCurrentPlace</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>currentPlace</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span> = [])</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>currentPlace = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>currentPlace</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The marking store type could be &quot;multiple_state&quot; or &quot;single_state&quot;. A single
+state marking store does not support a model being on multiple places at the
+same time. This means a &quot;workflow&quot; must use a &quot;multiple_state&quot; marking store
+and a &quot;state_machine&quot; must use a &quot;single_state&quot; marking store. Symfony
+configures the marking store according to the &quot;type&quot; by default, so it's
+preferable to not configure it.</p>
+<p>A single state marking store uses a <code translate="no" class="notranslate">string</code> to store the data. A multiple
+state marking store uses an <code translate="no" class="notranslate">array</code> to store the data. If no state marking
+store is defined you have to return <code translate="no" class="notranslate">null</code> in both cases (e.g. the above
+example should define a return type like <code translate="no" class="notranslate">App\Entity\BlogPost::getCurrentPlace(): ?array</code>
+or like <code translate="no" class="notranslate">App\Entity\BlogPost::getCurrentPlace(): ?string</code>).</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The <code translate="no" class="notranslate">marking_store.type</code> (the default value depends on the <code translate="no" class="notranslate">type</code> value)
+and <code translate="no" class="notranslate">property</code> (default value <code translate="no" class="notranslate">[&#039;marking&#039;]</code>) attributes of the
+<code translate="no" class="notranslate">marking_store</code> option are optional. If omitted, their default values will
+be used. It's highly recommended to use the default value.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Setting the <code translate="no" class="notranslate">audit_trail.enabled</code> option to <code translate="no" class="notranslate">true</code> makes the application
+generate detailed log messages for the workflow activity.</p>
+</div>
+<p>With this workflow named <code translate="no" class="notranslate">blog_publishing</code>, you can get help to decide
+what actions are allowed on a blog post:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">BlogPost</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">LogicException</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span> = <span class="hljs-keyword">new</span> BlogPost();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>container<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'workflow.blog_publishing'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span><span class="hljs-operator">-&gt;</span>can(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>, <span class="hljs-string">'publish'</span>); <span class="hljs-comment">// False</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span><span class="hljs-operator">-&gt;</span>can(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>, <span class="hljs-string">'to_review'</span>); <span class="hljs-comment">// True</span>
+
+<span class="hljs-comment">// Update the currentState on the post</span>
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span><span class="hljs-operator">-&gt;</span>apply(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>, <span class="hljs-string">'to_review'</span>);
+} <span class="hljs-keyword">catch</span> (LogicException <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// See all the available transitions for the post in the current state</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>transitions</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span><span class="hljs-operator">-&gt;</span>getEnabledTransitions(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>);
+<span class="hljs-comment">// See a specific available transition for the post in the current state</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>transition</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span><span class="hljs-operator">-&gt;</span>getEnabledTransition(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>, <span class="hljs-string">'publish'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="accessing-the-workflow-in-a-class">
+    Accessing the Workflow in a Class
+    <a class="headerlink" href="#accessing-the-workflow-in-a-class" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can use the workflow inside a class by using
+<a href="service_container/autowiring.html" class="reference internal">service autowiring</a> and using
+<code translate="no" class="notranslate">camelCased workflow name + Workflow</code> as parameter name. If it is a state
+machine type, use <code translate="no" class="notranslate">camelCased workflow name + StateMachine</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">BlogPost</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">WorkflowInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        // Symfony will inject the <span class="hljs-string">'blog_publishing'</span> workflow configured before
+        private WorkflowInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishingWorkflow</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toReview</span><span class="hljs-params">(BlogPost <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>)</span>
+    </span>{
+        <span class="hljs-comment">// Update the currentState on the post</span>
+        <span class="hljs-keyword">try</span> {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>blogPublishingWorkflow<span class="hljs-operator">-&gt;</span>apply(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>, <span class="hljs-string">'to_review'</span>);
+        } <span class="hljs-keyword">catch</span> (LogicException <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>) {
+            <span class="hljs-comment">// ...</span>
+        }
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Workflows can also be injected thanks to their name and the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Attribute/Target.php" class="reference external" title="Symfony\Component\DependencyInjection\Attribute\Target" rel="external noopener noreferrer" target="_blank">Target</a>
+attribute:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">BlogPost</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">Target</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">WorkflowInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        #[Target<span class="hljs-params">(<span class="hljs-string">'blog_publishing'</span>)</span>]
+        private WorkflowInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span>
+    )</span> </span>{
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This allows you to decorrelate the argument name of any implementation
+name.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>All workflows and state machines services are tagged since in Symfony 6.2.</p>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>Injecting a workflow with only its name and
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Attribute/Target.php" class="reference external" title="Symfony\Component\DependencyInjection\Attribute\Target" rel="external noopener noreferrer" target="_blank">Target</a> was
+introduced in Symfony 6.3.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you want to retrieve all workflows, for documentation purposes for example,
+you can <a href="service_container/service_subscribers_locators.html" class="reference internal">inject all services</a>
+with the following tag:</p>
+<ul>
+    <li><code translate="no" class="notranslate">workflow</code>: all workflows and all state machine;</li>
+<li><code translate="no" class="notranslate">workflow.workflow</code>: all workflows;</li>
+<li><code translate="no" class="notranslate">workflow.state_machine</code>: all state machines.</li>
+</ul>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can find the list of available workflow services with the
+<code translate="no" class="notranslate">php bin/console debug:autowiring workflow</code> command.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="using-events">
+    Using Events
+    <a class="headerlink" href="#using-events" title="Permalink to this headline">¶</a>
+</h2>
+<p>To make your workflows more flexible, you can construct the <code translate="no" class="notranslate">Workflow</code>
+object with an <code translate="no" class="notranslate">EventDispatcher</code>. You can now create event listeners to
+block transitions (i.e. depending on the data in the blog post) and do
+additional actions when a workflow operation happened (e.g. sending
+announcements).</p>
+<p>Each step has three events that are fired in order:</p>
+<ul>
+    <li>An event for every workflow;</li>
+<li>An event for the workflow concerned;</li>
+<li>An event for the workflow concerned with the specific transition or place name.</li>
+</ul>
+<p>When a state transition is initiated, the events are dispatched in the following
+order:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">workflow.guard</code></dt>
+        
+        <dd>
+                            <p class="first">Validate whether the transition is blocked or not (see
+<a href="workflow.html#workflow-usage-guard-events" class="reference internal">guard events</a> and
+<a href="workflow.html#workflow-blocking-transitions" class="reference internal">blocking transitions</a>).</p>
+                            <p>The three events being dispatched are:</p>
+                            <ul class="last">
+    <li><code translate="no" class="notranslate">workflow.guard</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].guard</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].guard.[transition name]</code></li>
+</ul>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">workflow.leave</code></dt>
+        
+        <dd>
+                            <p class="first">The subject is about to leave a place.</p>
+                            <p>The three events being dispatched are:</p>
+                            <ul class="last">
+    <li><code translate="no" class="notranslate">workflow.leave</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].leave</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].leave.[place name]</code></li>
+</ul>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">workflow.transition</code></dt>
+        
+        <dd>
+                            <p class="first">The subject is going through this transition.</p>
+                            <p>The three events being dispatched are:</p>
+                            <ul class="last">
+    <li><code translate="no" class="notranslate">workflow.transition</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].transition</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].transition.[transition name]</code></li>
+</ul>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">workflow.enter</code></dt>
+        
+        <dd>
+                            <p class="first">The subject is about to enter a new place. This event is triggered right
+before the subject places are updated, which means that the marking of the
+subject is not yet updated with the new places.</p>
+                            <p>The three events being dispatched are:</p>
+                            <ul class="last">
+    <li><code translate="no" class="notranslate">workflow.enter</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].enter</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].enter.[place name]</code></li>
+</ul>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">workflow.entered</code></dt>
+        
+        <dd>
+                            <p class="first">The subject has entered in the places and the marking is updated.</p>
+                            <p>The three events being dispatched are:</p>
+                            <ul class="last">
+    <li><code translate="no" class="notranslate">workflow.entered</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].entered</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].entered.[place name]</code></li>
+</ul>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">workflow.completed</code></dt>
+        
+        <dd>
+                            <p class="first">The object has completed this transition.</p>
+                            <p>The three events being dispatched are:</p>
+                            <ul class="last">
+    <li><code translate="no" class="notranslate">workflow.completed</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].completed</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].completed.[transition name]</code></li>
+</ul>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">workflow.announce</code></dt>
+        
+        <dd>
+                            <p class="first">Triggered for each transition that now is accessible for the subject.</p>
+                            <p>The three events being dispatched are:</p>
+                            <ul>
+    <li><code translate="no" class="notranslate">workflow.announce</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].announce</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].announce.[transition name]</code></li>
+</ul>
+                            <p>After a transition is applied, the announce event tests for all available
+transitions. That will trigger all <a href="workflow.html#workflow-usage-guard-events" class="reference internal">guard events</a>
+once more, which could impact performance if they include intensive CPU or
+database workloads.</p>
+                            <p>If you don't need the announce event, disable it using the context:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span><span class="hljs-operator">-&gt;</span>apply(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>transitionName</span>, [Workflow<span class="hljs-operator">::</span>DISABLE_ANNOUNCE_EVENT =&gt; <span class="hljs-keyword">true</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+    </dl>
+<p>The context is accessible in all events except for the <code translate="no" class="notranslate">workflow.guard</code> events:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// $context must be an array</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span> = [<span class="hljs-string">'context_key'</span> =&gt; <span class="hljs-string">'context_value'</span>];
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span><span class="hljs-operator">-&gt;</span>apply(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>transitionName</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>);
+
+<span class="hljs-comment">// in an event listener (workflow.guard events)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getContext(); <span class="hljs-comment">// returns ['context']</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The leaving and entering events are triggered even for transitions that stay
+in the same place.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you initialize the marking by calling <code translate="no" class="notranslate">$workflow-&gt;getMarking($object);</code>,
+then the <code translate="no" class="notranslate">workflow.[workflow_name].entered.[initial_place_name]</code> event will
+be called with the default context (<code translate="no" class="notranslate">Workflow::DEFAULT_INITIAL_CONTEXT</code>).</p>
+</div>
+<p>Here is an example of how to enable logging for every time a &quot;blog_publishing&quot;
+workflow leaves a place:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/App/EventSubscriber/WorkflowLoggerSubscriber.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventSubscriber</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Log</span>\<span class="hljs-title">LoggerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventSubscriberInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">Event</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">WorkflowLoggerSubscriber</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">EventSubscriberInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private LoggerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>logger</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onLeave</span><span class="hljs-params">(Event <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>logger<span class="hljs-operator">-&gt;</span>alert(sprintf(
+            <span class="hljs-string">'Blog post (id: "%s") performed transition "%s" from "%s" to "%s"'</span>,
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getSubject()<span class="hljs-operator">-&gt;</span>getId(),
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getTransition()<span class="hljs-operator">-&gt;</span>getName(),
+            implode(<span class="hljs-string">', '</span>, array_keys(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getMarking()<span class="hljs-operator">-&gt;</span>getPlaces())),
+            implode(<span class="hljs-string">', '</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getTransition()<span class="hljs-operator">-&gt;</span>getTos())
+        ));
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubscribedEvents</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-string">'workflow.blog_publishing.leave'</span> =&gt; <span class="hljs-string">'onLeave'</span>,
+        ];
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If some listeners update the context during a transition, you can retrieve
+it via the marking:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>marking</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span><span class="hljs-operator">-&gt;</span>apply(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>, <span class="hljs-string">'to_review'</span>);
+
+<span class="hljs-comment">// contains the new value</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>marking</span><span class="hljs-operator">-&gt;</span>getContext();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="workflow-usage-guard-events"></span>
+<div class="section">
+<h3 id="guard-events">
+    Guard Events
+    <a class="headerlink" href="#guard-events" title="Permalink to this headline">¶</a>
+</h3>
+<p>There are special types of events called &quot;Guard events&quot;. Their event listeners
+are invoked every time a call to <code translate="no" class="notranslate">Workflow::can()</code>, <code translate="no" class="notranslate">Workflow::apply()</code> or
+<code translate="no" class="notranslate">Workflow::getEnabledTransitions()</code> is executed. With the guard events you may
+add custom logic to decide which transitions should be blocked or not. Here is a
+list of the guard event names.</p>
+<ul>
+    <li><code translate="no" class="notranslate">workflow.guard</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].guard</code></li>
+<li><code translate="no" class="notranslate">workflow.[workflow name].guard.[transition name]</code></li>
+</ul>
+<p>This example stops any blog post being transitioned to &quot;reviewed&quot; if it is
+missing a title:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/App/EventSubscriber/BlogPostReviewSubscriber.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventSubscriber</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">BlogPost</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventSubscriberInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">GuardEvent</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlogPostReviewSubscriber</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">EventSubscriberInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">guardReview</span><span class="hljs-params">(GuardEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+    </span>{
+        <span class="hljs-comment">/** <span class="hljs-doctag">@var</span> BlogPost $post */</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getSubject();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>title</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span><span class="hljs-operator">-&gt;</span>title;
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">empty</span>(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>title</span>)) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setBlocked(<span class="hljs-keyword">true</span>, <span class="hljs-string">'This blog post cannot be marked as reviewed because it has no title.'</span>);
+        }
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubscribedEvents</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-string">'workflow.blog_publishing.guard.to_review'</span> =&gt; [<span class="hljs-string">'guardReview'</span>],
+        ];
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="workflow-chosing-events-to-dispatch"></span>
+</div>
+<div class="section">
+<h3 id="choosing-which-events-to-dispatch">
+    Choosing which Events to Dispatch
+    <a class="headerlink" href="#choosing-which-events-to-dispatch" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you prefer to control which events are fired when performing each transition,
+use the <code translate="no" class="notranslate">events_to_dispatch</code> configuration option. This option does not apply
+to <a href="workflow.html#workflow-usage-guard-events" class="reference internal">Guard events</a>, which are always fired:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-fda7420bdc9b34659f84e6bc7f23e69803869418" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-1076ac734788d80f56ecc380fc2881e5892b3532" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-cf64ccda59d425fdc9046592a917b593f83623b2" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-fda7420bdc9b34659f84e6bc7f23e69803869418" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/workflow.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">workflows:</span>
+        <span class="hljs-attr">blog_publishing:</span>
+            <span class="hljs-comment"># you can pass one or more event names</span>
+            <span class="hljs-attr">events_to_dispatch:</span> <span class="hljs-string">['workflow.leave',</span> <span class="hljs-string">'workflow.completed'</span><span class="hljs-string">]</span>
+
+            <span class="hljs-comment"># pass an empty array to not dispatch any event</span>
+            <span class="hljs-attr">events_to_dispatch:</span> <span class="hljs-string">[]</span>
+
+            <span class="hljs-comment"># ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-1076ac734788d80f56ecc380fc2881e5892b3532" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/workflow.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:workflow</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"blog_publishing"</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- you can pass one or more event names --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:event-to-dispatch</span>&gt;</span>workflow.leave<span class="hljs-tag">&lt;/<span class="hljs-name">framework:event-to-dispatch</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:event-to-dispatch</span>&gt;</span>workflow.completed<span class="hljs-tag">&lt;/<span class="hljs-name">framework:event-to-dispatch</span>&gt;</span>
+
+            <span class="hljs-comment">&lt;!-- pass an empty array to not dispatch any event --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:event-to-dispatch</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">framework:event-to-dispatch</span>&gt;</span>
+
+            <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:workflow</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-cf64ccda59d425fdc9046592a917b593f83623b2" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/workflow.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>workflows()<span class="hljs-operator">-&gt;</span>workflows(<span class="hljs-string">'blog_publishing'</span>);
+
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-comment">// you can pass one or more event names</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>eventsToDispatch([
+        <span class="hljs-string">'workflow.leave'</span>,
+        <span class="hljs-string">'workflow.completed'</span>,
+    ]);
+
+    <span class="hljs-comment">// pass an empty array to not dispatch any event</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>eventsToDispatch([]);
+
+    <span class="hljs-comment">// ...</span>
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>You can also disable a specific event from being fired when applying a transition:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">BlogPost</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">LogicException</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span> = <span class="hljs-keyword">new</span> BlogPost();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>container<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'workflow.blog_publishing'</span>);
+
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span><span class="hljs-operator">-&gt;</span>apply(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>, <span class="hljs-string">'to_review'</span>, [
+        Workflow<span class="hljs-operator">::</span>DISABLE_ANNOUNCE_EVENT =&gt; <span class="hljs-keyword">true</span>,
+        Workflow<span class="hljs-operator">::</span>DISABLE_LEAVE_EVENT =&gt; <span class="hljs-keyword">true</span>,
+    ]);
+} <span class="hljs-keyword">catch</span> (LogicException <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>) {
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Disabling an event for a specific transition will take precedence over any
+events specified in the workflow configuration. In the above example the
+<code translate="no" class="notranslate">workflow.leave</code> event will not be fired, even if it has been specified as an
+event to be dispatched for all transitions in the workflow configuration.</p>
+<p>These are all the available constants:</p>
+<blockquote><ul>
+    <li><code translate="no" class="notranslate">Workflow::DISABLE_LEAVE_EVENT</code></li>
+<li><code translate="no" class="notranslate">Workflow::DISABLE_TRANSITION_EVENT</code></li>
+<li><code translate="no" class="notranslate">Workflow::DISABLE_ENTER_EVENT</code></li>
+<li><code translate="no" class="notranslate">Workflow::DISABLE_ENTERED_EVENT</code></li>
+<li><code translate="no" class="notranslate">Workflow::DISABLE_COMPLETED_EVENT</code></li>
+</ul>
+</blockquote>
+</div>
+<div class="section">
+<h3 id="event-methods">
+    Event Methods
+    <a class="headerlink" href="#event-methods" title="Permalink to this headline">¶</a>
+</h3>
+<p>Each workflow event is an instance of <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Event/Event.php" class="reference external" title="Symfony\Component\Workflow\Event\Event" rel="external noopener noreferrer" target="_blank">Event</a>.
+This means that each event has access to the following information:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Event/Event.php#method_getMarking" class="reference external" title="Symfony\Component\Workflow\Event\Event::getMarking()" rel="external noopener noreferrer" target="_blank">getMarking()</a></dt>
+        
+        <dd>
+                            Returns the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Marking.php" class="reference external" title="Symfony\Component\Workflow\Marking" rel="external noopener noreferrer" target="_blank">Marking</a> of the workflow.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Event/Event.php#method_getSubject" class="reference external" title="Symfony\Component\Workflow\Event\Event::getSubject()" rel="external noopener noreferrer" target="_blank">getSubject()</a></dt>
+        
+        <dd>
+                            Returns the object that dispatches the event.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Event/Event.php#method_getTransition" class="reference external" title="Symfony\Component\Workflow\Event\Event::getTransition()" rel="external noopener noreferrer" target="_blank">getTransition()</a></dt>
+        
+        <dd>
+                            Returns the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Transition.php" class="reference external" title="Symfony\Component\Workflow\Transition" rel="external noopener noreferrer" target="_blank">Transition</a> that dispatches the event.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Event/Event.php#method_getWorkflowName" class="reference external" title="Symfony\Component\Workflow\Event\Event::getWorkflowName()" rel="external noopener noreferrer" target="_blank">getWorkflowName()</a></dt>
+        
+        <dd>
+                            Returns a string with the name of the workflow that triggered the event.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Event/Event.php#method_getMetadata" class="reference external" title="Symfony\Component\Workflow\Event\Event::getMetadata()" rel="external noopener noreferrer" target="_blank">getMetadata()</a></dt>
+        
+        <dd>
+                            Returns a metadata.
+                    </dd>
+    </dl>
+<p>For Guard Events, there is an extended <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Event/GuardEvent.php" class="reference external" title="Symfony\Component\Workflow\Event\GuardEvent" rel="external noopener noreferrer" target="_blank">GuardEvent</a> class.
+This class has these additional methods:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Event/GuardEvent.php#method_isBlocked" class="reference external" title="Symfony\Component\Workflow\Event\GuardEvent::isBlocked()" rel="external noopener noreferrer" target="_blank">isBlocked()</a></dt>
+        
+        <dd>
+                            Returns if transition is blocked.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Event/GuardEvent.php#method_setBlocked" class="reference external" title="Symfony\Component\Workflow\Event\GuardEvent::setBlocked()" rel="external noopener noreferrer" target="_blank">setBlocked()</a></dt>
+        
+        <dd>
+                            Sets the blocked value.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Event/GuardEvent.php#method_getTransitionBlockerList" class="reference external" title="Symfony\Component\Workflow\Event\GuardEvent::getTransitionBlockerList()" rel="external noopener noreferrer" target="_blank">getTransitionBlockerList()</a></dt>
+        
+        <dd>
+                            Returns the event <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/TransitionBlockerList.php" class="reference external" title="Symfony\Component\Workflow\TransitionBlockerList" rel="external noopener noreferrer" target="_blank">TransitionBlockerList</a>.
+See <a href="workflow.html#workflow-blocking-transitions" class="reference internal">blocking transitions</a>.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Event/GuardEvent.php#method_addTransitionBlocker" class="reference external" title="Symfony\Component\Workflow\Event\GuardEvent::addTransitionBlocker()" rel="external noopener noreferrer" target="_blank">addTransitionBlocker()</a></dt>
+        
+        <dd>
+                            Add a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/TransitionBlocker.php" class="reference external" title="Symfony\Component\Workflow\TransitionBlocker" rel="external noopener noreferrer" target="_blank">TransitionBlocker</a> instance.
+                    </dd>
+    </dl>
+<span id="workflow-blocking-transitions"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="blocking-transitions">
+    Blocking Transitions
+    <a class="headerlink" href="#blocking-transitions" title="Permalink to this headline">¶</a>
+</h2>
+<p>The execution of the workflow can be controlled by calling custom logic to
+decide if the current transition is blocked or allowed before applying it. This
+feature is provided by &quot;guards&quot;, which can be used in two ways.</p>
+<p>First, you can listen to <a href="workflow.html#workflow-usage-guard-events" class="reference internal">the guard events</a>.
+Alternatively, you can define a <code translate="no" class="notranslate">guard</code> configuration option for the
+transition. The value of this option is any valid expression created with the
+<a href="components/expression_language.html" class="reference internal">ExpressionLanguage component</a>:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-2419afdae3498a3b04e9fd20f02d0d9d8e48fcd3" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-69206642ebaf6afc18bdd2f65ececf8b27655cb8" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-f2af44f1ee6d101f9aa3205909c6782b049c49e8" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-2419afdae3498a3b04e9fd20f02d0d9d8e48fcd3" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/workflow.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">workflows:</span>
+        <span class="hljs-attr">blog_publishing:</span>
+            <span class="hljs-comment"># previous configuration</span>
+            <span class="hljs-attr">transitions:</span>
+                <span class="hljs-attr">to_review:</span>
+                    <span class="hljs-comment"># the transition is allowed only if the current user has the ROLE_REVIEWER role.</span>
+                    <span class="hljs-attr">guard:</span> <span class="hljs-string">"is_granted('ROLE_REVIEWER')"</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">draft</span>
+                    <span class="hljs-attr">to:</span>   <span class="hljs-string">reviewed</span>
+                <span class="hljs-attr">publish:</span>
+                    <span class="hljs-comment"># or "is_anonymous", "is_remember_me", "is_fully_authenticated", "is_granted", "is_valid"</span>
+                    <span class="hljs-attr">guard:</span> <span class="hljs-string">"is_authenticated"</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">reviewed</span>
+                    <span class="hljs-attr">to:</span>   <span class="hljs-string">published</span>
+                <span class="hljs-attr">reject:</span>
+                    <span class="hljs-comment"># or any valid expression language with "subject" referring to the supported object</span>
+                    <span class="hljs-attr">guard:</span> <span class="hljs-string">"is_granted('ROLE_ADMIN') and subject.isRejectable()"</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">reviewed</span>
+                    <span class="hljs-attr">to:</span>   <span class="hljs-string">rejected</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-69206642ebaf6afc18bdd2f65ececf8b27655cb8" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/workflow.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+    https://symfony.com/schema/dic/services/services-1.0.xsd
+    http://symfony.com/schema/dic/symfony
+    https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:workflow</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"blog_publishing"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"workflow"</span>&gt;</span>
+
+            <span class="hljs-comment">&lt;!-- ... previous configuration --&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"to_review"</span>&gt;</span>
+                <span class="hljs-comment">&lt;!-- the transition is allowed only if the current user has the ROLE_REVIEWER role. --&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:guard</span>&gt;</span>is_granted("ROLE_REVIEWER")<span class="hljs-tag">&lt;/<span class="hljs-name">framework:guard</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>draft<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>reviewed<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"publish"</span>&gt;</span>
+                <span class="hljs-comment">&lt;!-- or "is_anonymous", "is_remember_me", "is_fully_authenticated", "is_granted" --&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:guard</span>&gt;</span>is_authenticated<span class="hljs-tag">&lt;/<span class="hljs-name">framework:guard</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>reviewed<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>published<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"reject"</span>&gt;</span>
+                <span class="hljs-comment">&lt;!-- or any valid expression language with "subject" referring to the post --&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:guard</span>&gt;</span>is_granted("ROLE_ADMIN") and subject.isStatusReviewed()<span class="hljs-tag">&lt;/<span class="hljs-name">framework:guard</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>reviewed<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>rejected<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:workflow</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-f2af44f1ee6d101f9aa3205909c6782b049c49e8" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/workflow.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>workflows()<span class="hljs-operator">-&gt;</span>workflows(<span class="hljs-string">'blog_publishing'</span>);
+    <span class="hljs-comment">// ... previous configuration</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'to_review'</span>)
+            <span class="hljs-comment">// the transition is allowed only if the current user has the ROLE_REVIEWER role.</span>
+            <span class="hljs-operator">-&gt;</span>guard(<span class="hljs-string">'is_granted("ROLE_REVIEWER")'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'draft'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'reviewed'</span>]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'publish'</span>)
+            <span class="hljs-comment">// or "is_anonymous", "is_remember_me", "is_fully_authenticated", "is_granted"</span>
+            <span class="hljs-operator">-&gt;</span>guard(<span class="hljs-string">'is_authenticated'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'reviewed'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'published'</span>]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'reject'</span>)
+            <span class="hljs-comment">// or any valid expression language with "subject" referring to the post</span>
+            <span class="hljs-operator">-&gt;</span>guard(<span class="hljs-string">'is_granted("ROLE_ADMIN") and subject.isStatusReviewed()'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'reviewed'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'rejected'</span>]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>You can also use transition blockers to block and return a user-friendly error
+message when you stop a transition from happening.
+In the example we get this message from the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Event/Event.php" class="reference external" title="Symfony\Component\Workflow\Event\Event" rel="external noopener noreferrer" target="_blank">Event</a>'s metadata, giving you a
+central place to manage the text.</p>
+<p>This example has been simplified; in production you may prefer to use the
+<a href="translation.html" class="reference internal">Translation</a> component to manage messages in one
+place:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/App/EventSubscriber/BlogPostPublishSubscriber.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventSubscriber</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventSubscriberInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">GuardEvent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">TransitionBlocker</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlogPostPublishSubscriber</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">EventSubscriberInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">guardPublish</span><span class="hljs-params">(GuardEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>eventTransition</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getTransition();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hourLimit</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getMetadata(<span class="hljs-string">'hour_limit'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>eventTransition</span>);
+
+        <span class="hljs-keyword">if</span> (date(<span class="hljs-string">'H'</span>) &lt;= <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hourLimit</span>) {
+            <span class="hljs-keyword">return</span>;
+        }
+
+        <span class="hljs-comment">// Block the transition "publish" if it is more than 8 PM</span>
+        <span class="hljs-comment">// with the message for end user</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>explanation</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getMetadata(<span class="hljs-string">'explanation'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>eventTransition</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>addTransitionBlocker(<span class="hljs-keyword">new</span> TransitionBlocker(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>explanation</span> , <span class="hljs-string">'0'</span>));
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubscribedEvents</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-string">'workflow.blog_publishing.guard.publish'</span> =&gt; [<span class="hljs-string">'guardPublish'</span>],
+        ];
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="usage-in-twig">
+    Usage in Twig
+    <a class="headerlink" href="#usage-in-twig" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony defines several Twig functions to manage workflows and reduce the need
+of domain logic in your templates:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">workflow_can()</code></dt>
+        
+        <dd>
+                            Returns <code translate="no" class="notranslate">true</code> if the given object can make the given transition.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">workflow_transitions()</code></dt>
+        
+        <dd>
+                            Returns an array with all the transitions enabled for the given object.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">workflow_transition()</code></dt>
+        
+        <dd>
+                            Returns a specific transition enabled for the given object and transition name.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">workflow_marked_places()</code></dt>
+        
+        <dd>
+                            Returns an array with the place names of the given marking.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">workflow_has_marked_place()</code></dt>
+        
+        <dd>
+                            Returns <code translate="no" class="notranslate">true</code> if the marking of the given object has the given state.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">workflow_transition_blockers()</code></dt>
+        
+        <dd>
+                            Returns <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/TransitionBlockerList.php" class="reference external" title="Symfony\Component\Workflow\TransitionBlockerList" rel="external noopener noreferrer" target="_blank">TransitionBlockerList</a> for the given transition.
+                    </dd>
+    </dl>
+<p>The following example shows these functions in action:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Actions on Blog Post<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">if</span></span> workflow_can(post, 'publish') %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"..."</span>&gt;</span>Publish<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endif</span></span> %}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">if</span></span> workflow_can(post, 'to_review') %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"..."</span>&gt;</span>Submit to review<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endif</span></span> %}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">if</span></span> workflow_can(post, 'reject') %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"..."</span>&gt;</span>Reject<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endif</span></span> %}</span><span class="xml">
+
+</span><span class="hljs-comment">{# Or loop through the enabled transitions #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">for</span></span> transition in workflow_transitions(post) %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"..."</span>&gt;</span></span><span class="hljs-template-variable">{{ transition.name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name">else</span> %}</span><span class="xml">
+    No actions available.
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endfor</span></span> %}</span><span class="xml">
+
+</span><span class="hljs-comment">{# Check if the object is in some specific place #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">if</span></span> workflow_has_marked_place(post, 'reviewed') %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>This post is ready for review.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endif</span></span> %}</span><span class="xml">
+
+</span><span class="hljs-comment">{# Check if some place has been marked on the object #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">if</span></span> 'reviewed' in workflow_marked_places(post) %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"label"</span>&gt;</span>Reviewed<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endif</span></span> %}</span><span class="xml">
+
+</span><span class="hljs-comment">{# Loop through the transition blockers #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">for</span></span> blocker in workflow_transition_blockers(post, 'publish') %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"error"</span>&gt;</span></span><span class="hljs-template-variable">{{ blocker.message }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endfor</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="storing-metadata">
+    Storing Metadata
+    <a class="headerlink" href="#storing-metadata" title="Permalink to this headline">¶</a>
+</h2>
+<p>In case you need it, you can store arbitrary metadata in workflows, their
+places, and their transitions using the <code translate="no" class="notranslate">metadata</code> option. This metadata can
+be only the title of the workflow or very complex objects:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-08092e4a4bf84344e41bd110896e72fdd40e28f3" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-9973c16cbe037c102efdfcab5a0c88deb4f79c1b" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-024576572399f28226ba2391cc6d67c858ca2f75" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-08092e4a4bf84344e41bd110896e72fdd40e28f3" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/workflow.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">workflows:</span>
+        <span class="hljs-attr">blog_publishing:</span>
+            <span class="hljs-attr">metadata:</span>
+                <span class="hljs-attr">title:</span> <span class="hljs-string">'Blog Publishing Workflow'</span>
+            <span class="hljs-comment"># ...</span>
+            <span class="hljs-attr">places:</span>
+                <span class="hljs-attr">draft:</span>
+                    <span class="hljs-attr">metadata:</span>
+                        <span class="hljs-attr">max_num_of_words:</span> <span class="hljs-number">500</span>
+                <span class="hljs-comment"># ...</span>
+            <span class="hljs-attr">transitions:</span>
+                <span class="hljs-attr">to_review:</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">draft</span>
+                    <span class="hljs-attr">to:</span>   <span class="hljs-string">review</span>
+                    <span class="hljs-attr">metadata:</span>
+                        <span class="hljs-attr">priority:</span> <span class="hljs-number">0.5</span>
+                <span class="hljs-attr">publish:</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">reviewed</span>
+                    <span class="hljs-attr">to:</span>   <span class="hljs-string">published</span>
+                    <span class="hljs-attr">metadata:</span>
+                        <span class="hljs-attr">hour_limit:</span> <span class="hljs-number">20</span>
+                        <span class="hljs-attr">explanation:</span> <span class="hljs-string">'You can not publish after 8 PM.'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-9973c16cbe037c102efdfcab5a0c88deb4f79c1b" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/workflow.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:workflow</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"blog_publishing"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:metadata</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:title</span>&gt;</span>Blog Publishing Workflow<span class="hljs-tag">&lt;/<span class="hljs-name">framework:title</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:metadata</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:place</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"draft"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:metadata</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">framework:max-num-of-words</span>&gt;</span>500<span class="hljs-tag">&lt;/<span class="hljs-name">framework:max-num-of-words</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">framework:metadata</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:place</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"to_review"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>draft<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>review<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:metadata</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">framework:priority</span>&gt;</span>0.5<span class="hljs-tag">&lt;/<span class="hljs-name">framework:priority</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">framework:metadata</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"publish"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>reviewed<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>published<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:metadata</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">framework:hour_limit</span>&gt;</span>20<span class="hljs-tag">&lt;/<span class="hljs-name">framework:hour_limit</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">framework:explanation</span>&gt;</span>You can not publish after 8 PM.<span class="hljs-tag">&lt;/<span class="hljs-name">framework:explanation</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">framework:metadata</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:workflow</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-024576572399f28226ba2391cc6d67c858ca2f75" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/workflow.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>workflows()<span class="hljs-operator">-&gt;</span>workflows(<span class="hljs-string">'blog_publishing'</span>);
+    <span class="hljs-comment">// ... previous configuration</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>metadata([
+        <span class="hljs-string">'title'</span> =&gt; <span class="hljs-string">'Blog Publishing Workflow'</span>
+    ]);
+
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>place()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'draft'</span>)
+        <span class="hljs-operator">-&gt;</span>metadata([
+            <span class="hljs-string">'max_num_of_words'</span> =&gt; <span class="hljs-number">500</span>,
+        ]);
+
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'to_review'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'draft'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'reviewed'</span>])
+            <span class="hljs-operator">-&gt;</span>metadata([
+                <span class="hljs-string">'priority'</span> =&gt; <span class="hljs-number">0.5</span>,
+            ]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishing</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'publish'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'reviewed'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'published'</span>])
+            <span class="hljs-operator">-&gt;</span>metadata([
+                <span class="hljs-string">'hour_limit'</span> =&gt; <span class="hljs-number">20</span>,
+                <span class="hljs-string">'explanation'</span> =&gt; <span class="hljs-string">'You can not publish after 8 PM.'</span>,
+            ]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Then you can access this metadata in your controller as follows:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/App/Controller/BlogPostController.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">BlogPost</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">WorkflowInterface</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">myAction</span><span class="hljs-params">(WorkflowInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishingWorkflow</span>, BlogPost <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>)</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>title</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishingWorkflow</span>
+        <span class="hljs-operator">-&gt;</span>getMetadataStore()
+        <span class="hljs-operator">-&gt;</span>getWorkflowMetadata()[<span class="hljs-string">'title'</span>] ?? <span class="hljs-string">'Default title'</span>
+    ;
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>maxNumOfWords</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishingWorkflow</span>
+        <span class="hljs-operator">-&gt;</span>getMetadataStore()
+        <span class="hljs-operator">-&gt;</span>getPlaceMetadata(<span class="hljs-string">'draft'</span>)[<span class="hljs-string">'max_num_of_words'</span>] ?? <span class="hljs-number">500</span>
+    ;
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>aTransition</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishingWorkflow</span><span class="hljs-operator">-&gt;</span>getDefinition()<span class="hljs-operator">-&gt;</span>getTransitions()[<span class="hljs-number">0</span>];
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>priority</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blogPublishingWorkflow</span>
+        <span class="hljs-operator">-&gt;</span>getMetadataStore()
+        <span class="hljs-operator">-&gt;</span>getTransitionMetadata(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>aTransition</span>)[<span class="hljs-string">'priority'</span>] ?? <span class="hljs-number">0</span>
+    ;
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>There is a <code translate="no" class="notranslate">getMetadata()</code> method that works with all kinds of metadata:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// get "workflow metadata" passing the metadata key as argument</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>title</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span><span class="hljs-operator">-&gt;</span>getMetadataStore()<span class="hljs-operator">-&gt;</span>getMetadata(<span class="hljs-string">'title'</span>);
+
+<span class="hljs-comment">// get "place metadata" passing the metadata key as the first argument and the place name as the second argument</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>maxNumOfWords</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span><span class="hljs-operator">-&gt;</span>getMetadataStore()<span class="hljs-operator">-&gt;</span>getMetadata(<span class="hljs-string">'max_num_of_words'</span>, <span class="hljs-string">'draft'</span>);
+
+<span class="hljs-comment">// get "transition metadata" passing the metadata key as the first argument and a Transition object as the second argument</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>priority</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span><span class="hljs-operator">-&gt;</span>getMetadataStore()<span class="hljs-operator">-&gt;</span>getMetadata(<span class="hljs-string">'priority'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>aTransition</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In a <a href="session.html#flash-messages" class="reference internal">flash message</a> in your controller:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// $transition = ...; (an instance of Transition)</span>
+
+<span class="hljs-comment">// $workflow is a Workflow instance retrieved from the Registry or injected directly (see above)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>title</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflow</span><span class="hljs-operator">-&gt;</span>getMetadataStore()<span class="hljs-operator">-&gt;</span>getMetadata(<span class="hljs-string">'title'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>transition</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>addFlash(<span class="hljs-string">'info'</span>, <span class="hljs-string">"You have successfully applied the transition with title: '$title'"</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Metadata can also be accessed in a Listener, from the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Event/Event.php" class="reference external" title="Symfony\Component\Workflow\Event\Event" rel="external noopener noreferrer" target="_blank">Event</a> object.</p>
+<p>In Twig templates, metadata is available via the <code translate="no" class="notranslate">workflow_metadata()</code> function:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>Metadata of Blog Post<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">strong</span>&gt;</span>Workflow<span class="hljs-tag">&lt;/<span class="hljs-name">strong</span>&gt;</span>:<span class="hljs-tag">&lt;<span class="hljs-name">br</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">code</span>&gt;</span></span><span class="hljs-template-variable">{{ workflow_metadata(blog_post, 'title') }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">code</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">strong</span>&gt;</span>Current place(s)<span class="hljs-tag">&lt;/<span class="hljs-name">strong</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">for</span></span> place in workflow_marked_places(blog_post) %}</span><span class="xml">
+            <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>
+                </span><span class="hljs-template-variable">{{ place }}</span><span class="xml">:
+                <span class="hljs-tag">&lt;<span class="hljs-name">code</span>&gt;</span></span><span class="hljs-template-variable">{{ workflow_metadata(blog_post, 'max_num_of_words', place) ?: 'Unlimited'}}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">code</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endfor</span></span> %}</span><span class="xml">
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">strong</span>&gt;</span>Enabled transition(s)<span class="hljs-tag">&lt;/<span class="hljs-name">strong</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">for</span></span> transition in workflow_transitions(blog_post) %}</span><span class="xml">
+            <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>
+                </span><span class="hljs-template-variable">{{ transition.name }}</span><span class="xml">:
+                <span class="hljs-tag">&lt;<span class="hljs-name">code</span>&gt;</span></span><span class="hljs-template-variable">{{ workflow_metadata(blog_post, 'priority', transition) ?: 0 }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">code</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endfor</span></span> %}</span><span class="xml">
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">strong</span>&gt;</span>to_review Priority<span class="hljs-tag">&lt;/<span class="hljs-name">strong</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>
+            to_review:
+            <span class="hljs-tag">&lt;<span class="hljs-name">code</span>&gt;</span></span><span class="hljs-template-variable">{{ workflow_metadata(blog_post, 'priority', workflow_transition(blog_post, 'to_review')) }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">code</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="learn-more">
+    Learn more
+    <a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a>
+</h2>
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-2"><li><a href="workflow/workflow-and-state-machine.html">Workflows and State Machines</a></li><li><a href="workflow/dumping-workflows.html">How to Dump Workflows</a></li></ul></div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

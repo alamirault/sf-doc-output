@@ -1,0 +1,301 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="using-webpack-dev-server-and-hmr">
+    Using webpack-dev-server and HMR
+    <a class="headerlink" href="#using-webpack-dev-server-and-hmr" title="Permalink to this headline">¶</a>
+</h1>
+<p>While developing, instead of using <code translate="no" class="notranslate">yarn encore dev --watch</code>, you can use the
+<a href="https://webpack.js.org/configuration/dev-server/" class="reference external" rel="external noopener noreferrer" target="_blank">webpack-dev-server</a>:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># if you use the Yarn package manager</span>
+<span class="hljs-prompt">$ </span>yarn encore dev-server
+
+<span class="hljs-comment"># if you use the npm package manager</span>
+<span class="hljs-prompt">$ </span>npm run dev-server</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This builds and serves the front-end assets from a new server. This server runs at
+<code translate="no" class="notranslate">localhost:8080</code> by default, meaning your build assets are available at <code translate="no" class="notranslate">localhost:8080/build</code>.
+This server does not actually write the files to disk; instead it serves them from memory,
+allowing for hot module reloading.</p>
+<p>As a consequence, the <code translate="no" class="notranslate">link</code> and <code translate="no" class="notranslate">script</code> tags need to point to the new server. If you're using the
+<code translate="no" class="notranslate">encore_entry_script_tags()</code> and <code translate="no" class="notranslate">encore_entry_link_tags()</code> Twig shortcuts (or are
+<a href="versioning.html#load-manifest-files" class="reference internal">processing your assets through entrypoints.json</a> in some other way),
+you're done: the paths in your templates will automatically point to the dev server.</p>
+<div class="section">
+<h2 id="dev-server-options">
+    dev-server Options
+    <a class="headerlink" href="#dev-server-options" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <code translate="no" class="notranslate">dev-server</code> command supports all the options defined by <a href="https://webpack.js.org/configuration/dev-server/" class="reference external" rel="external noopener noreferrer" target="_blank">webpack-dev-server</a>.
+You can set these options via command line options:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># if you use the Yarn package manager</span>
+<span class="hljs-prompt">$ </span>yarn encore dev-server --port 9000
+
+<span class="hljs-comment"># if you use the npm package manager</span>
+<span class="hljs-prompt">$ </span>npm run dev-server -- --port 9000</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also set these options using the <code translate="no" class="notranslate">Encore.configureDevServerOptions()</code>
+method in your <code translate="no" class="notranslate">webpack.config.js</code> file:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// webpack.config.js</span>
+<span class="hljs-comment">// ...</span>
+
+Encore
+    <span class="hljs-comment">// ...</span>
+
+    .configureDevServerOptions(<span class="hljs-function"><span class="hljs-params">options</span> =&gt;</span> {
+        options.server = {
+            <span class="hljs-attr">type</span>: <span class="hljs-string">'https'</span>,
+            <span class="hljs-attr">options</span>: {
+                <span class="hljs-attr">key</span>: <span class="hljs-string">'/path/to/server.key'</span>,
+                <span class="hljs-attr">cert</span>: <span class="hljs-string">'/path/to/server.crt'</span>,
+            }
+        }
+    })
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="enabling-https-using-the-symfony-web-server">
+    Enabling HTTPS using the Symfony Web Server
+    <a class="headerlink" href="#enabling-https-using-the-symfony-web-server" title="Permalink to this headline">¶</a>
+</h2>
+<p>If you're using the <a href="../../setup/symfony_server.html" class="reference internal">Symfony web server</a> locally with HTTPS,
+you'll need to also tell the dev-server to use HTTPS. To do this, you can reuse the Symfony web
+server SSL certificate:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">// webpack.config.js
+  // ...
+<span class="hljs-addition">+ const path = require('path');</span>
+
+  Encore
+      // ...
+
+<span class="hljs-addition">+     .configureDevServerOptions(options =&gt; {</span>
+<span class="hljs-addition">+         options.server = {</span>
+<span class="hljs-addition">+             type: 'https',</span>
+<span class="hljs-addition">+             options: {</span>
+<span class="hljs-addition">+                 pfx: path.join(process.env.HOME, '.symfony5/certs/default.p12'),</span>
+<span class="hljs-addition">+             }</span>
+<span class="hljs-addition">+         }</span>
+<span class="hljs-addition">+     })</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="cors-issues">
+    CORS Issues
+    <a class="headerlink" href="#cors-issues" title="Permalink to this headline">¶</a>
+</h2>
+<p>If you experience issues related to CORS (Cross Origin Resource Sharing), set
+the following option:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// webpack.config.js</span>
+<span class="hljs-comment">// ...</span>
+
+Encore
+    <span class="hljs-comment">// ...</span>
+
+    .configureDevServerOptions(<span class="hljs-function"><span class="hljs-params">options</span> =&gt;</span> {
+        options.allowedHosts = <span class="hljs-string">'all'</span>;
+        <span class="hljs-comment">// in older Webpack Dev Server versions, use this option instead:</span>
+        <span class="hljs-comment">// options.firewall = false;</span>
+    })</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Beware that this is not a recommended security practice in general, but here
+it's required to solve the CORS issue.</p>
+</div>
+<div class="section">
+<h2 id="hot-module-replacement-hmr">
+    Hot Module Replacement HMR
+    <a class="headerlink" href="#hot-module-replacement-hmr" title="Permalink to this headline">¶</a>
+</h2>
+<p>Hot module replacement is a superpower of the <code translate="no" class="notranslate">dev-server</code> where styles and
+(in some cases) JavaScript can automatically update without needing to reload
+your page. HMR works automatically with CSS (as long as you're using the
+<code translate="no" class="notranslate">dev-server</code> and Encore 1.0 or higher) but only works with some JavaScript
+(like <a href="vuejs.html" class="reference internal">Vue.js</a>).</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>1.0.0</span>
+    </p><p>Before Encore 1.0, you needed to pass a <code translate="no" class="notranslate">--hot</code> flag at the command line
+to enable HMR. You also needed to disable CSS extraction to enable HMR for
+CSS. That is no longer needed.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

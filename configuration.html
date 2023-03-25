@@ -1,0 +1,2659 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="configuring-symfony">
+    Configuring Symfony
+    <a class="headerlink" href="#configuring-symfony" title="Permalink to this headline">¶</a>
+</h1>
+<div class="section">
+<h2 id="configuration-files">
+    Configuration Files
+    <a class="headerlink" href="#configuration-files" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony applications are configured with the files stored in the <code translate="no" class="notranslate">config/</code>
+directory, which has this default structure:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">your-project/
+├─ config/
+│  ├─ packages/
+│  ├─ bundles.php
+│  ├─ routes.yaml
+│  └─ services.yaml</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<ul>
+    <li>The <code translate="no" class="notranslate">routes.yaml</code> file defines the <a href="routing.html" class="reference internal">routing configuration</a>;</li>
+<li>The <code translate="no" class="notranslate">services.yaml</code> file configures the services of the <a href="service_container.html" class="reference internal">service container</a>;</li>
+<li>The <code translate="no" class="notranslate">bundles.php</code> file enables/disables packages in your application;</li>
+<li>The <code translate="no" class="notranslate">config/packages/</code> directory stores the configuration of every package
+installed in your application.</li>
+</ul>
+<p>Packages (also called &quot;bundles&quot; in Symfony and &quot;plugins/modules&quot; in other
+projects) add ready-to-use features to your projects.</p>
+<p>When using <a href="setup.html#symfony-flex" class="reference internal">Symfony Flex</a>, which is enabled by default in
+Symfony applications, packages update the <code translate="no" class="notranslate">bundles.php</code> file and create new
+files in <code translate="no" class="notranslate">config/packages/</code> automatically during their installation. For
+example, this is the default file created by the &quot;API Platform&quot; bundle:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/api_platform.yaml</span>
+<span class="hljs-attr">api_platform:</span>
+    <span class="hljs-attr">mapping:</span>
+        <span class="hljs-attr">paths:</span> <span class="hljs-string">['%kernel.project_dir%/src/Entity']</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Splitting the configuration into lots of small files might appear intimidating for some
+Symfony newcomers. However, you'll get used to them quickly and you rarely need
+to change these files after package installation.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>To learn about all the available configuration options, check out the
+<a href="reference/index.html" class="reference internal">Symfony Configuration Reference</a> or run the
+<code translate="no" class="notranslate">config:dump-reference</code> command.</p>
+</div>
+<span id="configuration-formats"></span>
+<div class="section">
+<h3 id="configuration-formats">
+    Configuration Formats
+    <a class="headerlink" href="#configuration-formats" title="Permalink to this headline">¶</a>
+</h3>
+<p>Unlike other frameworks, Symfony doesn't impose a specific format on you to
+configure your applications, but lets you choose between YAML, XML and PHP.
+Throughout the Symfony documentation, all configuration examples will be
+shown in these three formats.</p>
+<p>There isn't any practical difference between formats. In fact, Symfony
+transforms and caches all of them into PHP before running the application, so
+there's not even any performance difference between them.</p>
+<p>YAML is used by default when installing packages because it's concise and very
+readable. These are the main advantages and disadvantages of each format:</p>
+<ul>
+    <li><strong>YAML</strong>: simple, clean and readable, but not all IDEs support autocompletion
+and validation for it. <a href="reference/formats/yaml.html" class="reference internal">Learn the YAML syntax</a>;</li>
+<li><strong>XML</strong>: autocompleted/validated by most IDEs and is parsed natively by PHP,
+but sometimes it generates configuration considered too verbose. <a href="https://en.wikipedia.org/wiki/XML" class="reference external" rel="external noopener noreferrer" target="_blank">Learn the XML syntax</a>;</li>
+<li><strong>PHP</strong>: very powerful and it allows you to create dynamic configuration with
+arrays or a <a href="configuration.html#config-config-builder" class="reference internal">ConfigBuilder</a>.</li>
+</ul>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>By default Symfony loads the configuration files defined in YAML and PHP
+formats. If you define configuration in XML format, update the
+<code translate="no" class="notranslate">src/Kernel.php</code> file to add support for the <code translate="no" class="notranslate">.xml</code> file extension.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The automatic loading of PHP configuration files was introduced in Symfony 6.1.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h3 id="importing-configuration-files">
+    Importing Configuration Files
+    <a class="headerlink" href="#importing-configuration-files" title="Permalink to this headline">¶</a>
+</h3>
+<p>Symfony loads configuration files using the <a href="components/config.html" class="reference internal">Config component</a>, which provides advanced features such as importing other
+configuration files, even if they use a different format:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-ed897ff81cc9d12cad243c4b2001e15ebb1be2fc" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-7871f15a9d9b7f80c6549ca04be9788f0bdf37da" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-5d451642b3b5795250ef57b8cdbcb31075c4d91c" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-ed897ff81cc9d12cad243c4b2001e15ebb1be2fc" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">imports:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">resource:</span> <span class="hljs-string">'legacy_config.php'</span> <span class="hljs-string">}</span>
+
+    <span class="hljs-comment"># glob expressions are also supported to load multiple files</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">resource:</span> <span class="hljs-string">'/etc/myapp/*.yaml'</span> <span class="hljs-string">}</span>
+
+    <span class="hljs-comment"># ignore_errors: not_found silently discards errors if the loaded file doesn't exist</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">resource:</span> <span class="hljs-string">'my_config_file.xml'</span><span class="hljs-string">,</span> <span class="hljs-attr">ignore_errors:</span> <span class="hljs-string">not_found</span> <span class="hljs-string">}</span>
+    <span class="hljs-comment"># ignore_errors: true silently discards all errors (including invalid code and not found)</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">resource:</span> <span class="hljs-string">'my_other_config_file.xml'</span><span class="hljs-string">,</span> <span class="hljs-attr">ignore_errors:</span> <span class="hljs-literal">true</span> <span class="hljs-string">}</span>
+
+<span class="hljs-comment"># ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-7871f15a9d9b7f80c6549ca04be9788f0bdf37da" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">imports</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">"legacy_config.php"</span>/&gt;</span>
+        <span class="hljs-comment">&lt;!-- glob expressions are also supported to load multiple files --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">"/etc/myapp/*.yaml"</span>/&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- ignore-errors="not_found" silently discards errors if the loaded file doesn't exist --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">"my_config_file.yaml"</span> <span class="hljs-attr">ignore-errors</span>=<span class="hljs-string">"not_found"</span>/&gt;</span>
+        <span class="hljs-comment">&lt;!-- ignore-errors="true" silently discards all errors (including invalid code and not found) --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">"my_other_config_file.yaml"</span> <span class="hljs-attr">ignore-errors</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">imports</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-5d451642b3b5795250ef57b8cdbcb31075c4d91c" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'legacy_config.php'</span>);
+
+    <span class="hljs-comment">// glob expressions are also supported to load multiple files</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'/etc/myapp/*.yaml'</span>);
+
+    <span class="hljs-comment">// the third optional argument of import() is 'ignore_errors'</span>
+    <span class="hljs-comment">// 'ignore_errors' set to 'not_found' silently discards errors if the loaded file doesn't exist</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'my_config_file.yaml'</span>, <span class="hljs-keyword">null</span>, <span class="hljs-string">'not_found'</span>);
+    <span class="hljs-comment">// 'ignore_errors' set to true silently discards all errors (including invalid code and not found)</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'my_config_file.yaml'</span>, <span class="hljs-keyword">null</span>, <span class="hljs-keyword">true</span>);
+};
+
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<span id="config-parameter-intro"></span>
+<span id="config-parameters-yml"></span>
+<span id="configuration-parameters"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="configuration-parameters">
+    Configuration Parameters
+    <a class="headerlink" href="#configuration-parameters" title="Permalink to this headline">¶</a>
+</h2>
+<p>Sometimes the same configuration value is used in several configuration files.
+Instead of repeating it, you can define it as a &quot;parameter&quot;, which is like a
+reusable configuration value. By convention, parameters are defined under the
+<code translate="no" class="notranslate">parameters</code> key in the <code translate="no" class="notranslate">config/services.yaml</code> file:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-6efb0a9b97ca90d9ce8b36de80336d4b35985054" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-f881615fc5429ab7efbce0508a6dc39d9dc23635" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-24eb97bbe03dea78323caea05eb3995f4da96ffd" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-6efb0a9b97ca90d9ce8b36de80336d4b35985054" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">parameters:</span>
+    <span class="hljs-comment"># the parameter name is an arbitrary string (the 'app.' prefix is recommended</span>
+    <span class="hljs-comment"># to better differentiate your parameters from Symfony parameters).</span>
+    <span class="hljs-attr">app.admin_email:</span> <span class="hljs-string">'something@example.com'</span>
+
+    <span class="hljs-comment"># boolean parameters</span>
+    <span class="hljs-attr">app.enable_v2_protocol:</span> <span class="hljs-literal">true</span>
+
+    <span class="hljs-comment"># array/collection parameters</span>
+    <span class="hljs-attr">app.supported_locales:</span> <span class="hljs-string">['en',</span> <span class="hljs-string">'es'</span><span class="hljs-string">,</span> <span class="hljs-string">'fr'</span><span class="hljs-string">]</span>
+
+    <span class="hljs-comment"># binary content parameters (encode the contents with base64_encode())</span>
+    <span class="hljs-attr">app.some_parameter:</span> <span class="hljs-type">!!binary</span> <span class="hljs-string">VGhpcyBpcyBhIEJlbGwgY2hhciAH</span>
+
+    <span class="hljs-comment"># PHP constants as parameter values</span>
+    <span class="hljs-attr">app.some_constant:</span> <span class="hljs-type">!php</span><span class="hljs-string">/const</span> <span class="hljs-string">GLOBAL_CONSTANT</span>
+    <span class="hljs-attr">app.another_constant:</span> <span class="hljs-type">!php</span><span class="hljs-string">/const</span> <span class="hljs-string">App\Entity\BlogPost::MAX_ITEMS</span>
+
+    <span class="hljs-comment"># Enum case as parameter values</span>
+    <span class="hljs-attr">app.some_enum:</span> <span class="hljs-type">!php</span><span class="hljs-string">/enum</span> <span class="hljs-string">App\Enum\PostState::Published</span>
+
+<span class="hljs-comment"># ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-f881615fc5429ab7efbce0508a6dc39d9dc23635" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">parameters</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- the parameter name is an arbitrary string (the 'app.' prefix is recommended
+             to better differentiate your parameters from Symfony parameters). --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"app.admin_email"</span>&gt;</span>something@example.com<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- boolean parameters --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"app.enable_v2_protocol"</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- if you prefer to store the boolean value as a string in the parameter --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"app.enable_v2_protocol"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"string"</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- array/collection parameters --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"app.supported_locales"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"collection"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span>&gt;</span>en<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span>&gt;</span>es<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span>&gt;</span>fr<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- binary content parameters (encode the contents with base64_encode()) --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"app.some_parameter"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"binary"</span>&gt;</span>VGhpcyBpcyBhIEJlbGwgY2hhciAH<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- PHP constants as parameter values --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"app.some_constant"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"constant"</span>&gt;</span>GLOBAL_CONSTANT<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"app.another_constant"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"constant"</span>&gt;</span>App\Entity\BlogPost::MAX_ITEMS<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- Enum case as parameter values --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"app.some_enum"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"enum"</span>&gt;</span>App\Enum\PostState::Published<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">parameters</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-24eb97bbe03dea78323caea05eb3995f4da96ffd" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">BlogPost</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Enum</span>\<span class="hljs-title">PostState</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>parameters()
+        <span class="hljs-comment">// the parameter name is an arbitrary string (the 'app.' prefix is recommended</span>
+        <span class="hljs-comment">// to better differentiate your parameters from Symfony parameters).</span>
+        <span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'app.admin_email'</span>, <span class="hljs-string">'something@example.com'</span>)
+
+        <span class="hljs-comment">// boolean parameters</span>
+        <span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'app.enable_v2_protocol'</span>, <span class="hljs-keyword">true</span>)
+
+        <span class="hljs-comment">// array/collection parameters</span>
+        <span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'app.supported_locales'</span>, [<span class="hljs-string">'en'</span>, <span class="hljs-string">'es'</span>, <span class="hljs-string">'fr'</span>])
+
+        <span class="hljs-comment">// binary content parameters (use the PHP escape sequences)</span>
+        <span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'app.some_parameter'</span>, <span class="hljs-string">'This is a Bell char: \x07'</span>)
+
+        <span class="hljs-comment">// PHP constants as parameter values</span>
+        <span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'app.some_constant'</span>, GLOBAL_CONSTANT)
+        <span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'app.another_constant'</span>, BlogPost<span class="hljs-operator">::</span>MAX_ITEMS);
+
+        <span class="hljs-comment">// Enum case as parameter values</span>
+        <span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'app.some_enum'</span>, PostState<span class="hljs-operator">::</span>Published);
+};
+
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>By default and when using XML configuration, the values between <code translate="no" class="notranslate">&lt;parameter&gt;</code>
+tags are not trimmed. This means that the value of the following parameter will be
+<code translate="no" class="notranslate">&#039;\n    something@example.com\n&#039;</code>:</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"app.admin_email"</span>&gt;</span>
+    something@example.com
+<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you want to trim the value of your parameter, use the <code translate="no" class="notranslate">trim</code> attribute.
+When using it, the value of the following parameter will be <code translate="no" class="notranslate">something@example.com</code>:</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"app.admin_email"</span> <span class="hljs-attr">trim</span>=<span class="hljs-string">"true"</span>&gt;</span>
+    something@example.com
+<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>Passing an enum case as a service parameter was introduced in Symfony 6.2.</p>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The <code translate="no" class="notranslate">trim</code> attribute was introduced in Symfony 6.3.</p>
+</div>
+<p>Once defined, you can reference this parameter value from any other
+configuration file using a special syntax: wrap the parameter name in two <code translate="no" class="notranslate">%</code>
+(e.g. <code translate="no" class="notranslate">%app.admin_email%</code>):</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-c041a700d5d756eefdd38e2535962f7b6b736eb3" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-1642b279362e3b08ac3066867cc9d8ac1cb2a2bb" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-10d8bf2179ee03c559339e175b9e11c4474b5f9d" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-c041a700d5d756eefdd38e2535962f7b6b736eb3" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/some_package.yaml</span>
+<span class="hljs-attr">some_package:</span>
+    <span class="hljs-comment"># any string surrounded by two % is replaced by that parameter value</span>
+    <span class="hljs-attr">email_address:</span> <span class="hljs-string">'%app.admin_email%'</span>
+
+    <span class="hljs-comment"># ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-1642b279362e3b08ac3066867cc9d8ac1cb2a2bb" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/some_package.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- any string surrounded by two % is replaced by that parameter value --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">some-package:config</span> <span class="hljs-attr">email-address</span>=<span class="hljs-string">"%app.admin_email%"</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">some-package:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-10d8bf2179ee03c559339e175b9e11c4474b5f9d" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/some_package.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>extension(<span class="hljs-string">'some_package'</span>, [
+        <span class="hljs-comment">// any string surrounded by two % is replaced by that parameter value</span>
+        <span class="hljs-string">'email_address'</span> =&gt; <span class="hljs-string">'%app.admin_email%'</span>,
+
+        <span class="hljs-comment">// ...</span>
+    ]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If some parameter value includes the <code translate="no" class="notranslate">%</code> character, you need to escape it
+by adding another <code translate="no" class="notranslate">%</code>, so Symfony doesn't consider it a reference to a
+parameter name:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-66b6d226acd01b2981d79f8770bf15b6619a3c25" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-224205afd84ca9ded2c2f8e2572247ea9a81cc7f" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-d3c37d054afd4e70fd07565b23ab12716d6b8f12" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-66b6d226acd01b2981d79f8770bf15b6619a3c25" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">parameters:</span>
+    <span class="hljs-comment"># Parsed as 'https://symfony.com/?foo=%s&amp;amp;bar=%d'</span>
+    <span class="hljs-attr">url_pattern:</span> <span class="hljs-string">'https://symfony.com/?foo=%%s&amp;amp;bar=%%d'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-224205afd84ca9ded2c2f8e2572247ea9a81cc7f" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">parameters</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"url_pattern"</span>&gt;</span>http://symfony.com/?foo=%%s<span class="hljs-symbol">&amp;amp;</span>bar=%%d<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">parameters</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-d3c37d054afd4e70fd07565b23ab12716d6b8f12" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>parameters()
+        <span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'url_pattern'</span>, <span class="hljs-string">'http://symfony.com/?foo=%%s&amp;amp;bar=%%d'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Due to the way in which parameters are resolved, you cannot use them
+to build paths in imports dynamically. This means that something like
+<strong>the following does not work:</strong></p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-6006cdeb4573549cfda5ce0ec50a553118c91cbb" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-bfa58ac3de282b25ad9a5006a86fe3669a1e5314" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-9aee3cd78b608bba05ff2989fd1e3a5199699c56" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-6006cdeb4573549cfda5ce0ec50a553118c91cbb" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">imports:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">resource:</span> <span class="hljs-string">'%kernel.project_dir%/somefile.yaml'</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-bfa58ac3de282b25ad9a5006a86fe3669a1e5314" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">imports</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">"%kernel.project_dir%/somefile.yaml"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">imports</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-9aee3cd78b608bba05ff2989fd1e3a5199699c56" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'%kernel.project_dir%/somefile.yaml'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<p>Configuration parameters are very common in Symfony applications. Some packages
+even define their own parameters (e.g. when installing the translation package,
+a new <code translate="no" class="notranslate">locale</code> parameter is added to the <code translate="no" class="notranslate">config/services.yaml</code> file).</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>By convention, parameters whose names start with a dot <code translate="no" class="notranslate">.</code> (for example,
+<code translate="no" class="notranslate">.mailer.transport</code>), are available only during the container compilation.
+They are useful when working with <a href="service_container/compiler_passes.html" class="reference internal">Compiler Passes</a>
+to declare some temporary parameters that won't be available later in the application.</p>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>Compile-time parameters were introduced in Symfony 6.3.</p>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Later in this article you can read how to
+<a href="configuration.html#configuration-accessing-parameters" class="reference internal">get configuration parameters in controllers and services</a>.</p>
+</div>
+<span id="page-creation-environments"></span>
+<span id="page-creation-prod-cache-clear"></span>
+<span id="configuration-environments"></span>
+</div>
+<div class="section">
+<h2 id="configuration-environments">
+    Configuration Environments
+    <a class="headerlink" href="#configuration-environments" title="Permalink to this headline">¶</a>
+</h2>
+<p>You have only one application, but whether you realize it or not, you need it
+to behave differently at different times:</p>
+<ul>
+    <li>While <strong>developing</strong>, you want to log everything and expose nice debugging tools;</li>
+<li>After deploying to <strong>production</strong>, you want that same application to be
+optimized for speed and only log errors.</li>
+</ul>
+<p>The files stored in <code translate="no" class="notranslate">config/packages/</code> are used by Symfony to configure the
+<a href="service_container.html" class="reference internal">application services</a>. In other words, you can change
+the application behavior by changing which configuration files are loaded.
+That's the idea of Symfony's <strong>configuration environments</strong>.</p>
+<p>A typical Symfony application begins with three environments:</p>
+<ul>
+    <li><code translate="no" class="notranslate">dev</code> for local development,</li>
+<li><code translate="no" class="notranslate">prod</code> for production servers,</li>
+<li><code translate="no" class="notranslate">test</code> for <a href="testing.html" class="reference internal">automated tests</a>.</li>
+</ul>
+<p>When running the application, Symfony loads the configuration files in this
+order (the last files can override the values set in the previous ones):</p>
+<ol class="arabic">
+    <li>The files in <code translate="no" class="notranslate">config/packages/*.&lt;extension&gt;</code>;</li>
+<li>the files in <code translate="no" class="notranslate">config/packages/&lt;environment-name&gt;/*.&lt;extension&gt;</code>;</li>
+<li><code translate="no" class="notranslate">config/services.&lt;extension&gt;</code>;</li>
+<li><code translate="no" class="notranslate">config/services_&lt;environment-name&gt;.&lt;extension&gt;</code>.</li>
+</ol>
+<p>Take the <code translate="no" class="notranslate">framework</code> package, installed by default, as an example:</p>
+<ul>
+    <li>First, <code translate="no" class="notranslate">config/packages/framework.yaml</code> is loaded in all environments and
+it configures the framework with some options;</li>
+<li>In the <strong>prod</strong> environment, nothing extra will be set as there is no
+<code translate="no" class="notranslate">config/packages/prod/framework.yaml</code> file;</li>
+<li>In the <strong>dev</strong> environment, there is no file either (
+<code translate="no" class="notranslate">config/packages/dev/framework.yaml</code> does not exist).</li>
+<li>In the <strong>test</strong> environment, the <code translate="no" class="notranslate">config/packages/test/framework.yaml</code> file
+is loaded to override some of the settings previously configured in
+<code translate="no" class="notranslate">config/packages/framework.yaml</code>.</li>
+</ul>
+<p>In reality, each environment differs only somewhat from others. This means that
+all environments share a large base of common configuration, which is put in
+files directly in the <code translate="no" class="notranslate">config/packages/</code> directory.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can also define options for different environments in a single
+configuration file using the special <code translate="no" class="notranslate">when</code> keyword:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-4a3b5b176d5fbd5b0d7ac9efa19aa4649d55487f" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-4782afd23febbe427fa1bb6f7a68de14b5faedc7" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-2d181d4ecac3c7e4919b6ecb5d4c302a66193a25" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-4a3b5b176d5fbd5b0d7ac9efa19aa4649d55487f" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/webpack_encore.yaml</span>
+<span class="hljs-attr">webpack_encore:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">output_path:</span> <span class="hljs-string">'%kernel.project_dir%/public/build'</span>
+    <span class="hljs-attr">strict_mode:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-attr">cache:</span> <span class="hljs-literal">false</span>
+
+<span class="hljs-comment"># cache is enabled only in the "prod" environment</span>
+<span class="hljs-string">when@prod:</span>
+    <span class="hljs-attr">webpack_encore:</span>
+        <span class="hljs-attr">cache:</span> <span class="hljs-literal">true</span>
+
+<span class="hljs-comment"># disable strict mode only in the "test" environment</span>
+<span class="hljs-string">when@test:</span>
+    <span class="hljs-attr">webpack_encore:</span>
+        <span class="hljs-attr">strict_mode:</span> <span class="hljs-literal">false</span>
+
+<span class="hljs-comment"># YAML syntax allows to reuse contents using "anchors" (&amp;some_name) and "aliases" (*some_name).</span>
+<span class="hljs-comment"># In this example, 'test' configuration uses the exact same configuration as in 'prod'</span>
+<span class="hljs-string">when@prod:</span> <span class="hljs-meta">&amp;webpack_prod</span>
+    <span class="hljs-attr">webpack_encore:</span>
+        <span class="hljs-comment"># ...</span>
+<span class="hljs-string">when@test:</span> <span class="hljs-meta">*webpack_prod</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-4782afd23febbe427fa1bb6f7a68de14b5faedc7" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/webpack_encore.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">webpack-encore:config</span>
+        <span class="hljs-attr">output-path</span>=<span class="hljs-string">"%kernel.project_dir%/public/build"</span>
+        <span class="hljs-attr">strict-mode</span>=<span class="hljs-string">"true"</span>
+        <span class="hljs-attr">cache</span>=<span class="hljs-string">"false"</span>
+    /&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- cache is enabled only in the "test" environment --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">when</span> <span class="hljs-attr">env</span>=<span class="hljs-string">"prod"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">webpack-encore:config</span> <span class="hljs-attr">cache</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">when</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- disable strict mode only in the "test" environment --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">when</span> <span class="hljs-attr">env</span>=<span class="hljs-string">"test"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">webpack-encore:config</span> <span class="hljs-attr">strict-mode</span>=<span class="hljs-string">"false"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">when</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-2d181d4ecac3c7e4919b6ecb5d4c302a66193a25" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/framework.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">ContainerConfigurator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">WebpackEncoreConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(WebpackEncoreConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>webpackEncore</span>, ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>webpackEncore</span>
+        <span class="hljs-operator">-&gt;</span>outputPath(<span class="hljs-string">'%kernel.project_dir%/public/build'</span>)
+        <span class="hljs-operator">-&gt;</span>strictMode(<span class="hljs-keyword">true</span>)
+        <span class="hljs-operator">-&gt;</span>cache(<span class="hljs-keyword">false</span>)
+    ;
+
+    <span class="hljs-comment">// cache is enabled only in the "prod" environment</span>
+    <span class="hljs-keyword">if</span> (<span class="hljs-string">'prod'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>env()) {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>webpackEncore</span><span class="hljs-operator">-&gt;</span>cache(<span class="hljs-keyword">true</span>);
+    }
+
+    <span class="hljs-comment">// disable strict mode only in the "test" environment</span>
+    <span class="hljs-keyword">if</span> (<span class="hljs-string">'test'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>env()) {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>webpackEncore</span><span class="hljs-operator">-&gt;</span>strictMode(<span class="hljs-keyword">false</span>);
+    }
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>See the <code translate="no" class="notranslate">configureContainer()</code> method of
+<a href="configuration/front_controllers_and_kernel.html" class="reference internal">the Kernel class</a> to
+learn everything about the loading order of configuration files.</p>
+</div>
+<span id="selecting-the-active-environment"></span>
+<div class="section">
+<h3 id="selecting-the-active-environment">
+    Selecting the Active Environment
+    <a class="headerlink" href="#selecting-the-active-environment" title="Permalink to this headline">¶</a>
+</h3>
+<p>Symfony applications come with a file called <code translate="no" class="notranslate">.env</code> located at the project
+root directory. This file is used to define the value of environment variables
+and it's explained in detail <a href="configuration.html#config-dot-env" class="reference internal">later in this article</a>.</p>
+<p>Open the <code translate="no" class="notranslate">.env</code> file (or better, the <code translate="no" class="notranslate">.env.local</code> file if you created one)
+and edit the value of the <code translate="no" class="notranslate">APP_ENV</code> variable to change the environment in
+which the application runs. For example, to run the application in production:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash"><span class="hljs-comment"># .env (or .env.local)</span>
+APP_ENV=prod</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This value is used both for the web and for the console commands. However, you
+can override it for commands by setting the <code translate="no" class="notranslate">APP_ENV</code> value before running them:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># Use the environment defined in the .env file</span>
+<span class="hljs-prompt">$ </span>php bin/console command_name
+
+<span class="hljs-comment"># Ignore the .env file and run this command in production</span>
+<span class="hljs-prompt">$ </span>APP_ENV=prod php bin/console command_name</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="creating-a-new-environment">
+    Creating a New Environment
+    <a class="headerlink" href="#creating-a-new-environment" title="Permalink to this headline">¶</a>
+</h3>
+<p>The default three environments provided by Symfony are enough for most projects,
+but you can define your own environments too. For example, this is how you can
+define a <code translate="no" class="notranslate">staging</code> environment where the client can test the project before
+going to production:</p>
+<ol class="arabic">
+    <li>Create a configuration directory with the same name as the environment (in
+this case, <code translate="no" class="notranslate">config/packages/staging/</code>);</li>
+<li>Add the needed configuration files in <code translate="no" class="notranslate">config/packages/staging/</code> to
+define the behavior of the new environment. Symfony loads the
+<code translate="no" class="notranslate">config/packages/*.yaml</code> files first, so you only need to configure the
+differences to those files;</li>
+<li>Select the <code translate="no" class="notranslate">staging</code> environment using the <code translate="no" class="notranslate">APP_ENV</code> env var as explained
+in the previous section.</li>
+</ol>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>It's common for environments to be similar to each other, so you can
+use <a href="https://en.wikipedia.org/wiki/Symbolic_link" class="reference external" rel="external noopener noreferrer" target="_blank">symbolic links</a> between <code translate="no" class="notranslate">config/packages/&lt;environment-name&gt;/</code>
+directories to reuse the same configuration.</p>
+</div>
+<p>Instead of creating new environments, you can use environment variables as
+explained in the following section. This way you can use the same application
+and environment (e.g. <code translate="no" class="notranslate">prod</code>) but change its behavior thanks to the
+configuration based on environment variables (e.g. to run the application in
+different scenarios: staging, quality assurance, client review, etc.)</p>
+<span id="config-env-vars"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="configuration-based-on-environment-variables">
+    Configuration Based on Environment Variables
+    <a class="headerlink" href="#configuration-based-on-environment-variables" title="Permalink to this headline">¶</a>
+</h2>
+<p>Using <a href="https://en.wikipedia.org/wiki/Environment_variable" class="reference external" rel="external noopener noreferrer" target="_blank">environment variables</a> (or &quot;env vars&quot; for short) is a common practice to
+configure options that depend on where the application is run (e.g. the database
+credentials are usually different in production versus your local machine). If
+the values are sensitive, you can even <a href="configuration/secrets.html" class="reference internal">encrypt them as secrets</a>.</p>
+<p>Use the special syntax <code translate="no" class="notranslate">%env(ENV_VAR_NAME)%</code> to reference environment variables.
+The values of these options are resolved at runtime (only once per request, to
+not impact performance) so you can change the application behavior without having
+to clear the cache.</p>
+<p>This example shows how you could configure the application secret using an env var:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-628f9607cd8f6e8c401fa70ffb78d41fbc3f1d79" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-5506635667ca0d4fbd5ccd83434c0fa6a9e75978" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-36344f2c7ebf7c2429c6c5245f44f1292b36a4e2" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-628f9607cd8f6e8c401fa70ffb78d41fbc3f1d79" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/framework.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-comment"># by convention the env var names are always uppercase</span>
+    <span class="hljs-attr">secret:</span> <span class="hljs-string">'%env(APP_SECRET)%'</span>
+    <span class="hljs-comment"># ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-5506635667ca0d4fbd5ccd83434c0fa6a9e75978" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/framework.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/framework"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- by convention the env var names are always uppercase --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span> <span class="hljs-attr">secret</span>=<span class="hljs-string">"%env(APP_SECRET)%"</span>/&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-36344f2c7ebf7c2429c6c5245f44f1292b36a4e2" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/framework.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>extension(<span class="hljs-string">'framework'</span>, [
+        <span class="hljs-comment">// by convention the env var names are always uppercase</span>
+        <span class="hljs-string">'secret'</span> =&gt; <span class="hljs-string">'%env(APP_SECRET)%'</span>,
+    ]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Your env vars can also be accessed via the PHP super globals <code translate="no" class="notranslate">$_ENV</code> and
+<code translate="no" class="notranslate">$_SERVER</code> (both are equivalent):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>databaseUrl</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_ENV</span>[<span class="hljs-string">'DATABASE_URL'</span>]; <span class="hljs-comment">// mysql://db_user:db_password@127.0.0.1:3306/db_name</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>env</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'APP_ENV'</span>]; <span class="hljs-comment">// prod</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>However, in Symfony applications there's no need to use this, because the
+configuration system provides a better way of working with env vars.</p>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>The values of env vars can only be strings, but Symfony includes some
+<a href="configuration/env_var_processors.html" class="reference internal">env var processors</a> to transform
+their contents (e.g. to turn a string value into an integer).</p>
+</div>
+<p>To define the value of an env var, you have several options:</p>
+<ul>
+    <li><a href="configuration.html#config-dot-env" class="reference internal">Add the value to a .env file</a>;</li>
+<li><a href="configuration.html#configuration-secrets" class="reference internal">Encrypt the value as a secret</a>;</li>
+<li>Set the value as a real environment variable in your shell or your web server.</li>
+</ul>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Some hosts - like Platform.sh - offer easy <a href="https://symfony.com/doc/current/cloud/env.html" class="reference external">utilities to manage env vars</a>
+in production.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Some configuration features are not compatible with env vars. For example,
+defining some container parameters conditionally based on the existence of
+another configuration option. When using an env var, the configuration option
+always exists, because its value will be <code translate="no" class="notranslate">null</code> when the related env var
+is not defined.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Beware that dumping the contents of the <code translate="no" class="notranslate">$_SERVER</code> and <code translate="no" class="notranslate">$_ENV</code> variables
+or outputting the <code translate="no" class="notranslate">phpinfo()</code> contents will display the values of the
+environment variables, exposing sensitive information such as the database
+credentials.</p>
+<p>The values of the env vars are also exposed in the web interface of the
+<a href="profiler.html" class="reference internal">Symfony profiler</a>. In practice this shouldn't be a
+problem because the web profiler must <strong>never</strong> be enabled in production.</p>
+</div>
+<span id="configuration-env-var-in-dev"></span>
+<span id="config-dot-env"></span>
+<div class="section">
+<h3 id="configuring-environment-variables-in-env-files">
+    Configuring Environment Variables in .env Files
+    <a class="headerlink" href="#configuring-environment-variables-in-env-files" title="Permalink to this headline">¶</a>
+</h3>
+<p>Instead of defining env vars in your shell or your web server, Symfony provides
+a convenient way to define them inside a <code translate="no" class="notranslate">.env</code> (with a leading dot) file
+located at the root of your project.</p>
+<p>The <code translate="no" class="notranslate">.env</code> file is read and parsed on every request and its env vars are added
+to the <code translate="no" class="notranslate">$_ENV</code> &amp; <code translate="no" class="notranslate">$_SERVER</code> PHP variables. Any existing env vars are <em>never</em>
+overwritten by the values defined in <code translate="no" class="notranslate">.env</code>, so you can combine both.</p>
+<p>For example, to define the <code translate="no" class="notranslate">DATABASE_URL</code> env var shown earlier in this article,
+you can add:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash"><span class="hljs-comment"># .env</span>
+DATABASE_URL=<span class="hljs-string">"mysql://db_user:db_password@127.0.0.1:3306/db_name"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This file should be committed to your repository and (due to that fact) should
+only contain &quot;default&quot; values that are good for local development. This file
+should not contain production values.</p>
+<p>In addition to your own env vars, this <code translate="no" class="notranslate">.env</code> file also contains the env vars
+defined by the third-party packages installed in your application (they are
+added automatically by <a href="setup.html#symfony-flex" class="reference internal">Symfony Flex</a> when installing packages).</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Since the <code translate="no" class="notranslate">.env</code> file is read and parsed on every request, you don't need to
+clear the Symfony cache or restart the PHP container if you're using Docker.</p>
+</div>
+<div class="section">
+<h4 id="env-file-syntax">
+    .env File Syntax
+    <a class="headerlink" href="#env-file-syntax" title="Permalink to this headline">¶</a>
+</h4>
+<p>Add comments by prefixing them with <code translate="no" class="notranslate">#</code>:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash"><span class="hljs-comment"># database credentials</span>
+DB_USER=root
+DB_PASS=pass <span class="hljs-comment"># this is the secret password</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Use environment variables in values by prefixing variables with <code translate="no" class="notranslate">$</code>:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash">DB_USER=root
+DB_PASS=<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>{DB_USER}</span>pass <span class="hljs-comment"># include the user as a password prefix</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>The order is important when some env var depends on the value of other env
+vars. In the above example, <code translate="no" class="notranslate">DB_PASS</code> must be defined after <code translate="no" class="notranslate">DB_USER</code>.
+Moreover, if you define multiple <code translate="no" class="notranslate">.env</code> files and put <code translate="no" class="notranslate">DB_PASS</code> first,
+its value will depend on the <code translate="no" class="notranslate">DB_USER</code> value defined in other files
+instead of the value defined in this file.</p>
+</div>
+<p>Define a default value in case the environment variable is not set:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash">DB_USER=
+DB_PASS=<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>{DB_USER:-root}</span>pass <span class="hljs-comment"># results in DB_PASS=rootpass</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Embed commands via <code translate="no" class="notranslate">$()</code> (not supported on Windows):</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash">START_TIME=$(date)</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Using <code translate="no" class="notranslate">$()</code> might not work depending on your shell.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>As a <code translate="no" class="notranslate">.env</code> file is a regular shell script, you can <code translate="no" class="notranslate">source</code> it in
+your own shell scripts:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span><span class="hljs-built_in">source</span> .env</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<span id="configuration-multiple-env-files"></span>
+</div>
+</div>
+<div class="section">
+<h3 id="overriding-environment-values-via-env-local">
+    Overriding Environment Values via .env.local
+    <a class="headerlink" href="#overriding-environment-values-via-env-local" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you need to override an environment value (e.g. to a different value on your
+local machine), you can do that in a <code translate="no" class="notranslate">.env.local</code> file:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash"><span class="hljs-comment"># .env.local</span>
+DATABASE_URL=<span class="hljs-string">"mysql://root:@127.0.0.1:3306/my_database_name"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This file should be ignored by git and should <em>not</em> be committed to your repository.
+Several other <code translate="no" class="notranslate">.env</code> files are available to set environment variables in <em>just</em>
+the right situation:</p>
+<ul>
+    <li><code translate="no" class="notranslate">.env</code>: defines the default values of the env vars needed by the application;</li>
+<li><code translate="no" class="notranslate">.env.local</code>: overrides the default values for all environments but only on
+the machine which contains the file. This file should not be committed to the
+repository and it's ignored in the <code translate="no" class="notranslate">test</code> environment (because tests should
+produce the same results for everyone);</li>
+<li><code translate="no" class="notranslate">.env.&lt;environment&gt;</code> (e.g. <code translate="no" class="notranslate">.env.test</code>): overrides env vars only for one
+environment but for all machines (these files <em>are</em> committed);</li>
+<li><code translate="no" class="notranslate">.env.&lt;environment&gt;.local</code> (e.g. <code translate="no" class="notranslate">.env.test.local</code>): defines machine-specific
+env var overrides only for one environment. It's similar to <code translate="no" class="notranslate">.env.local</code>,
+but the overrides only apply to one environment.</li>
+</ul>
+<p><em>Real</em> environment variables always win over env vars created by any of the
+<code translate="no" class="notranslate">.env</code> files.</p>
+<p>The <code translate="no" class="notranslate">.env</code> and <code translate="no" class="notranslate">.env.&lt;environment&gt;</code> files should be committed to the
+repository because they are the same for all developers and machines. However,
+the env files ending in <code translate="no" class="notranslate">.local</code> (<code translate="no" class="notranslate">.env.local</code> and <code translate="no" class="notranslate">.env.&lt;environment&gt;.local</code>)
+<strong>should not be committed</strong> because only you will use them. In fact, the
+<code translate="no" class="notranslate">.gitignore</code> file that comes with Symfony prevents them from being committed.</p>
+<span id="configuration-env-var-in-prod"></span>
+</div>
+<div class="section">
+<h3 id="configuring-environment-variables-in-production">
+    Configuring Environment Variables in Production
+    <a class="headerlink" href="#configuring-environment-variables-in-production" title="Permalink to this headline">¶</a>
+</h3>
+<p>In production, the <code translate="no" class="notranslate">.env</code> files are also parsed and loaded on each request. So
+the easiest way to define env vars is by creating a <code translate="no" class="notranslate">.env.local</code> file on your
+production server(s) with your production values.</p>
+<p>To improve performance, you can optionally run the <code translate="no" class="notranslate">dump-env</code> command (available
+in <a href="setup.html#symfony-flex" class="reference internal">Symfony Flex</a> 1.2 or later):</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># parses ALL .env files and dumps their final values to .env.local.php</span>
+<span class="hljs-prompt">$ </span>composer dump-env prod</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>After running this command, Symfony will load the <code translate="no" class="notranslate">.env.local.php</code> file to
+get the environment variables and will not spend time parsing the <code translate="no" class="notranslate">.env</code> files.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Update your deployment tools/workflow to run the <code translate="no" class="notranslate">dump-env</code> command after
+each deploy to improve the application performance.</p>
+</div>
+<span id="configuration-secrets"></span>
+</div>
+<div class="section">
+<h3 id="encrypting-environment-variables-secrets">
+    Encrypting Environment Variables (Secrets)
+    <a class="headerlink" href="#encrypting-environment-variables-secrets" title="Permalink to this headline">¶</a>
+</h3>
+<p>Instead of defining a real environment variable or adding it to a <code translate="no" class="notranslate">.env</code> file,
+if the value of a variable is sensitive (e.g. an API key or a database password),
+you can encrypt the value using the <a href="configuration/secrets.html" class="reference internal">secrets management system</a>.</p>
+</div>
+<div class="section">
+<h3 id="listing-environment-variables">
+    Listing Environment Variables
+    <a class="headerlink" href="#listing-environment-variables" title="Permalink to this headline">¶</a>
+</h3>
+<p>Use the <code translate="no" class="notranslate">debug:dotenv</code> command to understand how Symfony parses the different
+<code translate="no" class="notranslate">.env</code> files to set the value of each environment variable:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:dotenv
+
+Dotenv Variables &amp; Files
+========================
+
+Scanned Files (<span class="hljs-keyword">in</span> descending priority)
+--------------------------------------
+
+* ⨯ .env.local.php
+* ⨯ .env.dev.local
+* ✓ .env.dev
+* ⨯ .env.local
+* ✓ .env
+
+Variables
+---------
+
+---------- ------- ---------- ------
+ Variable   Value   .env.dev   .env
+---------- ------- ---------- ------
+ FOO        BAR     n/a        BAR
+ ALICE      BOB     BOB        bob
+---------- ------- ---------- ------
+
+<span class="hljs-comment"># look for a specific variable passing its full or partial name as an argument</span>
+<span class="hljs-prompt">$ </span>php bin/console debug:dotenv foo</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The option to pass variable names to <code translate="no" class="notranslate">debug:dotenv</code> was introduced in Symfony 6.2.</p>
+</div>
+<p>Additionally, and regardless of how you set environment variables, you can see all
+environment variables, with their values, referenced in Symfony's container configuration:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:container --env-vars
+
+---------------- ----------------- ---------------------------------------------
+ Name             Default value     Real value
+---------------- ----------------- ---------------------------------------------
+ APP_SECRET       n/a               <span class="hljs-string">"471a62e2d601a8952deb186e44186cb3"</span>
+ FOO              <span class="hljs-string">"[1, "</span>2.5<span class="hljs-string">", 3]"</span>   n/a
+ BAR              null              n/a
+---------------- ----------------- ---------------------------------------------
+
+<span class="hljs-comment"># you can also filter the list of env vars by name:</span>
+<span class="hljs-prompt">$ </span>php bin/console debug:container --env-vars foo
+
+<span class="hljs-comment"># run this command to show all the details for a specific env var:</span>
+<span class="hljs-prompt">$ </span>php bin/console debug:container --env-var=FOO</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="configuration-accessing-parameters"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="accessing-configuration-parameters">
+    Accessing Configuration Parameters
+    <a class="headerlink" href="#accessing-configuration-parameters" title="Permalink to this headline">¶</a>
+</h2>
+<p>Controllers and services can access all the configuration parameters. This
+includes both the <a href="configuration.html#configuration-parameters" class="reference internal">parameters defined by yourself</a>
+and the parameters created by packages/bundles. Run the following command to see
+all the parameters that exist in your application:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:container --parameters</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In controllers extending from the <a href="controller.html#the-base-controller-class-services" class="reference internal">AbstractController</a>,
+use the <code translate="no" class="notranslate">getParameter()</code> helper:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/UserController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>projectDir</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getParameter(<span class="hljs-string">'kernel.project_dir'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>adminEmail</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getParameter(<span class="hljs-string">'app.admin_email'</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In services and controllers not extending from <code translate="no" class="notranslate">AbstractController</code>, inject
+the parameters as arguments of their constructors. You must inject them
+explicitly because <a href="service_container/autowiring.html" class="reference internal">service autowiring</a>
+doesn't work for parameters:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-19a1ab3810b74aaa6da9aa0a6f18d3abfbb5928e" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-3c4ffecb85a65afb1b65618db232f715abbe7acd" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-4527c86e74bda638f2e87b0e1862540bd95541cc" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-19a1ab3810b74aaa6da9aa0a6f18d3abfbb5928e" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">parameters:</span>
+    <span class="hljs-attr">app.contents_dir:</span> <span class="hljs-string">'...'</span>
+
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">App\Service\MessageGenerator:</span>
+        <span class="hljs-attr">arguments:</span>
+            <span class="hljs-string">$contentsDir:</span> <span class="hljs-string">'%app.contents_dir%'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-3c4ffecb85a65afb1b65618db232f715abbe7acd" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">parameters</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"app.contents_dir"</span>&gt;</span>...<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">parameters</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Service\MessageGenerator"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">argument</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"$contentsDir"</span>&gt;</span>%app.contents_dir%<span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-4527c86e74bda638f2e87b0e1862540bd95541cc" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Service</span>\<span class="hljs-title">MessageGenerator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>parameters()
+        <span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'app.contents_dir'</span>, <span class="hljs-string">'...'</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>services()
+        <span class="hljs-operator">-&gt;</span>get(MessageGenerator<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>arg(<span class="hljs-string">'$contentsDir'</span>, <span class="hljs-string">'%app.contents_dir%'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>If you inject the same parameters over and over again, use the
+<code translate="no" class="notranslate">services._defaults.bind</code> option instead. The arguments defined in that option are
+injected automatically whenever a service constructor or controller action
+defines an argument with that exact name. For example, to inject the value of the
+<a href="reference/configuration/kernel.html#configuration-kernel-project-directory" class="reference internal">kernel.project_dir parameter</a>
+whenever a service/controller defines a <code translate="no" class="notranslate">$projectDir</code> argument, use this:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-49d0b39d87cd7ba1e5a19fd5c6eff6258b421ef3" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-4c489e6484844570cc2b6ca43e3427fc4d6b7b88" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-beb9942334093f0a1964d33361b4c878d0afea84" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-49d0b39d87cd7ba1e5a19fd5c6eff6258b421ef3" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-attr">_defaults:</span>
+        <span class="hljs-attr">bind:</span>
+            <span class="hljs-comment"># pass this value to any $projectDir argument for any service</span>
+            <span class="hljs-comment"># that's created in this file (including controller arguments)</span>
+            <span class="hljs-string">$projectDir:</span> <span class="hljs-string">'%kernel.project_dir%'</span>
+
+    <span class="hljs-comment"># ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-4c489e6484844570cc2b6ca43e3427fc4d6b7b88" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">defaults</span> <span class="hljs-attr">autowire</span>=<span class="hljs-string">"true"</span> <span class="hljs-attr">autoconfigure</span>=<span class="hljs-string">"true"</span> <span class="hljs-attr">public</span>=<span class="hljs-string">"false"</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- pass this value to any $projectDir argument for any service
+                 that's created in this file (including controller arguments) --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">bind</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"$projectDir"</span>&gt;</span>%kernel.project_dir%<span class="hljs-tag">&lt;/<span class="hljs-name">bind</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">defaults</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-beb9942334093f0a1964d33361b4c878d0afea84" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">LuckyController</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services()
+        <span class="hljs-operator">-&gt;</span>defaults()
+            <span class="hljs-comment">// pass this value to any $projectDir argument for any service</span>
+            <span class="hljs-comment">// that's created in this file (including controller arguments)</span>
+            <span class="hljs-operator">-&gt;</span>bind(<span class="hljs-string">'$projectDir'</span>, <span class="hljs-string">'%kernel.project_dir%'</span>);
+
+    <span class="hljs-comment">// ...</span>
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Read the article about <a href="service_container.html#services-binding" class="reference internal">binding arguments by name and/or type</a>
+to learn more about this powerful feature.</p>
+</div>
+<p>Finally, if some service needs access to lots of parameters, instead of
+injecting each of them individually, you can inject all the application
+parameters at once by type-hinting any of its constructor arguments with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/ParameterBag/ContainerBagInterface.php" class="reference external" title="Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface" rel="external noopener noreferrer" target="_blank">ContainerBagInterface</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Service/MessageGenerator.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Service</span>;
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ParameterBag</span>\<span class="hljs-title">ContainerBagInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MessageGenerator</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private ContainerBagInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>params</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">someMethod</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// get any container parameter from $this-&gt;params, which stores all of them</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>sender</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>params<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'mailer_sender'</span>);
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="config-config-builder"></span>
+</div>
+<div class="section">
+<h2 id="using-php-configbuilders">
+    Using PHP ConfigBuilders
+    <a class="headerlink" href="#using-php-configbuilders" title="Permalink to this headline">¶</a>
+</h2>
+<p>Writing PHP config is sometimes difficult because you end up with large nested
+arrays and you have no autocompletion help from your favorite IDE. A way to
+address this is to use &quot;ConfigBuilders&quot;. They are objects that will help you
+build these arrays.</p>
+<p>Symfony generates the ConfigBuilder classes automatically in the
+<a href="reference/configuration/kernel.html#configuration-kernel-build-directory" class="reference internal">kernel build directory</a> for all the
+bundles installed in your application. By convention they all live in the
+namespace <code translate="no" class="notranslate">Symfony\Config</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>firewall(<span class="hljs-string">'main'</span>)
+        <span class="hljs-operator">-&gt;</span>pattern(<span class="hljs-string">'^/*'</span>)
+        <span class="hljs-operator">-&gt;</span>lazy(<span class="hljs-keyword">true</span>)
+        <span class="hljs-operator">-&gt;</span>anonymous();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>
+        <span class="hljs-operator">-&gt;</span>roleHierarchy(<span class="hljs-string">'ROLE_ADMIN'</span>, [<span class="hljs-string">'ROLE_USER'</span>])
+        <span class="hljs-operator">-&gt;</span>roleHierarchy(<span class="hljs-string">'ROLE_SUPER_ADMIN'</span>, [<span class="hljs-string">'ROLE_ADMIN'</span>, <span class="hljs-string">'ROLE_ALLOWED_TO_SWITCH'</span>])
+        <span class="hljs-operator">-&gt;</span>accessControl()
+            <span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'^/user'</span>)
+            <span class="hljs-operator">-&gt;</span>role(<span class="hljs-string">'ROLE_USER'</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>accessControl([<span class="hljs-string">'path'</span> =&gt; <span class="hljs-string">'^/admin'</span>, <span class="hljs-string">'roles'</span> =&gt; <span class="hljs-string">'ROLE_ADMIN'</span>]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Only root classes in the namespace <code translate="no" class="notranslate">Symfony\Config</code> are ConfigBuilders.
+Nested configs (e.g. <code translate="no" class="notranslate"><wbr>\Symfony<wbr>\Config<wbr>\Framework<wbr>\CacheConfig</code>) are regular
+PHP objects which aren't autowired when using them as an argument type.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="keep-going">
+    Keep Going!
+    <a class="headerlink" href="#keep-going" title="Permalink to this headline">¶</a>
+</h2>
+<p>Congratulations! You've tackled the basics of Symfony. Next, learn about <em>each</em>
+part of Symfony individually by following the guides. Check out:</p>
+<ul>
+    <li><a href="forms.html" class="reference internal">Forms</a></li>
+<li><a href="doctrine.html" class="reference internal">Databases and the Doctrine ORM</a></li>
+<li><a href="service_container.html" class="reference internal">Service Container</a></li>
+<li><a href="security.html" class="reference internal">Security</a></li>
+<li><a href="mailer.html" class="reference internal">Sending Emails with Mailer</a></li>
+<li><a href="logging.html" class="reference internal">Logging</a></li>
+</ul>
+<p>And all the other topics related to configuration:</p>
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-7"><li><a href="configuration/env_var_processors.html">Environment Variable Processors</a></li><li><a href="configuration/front_controllers_and_kernel.html">Understanding how the Front Controller, Kernel and Environments Work together</a></li><li><a href="configuration/micro_kernel_trait.html">Building your own Framework with the MicroKernelTrait</a></li><li><a href="configuration/multiple_kernels.html">How To Create Symfony Applications with Multiple Kernels</a></li><li><a href="configuration/override_dir_structure.html">How to Override Symfony's default Directory Structure</a></li><li><a href="configuration/secrets.html">How to Keep Sensitive Information Secret</a></li><li><a href="configuration/using_parameters_in_dic.html">Using Parameters within a Dependency Injection Class</a></li></ul></div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,370 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="upgrading-existing-applications-to-symfony-flex">
+    Upgrading Existing Applications to Symfony Flex
+    <a class="headerlink" href="#upgrading-existing-applications-to-symfony-flex" title="Permalink to this headline">¶</a>
+</h1>
+<p>Using Symfony Flex is optional, even in Symfony 4, where Flex is used by
+default. However, Flex is so convenient and improves your productivity so much
+that it's strongly recommended to upgrade your existing applications to it.</p>
+<p>Symfony Flex recommends that applications use the following directory structure,
+which is the same used by default in Symfony 4, but you can
+<a href="flex.html#flex-customize-paths" class="reference internal">customize some directories</a>:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">your-project/
+├── assets/
+├── bin/
+│   └── console
+├── config/
+│   ├── bundles.php
+│   ├── packages/
+│   ├── routes.yaml
+│   └── services.yaml
+├── public/
+│   └── index.php
+├── src/
+│   ├── ...
+│   └── Kernel.php
+├── templates/
+├── tests/
+├── translations/
+├── var/
+└── vendor/</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This means that installing the <code translate="no" class="notranslate">symfony/flex</code> dependency in your application
+is not enough. You must also upgrade the directory structure to the one shown
+above. There's no automatic tool to make this upgrade, so you must follow these
+manual steps:</p>
+<ol class="arabic">
+    <li><p>Install Flex as a dependency of your project:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/flex</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div></li>
+<li><p>If the project's <code translate="no" class="notranslate">composer.json</code> file contains <code translate="no" class="notranslate">symfony/symfony</code> dependency,
+it still depends on the Symfony Standard Edition, which is no longer available
+in Symfony 4. First, remove this dependency:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer remove symfony/symfony</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now add the <code translate="no" class="notranslate">symfony/symfony</code> package to the <code translate="no" class="notranslate">conflict</code> section of the project's
+<code translate="no" class="notranslate">composer.json</code> file as <a href="https://github.com/symfony/skeleton/blob/a0770a7f26eeda9890a104fa3de8f68c4120fca5/composer.json#L55-L57" class="reference external" rel="external noopener noreferrer" target="_blank">shown in this example of the skeleton-project</a> so that
+it will not be installed again:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">{
+      "require": {
+          "symfony/flex": "^1.0",
+<span class="hljs-addition">+   },</span>
+<span class="hljs-addition">+   "conflict": {</span>
+<span class="hljs-addition">+       "symfony/symfony": "*"</span>
+      }
+  }</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now you must add in <code translate="no" class="notranslate">composer.json</code> all the Symfony dependencies required
+by your project. A quick way to do that is to add all the components that
+were included in the previous <code translate="no" class="notranslate">symfony/symfony</code> dependency and later you
+can remove anything you don't really need:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require annotations asset orm twig \
+  logger mailer form security translation validator
+<span class="hljs-prompt">$ </span>composer require --dev dotenv maker-bundle orm-fixtures profiler</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div></li>
+<li><p>If the project's <code translate="no" class="notranslate">composer.json</code> file doesn't contain the <code translate="no" class="notranslate">symfony/symfony</code>
+dependency, it already defines its dependencies explicitly, as required by
+Flex. Reinstall all dependencies to force Flex to generate the
+configuration files in <code translate="no" class="notranslate">config/</code>, which is the most tedious part of the upgrade
+process:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>rm -rf vendor/*
+<span class="hljs-prompt">$ </span>composer install</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div></li>
+<li>Regardless of which of the previous steps you followed, at this point you'll have
+lots of new config files in <code translate="no" class="notranslate">config/</code>. They contain the default config
+defined by Symfony, so you must check your original files in <code translate="no" class="notranslate">app/config/</code>
+and make the needed changes in the new files. Flex config doesn't use suffixes
+in config files, so the old <code translate="no" class="notranslate">app/config/config_dev.yml</code> goes to
+<code translate="no" class="notranslate">config/packages/dev/*.yaml</code>, etc.</li>
+<li><p>The most important config file is <code translate="no" class="notranslate">app/config/services.yml</code>, which now is
+located at <code translate="no" class="notranslate">config/services.yaml</code>. Copy the contents of the
+<a href="https://github.com/symfony/recipes/blob/master/symfony/framework-bundle/5.3/config/services.yaml" class="reference external" rel="external noopener noreferrer" target="_blank">default services.yaml file</a> and then add your own service configuration.
+Later you can revisit this file because thanks to Symfony's
+<a href="../service_container/autowiring.html" class="reference internal">autowiring feature</a> you can remove
+most of the service configuration.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Make sure that your previous configuration files don't have <code translate="no" class="notranslate">imports</code>
+declarations pointing to resources already loaded by <code translate="no" class="notranslate">Kernel::configureContainer()</code>
+or <code translate="no" class="notranslate">Kernel::configureRoutes()</code> methods.</p>
+</div></li>
+<li><p>Move the rest of the <code translate="no" class="notranslate">app/</code> contents as follows (and after that, remove the
+<code translate="no" class="notranslate">app/</code> directory):</p>
+<ul>
+    <li><code translate="no" class="notranslate">app/Resources/views/</code> -&gt; <code translate="no" class="notranslate">templates/</code></li>
+<li><code translate="no" class="notranslate">app/Resources/translations/</code> -&gt; <code translate="no" class="notranslate">translations/</code></li>
+<li><code translate="no" class="notranslate">app/Resources/&lt;BundleName&gt;/views/</code> -&gt; <code translate="no" class="notranslate">templates/bundles/&lt;BundleName&gt;/</code></li>
+<li>rest of <code translate="no" class="notranslate">app/Resources/</code> files -&gt; <code translate="no" class="notranslate">src/Resources/</code></li>
+</ul></li>
+<li><p>Move the original PHP source code files from <code translate="no" class="notranslate">src/AppBundle/*</code>, except bundle
+specific files (like <code translate="no" class="notranslate">AppBundle.php</code> and <code translate="no" class="notranslate">DependencyInjection/</code>), to
+<code translate="no" class="notranslate">src/</code> and update the namespace of each moved file to be <code translate="no" class="notranslate">App\...</code> (advanced
+IDEs can do this automatically).</p>
+<p>In addition to moving the files, update the <code translate="no" class="notranslate">autoload</code> and <code translate="no" class="notranslate">autoload-dev</code>
+values of the <code translate="no" class="notranslate">composer.json</code> file as <a href="https://github.com/symfony/skeleton/blob/a0770a7f26eeda9890a104fa3de8f68c4120fca5/composer.json#L30-L39" class="reference external" rel="external noopener noreferrer" target="_blank">shown in this example</a> to use
+<code translate="no" class="notranslate">App\</code> and <code translate="no" class="notranslate">App\Tests\</code> as the application namespaces.</p>
+<p>If you used multiple bundles to organize your code, you must reorganize your
+code into <code translate="no" class="notranslate">src/</code>. For example, if you had <code translate="no" class="notranslate">src/UserBundle/Controller/DefaultController.php</code>
+and <code translate="no" class="notranslate">src/ProductBundle/Controller/DefaultController.php</code>, you could move
+them to <code translate="no" class="notranslate">src/Controller/UserController.php</code> and <code translate="no" class="notranslate">src/Controller/ProductController.php</code>.</p></li>
+<li>Move the public assets, such as images or compiled CSS/JS files, from
+<code translate="no" class="notranslate">src/AppBundle/Resources/public/</code> to <code translate="no" class="notranslate">public/</code> (e.g. <code translate="no" class="notranslate">public/images/</code>).</li>
+<li>Remove <code translate="no" class="notranslate">src/AppBundle/</code>.</li>
+<li>Move the source of the assets (e.g. the SCSS files) to <code translate="no" class="notranslate">assets/</code> and use
+<a href="../frontend.html" class="reference internal">Webpack Encore</a> to manage and compile them.</li>
+<li><code translate="no" class="notranslate">SYMFONY_DEBUG</code> and <code translate="no" class="notranslate">SYMFONY_ENV</code> environment variables were replaced by
+<code translate="no" class="notranslate">APP_DEBUG</code> and <code translate="no" class="notranslate">APP_ENV</code>. Copy their values to the new vars and then remove
+the former ones.</li>
+<li>Create the new <code translate="no" class="notranslate">public/index.php</code> front controller
+<a href="https://github.com/symfony/recipes/blob/master/symfony/framework-bundle/5.3/public/index.php" class="reference external" rel="external noopener noreferrer" target="_blank">copying Symfony's index.php source</a> and, if you made any customization in
+your <code translate="no" class="notranslate">web/app.php</code> and <code translate="no" class="notranslate">web/app_dev.php</code> files, copy those changes into
+the new file. You can now remove the old <code translate="no" class="notranslate">web/</code> dir.</li>
+<li>Update the <code translate="no" class="notranslate">bin/console</code> script <a href="https://github.com/symfony/recipes/blob/master/symfony/console/5.3/bin/console" class="reference external" rel="external noopener noreferrer" target="_blank">copying Symfony's bin/console source</a>
+and changing anything according to your original console script.</li>
+<li>Remove the <code translate="no" class="notranslate">bin/symfony_requirements</code> script and if you need a replacement
+for it, use the new <a href="https://github.com/symfony/requirements-checker" class="reference external" rel="external noopener noreferrer" target="_blank">Symfony Requirements Checker</a>.</li>
+<li>Update the <code translate="no" class="notranslate">.gitignore</code> file to replace the existing <code translate="no" class="notranslate">var/logs/</code> entry
+by <code translate="no" class="notranslate">var/log/</code>, which is the new name for the log directory.</li>
+</ol>
+<span id="flex-customize-paths"></span>
+<div class="section">
+<h2 id="customizing-flex-paths">
+    Customizing Flex Paths
+    <a class="headerlink" href="#customizing-flex-paths" title="Permalink to this headline">¶</a>
+</h2>
+<p>The Flex recipes make a few assumptions about your project's directory structure.
+Some of these assumptions can be customized by adding a key under the <code translate="no" class="notranslate">extra</code>
+section of your <code translate="no" class="notranslate">composer.json</code> file. For example, to tell Flex to copy any
+PHP classes into <code translate="no" class="notranslate">src/App</code> instead of <code translate="no" class="notranslate">src</code>:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"..."</span>: <span class="hljs-string">"..."</span>,
+
+    <span class="hljs-attr">"extra"</span>: {
+        <span class="hljs-attr">"src-dir"</span>: <span class="hljs-string">"src/App"</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The configurable paths are:</p>
+<ul>
+    <li><code translate="no" class="notranslate">bin-dir</code>: defaults to <code translate="no" class="notranslate">bin/</code></li>
+<li><code translate="no" class="notranslate">config-dir</code>: defaults to <code translate="no" class="notranslate">config/</code></li>
+<li><code translate="no" class="notranslate">src-dir</code> defaults to <code translate="no" class="notranslate">src/</code></li>
+<li><code translate="no" class="notranslate">var-dir</code> defaults to <code translate="no" class="notranslate">var/</code></li>
+<li><code translate="no" class="notranslate">public-dir</code> defaults to <code translate="no" class="notranslate">public/</code></li>
+</ul>
+<p>If you customize these paths, some files copied from a recipe still may contain
+references to the original path. In other words: you may need to update some things
+manually after a recipe is installed.</p>
+</div>
+<div class="section">
+<h2 id="learn-more">
+    Learn more
+    <a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a>
+</h2>
+<ul>
+    <li><a href="flex_private_recipes.html" class="reference internal">How To Configure and Use Flex Private Recipe Repositories</a></li>
+</ul>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

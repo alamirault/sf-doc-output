@@ -1,0 +1,1979 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="forms">
+    Forms
+    <a class="headerlink" href="#forms" title="Permalink to this headline">¶</a>
+</h1>
+<div class="admonition admonition-screencast screencast">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                <span>Screencast</span>
+    </p><p>Do you prefer video tutorials? Check out the <a href="https://symfonycasts.com/screencast/symfony-forms" class="reference external" rel="external noopener noreferrer" target="_blank">Symfony Forms screencast series</a>.</p>
+</div>
+<p>Creating and processing HTML forms is hard and repetitive. You need to deal with
+rendering HTML form fields, validating submitted data, mapping the form data
+into objects and a lot more. Symfony includes a powerful form feature that
+provides all these features and many more for truly complex scenarios.</p>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<p>In applications using <a href="setup.html#symfony-flex" class="reference internal">Symfony Flex</a>, run this command to
+install the form feature before using it:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/form</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>The recommended workflow when working with Symfony forms is the following:</p>
+<ol class="arabic">
+    <li><strong>Build the form</strong> in a Symfony controller or using a dedicated form class;</li>
+<li><strong>Render the form</strong> in a template so the user can edit and submit it;</li>
+<li><strong>Process the form</strong> to validate the submitted data, transform it into PHP
+data and do something with it (e.g. persist it in a database).</li>
+</ol>
+<p>Each of these steps is explained in detail in the next sections. To make
+examples easier to follow, all of them assume that you're building a small Todo
+list application that displays &quot;tasks&quot;.</p>
+<p>Users create and edit tasks using Symfony forms. Each task is an instance of the
+following <code translate="no" class="notranslate">Task</code> class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Entity/Task.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Task</span>
+</span>{
+    <span class="hljs-keyword">protected</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>;
+    <span class="hljs-keyword">protected</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dueDate</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getTask</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>task;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setTask</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>task = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDueDate</span><span class="hljs-params">()</span>: ?\<span class="hljs-title">DateTime</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>dueDate;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setDueDate</span><span class="hljs-params">(?\DateTime <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dueDate</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>dueDate = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dueDate</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This class is a &quot;plain-old-PHP-object&quot; because, so far, it has nothing to do
+with Symfony or any other library. It's a normal PHP object that directly solves
+a problem inside <em>your</em> application (i.e. the need to represent a task in your
+application). But you can also edit <a href="doctrine.html" class="reference internal">Doctrine entities</a> in the
+same way.</p>
+<span id="form-types"></span>
+<div class="section">
+<h3 id="form-types">
+    Form Types
+    <a class="headerlink" href="#form-types" title="Permalink to this headline">¶</a>
+</h3>
+<p>Before creating your first Symfony form, it's important to understand the
+concept of &quot;form type&quot;. In other projects, it's common to differentiate between
+&quot;forms&quot; and &quot;form fields&quot;. In Symfony, all of them are &quot;form types&quot;:</p>
+<ul>
+    <li>a single <code translate="no" class="notranslate">&lt;input type=&quot;text&quot;&gt;</code> form field is a &quot;form type&quot; (e.g. <code translate="no" class="notranslate">TextType</code>);</li>
+<li>a group of several HTML fields used to input a postal address is a &quot;form type&quot;
+(e.g. <code translate="no" class="notranslate">PostalAddressType</code>);</li>
+<li>an entire <code translate="no" class="notranslate">&lt;form&gt;</code> with multiple fields to edit a user profile is a
+&quot;form type&quot; (e.g. <code translate="no" class="notranslate">UserProfileType</code>).</li>
+</ul>
+<p>This may be confusing at first, but it will feel natural to you soon enough.
+Besides, it simplifies code and makes &quot;composing&quot; and &quot;embedding&quot; form fields
+much easier to implement.</p>
+<p>There are tens of <a href="reference/forms/types.html" class="reference internal">form types provided by Symfony</a>
+and you can also <a href="form/create_custom_field_type.html" class="reference internal">create your own form types</a>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="building-forms">
+    Building Forms
+    <a class="headerlink" href="#building-forms" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony provides a &quot;form builder&quot; object which allows you to describe the form
+fields using a fluent interface. Later, this builder creates the actual form
+object used to render and process contents.</p>
+<span id="creating-forms-in-controllers"></span>
+<div class="section">
+<h3 id="creating-forms-in-controllers">
+    Creating Forms in Controllers
+    <a class="headerlink" href="#creating-forms-in-controllers" title="Permalink to this headline">¶</a>
+</h3>
+<p>If your controller extends from the <a href="controller.html#the-base-controller-class-services" class="reference internal">AbstractController</a>,
+use the <code translate="no" class="notranslate">createFormBuilder()</code> helper:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/TaskController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Task</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">DateType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">SubmitType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">new</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// creates a task object and initializes some data for this example</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span> = <span class="hljs-keyword">new</span> Task();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span><span class="hljs-operator">-&gt;</span>setTask(<span class="hljs-string">'Write a blog post'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span><span class="hljs-operator">-&gt;</span>setDueDate(<span class="hljs-keyword">new</span> \DateTime(<span class="hljs-string">'tomorrow'</span>));
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createFormBuilder(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'task'</span>, TextType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'dueDate'</span>, DateType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'save'</span>, SubmitType<span class="hljs-operator">::</span>class, [<span class="hljs-string">'label'</span> =&gt; <span class="hljs-string">'Create Task'</span>])
+            <span class="hljs-operator">-&gt;</span>getForm();
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If your controller does not extend from <code translate="no" class="notranslate">AbstractController</code>, you'll need to
+<a href="controller.html#controller-accessing-services" class="reference internal">fetch services in your controller</a> and
+use the <code translate="no" class="notranslate">createBuilder()</code> method of the <code translate="no" class="notranslate">form.factory</code> service.</p>
+<p>In this example, you've added two fields to your form - <code translate="no" class="notranslate">task</code> and <code translate="no" class="notranslate">dueDate</code>
+- corresponding to the <code translate="no" class="notranslate">task</code> and <code translate="no" class="notranslate">dueDate</code> properties of the <code translate="no" class="notranslate">Task</code>
+class. You've also assigned each a <a href="forms.html#form-types" class="reference internal">form type</a> (e.g. <code translate="no" class="notranslate">TextType</code>
+and <code translate="no" class="notranslate">DateType</code>), represented by its fully qualified class name. Finally, you
+added a submit button with a custom label for submitting the form to the server.</p>
+<span id="creating-forms-in-classes"></span>
+</div>
+<div class="section">
+<h3 id="creating-form-classes">
+    Creating Form Classes
+    <a class="headerlink" href="#creating-form-classes" title="Permalink to this headline">¶</a>
+</h3>
+<p>Symfony recommends putting as little logic as possible in controllers. That's why
+it's better to move complex forms to dedicated classes instead of defining them
+in controller actions. Besides, forms defined in classes can be reused in
+multiple actions and services.</p>
+<p>Form classes are <a href="forms.html#form-types" class="reference internal">form types</a> that implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormTypeInterface.php" class="reference external" title="Symfony\Component\Form\FormTypeInterface" rel="external noopener noreferrer" target="_blank">FormTypeInterface</a>. However, it's better to
+extend from <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/AbstractType.php" class="reference external" title="Symfony\Component\Form\AbstractType" rel="external noopener noreferrer" target="_blank">AbstractType</a>, which already
+implements the interface and provides some utilities:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/TaskType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">DateType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">SubmitType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormBuilderInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'task'</span>, TextType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'dueDate'</span>, DateType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'save'</span>, SubmitType<span class="hljs-operator">::</span>class)
+        ;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Install the <a href="https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html" class="reference external">MakerBundle</a> in your project to generate form classes using
+the <code translate="no" class="notranslate">make:form</code> and <code translate="no" class="notranslate">make:registration-form</code> commands.</p>
+</div>
+<p>The form class contains all the directions needed to create the task form. In
+controllers extending from the <a href="controller.html#the-base-controller-class-services" class="reference internal">AbstractController</a>,
+use the <code translate="no" class="notranslate">createForm()</code> helper (otherwise, use the <code translate="no" class="notranslate">create()</code> method of the
+<code translate="no" class="notranslate">form.factory</code> service):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/TaskController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TaskType</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">new</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// creates a task object and initializes some data for this example</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span> = <span class="hljs-keyword">new</span> Task();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span><span class="hljs-operator">-&gt;</span>setTask(<span class="hljs-string">'Write a blog post'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span><span class="hljs-operator">-&gt;</span>setDueDate(<span class="hljs-keyword">new</span> \DateTime(<span class="hljs-string">'tomorrow'</span>));
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createForm(TaskType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="form-data-class"></span>
+<p>Every form needs to know the name of the class that holds the underlying data
+(e.g. <code translate="no" class="notranslate">App\Entity\Task</code>). Usually, this is just guessed based off of the
+object passed to the second argument to <code translate="no" class="notranslate">createForm()</code> (i.e. <code translate="no" class="notranslate">$task</code>).
+Later, when you begin <a href="form/embedded.html" class="reference internal">embedding forms</a>, this will no
+longer be sufficient.</p>
+<p>So, while not always necessary, it's generally a good idea to explicitly specify
+the <code translate="no" class="notranslate">data_class</code> option by adding the following to your form type class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/TaskType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Task</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-string">'data_class'</span> =&gt; Task<span class="hljs-operator">::</span>class,
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="rendering-forms"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="rendering-forms">
+    Rendering Forms
+    <a class="headerlink" href="#rendering-forms" title="Permalink to this headline">¶</a>
+</h2>
+<p>Now that the form has been created, the next step is to render it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/TaskController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Task</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TaskType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">new</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span> = <span class="hljs-keyword">new</span> Task();
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createForm(TaskType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'task/new.html.twig'</span>, [
+            <span class="hljs-string">'form'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>,
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Internally, the <code translate="no" class="notranslate">render()</code> method calls <code translate="no" class="notranslate">$form-&gt;createView()</code> to
+transform the form into a <em>form view</em> instance.</p>
+<div class="admonition admonition-deprecated ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>Prior to Symfony 6.2, you had to use <code translate="no" class="notranslate">$this-&gt;render(..., [&#039;form&#039; =&gt; $form-&gt;createView()])</code>
+or the <code translate="no" class="notranslate">renderForm()</code> method to render to form. The <code translate="no" class="notranslate">renderForm()</code>
+method is deprecated in favor of directly passing the <code translate="no" class="notranslate">FormInterface</code>
+instance to <code translate="no" class="notranslate">render()</code>.</p>
+</div>
+<p>Then, use some <a href="form/form_customization.html#reference-form-twig-functions" class="reference internal">form helper functions</a> to
+render the form contents:</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-comment">{# templates/task/new.html.twig #}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ form(form) }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! The <a href="form/form_customization.html#reference-forms-twig-form" class="reference internal">form() function</a> renders all
+fields <em>and</em> the <code translate="no" class="notranslate">&lt;form&gt;</code> start and end tags. By default, the form method is
+<code translate="no" class="notranslate">POST</code> and the target URL is the same that displayed the form, but
+<a href="forms.html#forms-change-action-method" class="reference internal">you can change both</a>.</p>
+<p>Notice how the rendered <code translate="no" class="notranslate">task</code> input field has the value of the <code translate="no" class="notranslate">task</code>
+property from the <code translate="no" class="notranslate">$task</code> object (i.e. &quot;Write a blog post&quot;). This is the first
+job of a form: to take data from an object and translate it into a format that's
+suitable for being rendered in an HTML form.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The form system is smart enough to access the value of the protected
+<code translate="no" class="notranslate">task</code> property via the <code translate="no" class="notranslate">getTask()</code> and <code translate="no" class="notranslate">setTask()</code> methods on the
+<code translate="no" class="notranslate">Task</code> class. Unless a property is public, it <em>must</em> have a &quot;getter&quot; and
+&quot;setter&quot; method so that Symfony can get and put data onto the property. For
+a boolean property, you can use an &quot;isser&quot; or &quot;hasser&quot; method (e.g.
+<code translate="no" class="notranslate">isPublished()</code> or <code translate="no" class="notranslate">hasReminder()</code>) instead of a getter (e.g.
+<code translate="no" class="notranslate">getPublished()</code> or <code translate="no" class="notranslate">getReminder()</code>).</p>
+</div>
+<p>As short as this rendering is, it's not very flexible. Usually, you'll need more
+control about how the entire form or some of its fields look. For example, thanks
+to the <a href="form/bootstrap5.html" class="reference internal">Bootstrap 5 integration with Symfony forms</a> you
+can set this option to generate forms compatible with the Bootstrap 5 CSS framework:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-afbbc45136a11993dd18bc5e70cacefb24af9817" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-88f97e3ddf6f9d2fefdc9a3e6e36820e1984ba74" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-64188244641ca222d05e4087d4bad44dd1741bbc" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-afbbc45136a11993dd18bc5e70cacefb24af9817" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/twig.yaml</span>
+<span class="hljs-attr">twig:</span>
+    <span class="hljs-attr">form_themes:</span> <span class="hljs-string">['bootstrap_5_layout.html.twig']</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-88f97e3ddf6f9d2fefdc9a3e6e36820e1984ba74" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/twig.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:twig</span>=<span class="hljs-string">"http://symfony.com/schema/dic/twig"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/twig
+        https://symfony.com/schema/dic/twig/twig-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">twig:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">twig:form-theme</span>&gt;</span>bootstrap_5_layout.html.twig<span class="hljs-tag">&lt;/<span class="hljs-name">twig:form-theme</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">twig:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-64188244641ca222d05e4087d4bad44dd1741bbc" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/twig.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">TwigConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(TwigConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span><span class="hljs-operator">-&gt;</span>formThemes([<span class="hljs-string">'bootstrap_5_layout.html.twig'</span>]);
+
+    <span class="hljs-comment">// ...</span>
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>The <a href="form/form_themes.html#symfony-builtin-forms" class="reference internal">built-in Symfony form themes</a> include
+Bootstrap 3, 4 and 5, Foundation 5 and 6, as well as Tailwind 2. You can also
+<a href="form/form_themes.html#create-your-own-form-theme" class="reference internal">create your own Symfony form theme</a>.</p>
+<p>In addition to form themes, Symfony allows you to
+<a href="form/form_customization.html" class="reference internal">customize the way fields are rendered</a> with
+multiple functions to render each field part separately (widgets, labels,
+errors, help messages, etc.)</p>
+<span id="processing-forms"></span>
+</div>
+<div class="section">
+<h2 id="processing-forms">
+    Processing Forms
+    <a class="headerlink" href="#processing-forms" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="best_practices.html#best-practice-handle-form" class="reference internal">recommended way of processing forms</a> is to
+use a single action for both rendering the form and handling the form submit.
+You can use separate actions, but using one action simplifies everything while
+keeping the code concise and maintainable.</p>
+<p>Processing a form means to translate user-submitted data back to the properties
+of an object. To make this happen, the submitted data from the user must be
+written into the form object:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/TaskController.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">new</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// just set up a fresh $task object (remove the example data)</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span> = <span class="hljs-keyword">new</span> Task();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createForm(TaskType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>handleRequest(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isSubmitted() &amp;&amp; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isValid()) {
+            <span class="hljs-comment">// $form-&gt;getData() holds the submitted values</span>
+            <span class="hljs-comment">// but, the original `$task` variable has also been updated</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>getData();
+
+            <span class="hljs-comment">// ... perform some action, such as saving the task to the database</span>
+
+            <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>redirectToRoute(<span class="hljs-string">'task_success'</span>);
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'task/new.html.twig'</span>, [
+            <span class="hljs-string">'form'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>,
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This controller follows a common pattern for handling forms and has three
+possible paths:</p>
+<ol class="arabic">
+    <li>When initially loading the page in a browser, the form hasn't been submitted
+yet and <code translate="no" class="notranslate">$form-&gt;isSubmitted()</code> returns <code translate="no" class="notranslate">false</code>. So, the form is created
+and rendered;</li>
+<li><p>When the user submits the form, <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormInterface.php#method_handleRequest" class="reference external" title="Symfony\Component\Form\FormInterface::handleRequest()" rel="external noopener noreferrer" target="_blank">handleRequest()</a>
+recognizes this and immediately writes the submitted data back into the
+<code translate="no" class="notranslate">task</code> and <code translate="no" class="notranslate">dueDate</code> properties of the <code translate="no" class="notranslate">$task</code> object. Then this object
+is validated (validation is explained in the next section). If it is invalid,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormInterface.php#method_isValid" class="reference external" title="Symfony\Component\Form\FormInterface::isValid()" rel="external noopener noreferrer" target="_blank">isValid()</a> returns
+<code translate="no" class="notranslate">false</code> and the form is rendered again, but now with validation errors.</p>
+<p>By passing <code translate="no" class="notranslate">$form</code> to the <code translate="no" class="notranslate">render()</code> method (instead of
+<code translate="no" class="notranslate">$form-&gt;createView()</code>), the response code is automatically set to
+<a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-422-unprocessable-content" class="reference external" rel="external noopener noreferrer" target="_blank">HTTP 422 Unprocessable Content</a>. This ensures compatibility with tools
+relying on the HTTP specification, like <a href="https://ux.symfony.com/turbo" class="reference external">Symfony UX Turbo</a>;</p></li>
+<li>When the user submits the form with valid data, the submitted data is again
+written into the form, but this time <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormInterface.php#method_isValid" class="reference external" title="Symfony\Component\Form\FormInterface::isValid()" rel="external noopener noreferrer" target="_blank">isValid()</a>
+returns <code translate="no" class="notranslate">true</code>. Now you have the opportunity to perform some actions using
+the <code translate="no" class="notranslate">$task</code> object (e.g. persisting it to the database) before redirecting
+the user to some other page (e.g. a &quot;thank you&quot; or &quot;success&quot; page);</li>
+</ol>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Redirecting a user after a successful form submission is a best practice
+that prevents the user from being able to hit the &quot;Refresh&quot; button of
+their browser and re-post the data.</p>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>If you need more control over exactly when your form is submitted or which
+data is passed to it, you can
+<a href="form/direct_submit.html" class="reference internal">use the submit() method to handle form submissions</a>.</p>
+</div>
+<span id="validating-forms"></span>
+</div>
+<div class="section">
+<h2 id="validating-forms">
+    Validating Forms
+    <a class="headerlink" href="#validating-forms" title="Permalink to this headline">¶</a>
+</h2>
+<p>In the previous section, you learned how a form can be submitted with valid
+or invalid data. In Symfony, the question isn't whether the &quot;form&quot; is valid, but
+whether or not the underlying object (<code translate="no" class="notranslate">$task</code> in this example) is valid after
+the form has applied the submitted data to it. Calling <code translate="no" class="notranslate">$form-&gt;isValid()</code> is a
+shortcut that asks the <code translate="no" class="notranslate">$task</code> object whether or not it has valid data.</p>
+<p>Before using validation, add support for it in your application:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/validator</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Validation is done by adding a set of rules, called (validation) constraints,
+to a class. You can add them either to the entity class or to the form class.</p>
+<p>To see the first approach - adding constraints to the entity - in action,
+add the validation constraints, so that the <code translate="no" class="notranslate">task</code> field cannot be empty,
+and the <code translate="no" class="notranslate">dueDate</code> field cannot be empty, and must be a valid <code translate="no" class="notranslate">DateTime</code>
+object.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-4">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-8666970c7ab2b15fd4e0f595b89c574213767057" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-aa5cb783b268d49ac23c800ff4300040dc712652" aria-selected="false"
+                 tabindex="-1">
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-38dae19798f48c2381d7d92abd660153b631aebf" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-1402f3602cffb36fbf149d903b35bb7613403050" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-8666970c7ab2b15fd4e0f595b89c574213767057" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Entity/Task.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Task</span>
+</span>{
+    <span class="hljs-comment">#[Assert\NotBlank]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>;
+
+    <span class="hljs-comment">#[Assert\NotBlank]</span>
+    <span class="hljs-comment">#[Assert\Type(\DateTime::class)]</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dueDate</span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-aa5cb783b268d49ac23c800ff4300040dc712652" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="display: none">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/validator/validation.yaml</span>
+<span class="hljs-string">App\Entity\Task:</span>
+    <span class="hljs-attr">properties:</span>
+        <span class="hljs-attr">task:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-attr">NotBlank:</span> <span class="hljs-string">~</span>
+        <span class="hljs-attr">dueDate:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-attr">NotBlank:</span> <span class="hljs-string">~</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-attr">Type:</span> <span class="hljs-string">\DateTime</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-38dae19798f48c2381d7d92abd660153b631aebf" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/validator/validation.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">constraint-mapping</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/constraint-mapping"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/constraint-mapping
+        https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">class</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"App\Entity\Task"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"task"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">constraint</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"NotBlank"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"dueDate"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">constraint</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"NotBlank"</span>/&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">constraint</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Type"</span>&gt;</span>\DateTime<span class="hljs-tag">&lt;/<span class="hljs-name">constraint</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">class</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">constraint-mapping</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-1402f3602cffb36fbf149d903b35bb7613403050" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Entity/Task.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span>\<span class="hljs-title">NotBlank</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span>\<span class="hljs-title">Type</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Mapping</span>\<span class="hljs-title">ClassMetadata</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Task</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadValidatorMetadata</span><span class="hljs-params">(ClassMetadata <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addPropertyConstraint(<span class="hljs-string">'task'</span>, <span class="hljs-keyword">new</span> NotBlank());
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addPropertyConstraint(<span class="hljs-string">'dueDate'</span>, <span class="hljs-keyword">new</span> NotBlank());
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addPropertyConstraint(
+            <span class="hljs-string">'dueDate'</span>,
+            <span class="hljs-keyword">new</span> Type(\DateTime<span class="hljs-operator">::</span>class)
+        );
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>That's it! If you re-submit the form with invalid data, you'll see the
+corresponding errors printed out with the form.</p>
+<p>To see the second approach - adding constraints to the form - and to
+learn more about the validation constraints, please refer to the
+<a href="validation.html" class="reference internal">Symfony validation documentation</a>.</p>
+</div>
+<div class="section">
+<h2 id="other-common-form-features">
+    Other Common Form Features
+    <a class="headerlink" href="#other-common-form-features" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="passing-options-to-forms">
+    Passing Options to Forms
+    <a class="headerlink" href="#passing-options-to-forms" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you <a href="forms.html#creating-forms-in-classes" class="reference internal">create forms in classes</a>, when building
+the form in the controller you can pass custom options to it as the third optional
+argument of <code translate="no" class="notranslate">createForm()</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/TaskController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TaskType</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">new</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span> = <span class="hljs-keyword">new</span> Task();
+        <span class="hljs-comment">// use some PHP logic to decide if this form field is required or not</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dueDateIsRequired</span> = ...;
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createForm(TaskType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>, [
+            <span class="hljs-string">'require_due_date'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dueDateIsRequired</span>,
+        ]);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you try to use the form now, you'll see an error message: <em>The option
+&quot;require_due_date&quot; does not exist.</em> That's because forms must declare all the
+options they accept using the <code translate="no" class="notranslate">configureOptions()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/TaskType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-comment">// ...,</span>
+            <span class="hljs-string">'require_due_date'</span> =&gt; <span class="hljs-keyword">false</span>,
+        ]);
+
+        <span class="hljs-comment">// you can also define the allowed types, allowed values and</span>
+        <span class="hljs-comment">// any other feature supported by the OptionsResolver component</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setAllowedTypes(<span class="hljs-string">'require_due_date'</span>, <span class="hljs-string">'bool'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now you can use this new form option inside the <code translate="no" class="notranslate">buildForm()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/TaskType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">DateType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormBuilderInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-comment">// ...</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'dueDate'</span>, DateType<span class="hljs-operator">::</span>class, [
+                <span class="hljs-string">'required'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>[<span class="hljs-string">'require_due_date'</span>],
+            ])
+        ;
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="form-type-options">
+    Form Type Options
+    <a class="headerlink" href="#form-type-options" title="Permalink to this headline">¶</a>
+</h3>
+<p>Each <a href="forms.html#form-types" class="reference internal">form type</a> has a number of options to configure it, as
+explained in the <a href="reference/forms/types.html" class="reference internal">Symfony form types reference</a>.
+Two commonly used options are <code translate="no" class="notranslate">required</code> and <code translate="no" class="notranslate">label</code>.</p>
+<div class="section">
+<h4 id="the-required-option">
+    The <code translate="no" class="notranslate">required</code> Option
+    <a class="headerlink" href="#the-required-option" title="Permalink to this headline">¶</a>
+</h4>
+<p>The most common option is the <code translate="no" class="notranslate">required</code> option, which can be applied to any
+field. By default, this option is set to <code translate="no" class="notranslate">true</code>, meaning that HTML5-ready
+browsers will require you to fill in all fields before submitting the form.</p>
+<p>If you don't want this behavior, either
+<a href="forms.html#forms-html5-validation-disable" class="reference internal">disable client-side validation</a> for the
+entire form or set the <code translate="no" class="notranslate">required</code> option to <code translate="no" class="notranslate">false</code> on one or more fields:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'dueDate'</span>, DateType<span class="hljs-operator">::</span>class, [
+    <span class="hljs-string">'required'</span> =&gt; <span class="hljs-keyword">false</span>,
+])</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">required</code> option does not perform any server-side validation. If a user
+submits a blank value for the field (either with an old browser or a web
+service, for example), it will be accepted as a valid value unless you also use
+Symfony's <code translate="no" class="notranslate">NotBlank</code> or <code translate="no" class="notranslate">NotNull</code> validation constraints.</p>
+</div>
+<div class="section">
+<h4 id="the-label-option">
+    The <code translate="no" class="notranslate">label</code> Option
+    <a class="headerlink" href="#the-label-option" title="Permalink to this headline">¶</a>
+</h4>
+<p>By default, the label of form fields are the <em>humanized</em> version of the
+property name (<code translate="no" class="notranslate">user</code> -&gt; <code translate="no" class="notranslate">User</code>; <code translate="no" class="notranslate">postalAddress</code> -&gt; <code translate="no" class="notranslate">Postal Address</code>).
+Set the <code translate="no" class="notranslate">label</code> option on fields to define their labels explicitly:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'dueDate'</span>, DateType<span class="hljs-operator">::</span>class, [
+    <span class="hljs-comment">// set it to FALSE to not display the label for this field</span>
+    <span class="hljs-string">'label'</span> =&gt; <span class="hljs-string">'To Be Completed Before'</span>,
+])</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>By default, <code translate="no" class="notranslate">&lt;label&gt;</code> tags of required fields are rendered with a
+<code translate="no" class="notranslate">required</code> CSS class, so you can display an asterisk by applying a CSS style:</p>
+<div translate="no" class="highlight-css notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs css"><span class="hljs-selector-tag">label</span><span class="hljs-selector-class">.required</span><span class="hljs-selector-pseudo">:before</span> {
+    <span class="hljs-attribute">content</span>: <span class="hljs-string">"*"</span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<span id="forms-change-action-method"></span>
+</div>
+</div>
+<div class="section">
+<h3 id="changing-the-action-and-http-method">
+    Changing the Action and HTTP Method
+    <a class="headerlink" href="#changing-the-action-and-http-method" title="Permalink to this headline">¶</a>
+</h3>
+<p>By default, a form will be submitted via an HTTP POST request to the same
+URL under which the form was rendered. When building the form in the controller,
+use the <code translate="no" class="notranslate">setAction()</code> and <code translate="no" class="notranslate">setMethod()</code> methods to change this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/TaskController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">DateType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">SubmitType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">new</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createFormBuilder(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>)
+            <span class="hljs-operator">-&gt;</span>setAction(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>generateUrl(<span class="hljs-string">'target_route'</span>))
+            <span class="hljs-operator">-&gt;</span>setMethod(<span class="hljs-string">'GET'</span>)
+            <span class="hljs-comment">// ...</span>
+            <span class="hljs-operator">-&gt;</span>getForm();
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When building the form in a class, pass the action and method as form options:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/TaskController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">TaskType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">new</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createForm(TaskType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>, [
+            <span class="hljs-string">'action'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>generateUrl(<span class="hljs-string">'target_route'</span>),
+            <span class="hljs-string">'method'</span> =&gt; <span class="hljs-string">'GET'</span>,
+        ]);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Finally, you can override the action and method in the template by passing them
+to the <code translate="no" class="notranslate">form()</code> or the <code translate="no" class="notranslate">form_start()</code> helper functions:</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-comment">{# templates/task/new.html.twig #}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ form_start(form, {'action': path('target_route'), 'method': 'GET'}) }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If the form's method is not <code translate="no" class="notranslate">GET</code> or <code translate="no" class="notranslate">POST</code>, but <code translate="no" class="notranslate">PUT</code>, <code translate="no" class="notranslate">PATCH</code> or
+<code translate="no" class="notranslate">DELETE</code>, Symfony will insert a hidden field with the name <code translate="no" class="notranslate">_method</code>
+that stores this method. The form will be submitted in a normal <code translate="no" class="notranslate">POST</code>
+request, but <a href="routing.html" class="reference internal">Symfony's routing</a> is capable of detecting the
+<code translate="no" class="notranslate">_method</code> parameter and will interpret it as a <code translate="no" class="notranslate">PUT</code>, <code translate="no" class="notranslate">PATCH</code> or
+<code translate="no" class="notranslate">DELETE</code> request. The <a href="reference/configuration/framework.html#configuration-framework-http_method_override" class="reference internal">Framework Configuration Reference (FrameworkBundle)</a>
+option must be enabled for this to work.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="changing-the-form-name">
+    Changing the Form Name
+    <a class="headerlink" href="#changing-the-form-name" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you inspect the HTML contents of the rendered form, you'll see that the
+<code translate="no" class="notranslate">&lt;form&gt;</code> name and the field names are generated from the type class name
+(e.g. <code translate="no" class="notranslate">&lt;form name=&quot;task&quot; ...&gt;</code> and <code translate="no" class="notranslate">&lt;select name=&quot;task[dueDate][date][month]&quot; ...&gt;</code>).</p>
+<p>If you want to modify this, use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormFactoryInterface.php#method_createNamed" class="reference external" title="Symfony\Component\Form\FormFactoryInterface::createNamed()" rel="external noopener noreferrer" target="_blank">createNamed()</a>
+method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/TaskController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">TaskType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormFactoryInterface</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">new</span><span class="hljs-params">(FormFactoryInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>formFactory</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span> = ...;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>formFactory</span><span class="hljs-operator">-&gt;</span>createNamed(<span class="hljs-string">'my_name'</span>, TaskType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can even suppress the name completely by setting it to an empty string.</p>
+<span id="forms-html5-validation-disable"></span>
+</div>
+<div class="section">
+<h3 id="client-side-html-validation">
+    Client-Side HTML Validation
+    <a class="headerlink" href="#client-side-html-validation" title="Permalink to this headline">¶</a>
+</h3>
+<p>Thanks to HTML5, many browsers can natively enforce certain validation
+constraints on the client side. The most common validation is activated by
+adding a <code translate="no" class="notranslate">required</code> attribute on fields that are required. For browsers
+that support HTML5, this will result in a native browser message being displayed
+if the user tries to submit the form with that field blank.</p>
+<p>Generated forms take full advantage of this new feature by adding sensible HTML
+attributes that trigger the validation. The client-side validation, however, can
+be disabled by adding the <code translate="no" class="notranslate">novalidate</code> attribute to the <code translate="no" class="notranslate">&lt;form&gt;</code> tag or
+<code translate="no" class="notranslate">formnovalidate</code> to the submit tag. This is especially useful when you want to
+test your server-side validation constraints, but are being prevented by your
+browser from, for example, submitting blank fields.</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-comment">{# templates/task/new.html.twig #}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}</span><span class="xml">) }}
+    </span><span class="hljs-template-variable">{{ form_widget(form) }}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ form_end(form) }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="form-type-guessing"></span>
+</div>
+<div class="section">
+<h3 id="form-type-guessing">
+    Form Type Guessing
+    <a class="headerlink" href="#form-type-guessing" title="Permalink to this headline">¶</a>
+</h3>
+<p>If the object handled by the form includes validation constraints, Symfony can
+introspect that metadata to guess the type of your field.
+In the above example, Symfony can guess from the validation rules that the
+<code translate="no" class="notranslate">task</code> field is a normal <code translate="no" class="notranslate">TextType</code> field and the <code translate="no" class="notranslate">dueDate</code> field is a
+<code translate="no" class="notranslate">DateType</code> field.</p>
+<p>To enable Symfony's &quot;guessing mechanism&quot;, omit the second argument to the <code translate="no" class="notranslate">add()</code> method, or
+pass <code translate="no" class="notranslate">null</code> to it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/TaskType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">DateType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">SubmitType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormBuilderInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-comment">// if you don't define field options, you can omit the second argument</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'task'</span>)
+            <span class="hljs-comment">// if you define field options, pass NULL as second argument</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'dueDate'</span>, <span class="hljs-keyword">null</span>, [<span class="hljs-string">'required'</span> =&gt; <span class="hljs-keyword">false</span>])
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'save'</span>, SubmitType<span class="hljs-operator">::</span>class)
+        ;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When using a specific <a href="form/validation_groups.html" class="reference internal">form validation group</a>,
+the field type guesser will still consider <em>all</em> validation constraints when
+guessing your field types (including constraints that are not part of the
+validation group(s) being used).</p>
+</div>
+<div class="section">
+<h4 id="form-type-options-guessing">
+    Form Type Options Guessing
+    <a class="headerlink" href="#form-type-options-guessing" title="Permalink to this headline">¶</a>
+</h4>
+<p>When the guessing mechanism is enabled for some field, in addition to its form type,
+the following options will be guessed too:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">required</code></dt>
+        
+        <dd>
+                            The <code translate="no" class="notranslate">required</code> option is guessed based on the validation rules (i.e. is
+the field <code translate="no" class="notranslate">NotBlank</code> or <code translate="no" class="notranslate">NotNull</code>) or the Doctrine metadata (i.e. is the
+field <code translate="no" class="notranslate">nullable</code>). This is very useful, as your client-side validation will
+automatically match your validation rules.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">maxlength</code></dt>
+        
+        <dd>
+                            If the field is some sort of text field, then the <code translate="no" class="notranslate">maxlength</code> option attribute
+is guessed from the validation constraints (if <code translate="no" class="notranslate">Length</code> or <code translate="no" class="notranslate">Range</code> is used)
+or from the <a href="doctrine.html" class="reference internal">Doctrine</a> metadata (via the field's length).
+                    </dd>
+    </dl>
+<p>If you'd like to change one of the guessed values, override it in the options field array:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'task'</span>, <span class="hljs-keyword">null</span>, [<span class="hljs-string">'attr'</span> =&gt; [<span class="hljs-string">'maxlength'</span> =&gt; <span class="hljs-number">4</span>]])</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Besides guessing the form type, Symfony also guesses <a href="forms.html#validating-forms" class="reference internal">validation constraints</a>
+if you're using a Doctrine entity. Read <a href="doctrine.html#automatic_object_validation" class="reference internal">Databases and the Doctrine ORM</a>
+guide for more information.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h3 id="unmapped-fields">
+    Unmapped Fields
+    <a class="headerlink" href="#unmapped-fields" title="Permalink to this headline">¶</a>
+</h3>
+<p>When editing an object via a form, all form fields are considered properties of
+the object. Any fields on the form that do not exist on the object will cause an
+exception to be thrown.</p>
+<p>If you need extra fields in the form that won't be stored in the object (for
+example to add an <em>&quot;I agree with these terms&quot;</em> checkbox), set the <code translate="no" class="notranslate">mapped</code>
+option to <code translate="no" class="notranslate">false</code> in those fields:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">CheckboxType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">SubmitType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormBuilderInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'task'</span>)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'dueDate'</span>)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'agreeTerms'</span>, CheckboxType<span class="hljs-operator">::</span>class, [<span class="hljs-string">'mapped'</span> =&gt; <span class="hljs-keyword">false</span>])
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'save'</span>, SubmitType<span class="hljs-operator">::</span>class)
+        ;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>These &quot;unmapped fields&quot; can be set and accessed in a controller with:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'agreeTerms'</span>)<span class="hljs-operator">-&gt;</span>getData();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'agreeTerms'</span>)<span class="hljs-operator">-&gt;</span>setData(<span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Additionally, if there are any fields on the form that aren't included in
+the submitted data, those fields will be explicitly set to <code translate="no" class="notranslate">null</code>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="learn-more">
+    Learn more
+    <a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a>
+</h2>
+<p>When building forms, keep in mind that the first goal of a form is to translate
+data from an object (<code translate="no" class="notranslate">Task</code>) to an HTML form so that the user can modify that
+data. The second goal of a form is to take the data submitted by the user and to
+re-apply it to the object.</p>
+<p>There's a lot more to learn and a lot of <em>powerful</em> tricks in the Symfony forms:</p>
+<p>Reference:</p>
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-1"><li><a href="reference/forms/types.html">Form Types Reference</a></li></ul></div>
+<p>Advanced Features:</p>
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-8"><li><a href="controller/upload_file.html">How to Upload Files</a></li><li><a href="security/csrf.html">How to Implement CSRF Protection</a></li><li><a href="form/form_dependencies.html">How to Access Services or Config from Inside a Form</a></li><li><a href="form/create_custom_field_type.html">How to Create a Custom Form Field Type</a></li><li><a href="form/data_transformers.html">How to Use Data Transformers</a></li><li><a href="form/data_mappers.html">When and How to Use Data Mappers</a></li><li><a href="form/create_form_type_extension.html">How to Create a Form Type Extension</a></li><li><a href="form/type_guesser.html">Creating a custom Type Guesser</a></li></ul></div>
+<p>Form Themes and Customization:</p>
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-4"><li><a href="form/bootstrap4.html">Bootstrap 4 Form Theme</a></li><li><a href="form/bootstrap5.html">Bootstrap 5 Form Theme</a></li><li><a href="form/form_customization.html">How to Customize Form Rendering</a></li><li><a href="form/form_themes.html">How to Work with Form Themes</a></li></ul></div>
+<p>Events:</p>
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-2"><li><a href="form/events.html">Form Events</a></li><li><a href="form/dynamic_form_modification.html">How to Dynamically Modify Forms Using Form Events</a></li></ul></div>
+<p>Validation:</p>
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-4"><li><a href="form/validation_groups.html">How to Define the Validation Groups to Use</a></li><li><a href="form/validation_group_service_resolver.html">How to Dynamically Configure Form Validation Groups</a></li><li><a href="form/button_based_validation.html">How to Choose Validation Groups Based on the Clicked Button</a></li><li><a href="form/disabling_validation.html">How to Disable the Validation of Submitted Data</a></li></ul></div>
+<p>Misc.:</p>
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-8"><li><a href="form/direct_submit.html">How to Use the submit() Function to Handle Form Submissions</a></li><li><a href="form/embedded.html">How to Embed Forms</a></li><li><a href="form/form_collections.html">How to Embed a Collection of Forms</a></li><li><a href="form/inherit_data_option.html">How to Reduce Code Duplication with "inherit_data"</a></li><li><a href="form/multiple_buttons.html">How to Submit a Form with Multiple Buttons</a></li><li><a href="form/unit_testing.html">How to Unit Test your Forms</a></li><li><a href="form/use_empty_data.html">How to Configure empty Data for a Form Class</a></li><li><a href="form/without_class.html">How to Use a Form without a Data Class</a></li></ul></div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

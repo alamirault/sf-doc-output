@@ -1,0 +1,793 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="form-events">
+    Form Events
+    <a class="headerlink" href="#form-events" title="Permalink to this headline">¶</a>
+</h1>
+<p>The Form component provides a structured process to let you customize your
+forms, by making use of the
+<a href="../components/event_dispatcher.html" class="reference internal">EventDispatcher component</a>.
+Using form events, you may modify information or fields at different steps
+of the workflow: from the population of the form to the submission of the
+data from the request.</p>
+<p>For example, if you need to add a field depending on request values, you can
+register an event listener to the <code translate="no" class="notranslate">FormEvents::PRE_SUBMIT</code> event as follows:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormEvent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormEvents</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>listener</span> = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FormEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+};
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>formFactory</span><span class="hljs-operator">-&gt;</span>createBuilder()
+    <span class="hljs-comment">// ... add form fields</span>
+    <span class="hljs-operator">-&gt;</span>addEventListener(FormEvents<span class="hljs-operator">::</span>PRE_SUBMIT, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>listener</span>);
+
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h2 id="the-form-workflow">
+    The Form Workflow
+    <a class="headerlink" href="#the-form-workflow" title="Permalink to this headline">¶</a>
+</h2>
+<object data="../_images/form/form_workflow.svg" type="image/svg+xml"></object>
+<div class="section">
+<h3 id="1-pre-populating-the-form-formevents-pre-set-data-and-formevents-post-set-data">
+    1) Pre-populating the Form (<code translate="no" class="notranslate">FormEvents::PRE_SET_DATA</code> and <code translate="no" class="notranslate">FormEvents::POST_SET_DATA</code>)
+    <a class="headerlink" href="#1-pre-populating-the-form-formevents-pre-set-data-and-formevents-post-set-data" title="Permalink to this headline">¶</a>
+</h3>
+<object data="../_images/form/form_prepopulation_workflow.svg" type="image/svg+xml"></object>
+<p>Two events are dispatched during pre-population of a form, when
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Form.php#method_setData" class="reference external" title="Symfony\Component\Form\Form::setData()" rel="external noopener noreferrer" target="_blank">Form::setData()</a>
+is called: <code translate="no" class="notranslate">FormEvents::PRE_SET_DATA</code> and <code translate="no" class="notranslate">FormEvents::POST_SET_DATA</code>.</p>
+<div class="section">
+<h4 id="a-the-formevents-pre-set-data-event">
+    A) The <code translate="no" class="notranslate">FormEvents::PRE_SET_DATA</code> Event
+    <a class="headerlink" href="#a-the-formevents-pre-set-data-event" title="Permalink to this headline">¶</a>
+</h4>
+<p>The <code translate="no" class="notranslate">FormEvents::PRE_SET_DATA</code> event is dispatched at the beginning of the
+<code translate="no" class="notranslate">Form::setData()</code> method. It can be used to:</p>
+<ul>
+    <li>Modify the data given during pre-population;</li>
+<li>Modify a form depending on the pre-populated data (adding or removing fields dynamically).</li>
+</ul>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Data Type</th>
+                                            <th>Value</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td>Model data</td>
+                                    <td><code translate="no" class="notranslate">null</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Normalized data</td>
+                                    <td><code translate="no" class="notranslate">null</code></td>
+                            </tr>
+                    <tr>
+                                    <td>View data</td>
+                                    <td><code translate="no" class="notranslate">null</code></td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>See all form events at a glance in the
+<a href="events.html#component-form-event-table" class="reference internal">Form Events Information Table</a>.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>During <code translate="no" class="notranslate">FormEvents::PRE_SET_DATA</code>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Form.php#method_setData" class="reference external" title="Symfony\Component\Form\Form::setData()" rel="external noopener noreferrer" target="_blank">Form::setData()</a>
+is locked and will throw an exception if used. If you wish to modify
+data, you should use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormEvent.php#method_setData" class="reference external" title="Symfony\Component\Form\FormEvent::setData()" rel="external noopener noreferrer" target="_blank">FormEvent::setData()</a>
+instead.</p>
+</div>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span><code translate="no" class="notranslate">FormEvents::PRE_SET_DATA</code> in the Form component</span></p><p>The <code translate="no" class="notranslate">Symfony<wbr>\Component<wbr>\Form<wbr>\Extension<wbr>\Core<wbr>\Type<wbr>\CollectionType</code> form type relies
+on the <code translate="no" class="notranslate">Symfony<wbr>\Component<wbr>\Form<wbr>\Extension<wbr>\Core<wbr>\EventListener<wbr>\ResizeFormListener</code>
+subscriber, listening to the <code translate="no" class="notranslate">FormEvents::PRE_SET_DATA</code> event in order
+to reorder the form's fields depending on the data from the pre-populated
+object, by removing and adding all form rows.</p>
+</div></div>
+</div>
+<div class="section">
+<h4 id="b-the-formevents-post-set-data-event">
+    B) The <code translate="no" class="notranslate">FormEvents::POST_SET_DATA</code> Event
+    <a class="headerlink" href="#b-the-formevents-post-set-data-event" title="Permalink to this headline">¶</a>
+</h4>
+<p>The <code translate="no" class="notranslate">FormEvents::POST_SET_DATA</code> event is dispatched at the end of the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Form.php#method_setData" class="reference external" title="Symfony\Component\Form\Form::setData()" rel="external noopener noreferrer" target="_blank">Form::setData()</a>
+method. This event is mostly here for reading data after having pre-populated
+the form.</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Data Type</th>
+                                            <th>Value</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td>Model data</td>
+                                    <td>Model data injected into <code translate="no" class="notranslate">setData()</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Normalized data</td>
+                                    <td>Model data transformed using a model transformer</td>
+                            </tr>
+                    <tr>
+                                    <td>View data</td>
+                                    <td>Normalized data transformed using a view transformer</td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>See all form events at a glance in the
+<a href="events.html#component-form-event-table" class="reference internal">Form Events Information Table</a>.</p>
+</div>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span><code translate="no" class="notranslate">FormEvents::POST_SET_DATA</code> in the Form component</span></p><p>The <code translate="no" class="notranslate">Symfony<wbr>\Component<wbr>\Form<wbr>\Extension<wbr>\DataCollector<wbr>\EventListener<wbr>\DataCollectorListener</code>
+class is subscribed to listen to the <code translate="no" class="notranslate">FormEvents::POST_SET_DATA</code> event
+in order to collect information about the forms from the denormalized
+model and view data.</p>
+</div></div>
+</div>
+</div>
+<div class="section">
+<h3 id="2-submitting-a-form-formevents-pre-submit-formevents-submit-and-formevents-post-submit">
+    2) Submitting a Form (<code translate="no" class="notranslate">FormEvents::PRE_SUBMIT</code>, <code translate="no" class="notranslate">FormEvents::SUBMIT</code> and <code translate="no" class="notranslate">FormEvents::POST_SUBMIT</code>)
+    <a class="headerlink" href="#2-submitting-a-form-formevents-pre-submit-formevents-submit-and-formevents-post-submit" title="Permalink to this headline">¶</a>
+</h3>
+<object data="../_images/form/form_submission_workflow.svg" type="image/svg+xml"></object>
+<p>Three events are dispatched when
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Form.php#method_handleRequest" class="reference external" title="Symfony\Component\Form\Form::handleRequest()" rel="external noopener noreferrer" target="_blank">Form::handleRequest()</a>
+or <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Form.php#method_submit" class="reference external" title="Symfony\Component\Form\Form::submit()" rel="external noopener noreferrer" target="_blank">Form::submit()</a> are
+called: <code translate="no" class="notranslate">FormEvents::PRE_SUBMIT</code>, <code translate="no" class="notranslate">FormEvents::SUBMIT</code>,
+<code translate="no" class="notranslate">FormEvents::POST_SUBMIT</code>.</p>
+<div class="section">
+<h4 id="a-the-formevents-pre-submit-event">
+    A) The <code translate="no" class="notranslate">FormEvents::PRE_SUBMIT</code> Event
+    <a class="headerlink" href="#a-the-formevents-pre-submit-event" title="Permalink to this headline">¶</a>
+</h4>
+<p>The <code translate="no" class="notranslate">FormEvents::PRE_SUBMIT</code> event is dispatched at the beginning of the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Form.php#method_submit" class="reference external" title="Symfony\Component\Form\Form::submit()" rel="external noopener noreferrer" target="_blank">Form::submit()</a> method.</p>
+<p>It can be used to:</p>
+<ul>
+    <li>Change data from the request, before submitting the data to the form;</li>
+<li>Add or remove form fields, before submitting the data to the form.</li>
+</ul>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Data Type</th>
+                                            <th>Value</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td>Model data</td>
+                                    <td>Same as in <code translate="no" class="notranslate">FormEvents::POST_SET_DATA</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Normalized data</td>
+                                    <td>Same as in <code translate="no" class="notranslate">FormEvents::POST_SET_DATA</code></td>
+                            </tr>
+                    <tr>
+                                    <td>View data</td>
+                                    <td>Same as in <code translate="no" class="notranslate">FormEvents::POST_SET_DATA</code></td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>See all form events at a glance in the
+<a href="events.html#component-form-event-table" class="reference internal">Form Events Information Table</a>.</p>
+</div>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span><code translate="no" class="notranslate">FormEvents::PRE_SUBMIT</code> in the Form component</span></p><p>The <code translate="no" class="notranslate">Symfony<wbr>\Component<wbr>\Form<wbr>\Extension<wbr>\Core<wbr>\EventListener<wbr>\TrimListener</code>
+subscriber subscribes to the <code translate="no" class="notranslate">FormEvents::PRE_SUBMIT</code> event in order to
+trim the request's data (for string values).
+The <code translate="no" class="notranslate">Symfony<wbr>\Component<wbr>\Form<wbr>\Extension<wbr>\Csrf<wbr>\EventListener<wbr>\CsrfValidationListener</code>
+subscriber subscribes to the <code translate="no" class="notranslate">FormEvents::PRE_SUBMIT</code> event in order to
+validate the CSRF token.</p>
+</div></div>
+</div>
+<div class="section">
+<h4 id="b-the-formevents-submit-event">
+    B) The <code translate="no" class="notranslate">FormEvents::SUBMIT</code> Event
+    <a class="headerlink" href="#b-the-formevents-submit-event" title="Permalink to this headline">¶</a>
+</h4>
+<p>The <code translate="no" class="notranslate">FormEvents::SUBMIT</code> event is dispatched right before the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Form.php#method_submit" class="reference external" title="Symfony\Component\Form\Form::submit()" rel="external noopener noreferrer" target="_blank">Form::submit()</a> method
+transforms back the normalized data to the model and view data.</p>
+<p>It can be used to change data from the normalized representation of the data.</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Data Type</th>
+                                            <th>Value</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td>Model data</td>
+                                    <td>Same as in <code translate="no" class="notranslate">FormEvents::POST_SET_DATA</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Normalized data</td>
+                                    <td>Data from the request reverse-transformed from the request using a view transformer</td>
+                            </tr>
+                    <tr>
+                                    <td>View data</td>
+                                    <td>Same as in <code translate="no" class="notranslate">FormEvents::POST_SET_DATA</code></td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>See all form events at a glance in the
+<a href="events.html#component-form-event-table" class="reference internal">Form Events Information Table</a>.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>At this point, you cannot add or remove fields to the form.</p>
+</div>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span><code translate="no" class="notranslate">FormEvents::SUBMIT</code> in the Form component</span></p><p>The <code translate="no" class="notranslate">Symfony<wbr>\Component<wbr>\Form<wbr>\Extension<wbr>\Core<wbr>\EventListener<wbr>\FixUrlProtocolListener</code>
+subscribes to the <code translate="no" class="notranslate">FormEvents::SUBMIT</code> event in order to prepend a default
+protocol to URL fields that were submitted without a protocol.</p>
+</div></div>
+</div>
+<div class="section">
+<h4 id="c-the-formevents-post-submit-event">
+    C) The <code translate="no" class="notranslate">FormEvents::POST_SUBMIT</code> Event
+    <a class="headerlink" href="#c-the-formevents-post-submit-event" title="Permalink to this headline">¶</a>
+</h4>
+<p>The <code translate="no" class="notranslate">FormEvents::POST_SUBMIT</code> event is dispatched after the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Form.php#method_submit" class="reference external" title="Symfony\Component\Form\Form::submit()" rel="external noopener noreferrer" target="_blank">Form::submit()</a> once the
+model and view data have been denormalized.</p>
+<p>It can be used to fetch data after denormalization.</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Data Type</th>
+                                            <th>Value</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td>Model data</td>
+                                    <td>Normalized data reverse-transformed using a model transformer</td>
+                            </tr>
+                    <tr>
+                                    <td>Normalized data</td>
+                                    <td>Same as in <code translate="no" class="notranslate">FormEvents::SUBMIT</code></td>
+                            </tr>
+                    <tr>
+                                    <td>View data</td>
+                                    <td>Normalized data transformed using a view transformer</td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>See all form events at a glance in the
+<a href="events.html#component-form-event-table" class="reference internal">Form Events Information Table</a>.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>At this point, you cannot add or remove fields to the current form and its
+children.</p>
+</div>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span><code translate="no" class="notranslate">FormEvents::POST_SUBMIT</code> in the Form component</span></p><p>The <code translate="no" class="notranslate">Symfony<wbr>\Component<wbr>\Form<wbr>\Extension<wbr>\DataCollector<wbr>\EventListener<wbr>\DataCollectorListener</code>
+subscribes to the <code translate="no" class="notranslate">FormEvents::POST_SUBMIT</code> event in order to collect
+information about the forms.
+The <code translate="no" class="notranslate">Symfony<wbr>\Component<wbr>\Form<wbr>\Extension<wbr>\Validator<wbr>\EventListener<wbr>\ValidationListener</code>
+subscribes to the <code translate="no" class="notranslate">FormEvents::POST_SUBMIT</code> event in order to
+automatically validate the denormalized object.</p>
+</div></div>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="registering-event-listeners-or-event-subscribers">
+    Registering Event Listeners or Event Subscribers
+    <a class="headerlink" href="#registering-event-listeners-or-event-subscribers" title="Permalink to this headline">¶</a>
+</h2>
+<p>In order to be able to use Form events, you need to create an event listener
+or an event subscriber and register it to an event.</p>
+<p>The name of each of the &quot;form&quot; events is defined as a constant on the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormEvents.php" class="reference external" title="Symfony\Component\Form\FormEvents" rel="external noopener noreferrer" target="_blank">FormEvents</a> class.
+Additionally, each event callback (listener or subscriber method) is passed a
+single argument, which is an instance of
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormEvent.php" class="reference external" title="Symfony\Component\Form\FormEvent" rel="external noopener noreferrer" target="_blank">FormEvent</a>. The event object contains a
+reference to the current state of the form and the current data being
+processed.</p>
+<span id="component-form-event-table"></span>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Name</th>
+                                            <th><code translate="no" class="notranslate">FormEvents</code> Constant</th>
+                                            <th>Event's Data</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">form.pre_set_data</code></td>
+                                    <td><code translate="no" class="notranslate">FormEvents::PRE_SET_DATA</code></td>
+                                    <td>Model data</td>
+                            </tr>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">form.post_set_data</code></td>
+                                    <td><code translate="no" class="notranslate">FormEvents::POST_SET_DATA</code></td>
+                                    <td>Model data</td>
+                            </tr>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">form.pre_submit</code></td>
+                                    <td><code translate="no" class="notranslate">FormEvents::PRE_SUBMIT</code></td>
+                                    <td>Request data</td>
+                            </tr>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">form.submit</code></td>
+                                    <td><code translate="no" class="notranslate">FormEvents::SUBMIT</code></td>
+                                    <td>Normalized data</td>
+                            </tr>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">form.post_submit</code></td>
+                                    <td><code translate="no" class="notranslate">FormEvents::POST_SUBMIT</code></td>
+                                    <td>View data</td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<div class="section">
+<h3 id="event-listeners">
+    Event Listeners
+    <a class="headerlink" href="#event-listeners" title="Permalink to this headline">¶</a>
+</h3>
+<p>An event listener may be any type of valid callable. For example, you can
+define an event listener function inline right in the <code translate="no" class="notranslate">addEventListener</code>
+method of the <code translate="no" class="notranslate">FormFactory</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">CheckboxType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">EmailType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormEvent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormEvents</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>formFactory</span><span class="hljs-operator">-&gt;</span>createBuilder()
+    <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'username'</span>, TextType<span class="hljs-operator">::</span>class)
+    <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'showEmail'</span>, CheckboxType<span class="hljs-operator">::</span>class)
+    <span class="hljs-operator">-&gt;</span>addEventListener(FormEvents<span class="hljs-operator">::</span>PRE_SUBMIT, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FormEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>: <span class="hljs-title">void</span> </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getData();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getForm();
+
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>) {
+            <span class="hljs-keyword">return</span>;
+        }
+
+        <span class="hljs-comment">// checks whether the user has chosen to display their email or not.</span>
+        <span class="hljs-comment">// If the data was submitted previously, the additional value that is</span>
+        <span class="hljs-comment">// included in the request variables needs to be removed.</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>[<span class="hljs-string">'showEmail'</span>]) &amp;&amp; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>[<span class="hljs-string">'showEmail'</span>]) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'email'</span>, EmailType<span class="hljs-operator">::</span>class);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">unset</span>(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>[<span class="hljs-string">'email'</span>]);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setData(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>);
+        }
+    })
+    <span class="hljs-operator">-&gt;</span>getForm();
+
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When you have created a form type class, you can use one of its methods as a
+callback for better readability:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/SubscriptionType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">CheckboxType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormEvent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormEvents</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SubscriptionType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'username'</span>, TextType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'showEmail'</span>, CheckboxType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>addEventListener(
+                FormEvents<span class="hljs-operator">::</span>PRE_SET_DATA,
+                [<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>, <span class="hljs-string">'onPreSetData'</span>]
+            )
+        ;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPreSetData</span><span class="hljs-params">(FormEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="event-subscribers">
+    Event Subscribers
+    <a class="headerlink" href="#event-subscribers" title="Permalink to this headline">¶</a>
+</h3>
+<p>Event subscribers have different uses:</p>
+<ul>
+    <li>Improving readability;</li>
+<li>Listening to multiple events;</li>
+<li>Regrouping multiple listeners inside a single class.</li>
+</ul>
+<p>Consider the following example of a form event subscriber:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/EventListener/AddEmailFieldListener.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">EventListener</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventSubscriberInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">EmailType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormEvent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormEvents</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AddEmailFieldListener</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">EventSubscriberInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubscribedEvents</span><span class="hljs-params">()</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            FormEvents<span class="hljs-operator">::</span>PRE_SET_DATA =&gt; <span class="hljs-string">'onPreSetData'</span>,
+            FormEvents<span class="hljs-operator">::</span>PRE_SUBMIT   =&gt; <span class="hljs-string">'onPreSubmit'</span>,
+        ];
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPreSetData</span><span class="hljs-params">(FormEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getData();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getForm();
+
+        <span class="hljs-comment">// checks whether the user from the initial data has chosen to</span>
+        <span class="hljs-comment">// display their email or not.</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">true</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span><span class="hljs-operator">-&gt;</span>isShowEmail()) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'email'</span>, EmailType<span class="hljs-operator">::</span>class);
+        }
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPreSubmit</span><span class="hljs-params">(FormEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getData();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getForm();
+
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>) {
+            <span class="hljs-keyword">return</span>;
+        }
+
+        <span class="hljs-comment">// checks whether the user has chosen to display their email or not.</span>
+        <span class="hljs-comment">// If the data was submitted previously, the additional value that</span>
+        <span class="hljs-comment">// is included in the request variables needs to be removed.</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>[<span class="hljs-string">'showEmail'</span>]) &amp;&amp; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>[<span class="hljs-string">'showEmail'</span>]) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'email'</span>, EmailType<span class="hljs-operator">::</span>class);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">unset</span>(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>[<span class="hljs-string">'email'</span>]);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setData(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>);
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>To register the event subscriber, use the <code translate="no" class="notranslate">addEventSubscriber()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">EventListener</span>\<span class="hljs-title">AddEmailFieldListener</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">CheckboxType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>formFactory</span><span class="hljs-operator">-&gt;</span>createBuilder()
+    <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'username'</span>, TextType<span class="hljs-operator">::</span>class)
+    <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'showEmail'</span>, CheckboxType<span class="hljs-operator">::</span>class)
+    <span class="hljs-operator">-&gt;</span>addEventSubscriber(<span class="hljs-keyword">new</span> AddEmailFieldListener())
+    <span class="hljs-operator">-&gt;</span>getForm();
+
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

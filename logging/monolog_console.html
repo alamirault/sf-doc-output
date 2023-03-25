@@ -1,0 +1,378 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-configure-monolog-to-display-console-messages">
+    How to Configure Monolog to Display Console Messages
+    <a class="headerlink" href="#how-to-configure-monolog-to-display-console-messages" title="Permalink to this headline">¶</a>
+</h1>
+<p>It is possible to use the console to print messages for certain
+<a href="../console/verbosity.html" class="reference internal">verbosity levels</a> using the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Output/OutputInterface.php" class="reference external" title="Symfony\Component\Console\Output\OutputInterface" rel="external noopener noreferrer" target="_blank">OutputInterface</a> instance that
+is passed when a command is run.</p>
+<p>When a lot of logging has to happen, it's cumbersome to print information
+depending on the verbosity settings (<code translate="no" class="notranslate">-v</code>, <code translate="no" class="notranslate">-vv</code>, <code translate="no" class="notranslate">-vvv</code>) because the
+calls need to be wrapped in conditions. For example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+
+<span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>
+</span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>isDebug()) {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-string">'Some info'</span>);
+    }
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>isVerbose()) {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-string">'Some more info'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Instead of using these semantic methods to test for each of the verbosity
+levels, the <a href="https://github.com/symfony/monolog-bridge" class="reference external" rel="external noopener noreferrer" target="_blank">MonologBridge</a> provides a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Monolog/Handler/ConsoleHandler.php" class="reference external" title="Symfony\Bridge\Monolog\Handler\ConsoleHandler" rel="external noopener noreferrer" target="_blank">ConsoleHandler</a> that listens to
+console events and writes log messages to the console output depending on
+the current log level and the console verbosity.</p>
+<p>The example above could then be rewritten as:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Command/YourCommand.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Command</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Log</span>\<span class="hljs-title">LoggerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">YourCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private LoggerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>logger</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>logger<span class="hljs-operator">-&gt;</span>debug(<span class="hljs-string">'Some info'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>logger<span class="hljs-operator">-&gt;</span>notice(<span class="hljs-string">'Some more info'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Depending on the verbosity level that the command is run in and the user's
+configuration (see below), these messages may or may not be displayed to
+the console. If they are displayed, they are time-stamped and colored appropriately.
+Additionally, error logs are written to the error output (<code translate="no" class="notranslate">php://stderr</code>).
+There is no need to conditionally handle the verbosity settings anymore.</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>LoggerInterface</th>
+                                            <th>Verbosity</th>
+                                            <th>Command line</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td>-&gt;error()</td>
+                                    <td>OutputInterface::VERBOSITY_QUIET</td>
+                                    <td>stderr</td>
+                            </tr>
+                    <tr>
+                                    <td>-&gt;warning()</td>
+                                    <td>OutputInterface::VERBOSITY_NORMAL</td>
+                                    <td>stdout</td>
+                            </tr>
+                    <tr>
+                                    <td>-&gt;notice()</td>
+                                    <td>OutputInterface::VERBOSITY_VERBOSE</td>
+                                    <td>-v</td>
+                            </tr>
+                    <tr>
+                                    <td>-&gt;info()</td>
+                                    <td>OutputInterface::VERBOSITY_VERY_VERBOSE</td>
+                                    <td>-vv</td>
+                            </tr>
+                    <tr>
+                                    <td>-&gt;debug()</td>
+                                    <td>OutputInterface::VERBOSITY_DEBUG</td>
+                                    <td>-vvv</td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<p>The Monolog console handler is enabled by default:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-bc22f52b05c6c85ed04d2ec8f33da630c585d66e" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-f4e2e9f336a2b89145a3fdc618ed78725a93e069" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-168cecb4aa9d041a179e8a6c440a986e0556cece" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-bc22f52b05c6c85ed04d2ec8f33da630c585d66e" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/dev/monolog.yaml</span>
+<span class="hljs-attr">monolog:</span>
+    <span class="hljs-attr">handlers:</span>
+        <span class="hljs-comment"># ...</span>
+        <span class="hljs-attr">console:</span>
+            <span class="hljs-attr">type:</span>   <span class="hljs-string">console</span>
+            <span class="hljs-attr">process_psr_3_messages:</span> <span class="hljs-literal">false</span>
+            <span class="hljs-attr">channels:</span> <span class="hljs-string">['!event',</span> <span class="hljs-string">'!doctrine'</span><span class="hljs-string">,</span> <span class="hljs-string">'!console'</span><span class="hljs-string">]</span>
+
+            <span class="hljs-comment"># optionally configure the mapping between verbosity levels and log levels</span>
+            <span class="hljs-comment"># verbosity_levels:</span>
+            <span class="hljs-comment">#     VERBOSITY_NORMAL: NOTICE</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-f4e2e9f336a2b89145a3fdc618ed78725a93e069" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/dev/monolog.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:monolog</span>=<span class="hljs-string">"http://symfony.com/schema/dic/monolog"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">monolog:config</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">monolog:handler</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"console"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"console"</span> <span class="hljs-attr">process-psr-3-messages</span>=<span class="hljs-string">"false"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">monolog:channels</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">monolog:channel</span>&gt;</span>!event<span class="hljs-tag">&lt;/<span class="hljs-name">monolog:channel</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">monolog:channel</span>&gt;</span>!doctrine<span class="hljs-tag">&lt;/<span class="hljs-name">monolog:channel</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">monolog:channel</span>&gt;</span>!console<span class="hljs-tag">&lt;/<span class="hljs-name">monolog:channel</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">monolog:channels</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">monolog:handler</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">monolog:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-168cecb4aa9d041a179e8a6c440a986e0556cece" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/dev/monolog.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">MonologConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(MonologConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monolog</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monolog</span><span class="hljs-operator">-&gt;</span>handler(<span class="hljs-string">'console'</span>)
+        <span class="hljs-operator">-&gt;</span>type(<span class="hljs-string">'console'</span>)
+        <span class="hljs-operator">-&gt;</span>processPsr3Messages(<span class="hljs-keyword">false</span>)
+        <span class="hljs-operator">-&gt;</span>channels()<span class="hljs-operator">-&gt;</span>elements([<span class="hljs-string">'!event'</span>, <span class="hljs-string">'!doctrine'</span>, <span class="hljs-string">'!console'</span>])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Now, log messages will be shown on the console based on the log levels and verbosity.
+By default (normal verbosity level), warnings and higher will be shown. But in
+<a href="../console/verbosity.html" class="reference internal">full verbosity mode</a>, all messages will be shown.</p>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

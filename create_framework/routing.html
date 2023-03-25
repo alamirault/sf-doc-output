@@ -1,0 +1,605 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-routing-component">
+    The Routing Component
+    <a class="headerlink" href="#the-routing-component" title="Permalink to this headline">¶</a>
+</h1>
+<p>Before we start diving into the Routing component, let's refactor our current
+framework just a little to make templates even more readable:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// example.com/web/front.php</span>
+<span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../vendor/autoload.php'</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>map</span> = [
+    <span class="hljs-string">'/hello'</span> =&gt; <span class="hljs-string">'hello'</span>,
+    <span class="hljs-string">'/bye'</span>   =&gt; <span class="hljs-string">'bye'</span>,
+];
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo();
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>map</span>[<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>])) {
+    ob_start();
+    extract(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>query<span class="hljs-operator">-&gt;</span>all(), EXTR_SKIP);
+    <span class="hljs-keyword">include</span> sprintf(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../src/pages/%s.php'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>map</span>[<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>]);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(ob_get_clean());
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Not Found'</span>, <span class="hljs-number">404</span>);
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As we now extract the request query parameters, simplify the <code translate="no" class="notranslate">hello.php</code>
+template as follows:</p>
+<div translate="no" class="highlight-html+php highlight-html notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+php html"><span class="hljs-comment">&lt;!-- example.com/src/pages/hello.php --&gt;</span>
+Hello <span class="php"><span class="hljs-meta">&lt;?</span>= htmlspecialchars(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span> ?? <span class="hljs-string">'World'</span>, ENT_QUOTES, <span class="hljs-string">'UTF-8'</span>) <span class="hljs-meta">?&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, we are in good shape to add new features.</p>
+<p>One very important aspect of any website is the form of its URLs. Thanks to
+the URL map, we have decoupled the URL from the code that generates the
+associated response, but it is not yet flexible enough. For instance, we might
+want to support dynamic paths to allow embedding data directly into the URL
+(e.g. <code translate="no" class="notranslate">/hello/Fabien</code>) instead of relying on a query string (e.g. <code translate="no" class="notranslate">/hello?name=Fabien</code>).</p>
+<p>To support this feature, add the Symfony Routing component as a dependency:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/routing</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Instead of an array for the URL map, the Routing component relies on a
+<code translate="no" class="notranslate">RouteCollection</code> instance:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">RouteCollection</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span> = <span class="hljs-keyword">new</span> RouteCollection();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Let's add a route that describes the <code translate="no" class="notranslate">/hello/SOMETHING</code> URL and add another
+one for the simple <code translate="no" class="notranslate">/bye</code> one:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Route</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'hello'</span>, <span class="hljs-keyword">new</span> Route(<span class="hljs-string">'/hello/{name}'</span>, [<span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'World'</span>]));
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'bye'</span>, <span class="hljs-keyword">new</span> Route(<span class="hljs-string">'/bye'</span>));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Each entry in the collection is defined by a name (<code translate="no" class="notranslate">hello</code>) and a <code translate="no" class="notranslate">Route</code>
+instance, which is defined by a route pattern (<code translate="no" class="notranslate">/hello/{name}</code>) and an array
+of default values for route attributes (<code translate="no" class="notranslate">[&#039;name&#039; =&gt; &#039;World&#039;]</code>).</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Read the <a href="../routing.html" class="reference internal">Routing documentation</a> to learn more about
+its many features like URL generation, attribute requirements, HTTP
+method enforcement, loaders for YAML or XML files, dumpers to PHP or
+Apache rewrite rules for enhanced performance and much more.</p>
+</div>
+<p>Based on the information stored in the <code translate="no" class="notranslate">RouteCollection</code> instance, a
+<code translate="no" class="notranslate">UrlMatcher</code> instance can match URL paths:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Matcher</span>\<span class="hljs-title">UrlMatcher</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">RequestContext</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span> = <span class="hljs-keyword">new</span> RequestContext();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span><span class="hljs-operator">-&gt;</span>fromRequest(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span> = <span class="hljs-keyword">new</span> UrlMatcher(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>attributes</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span><span class="hljs-operator">-&gt;</span>match(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo());</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">match()</code> method takes a request path and returns an array of attributes
+(notice that the matched route is automatically stored under the special
+<code translate="no" class="notranslate">_route</code> attribute):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span><span class="hljs-operator">-&gt;</span>match(<span class="hljs-string">'/bye'</span>);
+<span class="hljs-comment">/* Result:
+[
+    '_route' =&gt; 'bye',
+];
+*/</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span><span class="hljs-operator">-&gt;</span>match(<span class="hljs-string">'/hello/Fabien'</span>);
+<span class="hljs-comment">/* Result:
+[
+    'name' =&gt; 'Fabien',
+    '_route' =&gt; 'hello',
+];
+*/</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span><span class="hljs-operator">-&gt;</span>match(<span class="hljs-string">'/hello'</span>);
+<span class="hljs-comment">/* Result:
+[
+    'name' =&gt; 'World',
+    '_route' =&gt; 'hello',
+];
+*/</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Even if we don't strictly need the request context in our examples, it is
+used in real-world applications to enforce method requirements and more.</p>
+</div>
+<p>The URL matcher throws an exception when none of the routes match:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span><span class="hljs-operator">-&gt;</span>match(<span class="hljs-string">'/not-found'</span>);
+
+<span class="hljs-comment">// throws a Symfony\Component\Routing\Exception\ResourceNotFoundException</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>With this knowledge in mind, let's write the new version of our framework:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// example.com/web/front.php</span>
+<span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../vendor/autoload.php'</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span> = <span class="hljs-keyword">include</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../src/app.php'</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span> = <span class="hljs-keyword">new</span> Routing\RequestContext();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span><span class="hljs-operator">-&gt;</span>fromRequest(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span> = <span class="hljs-keyword">new</span> Routing\Matcher\UrlMatcher(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>);
+
+<span class="hljs-keyword">try</span> {
+    extract(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span><span class="hljs-operator">-&gt;</span>match(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo()), EXTR_SKIP);
+    ob_start();
+    <span class="hljs-keyword">include</span> sprintf(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../src/pages/%s.php'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_route</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(ob_get_clean());
+} <span class="hljs-keyword">catch</span> (Routing\<span class="hljs-keyword">Exception</span>\ResourceNotFoundException <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Not Found'</span>, <span class="hljs-number">404</span>);
+} <span class="hljs-keyword">catch</span> (<span class="hljs-keyword">Exception</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'An error occurred'</span>, <span class="hljs-number">500</span>);
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>There are a few new things in the code:</p>
+<ul>
+    <li>Route names are used for template names;</li>
+<li><code translate="no" class="notranslate">500</code> errors are now managed correctly;</li>
+<li>Request attributes are extracted to keep our templates simple:</li>
+</ul>
+<div translate="no" class="highlight-html+php highlight-html notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+php html">// example.com/src/pages/hello.php
+Hello <span class="php"><span class="hljs-meta">&lt;?</span>= htmlspecialchars(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>, ENT_QUOTES, <span class="hljs-string">'UTF-8'</span>) <span class="hljs-meta">?&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<ul>
+    <li><p>Route configuration has been moved to its own file:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// example.com/src/app.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span> = <span class="hljs-keyword">new</span> Routing\RouteCollection();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'hello'</span>, <span class="hljs-keyword">new</span> Routing\Route(<span class="hljs-string">'/hello/{name}'</span>, [<span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'World'</span>]));
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'bye'</span>, <span class="hljs-keyword">new</span> Routing\Route(<span class="hljs-string">'/bye'</span>));
+
+<span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div></li>
+</ul>
+<p>We now have a clear separation between the configuration (everything
+specific to our application in <code translate="no" class="notranslate">app.php</code>) and the framework (the generic
+code that powers our application in <code translate="no" class="notranslate">front.php</code>).</p>
+<p>With less than 30 lines of code, we have a new framework, more powerful and
+more flexible than the previous one. Enjoy!</p>
+<p>Using the Routing component has one big additional benefit: the ability to
+generate URLs based on Route definitions. When using both URL matching and URL
+generation in your code, changing the URL patterns should have no other
+impact. You can use the generator this way:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>generator</span> = <span class="hljs-keyword">new</span> Routing\Generator\UrlGenerator(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>);
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>generator</span><span class="hljs-operator">-&gt;</span>generate(<span class="hljs-string">'hello'</span>, [<span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Fabien'</span>]);
+<span class="hljs-comment">// outputs /hello/Fabien</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The code should be self-explanatory; and thanks to the context, you can even
+generate absolute URLs:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Generator</span>\<span class="hljs-title">UrlGeneratorInterface</span>;
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>generator</span><span class="hljs-operator">-&gt;</span>generate(
+    <span class="hljs-string">'hello'</span>,
+    [<span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Fabien'</span>],
+    UrlGeneratorInterface<span class="hljs-operator">::</span>ABSOLUTE_URL
+);
+<span class="hljs-comment">// outputs something like http://example.com/somewhere/hello/Fabien</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Concerned about performance? Based on your route definitions, create a
+highly optimized URL matcher class that can replace the default
+<code translate="no" class="notranslate">UrlMatcher</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Matcher</span>\<span class="hljs-title">CompiledUrlMatcher</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Matcher</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">CompiledUrlMatcherDumper</span>;
+
+<span class="hljs-comment">// $compiledRoutes is a plain PHP array that describes all routes in a performant data format</span>
+<span class="hljs-comment">// you can (and should) cache it, typically by exporting it to a PHP file</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>compiledRoutes</span> = (<span class="hljs-keyword">new</span> CompiledUrlMatcherDumper(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>))<span class="hljs-operator">-&gt;</span>getCompiledRoutes();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span> = <span class="hljs-keyword">new</span> CompiledUrlMatcher(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>compiledRoutes</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,1503 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-uid-component">
+    The UID Component
+    <a class="headerlink" href="#the-uid-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The UID component provides utilities to work with <a href="https://en.wikipedia.org/wiki/UID" class="reference external" rel="external noopener noreferrer" target="_blank">unique identifiers</a> (UIDs)
+such as UUIDs and ULIDs.</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/uid</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+<span id="uuid"></span>
+</div>
+<div class="section">
+<h2 id="uuids">
+    UUIDs
+    <a class="headerlink" href="#uuids" title="Permalink to this headline">¶</a>
+</h2>
+<p><a href="https://en.wikipedia.org/wiki/Universally_unique_identifier" class="reference external" rel="external noopener noreferrer" target="_blank">UUIDs</a> (<em>universally unique identifiers</em>) are one of the most popular UIDs in
+the software industry. UUIDs are 128-bit numbers usually represented as five
+groups of hexadecimal characters: <code translate="no" class="notranslate">xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx</code>
+(the <code translate="no" class="notranslate">M</code> digit is the UUID version and the <code translate="no" class="notranslate">N</code> digit is the UUID variant).</p>
+<div class="section">
+<h3 id="generating-uuids">
+    Generating UUIDs
+    <a class="headerlink" href="#generating-uuids" title="Permalink to this headline">¶</a>
+</h3>
+<p>Use the named constructors of the <code translate="no" class="notranslate">Uuid</code> class or any of the specific classes
+to create each type of UUID:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">Uuid</span>;
+
+<span class="hljs-comment">// UUID type 1 generates the UUID using the MAC address of your device and a timestamp.</span>
+<span class="hljs-comment">// Both are obtained automatically, so you don't have to pass any constructor argument.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v1(); <span class="hljs-comment">// $uuid is an instance of Symfony\Component\Uid\UuidV1</span>
+
+<span class="hljs-comment">// UUID type 4 generates a random UUID, so you don't have to pass any constructor argument.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v4(); <span class="hljs-comment">// $uuid is an instance of Symfony\Component\Uid\UuidV4</span>
+
+<span class="hljs-comment">// UUID type 3 and 5 generate a UUID hashing the given namespace and name. Type 3 uses</span>
+<span class="hljs-comment">// MD5 hashes and Type 5 uses SHA-1. The namespace is another UUID (e.g. a Type 4 UUID)</span>
+<span class="hljs-comment">// and the name is an arbitrary string (e.g. a product name; if it's unique).</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>namespace</span> = Uuid<span class="hljs-operator">::</span>v4();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>getUniqueName();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v3(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>namespace</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>); <span class="hljs-comment">// $uuid is an instance of Symfony\Component\Uid\UuidV3</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v5(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>namespace</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>); <span class="hljs-comment">// $uuid is an instance of Symfony\Component\Uid\UuidV5</span>
+
+<span class="hljs-comment">// the namespaces defined by RFC 4122 (see https://tools.ietf.org/html/rfc4122#appendix-C)</span>
+<span class="hljs-comment">// are available as PHP constants and as string values</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v3(Uuid<span class="hljs-operator">::</span>NAMESPACE_DNS, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>);  <span class="hljs-comment">// same as: Uuid::v3('dns', $name);</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v3(Uuid<span class="hljs-operator">::</span>NAMESPACE_URL, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>);  <span class="hljs-comment">// same as: Uuid::v3('url', $name);</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v3(Uuid<span class="hljs-operator">::</span>NAMESPACE_OID, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>);  <span class="hljs-comment">// same as: Uuid::v3('oid', $name);</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v3(Uuid<span class="hljs-operator">::</span>NAMESPACE_X500, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>); <span class="hljs-comment">// same as: Uuid::v3('x500', $name);</span>
+
+<span class="hljs-comment">// UUID type 6 is not part of the UUID standard. It's lexicographically sortable</span>
+<span class="hljs-comment">// (like ULIDs) and contains a 60-bit timestamp and 63 extra unique bits.</span>
+<span class="hljs-comment">// It's defined in http://gh.peabody.io/uuidv6/</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v6(); <span class="hljs-comment">// $uuid is an instance of Symfony\Component\Uid\UuidV6</span>
+
+<span class="hljs-comment">// UUID version 7 features a time-ordered value field derived from the well known</span>
+<span class="hljs-comment">// Unix Epoch timestamp source: the number of seconds since midnight 1 Jan 1970 UTC, leap seconds excluded.</span>
+<span class="hljs-comment">// As well as improved entropy characteristics over versions 1 or 6.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v7();
+
+<span class="hljs-comment">// UUID version 8 provides an RFC-compatible format for experimental or vendor-specific use cases.</span>
+<span class="hljs-comment">// The only requirement is that the variant and version bits MUST be set as defined in Section 4:</span>
+<span class="hljs-comment">// https://www.ietf.org/archive/id/draft-peabody-dispatch-new-uuid-format-04.html#variant_and_version_fields</span>
+<span class="hljs-comment">// UUIDv8 uniqueness will be implementation-specific and SHOULD NOT be assumed.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v8();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>UUID versions 7 and 8 were introduced in Symfony 6.2.</p>
+</div>
+<p>If your UUID value is already generated in another format, use any of the
+following methods to create a <code translate="no" class="notranslate">Uuid</code> object from it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// all the following examples would generate the same Uuid object</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>fromString(<span class="hljs-string">'d9e7a184-5d5b-11ea-a62a-3499710062d0'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>fromBinary(<span class="hljs-string">"\xd9\xe7\xa1\x84\x5d\x5b\x11\xea\xa6\x2a\x34\x99\x71\x00\x62\xd0"</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>fromBase32(<span class="hljs-string">'6SWYGR8QAV27NACAHMK5RG0RPG'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>fromBase58(<span class="hljs-string">'TuetYWNHhmuSQ3xPoVLv9M'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>fromRfc4122(<span class="hljs-string">'d9e7a184-5d5b-11ea-a62a-3499710062d0'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also use the <code translate="no" class="notranslate">UuidFactory</code> to generate UUIDs. First, you may
+configure the behavior of the factory using configuration files:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-4e107c3e859df5772a7e1dd6eb40d51cf565b27f" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-8b5ef45f3e975d6b27448d4208d29fd484e03871" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-46b8525b3b2d98dd66f36b7b3fd740d41ea9c5fd" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-4e107c3e859df5772a7e1dd6eb40d51cf565b27f" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/uid.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">uid:</span>
+        <span class="hljs-attr">default_uuid_version:</span> <span class="hljs-number">6</span>
+        <span class="hljs-attr">name_based_uuid_version:</span> <span class="hljs-number">5</span>
+        <span class="hljs-attr">name_based_uuid_namespace:</span> <span class="hljs-string">6ba7b810-9dad-11d1-80b4-00c04fd430c8</span>
+        <span class="hljs-attr">time_based_uuid_version:</span> <span class="hljs-number">6</span>
+        <span class="hljs-attr">time_based_uuid_node:</span> <span class="hljs-number">121212121212</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-8b5ef45f3e975d6b27448d4208d29fd484e03871" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/uid.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+           <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+           <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+           <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+                https://symfony.com/schema/dic/services/services-1.0.xsd
+                http://symfony.com/schema/dic/symfony https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:uid</span>
+            <span class="hljs-attr">default_uuid_version</span>=<span class="hljs-string">"6"</span>
+            <span class="hljs-attr">name_based_uuid_version</span>=<span class="hljs-string">"5"</span>
+            <span class="hljs-attr">name_based_uuid_namespace</span>=<span class="hljs-string">"6ba7b810-9dad-11d1-80b4-00c04fd430c8"</span>
+            <span class="hljs-attr">time_based_uuid_version</span>=<span class="hljs-string">"6"</span>
+            <span class="hljs-attr">time_based_uuid_node</span>=<span class="hljs-string">"121212121212"</span>
+        /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-46b8525b3b2d98dd66f36b7b3fd740d41ea9c5fd" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/uid.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span>: <span class="hljs-title">void</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services()
+        <span class="hljs-operator">-&gt;</span>defaults()
+        <span class="hljs-operator">-&gt;</span>autowire()
+        <span class="hljs-operator">-&gt;</span>autoconfigure();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>extension(<span class="hljs-string">'framework'</span>, [
+        <span class="hljs-string">'uid'</span> =&gt; [
+            <span class="hljs-string">'default_uuid_version'</span> =&gt; <span class="hljs-number">6</span>,
+            <span class="hljs-string">'name_based_uuid_version'</span> =&gt; <span class="hljs-number">5</span>,
+            <span class="hljs-string">'name_based_uuid_namespace'</span> =&gt; <span class="hljs-string">'6ba7b810-9dad-11d1-80b4-00c04fd430c8'</span>,
+            <span class="hljs-string">'time_based_uuid_version'</span> =&gt; <span class="hljs-number">6</span>,
+            <span class="hljs-string">'time_based_uuid_node'</span> =&gt; <span class="hljs-number">121212121212</span>,
+        ],
+    ]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Then, you can inject the factory in your services and use it to generate UUIDs based
+on the configuration you defined:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Service</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">Factory</span>\<span class="hljs-title">UuidFactory</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FooService</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private UuidFactory <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuidFactory</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">generate</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// This creates a UUID of the version given in the configuration file (v6 by default)</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>uuidFactory<span class="hljs-operator">-&gt;</span>create();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>nameBasedUuid</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>uuidFactory<span class="hljs-operator">-&gt;</span>nameBased(<span class="hljs-comment">/** ... */</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>randomBasedUuid</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>uuidFactory<span class="hljs-operator">-&gt;</span>randomBased();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>timestampBased</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>uuidFactory<span class="hljs-operator">-&gt;</span>timeBased();
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="converting-uuids">
+    Converting UUIDs
+    <a class="headerlink" href="#converting-uuids" title="Permalink to this headline">¶</a>
+</h3>
+<p>Use these methods to transform the UUID object into different bases:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>fromString(<span class="hljs-string">'d9e7a184-5d5b-11ea-a62a-3499710062d0'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span><span class="hljs-operator">-&gt;</span>toBinary();  <span class="hljs-comment">// string(16) "\xd9\xe7\xa1\x84\x5d\x5b\x11\xea\xa6\x2a\x34\x99\x71\x00\x62\xd0"</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span><span class="hljs-operator">-&gt;</span>toBase32();  <span class="hljs-comment">// string(26) "6SWYGR8QAV27NACAHMK5RG0RPG"</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span><span class="hljs-operator">-&gt;</span>toBase58();  <span class="hljs-comment">// string(22) "TuetYWNHhmuSQ3xPoVLv9M"</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span><span class="hljs-operator">-&gt;</span>toRfc4122(); <span class="hljs-comment">// string(36) "d9e7a184-5d5b-11ea-a62a-3499710062d0"</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span><span class="hljs-operator">-&gt;</span>toHex();     <span class="hljs-comment">// string(34) "0xd9e7a1845d5b11eaa62a3499710062d0"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">toHex()</code> method was introduced in Symfony 6.2.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="working-with-uuids">
+    Working with UUIDs
+    <a class="headerlink" href="#working-with-uuids" title="Permalink to this headline">¶</a>
+</h3>
+<p>UUID objects created with the <code translate="no" class="notranslate">Uuid</code> class can use the following methods
+(which are equivalent to the <code translate="no" class="notranslate">uuid_*()</code> method of the PHP extension):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">NilUuid</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">Uuid</span>;
+
+<span class="hljs-comment">// checking if the UUID is null (note that the class is called</span>
+<span class="hljs-comment">// NilUuid instead of NullUuid to follow the UUID standard notation)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v4();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> <span class="hljs-keyword">instanceof</span> NilUuid; <span class="hljs-comment">// false</span>
+
+<span class="hljs-comment">// checking the type of UUID</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">UuidV4</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v4();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> <span class="hljs-keyword">instanceof</span> UuidV4; <span class="hljs-comment">// true</span>
+
+<span class="hljs-comment">// getting the UUID datetime (it's only available in certain UUID types)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span> = Uuid<span class="hljs-operator">::</span>v1();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span><span class="hljs-operator">-&gt;</span>getDateTime(); <span class="hljs-comment">// returns a \DateTimeImmutable instance</span>
+
+<span class="hljs-comment">// checking if a given value is valid as UUID</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isValid</span> = Uuid<span class="hljs-operator">::</span>isValid(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid</span>); <span class="hljs-comment">// true or false</span>
+
+<span class="hljs-comment">// comparing UUIDs and checking for equality</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid1</span> = Uuid<span class="hljs-operator">::</span>v1();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid4</span> = Uuid<span class="hljs-operator">::</span>v4();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid1</span><span class="hljs-operator">-&gt;</span>equals(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid4</span>); <span class="hljs-comment">// false</span>
+
+<span class="hljs-comment">// this method returns:</span>
+<span class="hljs-comment">//   * int(0) if $uuid1 and $uuid4 are equal</span>
+<span class="hljs-comment">//   * int &gt; 0 if $uuid1 is greater than $uuid4</span>
+<span class="hljs-comment">//   * int &lt; 0 if $uuid1 is less than $uuid4</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid1</span><span class="hljs-operator">-&gt;</span>compare(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uuid4</span>); <span class="hljs-comment">// e.g. int(4)</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="storing-uuids-in-databases">
+    Storing UUIDs in Databases
+    <a class="headerlink" href="#storing-uuids-in-databases" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you <a href="../doctrine.html" class="reference internal">use Doctrine</a>, consider using the <code translate="no" class="notranslate">uuid</code> Doctrine
+type, which converts to/from UUID objects automatically:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Entity/Product.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Mapping</span> <span class="hljs-title">as</span> <span class="hljs-title">ORM</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Doctrine</span>\<span class="hljs-title">Types</span>\<span class="hljs-title">UuidType</span>;
+
+<span class="hljs-comment">#[ORM\Entity(repositoryClass: ProductRepository::class)]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Product</span>
+</span>{
+    <span class="hljs-comment">#[ORM\Column(type: UuidType::NAME)]</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>someProperty</span>;
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">UuidType::NAME</code> constant was introduced in Symfony 6.2.</p>
+</div>
+<p>There's also a Doctrine generator to help auto-generate UUID values for the
+entity primary keys:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Mapping</span> <span class="hljs-title">as</span> <span class="hljs-title">ORM</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Doctrine</span>\<span class="hljs-title">Types</span>\<span class="hljs-title">UuidType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">Uuid</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserInterface</span>
+</span>{
+    <span class="hljs-comment">#[ORM\Id]</span>
+    <span class="hljs-comment">#[ORM\Column(type: UuidType::NAME, unique: true)]</span>
+    <span class="hljs-comment">#[ORM\GeneratedValue(strategy: 'CUSTOM')]</span>
+    <span class="hljs-comment">#[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getId</span><span class="hljs-params">()</span>: ?<span class="hljs-title">Uuid</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>id;
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When using built-in Doctrine repository methods (e.g. <code translate="no" class="notranslate">findOneBy()</code>), Doctrine
+knows how to convert these UUID types to build the SQL query
+(e.g. <code translate="no" class="notranslate">-&gt;findOneBy([&#039;user&#039; =&gt; $user-&gt;getUuid()])</code>). However, when using DQL
+queries or building the query yourself, you'll need to set <code translate="no" class="notranslate">uuid</code> as the type
+of the UUID parameters:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Repository/ProductRepository.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Doctrine</span>\<span class="hljs-title">Types</span>\<span class="hljs-title">UuidType</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductRepository</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceEntityRepository</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">findUserProducts</span><span class="hljs-params">(User <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>)</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>qb</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createQueryBuilder(<span class="hljs-string">'p'</span>)
+            <span class="hljs-comment">// ...</span>
+            <span class="hljs-comment">// add UuidType::NAME as the third argument to tell Doctrine that this is a UUID</span>
+            <span class="hljs-operator">-&gt;</span>setParameter(<span class="hljs-string">'user'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span><span class="hljs-operator">-&gt;</span>getUuid(), UuidType<span class="hljs-operator">::</span>NAME)
+
+            <span class="hljs-comment">// alternatively, you can convert it to a value compatible with</span>
+            <span class="hljs-comment">// the type inferred by Doctrine</span>
+            <span class="hljs-operator">-&gt;</span>setParameter(<span class="hljs-string">'user'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span><span class="hljs-operator">-&gt;</span>getUuid()<span class="hljs-operator">-&gt;</span>toBinary())
+        ;
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="ulid"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="ulids">
+    ULIDs
+    <a class="headerlink" href="#ulids" title="Permalink to this headline">¶</a>
+</h2>
+<p><a href="https://github.com/ulid/spec" class="reference external" rel="external noopener noreferrer" target="_blank">ULIDs</a> (<em>Universally Unique Lexicographically Sortable Identifier</em>) are 128-bit
+numbers usually represented as a 26-character string: <code translate="no" class="notranslate">TTTTTTTTTTRRRRRRRRRRRRRRRR</code>
+(where <code translate="no" class="notranslate">T</code> represents a timestamp and <code translate="no" class="notranslate">R</code> represents the random bits).</p>
+<p>ULIDs are an alternative to UUIDs when using those is impractical. They provide
+128-bit compatibility with UUID, they are lexicographically sortable and they
+are encoded as 26-character strings (vs 36-character UUIDs).</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you generate more than one ULID during the same millisecond in the
+same process then the random portion is incremented by one bit in order
+to provide monotonicity for sorting. The random portion is not random
+compared to the previous ULID in this case.</p>
+</div>
+<div class="section">
+<h3 id="generating-ulids">
+    Generating ULIDs
+    <a class="headerlink" href="#generating-ulids" title="Permalink to this headline">¶</a>
+</h3>
+<p>Instantiate the <code translate="no" class="notranslate">Ulid</code> class to generate a random ULID value:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">Ulid</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span> = <span class="hljs-keyword">new</span> Ulid();  <span class="hljs-comment">// e.g. 01AN4Z07BY79KA1307SR9X4MV3</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If your ULID value is already generated in another format, use any of the
+following methods to create a <code translate="no" class="notranslate">Ulid</code> object from it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// all the following examples would generate the same Ulid object</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span> = Ulid<span class="hljs-operator">::</span>fromString(<span class="hljs-string">'01E439TP9XJZ9RPFH3T1PYBCR8'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span> = Ulid<span class="hljs-operator">::</span>fromBinary(<span class="hljs-string">"\x01\x71\x06\x9d\x59\x3d\x97\xd3\x8b\x3e\x23\xd0\x6d\xe5\xb3\x08"</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span> = Ulid<span class="hljs-operator">::</span>fromBase32(<span class="hljs-string">'01E439TP9XJZ9RPFH3T1PYBCR8'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span> = Ulid<span class="hljs-operator">::</span>fromBase58(<span class="hljs-string">'1BKocMc5BnrVcuq2ti4Eqm'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span> = Ulid<span class="hljs-operator">::</span>fromRfc4122(<span class="hljs-string">'0171069d-593d-97d3-8b3e-23d06de5b308'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Like UUIDs, ULIDs have their own factory, <code translate="no" class="notranslate">UlidFactory</code>, that can be used to generate them:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Service</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">Factory</span>\<span class="hljs-title">UlidFactory</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FooService</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private UlidFactory <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulidFactory</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">generate</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>ulidFactory<span class="hljs-operator">-&gt;</span>create();
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>There's also a special <code translate="no" class="notranslate">NilUlid</code> class to represent ULID <code translate="no" class="notranslate">null</code> values:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">NilUlid</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span> = <span class="hljs-keyword">new</span> NilUlid();
+<span class="hljs-comment">// equivalent to $ulid = new Ulid('00000000000000000000000000');</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="converting-ulids">
+    Converting ULIDs
+    <a class="headerlink" href="#converting-ulids" title="Permalink to this headline">¶</a>
+</h3>
+<p>Use these methods to transform the ULID object into different bases:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span> = Ulid<span class="hljs-operator">::</span>fromString(<span class="hljs-string">'01E439TP9XJZ9RPFH3T1PYBCR8'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span><span class="hljs-operator">-&gt;</span>toBinary();  <span class="hljs-comment">// string(16) "\x01\x71\x06\x9d\x59\x3d\x97\xd3\x8b\x3e\x23\xd0\x6d\xe5\xb3\x08"</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span><span class="hljs-operator">-&gt;</span>toBase32();  <span class="hljs-comment">// string(26) "01E439TP9XJZ9RPFH3T1PYBCR8"</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span><span class="hljs-operator">-&gt;</span>toBase58();  <span class="hljs-comment">// string(22) "1BKocMc5BnrVcuq2ti4Eqm"</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span><span class="hljs-operator">-&gt;</span>toRfc4122(); <span class="hljs-comment">// string(36) "0171069d-593d-97d3-8b3e-23d06de5b308"</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid</span><span class="hljs-operator">-&gt;</span>toHex();     <span class="hljs-comment">// string(34) "0x0171069d593d97d38b3e23d06de5b308"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">toHex()</code> method was introduced in Symfony 6.2.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="working-with-ulids">
+    Working with ULIDs
+    <a class="headerlink" href="#working-with-ulids" title="Permalink to this headline">¶</a>
+</h3>
+<p>ULID objects created with the <code translate="no" class="notranslate">Ulid</code> class can use the following methods:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">Ulid</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid1</span> = <span class="hljs-keyword">new</span> Ulid();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid2</span> = <span class="hljs-keyword">new</span> Ulid();
+
+<span class="hljs-comment">// checking if a given value is valid as ULID</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isValid</span> = Ulid<span class="hljs-operator">::</span>isValid(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulidValue</span>); <span class="hljs-comment">// true or false</span>
+
+<span class="hljs-comment">// getting the ULID datetime</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid1</span><span class="hljs-operator">-&gt;</span>getDateTime(); <span class="hljs-comment">// returns a \DateTimeImmutable instance</span>
+
+<span class="hljs-comment">// comparing ULIDs and checking for equality</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid1</span><span class="hljs-operator">-&gt;</span>equals(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid2</span>); <span class="hljs-comment">// false</span>
+<span class="hljs-comment">// this method returns $ulid1 &lt;=&gt; $ulid2</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid1</span><span class="hljs-operator">-&gt;</span>compare(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ulid2</span>); <span class="hljs-comment">// e.g. int(-1)</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="storing-ulids-in-databases">
+    Storing ULIDs in Databases
+    <a class="headerlink" href="#storing-ulids-in-databases" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you <a href="../doctrine.html" class="reference internal">use Doctrine</a>, consider using the <code translate="no" class="notranslate">ulid</code> Doctrine
+type, which converts to/from ULID objects automatically:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Entity/Product.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Mapping</span> <span class="hljs-title">as</span> <span class="hljs-title">ORM</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Doctrine</span>\<span class="hljs-title">Types</span>\<span class="hljs-title">UlidType</span>;
+
+<span class="hljs-comment">#[ORM\Entity(repositoryClass: ProductRepository::class)]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Product</span>
+</span>{
+    <span class="hljs-comment">#[ORM\Column(type: UlidType::NAME)]</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>someProperty</span>;
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">UlidType::NAME</code> constant was introduced in Symfony 6.2.</p>
+</div>
+<p>There's also a Doctrine generator to help auto-generate ULID values for the
+entity primary keys:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Mapping</span> <span class="hljs-title">as</span> <span class="hljs-title">ORM</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Doctrine</span>\<span class="hljs-title">Types</span>\<span class="hljs-title">UlidType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">Ulid</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Product</span>
+</span>{
+    <span class="hljs-comment">#[ORM\Id]</span>
+    <span class="hljs-comment">#[ORM\Column(type: UlidType::NAME, unique: true)]</span>
+    <span class="hljs-comment">#[ORM\GeneratedValue(strategy: 'CUSTOM')]</span>
+    <span class="hljs-comment">#[ORM\CustomIdGenerator(class: 'doctrine.ulid_generator')]</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getId</span><span class="hljs-params">()</span>: ?<span class="hljs-title">Ulid</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>id;
+    }
+
+    <span class="hljs-comment">// ...</span>
+
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When using built-in Doctrine repository methods (e.g. <code translate="no" class="notranslate">findOneBy()</code>), Doctrine
+knows how to convert these ULID types to build the SQL query
+(e.g. <code translate="no" class="notranslate">-&gt;findOneBy([&#039;user&#039; =&gt; $user-&gt;getUlid()])</code>). However, when using DQL
+queries or building the query yourself, you'll need to set <code translate="no" class="notranslate">ulid</code> as the type
+of the ULID parameters:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Repository/ProductRepository.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Doctrine</span>\<span class="hljs-title">Types</span>\<span class="hljs-title">UlidType</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductRepository</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceEntityRepository</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">findUserProducts</span><span class="hljs-params">(User <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>)</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>qb</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createQueryBuilder(<span class="hljs-string">'p'</span>)
+            <span class="hljs-comment">// ...</span>
+            <span class="hljs-comment">// add UlidType::NAME as the third argument to tell Doctrine that this is a ULID</span>
+            <span class="hljs-operator">-&gt;</span>setParameter(<span class="hljs-string">'user'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span><span class="hljs-operator">-&gt;</span>getUlid(), UlidType<span class="hljs-operator">::</span>NAME)
+
+            <span class="hljs-comment">// alternatively, you can convert it to a value compatible with</span>
+            <span class="hljs-comment">// the type inferred by Doctrine</span>
+            <span class="hljs-operator">-&gt;</span>setParameter(<span class="hljs-string">'user'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span><span class="hljs-operator">-&gt;</span>getUlid()<span class="hljs-operator">-&gt;</span>toBinary())
+        ;
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="generating-and-inspecting-uuids-ulids-in-the-console">
+    Generating and Inspecting UUIDs/ULIDs in the Console
+    <a class="headerlink" href="#generating-and-inspecting-uuids-ulids-in-the-console" title="Permalink to this headline">¶</a>
+</h2>
+<p>This component provides several commands to generate and inspect UUIDs/ULIDs in
+the console. They are not enabled by default, so you must add the following
+configuration in your application before using these commands:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-95e154707277d2de189b3f4664a7563d5013293a" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-427db24b3ac63b00eb17c25113c4a73ed6aa37df" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-a4846f1b8542ea5fd6b826d18e7c2cf8c6ba29ad" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-95e154707277d2de189b3f4664a7563d5013293a" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">Symfony\Component\Uid\Command\GenerateUlidCommand:</span> <span class="hljs-string">~</span>
+    <span class="hljs-string">Symfony\Component\Uid\Command\GenerateUuidCommand:</span> <span class="hljs-string">~</span>
+    <span class="hljs-string">Symfony\Component\Uid\Command\InspectUlidCommand:</span> <span class="hljs-string">~</span>
+    <span class="hljs-string">Symfony\Component\Uid\Command\InspectUuidCommand:</span> <span class="hljs-string">~</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-427db24b3ac63b00eb17c25113c4a73ed6aa37df" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"Symfony\Component\Uid\Command\GenerateUlidCommand"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"Symfony\Component\Uid\Command\GenerateUuidCommand"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"Symfony\Component\Uid\Command\InspectUlidCommand"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"Symfony\Component\Uid\Command\InspectUuidCommand"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-a4846f1b8542ea5fd6b826d18e7c2cf8c6ba29ad" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">GenerateUlidCommand</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">GenerateUuidCommand</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">InspectUlidCommand</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Uid</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">InspectUuidCommand</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span>: <span class="hljs-title">void</span> </span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span>
+        <span class="hljs-operator">-&gt;</span>set(GenerateUlidCommand<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>set(GenerateUuidCommand<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>set(InspectUlidCommand<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>set(InspectUuidCommand<span class="hljs-operator">::</span>class);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Now you can generate UUIDs/ULIDs as follows (add the <code translate="no" class="notranslate">--help</code> option to the
+commands to learn about all their options):</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># generate 1 random-based UUID</span>
+<span class="hljs-prompt">$ </span>php bin/console uuid:generate --random-based
+
+<span class="hljs-comment"># generate 1 time-based UUID with a specific node</span>
+<span class="hljs-prompt">$ </span>php bin/console uuid:generate --time-based=now --node=fb3502dc-137e-4849-8886-ac90d07f64a7
+
+<span class="hljs-comment"># generate 2 UUIDs and output them in base58 format</span>
+<span class="hljs-prompt">$ </span>php bin/console uuid:generate --count=2 --format=base58
+
+<span class="hljs-comment"># generate 1 ULID with the current time as the timestamp</span>
+<span class="hljs-prompt">$ </span>php bin/console ulid:generate
+
+<span class="hljs-comment"># generate 1 ULID with a specific timestamp</span>
+<span class="hljs-prompt">$ </span>php bin/console ulid:generate --time=<span class="hljs-string">"2021-02-02 14:00:00"</span>
+
+<span class="hljs-comment"># generate 2 ULIDs and ouput them in RFC4122 format</span>
+<span class="hljs-prompt">$ </span>php bin/console ulid:generate --count=2 --format=rfc4122</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In addition to generating new UIDs, you can also inspect them with the following
+commands to show all the information for a given UID:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console uuid:inspect d0a3a023-f515-4fe0-915c-575e63693998
+ ---------------------- --------------------------------------
+  Label                  Value
+ ---------------------- --------------------------------------
+  Version                4
+  Canonical (RFC 4122)   d0a3a023-f515-4fe0-915c-575e63693998
+  Base 58                SmHvuofV4GCF7QW543rDD9
+  Base 32                6GMEG27X8N9ZG92Q2QBSHPJECR
+ ---------------------- --------------------------------------
+
+<span class="hljs-prompt">$ </span>php bin/console ulid:inspect 01F2TTCSYK1PDRH73Z41BN1C4X
+ --------------------- --------------------------------------
+  Label                 Value
+ --------------------- --------------------------------------
+  Canonical (Base 32)   01F2TTCSYK1PDRH73Z41BN1C4X
+  Base 58               1BYGm16jS4kX3VYCysKKq6
+  RFC 4122              0178b5a6-67d3-0d9b-889c-7f205750b09d
+ --------------------- --------------------------------------
+  Timestamp             2021-04-09 08:01:24.947
+ --------------------- --------------------------------------</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,415 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-load-service-configuration-inside-a-bundle">
+    How to Load Service Configuration inside a Bundle
+    <a class="headerlink" href="#how-to-load-service-configuration-inside-a-bundle" title="Permalink to this headline">¶</a>
+</h1>
+<p>Services created by bundles are not defined in the main <code translate="no" class="notranslate">config/services.yaml</code>
+file used by the application but in the bundles themselves. This article
+explains how to create and load service files using the bundle directory
+structure.</p>
+<div class="section">
+<h2 id="creating-an-extension-class">
+    Creating an Extension Class
+    <a class="headerlink" href="#creating-an-extension-class" title="Permalink to this headline">¶</a>
+</h2>
+<p>In order to load service configuration, you have to create a Dependency
+Injection (DI) Extension for your bundle. By default, the Extension class must
+follow these conventions (but later you'll learn how to skip them if needed):</p>
+<ul>
+    <li>It has to live in the <code translate="no" class="notranslate">DependencyInjection</code> namespace of the bundle;</li>
+<li>It has to implement the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Extension/ExtensionInterface.php" class="reference external" title="Symfony\Component\DependencyInjection\Extension\ExtensionInterface" rel="external noopener noreferrer" target="_blank">ExtensionInterface</a>,
+which is usually achieved by extending the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Extension/Extension.php" class="reference external" title="Symfony\Component\DependencyInjection\Extension\Extension" rel="external noopener noreferrer" target="_blank">Extension</a> class;</li>
+<li>The name is equal to the bundle name with the <code translate="no" class="notranslate">Bundle</code> suffix replaced by
+<code translate="no" class="notranslate">Extension</code> (e.g. the Extension class of the AcmeBundle would be called
+<code translate="no" class="notranslate">AcmeExtension</code> and the one for AcmeHelloBundle would be called
+<code translate="no" class="notranslate">AcmeHelloExtension</code>).</li>
+</ul>
+<p>This is how the extension of an AcmeHelloBundle should look like:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/DependencyInjection/AcmeHelloExtension.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Acme</span>\<span class="hljs-title">HelloBundle</span>\<span class="hljs-title">DependencyInjection</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Extension</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AcmeHelloExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Extension</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>, ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ... you'll load the files here later</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="manually-registering-an-extension-class">
+    Manually Registering an Extension Class
+    <a class="headerlink" href="#manually-registering-an-extension-class" title="Permalink to this headline">¶</a>
+</h3>
+<p>When not following the conventions, you will have to manually register your
+extension. To do this, you should override the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Bundle/Bundle.php#method_build" class="reference external" title="Symfony\Component\HttpKernel\Bundle\Bundle::build()" rel="external noopener noreferrer" target="_blank">Bundle::getContainerExtension()</a>
+method to return the instance of the extension:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Acme</span>\<span class="hljs-title">HelloBundle</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">UnconventionalExtensionClass</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">ExtensionInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AcmeHelloBundle</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getContainerExtension</span><span class="hljs-params">()</span>: ?<span class="hljs-title">ExtensionInterface</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> UnconventionalExtensionClass();
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In addition, when the new Extension class name doesn't follow the naming
+conventions, you must also override the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Extension/Extension.php#method_getAlias" class="reference external" title="Symfony\Component\DependencyInjection\Extension\Extension::getAlias()" rel="external noopener noreferrer" target="_blank">Extension::getAlias()</a>
+method to return the correct DI alias. The DI alias is the name used to refer to
+the bundle in the container (e.g. in the <code translate="no" class="notranslate">config/packages/</code> files). By
+default, this is done by removing the <code translate="no" class="notranslate">Extension</code> suffix and converting the
+class name to underscores (e.g. <code translate="no" class="notranslate">AcmeHelloExtension</code>'s DI alias is
+<code translate="no" class="notranslate">acme_hello</code>).</p>
+</div>
+</div>
+<div class="section">
+<h2 id="using-the-load-method">
+    Using the <code translate="no" class="notranslate">load()</code> Method
+    <a class="headerlink" href="#using-the-load-method" title="Permalink to this headline">¶</a>
+</h2>
+<p>In the <code translate="no" class="notranslate">load()</code> method, all services and parameters related to this extension
+will be loaded. This method doesn't get the actual container instance, but a
+copy. This container only has the parameters from the actual container. After
+loading the services and parameters, the copy will be merged into the actual
+container, to ensure all services and parameters are also added to the actual
+container.</p>
+<p>In the <code translate="no" class="notranslate">load()</code> method, you can use PHP code to register service definitions,
+but it is more common if you put these definitions in a configuration file
+(using the YAML, XML or PHP format).</p>
+<p>For instance, assume you have a file called <code translate="no" class="notranslate">services.xml</code> in the
+<code translate="no" class="notranslate">config/</code> directory of your bundle, your <code translate="no" class="notranslate">load()</code> method looks like:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FileLocator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">XmlFileLoader</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>, ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span> = <span class="hljs-keyword">new</span> XmlFileLoader(
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>,
+        <span class="hljs-keyword">new</span> FileLocator(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../../config'</span>)
+    );
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span><span class="hljs-operator">-&gt;</span>load(<span class="hljs-string">'services.xml'</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The other available loaders are <code translate="no" class="notranslate">YamlFileLoader</code> and <code translate="no" class="notranslate">PhpFileLoader</code>.</p>
+<div class="section">
+<h3 id="using-configuration-to-change-the-services">
+    Using Configuration to Change the Services
+    <a class="headerlink" href="#using-configuration-to-change-the-services" title="Permalink to this headline">¶</a>
+</h3>
+<p>The Extension is also the class that handles the configuration for that
+particular bundle (e.g. the configuration in <code translate="no" class="notranslate">config/packages/&lt;bundle_alias&gt;.yaml</code>).
+To read more about it, see the &quot;<a href="configuration.html" class="reference internal">How to Create Friendly Configuration for a Bundle</a>&quot; article.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="loading-services-directly-in-your-bundle-class">
+    Loading Services directly in your Bundle class
+    <a class="headerlink" href="#loading-services-directly-in-your-bundle-class" title="Permalink to this headline">¶</a>
+</h2>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The <code translate="no" class="notranslate">AbstractBundle</code> class was introduced in Symfony 6.1.</p>
+</div>
+<p>Alternatively, you can define and load services configuration directly in a
+bundle class instead of creating a specific <code translate="no" class="notranslate">Extension</code> class. You can do
+this by extending from <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Bundle/AbstractBundle.php" class="reference external" title="Symfony\Component\HttpKernel\Bundle\AbstractBundle" rel="external noopener noreferrer" target="_blank">AbstractBundle</a>
+and defining the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Bundle/AbstractBundle.php#method_loadExtension" class="reference external" title="Symfony\Component\HttpKernel\Bundle\AbstractBundle::loadExtension()" rel="external noopener noreferrer" target="_blank">loadExtension()</a>
+method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">ContainerConfigurator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">AbstractBundle</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AcmeHelloBundle</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractBundle</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadExtension</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span>, ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>, ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// load an XML, PHP or Yaml file</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'../config/services.xml'</span>);
+
+        <span class="hljs-comment">// you can also add or replace parameters and services</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>parameters()
+            <span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'acme_hello.phrase'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span>[<span class="hljs-string">'phrase'</span>])
+        ;
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span>[<span class="hljs-string">'scream'</span>]) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services()
+                <span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'acme_hello.printer'</span>)
+                    <span class="hljs-operator">-&gt;</span>class(ScreamingPrinter<span class="hljs-operator">::</span>class)
+            ;
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This method works similar to the <code translate="no" class="notranslate">Extension::load()</code> method, but it uses
+a new API to define and import service configuration.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Contrary to the <code translate="no" class="notranslate">$configs</code> parameter in <code translate="no" class="notranslate">Extension::load()</code>, the
+<code translate="no" class="notranslate">$config</code> parameter is already merged and processed by the
+<code translate="no" class="notranslate">AbstractBundle</code>.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The <code translate="no" class="notranslate">loadExtension()</code> is called only at compile time.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="adding-classes-to-compile">
+    Adding Classes to Compile
+    <a class="headerlink" href="#adding-classes-to-compile" title="Permalink to this headline">¶</a>
+</h2>
+<p>Bundles can hint Symfony about which of their classes contain annotations so
+they are compiled when generating the application cache to improve the overall
+performance. Define the list of annotated classes to compile in the
+<code translate="no" class="notranslate">addAnnotatedClassesToCompile()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>, ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>addAnnotatedClassesToCompile([
+        <span class="hljs-comment">// you can define the fully qualified class names...</span>
+        <span class="hljs-string">'App\\Controller\\DefaultController'</span>,
+        <span class="hljs-comment">// ... but glob patterns are also supported:</span>
+        <span class="hljs-string">'**Bundle\\Controller\\'</span>,
+
+        <span class="hljs-comment">// ...</span>
+    ]);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If some class extends from other classes, all its parents are automatically
+included in the list of classes to compile.</p>
+</div>
+<p>Patterns are transformed into the actual class namespaces using the classmap
+generated by Composer. Therefore, before using these patterns, you must generate
+the full classmap executing the <code translate="no" class="notranslate">dump-autoload</code> command of Composer.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>This technique can't be used when the classes to compile use the <code translate="no" class="notranslate">__DIR__</code>
+or <code translate="no" class="notranslate">__FILE__</code> constants, because their values will change when loading
+these classes from the <code translate="no" class="notranslate">classes.php</code> file.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

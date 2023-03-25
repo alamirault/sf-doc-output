@@ -1,0 +1,183 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="using-symfony-with-homestead-vagrant">
+    Using Symfony with Homestead/Vagrant
+    <a class="headerlink" href="#using-symfony-with-homestead-vagrant" title="Permalink to this headline">¶</a>
+</h1>
+<p>In order to develop a Symfony application, you might want to use a virtual
+development environment instead of the built-in server or WAMP/LAMP. <a href="https://laravel.com/docs/homestead" class="reference external" rel="external noopener noreferrer" target="_blank">Homestead</a>
+is an easy-to-use <a href="https://www.vagrantup.com/" class="reference external" rel="external noopener noreferrer" target="_blank">Vagrant</a> box to get a virtual environment up and running
+quickly.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Due to the amount of filesystem operations in Symfony (e.g. updating cache
+files and writing to log files), Symfony can slow down significantly. To
+improve the speed, consider <a href="../configuration/override_dir_structure.html#override-cache-dir" class="reference internal">overriding the cache and log directories</a>
+to a location outside the NFS share (for instance, by using
+<a href="https://secure.php.net/manual/en/function.sys-get-temp-dir.php" class="reference external" title="sys_get_temp_dir" rel="external noopener noreferrer" target="_blank">sys_get_temp_dir</a>). You can read <a href="https://beberlei.de/2013/08/19/speedup_symfony2_on_vagrant_boxes.html" class="reference external" rel="external noopener noreferrer" target="_blank">this blog post</a> for more
+tips to speed up Symfony on Vagrant.</p>
+</div>
+<div class="section">
+<h2 id="install-vagrant-and-homestead">
+    Install Vagrant and Homestead
+    <a class="headerlink" href="#install-vagrant-and-homestead" title="Permalink to this headline">¶</a>
+</h2>
+<p>Before you can use Homestead, you need to install and configure Vagrant and
+Homestead as explained in <a href="https://laravel.com/docs/homestead#installation-and-setup" class="reference external" rel="external noopener noreferrer" target="_blank">the Homestead documentation</a>.</p>
+</div>
+<div class="section">
+<h2 id="setting-up-a-symfony-application">
+    Setting Up a Symfony Application
+    <a class="headerlink" href="#setting-up-a-symfony-application" title="Permalink to this headline">¶</a>
+</h2>
+<p>Imagine you've installed your Symfony application in
+<code translate="no" class="notranslate">~/projects/symfony_demo</code> on your local system. You first need Homestead to
+sync your files in this project. Run <code translate="no" class="notranslate">homestead edit</code> to edit the
+Homestead configuration and configure the <code translate="no" class="notranslate">~/projects</code> directory:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># ...</span>
+<span class="hljs-attr">folders:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">map:</span> <span class="hljs-string">~/projects</span>
+      <span class="hljs-attr">to:</span> <span class="hljs-string">/home/vagrant/projects</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">projects/</code> directory on your PC is now accessible at
+<code translate="no" class="notranslate">/home/vagrant/projects</code> in the Homestead environment.</p>
+<p>After you've done this, configure the Symfony application in the Homestead
+configuration:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># ...</span>
+<span class="hljs-attr">sites:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">map:</span> <span class="hljs-string">symfony-demo.test</span>
+      <span class="hljs-attr">to:</span> <span class="hljs-string">/home/vagrant/projects/symfony_demo/public</span>
+      <span class="hljs-attr">type:</span> <span class="hljs-string">symfony4</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">type</code> option tells Homestead to use the Symfony nginx configuration.
+Homestead now supports a Symfony 2 and 3 web layout with <code translate="no" class="notranslate">app.php</code> and
+<code translate="no" class="notranslate">app_dev.php</code> when using type <code translate="no" class="notranslate">symfony2</code> and an <code translate="no" class="notranslate">index.php</code> layout when
+using type <code translate="no" class="notranslate">symfony4</code>.</p>
+<p>At last, edit the hosts file on your local machine to map <code translate="no" class="notranslate">symfony-demo.test</code>
+to <code translate="no" class="notranslate">192.168.10.10</code> (which is the IP used by Homestead):</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text"># /etc/hosts (unix) or C:\Windows\System32\drivers\etc\hosts (Windows)
+192.168.10.10 symfony-demo.test</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, navigate to <code translate="no" class="notranslate">http://symfony-demo.test</code> in your web browser and enjoy
+developing your Symfony application!</p>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>To learn more features of Homestead, including Blackfire Profiler
+integration, automatic creation of MySQL databases and more, read the
+<a href="https://laravel.com/docs/homestead#daily-usage" class="reference external" rel="external noopener noreferrer" target="_blank">Daily Usage</a> section of the Homestead documentation.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

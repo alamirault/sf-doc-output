@@ -1,0 +1,1736 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="events-and-event-listeners">
+    Events and Event Listeners
+    <a class="headerlink" href="#events-and-event-listeners" title="Permalink to this headline">¶</a>
+</h1>
+<p>During the execution of a Symfony application, lots of event notifications are
+triggered. Your application can listen to these notifications and respond to
+them by executing any piece of code.</p>
+<p>Symfony triggers several <a href="reference/events.html" class="reference internal">events related to the kernel</a>
+while processing the HTTP Request. Third-party bundles may also dispatch events, and
+you can even dispatch <a href="components/event_dispatcher.html" class="reference internal">custom events</a> from your
+own code.</p>
+<p>All the examples shown in this article use the same <code translate="no" class="notranslate">KernelEvents::EXCEPTION</code>
+event for consistency purposes. In your own application, you can use any event
+and even mix several of them in the same subscriber.</p>
+<div class="section">
+<h2 id="creating-an-event-listener">
+    Creating an Event Listener
+    <a class="headerlink" href="#creating-an-event-listener" title="Permalink to this headline">¶</a>
+</h2>
+<p>The most common way to listen to an event is to register an <strong>event listener</strong>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/EventListener/ExceptionListener.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ExceptionEvent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">HttpExceptionInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExceptionListener</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__invoke</span><span class="hljs-params">(ExceptionEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// You get the exception object from the received event</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getThrowable();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span> = sprintf(
+            <span class="hljs-string">'My Error says: %s with code: %s'</span>,
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span><span class="hljs-operator">-&gt;</span>getMessage(),
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span><span class="hljs-operator">-&gt;</span>getCode()
+        );
+
+        <span class="hljs-comment">// Customize your response object to display the exception details</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setContent(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span>);
+
+        <span class="hljs-comment">// HttpExceptionInterface is a special type of exception that</span>
+        <span class="hljs-comment">// holds status code and header details</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span> <span class="hljs-keyword">instanceof</span> HttpExceptionInterface) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setStatusCode(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span><span class="hljs-operator">-&gt;</span>getStatusCode());
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>headers<span class="hljs-operator">-&gt;</span>replace(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span><span class="hljs-operator">-&gt;</span>getHeaders());
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setStatusCode(Response<span class="hljs-operator">::</span>HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        <span class="hljs-comment">// sends the modified response object to the event</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setResponse(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now that the class is created, you need to register it as a service and
+notify Symfony that it is an event listener by using a special &quot;tag&quot;:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-a1c654c3ae9529fb90b498ba87372249439f1233" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-6722ebd83a1e762e70ac48e2704f7ed4ef8c39bd" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-7245e18486527980bb54c70c953134d877138907" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-a1c654c3ae9529fb90b498ba87372249439f1233" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">App\EventListener\ExceptionListener:</span>
+        <span class="hljs-attr">tags:</span> <span class="hljs-string">[kernel.event_listener]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-6722ebd83a1e762e70ac48e2704f7ed4ef8c39bd" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\EventListener\ExceptionListener"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"kernel.event_listener"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-7245e18486527980bb54c70c953134d877138907" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>\<span class="hljs-title">ExceptionListener</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(ExceptionListener<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>tag(<span class="hljs-string">'kernel.event_listener'</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Symfony follows this logic to decide which method to call inside the event
+listener class:</p>
+<ol class="arabic">
+    <li>If the <code translate="no" class="notranslate">kernel.event_listener</code> tag defines the <code translate="no" class="notranslate">method</code> attribute, that's
+the name of the method to be called;</li>
+<li>If no <code translate="no" class="notranslate">method</code> attribute is defined, try to call the <code translate="no" class="notranslate">__invoke()</code> magic
+method (which makes event listeners invokable);</li>
+<li>If the <code translate="no" class="notranslate">__invoke()</code> method is not defined either, throw an exception.</li>
+</ol>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>There is an optional attribute for the <code translate="no" class="notranslate">kernel.event_listener</code> tag called
+<code translate="no" class="notranslate">priority</code>, which is a positive or negative integer that defaults to <code translate="no" class="notranslate">0</code>
+and it controls the order in which listeners are executed (the higher the
+number, the earlier a listener is executed). This is useful when you need to
+guarantee that one listener is executed before another. The priorities of the
+internal Symfony listeners usually range from <code translate="no" class="notranslate">-256</code> to <code translate="no" class="notranslate">256</code> but your
+own listeners can use any positive or negative integer.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>There is an optional attribute for the <code translate="no" class="notranslate">kernel.event_listener</code> tag called
+<code translate="no" class="notranslate">event</code> which is useful when listener <code translate="no" class="notranslate">$event</code> argument is not typed.
+If you configure it, it will change type of <code translate="no" class="notranslate">$event</code> object.
+For the <code translate="no" class="notranslate">kernel.exception</code> event, it is <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ExceptionEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\ExceptionEvent" rel="external noopener noreferrer" target="_blank">ExceptionEvent</a>.
+Check out the <a href="reference/events.html" class="reference internal">Symfony events reference</a> to see
+what type of object each event provides.</p>
+<p>With this attribute, Symfony follows this logic to decide which method to call
+inside the event listener class:</p>
+<ol class="arabic">
+    <li>If the <code translate="no" class="notranslate">kernel.event_listener</code> tag defines the <code translate="no" class="notranslate">method</code> attribute, that's
+the name of the method to be called;</li>
+<li>If no <code translate="no" class="notranslate">method</code> attribute is defined, try to call the method whose name
+is <code translate="no" class="notranslate">on</code> + &quot;PascalCased event name&quot; (e.g. <code translate="no" class="notranslate">onKernelException()</code> method for
+the <code translate="no" class="notranslate">kernel.exception</code> event);</li>
+<li>If that method is not defined either, try to call the <code translate="no" class="notranslate">__invoke()</code> magic
+method (which makes event listeners invokable);</li>
+<li>If the <code translate="no" class="notranslate">__invoke()</code> method is not defined either, throw an exception.</li>
+</ol>
+</div>
+<span id="event-dispatcher_event-listener-attributes"></span>
+<div class="section">
+<h3 id="defining-event-listeners-with-php-attributes">
+    Defining Event Listeners with PHP Attributes
+    <a class="headerlink" href="#defining-event-listeners-with-php-attributes" title="Permalink to this headline">¶</a>
+</h3>
+<p>An alternative way to define an event listener is to use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/EventDispatcher/Attribute/AsEventListener.php" class="reference external" title="Symfony\Component\EventDispatcher\Attribute\AsEventListener" rel="external noopener noreferrer" target="_blank">AsEventListener</a>
+PHP attribute. This allows to configure the listener inside its class, without
+having to add any configuration in external files:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsEventListener</span>;
+
+<span class="hljs-comment">#[AsEventListener]</span>
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyListener</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__invoke</span><span class="hljs-params">(CustomEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can add multiple <code translate="no" class="notranslate">#[AsEventListener()]</code> attributes to configure different methods:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsEventListener</span>;
+
+<span class="hljs-comment">#[AsEventListener(event: CustomEvent::class, method: 'onCustomEvent')]</span>
+<span class="hljs-comment">#[AsEventListener(event: 'foo', priority: 42)]</span>
+<span class="hljs-comment">#[AsEventListener(event: 'bar', method: 'onBarEvent')]</span>
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyMultiListener</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onCustomEvent</span><span class="hljs-params">(CustomEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onFoo</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onBarEvent</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/EventDispatcher/Attribute/AsEventListener.php" class="reference external" title="Symfony\Component\EventDispatcher\Attribute\AsEventListener" rel="external noopener noreferrer" target="_blank">AsEventListener</a>
+can also be applied to methods directly:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsEventListener</span>;
+
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyMultiListener</span>
+</span>{
+    <span class="hljs-comment">#[AsEventListener()]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onCustomEvent</span><span class="hljs-params">(CustomEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-comment">#[AsEventListener(event: 'foo', priority: 42)]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onFoo</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-comment">#[AsEventListener(event: 'bar')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onBarEvent</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Note that the attribute doesn't require its <code translate="no" class="notranslate">event</code> parameter to be set
+if the method already type-hints the expected event.</p>
+</div>
+<span id="events-subscriber"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="creating-an-event-subscriber">
+    Creating an Event Subscriber
+    <a class="headerlink" href="#creating-an-event-subscriber" title="Permalink to this headline">¶</a>
+</h2>
+<p>Another way to listen to events is via an <strong>event subscriber</strong>, which is a class
+that defines one or more methods that listen to one or various events. The main
+difference with the event listeners is that subscribers always know the events
+to which they are listening.</p>
+<p>If different event subscriber methods listen to the same event, their order is
+defined by the <code translate="no" class="notranslate">priority</code> parameter. This value is a positive or negative
+integer which defaults to <code translate="no" class="notranslate">0</code>. The higher the number, the earlier the method
+is called. <strong>Priority is aggregated for all listeners and subscribers</strong>, so your
+methods could be called before or after the methods defined in other listeners
+and subscribers. To learn more about event subscribers, read <a href="components/event_dispatcher.html" class="reference internal">The EventDispatcher Component</a>.</p>
+<p>The following example shows an event subscriber that defines several methods which
+listen to the same <code translate="no" class="notranslate">kernel.exception</code> event:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/EventSubscriber/ExceptionSubscriber.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventSubscriber</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventSubscriberInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ExceptionEvent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">KernelEvents</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExceptionSubscriber</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">EventSubscriberInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubscribedEvents</span><span class="hljs-params">()</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-comment">// return the subscribed events, their methods and priorities</span>
+        <span class="hljs-keyword">return</span> [
+            KernelEvents<span class="hljs-operator">::</span><span class="hljs-keyword">EXCEPTION</span> =&gt; [
+                [<span class="hljs-string">'processException'</span>, <span class="hljs-number">10</span>],
+                [<span class="hljs-string">'logException'</span>, <span class="hljs-number">0</span>],
+                [<span class="hljs-string">'notifyException'</span>, <span class="hljs-number">-10</span>],
+            ],
+        ];
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">processException</span><span class="hljs-params">(ExceptionEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">logException</span><span class="hljs-params">(ExceptionEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">notifyException</span><span class="hljs-params">(ExceptionEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! Your <code translate="no" class="notranslate">services.yaml</code> file should already be setup to load services from
+the <code translate="no" class="notranslate">EventSubscriber</code> directory. Symfony takes care of the rest.</p>
+<span id="ref-event-subscriber-configuration"></span>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If your methods are <em>not</em> called when an exception is thrown, double-check that
+you're <a href="service_container.html#service-container-services-load-example" class="reference internal">loading services</a> from
+the <code translate="no" class="notranslate">EventSubscriber</code> directory and have <a href="service_container.html#services-autoconfigure" class="reference internal">autoconfigure</a>
+enabled. You can also manually add the <code translate="no" class="notranslate">kernel.event_subscriber</code> tag.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="request-events-checking-types">
+    Request Events, Checking Types
+    <a class="headerlink" href="#request-events-checking-types" title="Permalink to this headline">¶</a>
+</h2>
+<p>A single page can make several requests (one main request, and then multiple
+sub-requests - typically when <a href="templates.html#templates-embed-controllers" class="reference internal">embedding controllers in templates</a>).
+For the core Symfony events, you might need to check to see if the event is for
+a &quot;main&quot; request or a &quot;sub request&quot;:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/EventListener/RequestListener.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">RequestEvent</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RequestListener</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelRequest</span><span class="hljs-params">(RequestEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>isMainRequest()) {
+            <span class="hljs-comment">// don't do anything if it's not the main request</span>
+            <span class="hljs-keyword">return</span>;
+        }
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Certain things, like checking information on the <em>real</em> request, may not need to
+be done on the sub-request listeners.</p>
+<span id="events-or-subscribers"></span>
+</div>
+<div class="section">
+<h2 id="listeners-or-subscribers">
+    Listeners or Subscribers
+    <a class="headerlink" href="#listeners-or-subscribers" title="Permalink to this headline">¶</a>
+</h2>
+<p>Listeners and subscribers can be used in the same application indistinctly. The
+decision to use either of them is usually a matter of personal taste. However,
+there are some minor advantages for each of them:</p>
+<ul>
+    <li><strong>Subscribers are easier to reuse</strong> because the knowledge of the events is kept
+in the class rather than in the service definition. This is the reason why
+Symfony uses subscribers internally;</li>
+<li><strong>Listeners are more flexible</strong> because bundles can enable or disable each of
+them conditionally depending on some configuration value.</li>
+</ul>
+</div>
+<div class="section">
+<h2 id="event-aliases">
+    Event Aliases
+    <a class="headerlink" href="#event-aliases" title="Permalink to this headline">¶</a>
+</h2>
+<p>When configuring event listeners and subscribers via dependency injection,
+Symfony's core events can also be referred to by the fully qualified class
+name (FQCN) of the corresponding event class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/EventSubscriber/RequestSubscriber.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventSubscriber</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventSubscriberInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">RequestEvent</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RequestSubscriber</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">EventSubscriberInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubscribedEvents</span><span class="hljs-params">()</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            RequestEvent<span class="hljs-operator">::</span>class =&gt; <span class="hljs-string">'onKernelRequest'</span>,
+        ];
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelRequest</span><span class="hljs-params">(RequestEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Internally, the event FQCN are treated as aliases for the original event names.
+Since the mapping already happens when compiling the service container, event
+listeners and subscribers using FQCN instead of event names will appear under
+the original event name when inspecting the event dispatcher.</p>
+<p>This alias mapping can be extended for custom events by registering the
+compiler pass <code translate="no" class="notranslate">AddEventAliasesPass</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Kernel.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">MyCustomEvent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">AddEventAliasesPass</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Kernel</span> <span class="hljs-title">as</span> <span class="hljs-title">BaseKernel</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Kernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseKernel</span>
+</span>{
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">build</span><span class="hljs-params">(ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>addCompilerPass(<span class="hljs-keyword">new</span> AddEventAliasesPass([
+            MyCustomEvent<span class="hljs-operator">::</span>class =&gt; <span class="hljs-string">'my_custom_event'</span>,
+        ]));
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The compiler pass will always extend the existing list of aliases. Because of
+that, it is safe to register multiple instances of the pass with different
+configurations.</p>
+</div>
+<div class="section">
+<h2 id="debugging-event-listeners">
+    Debugging Event Listeners
+    <a class="headerlink" href="#debugging-event-listeners" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can find out what listeners are registered in the event dispatcher
+using the console. To show all events and their listeners, run:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:event-dispatcher</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can get registered listeners for a particular event by specifying
+its name:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:event-dispatcher kernel.exception</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>or can get everything which partial matches the event name:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:event-dispatcher kernel // matches <span class="hljs-string">"kernel.exception"</span>, <span class="hljs-string">"kernel.response"</span> etc.
+<span class="hljs-prompt">$ </span>php bin/console debug:event-dispatcher Security // matches <span class="hljs-string">"Symfony\Component\Security\Http\Event\CheckPassportEvent"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <a href="security.html" class="reference internal">security</a> system uses an event dispatcher per
+firewall. Use the <code translate="no" class="notranslate">--dispatcher</code> option to get the registered listeners
+for a particular event dispatcher:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:event-dispatcher --dispatcher=security.event_dispatcher.main</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="event-dispatcher-before-after-filters"></span>
+</div>
+<div class="section">
+<h2 id="how-to-set-up-before-and-after-filters">
+    How to Set Up Before and After Filters
+    <a class="headerlink" href="#how-to-set-up-before-and-after-filters" title="Permalink to this headline">¶</a>
+</h2>
+<p>It is quite common in web application development to need some logic to be
+performed right before or directly after your controller actions acting as
+filters or hooks.</p>
+<p>Some web frameworks define methods like <code translate="no" class="notranslate">preExecute()</code> and <code translate="no" class="notranslate">postExecute()</code>,
+but there is no such thing in Symfony. The good news is that there is a much
+better way to interfere with the Request -&gt; Response process using the
+<a href="components/event_dispatcher.html" class="reference internal">EventDispatcher component</a>.</p>
+<div class="section">
+<h3 id="token-validation-example">
+    Token Validation Example
+    <a class="headerlink" href="#token-validation-example" title="Permalink to this headline">¶</a>
+</h3>
+<p>Imagine that you need to develop an API where some controllers are public
+but some others are restricted to one or some clients. For these private features,
+you might provide a token to your clients to identify themselves.</p>
+<p>So, before executing your controller action, you need to check if the action
+is restricted or not. If it is restricted, you need to validate the provided
+token.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Please note that for simplicity in this recipe, tokens will be defined
+in config and neither database setup nor authentication via the Security
+component will be used.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="before-filters-with-the-kernel-controller-event">
+    Before Filters with the <code translate="no" class="notranslate">kernel.controller</code> Event
+    <a class="headerlink" href="#before-filters-with-the-kernel-controller-event" title="Permalink to this headline">¶</a>
+</h3>
+<p>First, define some token configuration as parameters:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-c70b7695d9af9c52e79098dc322efc6e51e7550c" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-40d9cd08622576c19b297564f7d7d6a2f8de73b6" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-39acddb696f0fcebdddb81e173f80cede6fdc7a7" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-c70b7695d9af9c52e79098dc322efc6e51e7550c" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">parameters:</span>
+    <span class="hljs-attr">tokens:</span>
+        <span class="hljs-attr">client1:</span> <span class="hljs-string">pass1</span>
+        <span class="hljs-attr">client2:</span> <span class="hljs-string">pass2</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-40d9cd08622576c19b297564f7d7d6a2f8de73b6" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">parameters</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"tokens"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"collection"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"client1"</span>&gt;</span>pass1<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"client2"</span>&gt;</span>pass2<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">parameters</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-39acddb696f0fcebdddb81e173f80cede6fdc7a7" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>setParameter(<span class="hljs-string">'tokens'</span>, [
+    <span class="hljs-string">'client1'</span> =&gt; <span class="hljs-string">'pass1'</span>,
+    <span class="hljs-string">'client2'</span> =&gt; <span class="hljs-string">'pass2'</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="section">
+<h4 id="tag-controllers-to-be-checked">
+    Tag Controllers to Be Checked
+    <a class="headerlink" href="#tag-controllers-to-be-checked" title="Permalink to this headline">¶</a>
+</h4>
+<p>A <code translate="no" class="notranslate">kernel.controller</code> (aka <code translate="no" class="notranslate">KernelEvents::CONTROLLER</code>) listener gets notified
+on <em>every</em> request, right before the controller is executed. So, first, you need
+some way to identify if the controller that matches the request needs token validation.</p>
+<p>A clean and easy way is to create an empty interface and make the controllers
+implement it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">TokenAuthenticatedController</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>A controller that implements this interface looks like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">TokenAuthenticatedController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FooController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">TokenAuthenticatedController</span>
+</span>{
+    <span class="hljs-comment">// An action that needs authentication</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">bar</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h4 id="creating-an-event-subscriber">
+    Creating an Event Subscriber
+    <a class="headerlink" href="#creating-an-event-subscriber" title="Permalink to this headline">¶</a>
+</h4>
+<p>Next, you'll need to create an event subscriber, which will hold the logic
+that you want to be executed before your controllers. If you're not familiar with
+event subscribers, you can learn more about them at <a href="event_dispatcher.html" class="reference internal">Events and Event Listeners</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/EventSubscriber/TokenSubscriber.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventSubscriber</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">TokenAuthenticatedController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventSubscriberInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ControllerEvent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">AccessDeniedHttpException</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">KernelEvents</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TokenSubscriber</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">EventSubscriberInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tokens</span>
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelController</span><span class="hljs-params">(ControllerEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controller</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getController();
+
+        <span class="hljs-comment">// when a controller class defines multiple action methods, the controller</span>
+        <span class="hljs-comment">// is returned as [$controllerInstance, 'methodName']</span>
+        <span class="hljs-keyword">if</span> (is_array(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controller</span>)) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controller</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controller</span>[<span class="hljs-number">0</span>];
+        }
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controller</span> <span class="hljs-keyword">instanceof</span> TokenAuthenticatedController) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getRequest()<span class="hljs-operator">-&gt;</span>query<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'token'</span>);
+            <span class="hljs-keyword">if</span> (!in_array(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>tokens)) {
+                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> AccessDeniedHttpException(<span class="hljs-string">'This action needs a valid token!'</span>);
+            }
+        }
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubscribedEvents</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            KernelEvents<span class="hljs-operator">::</span>CONTROLLER =&gt; <span class="hljs-string">'onKernelController'</span>,
+        ];
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! Your <code translate="no" class="notranslate">services.yaml</code> file should already be setup to load services from
+the <code translate="no" class="notranslate">EventSubscriber</code> directory. Symfony takes care of the rest. Your
+<code translate="no" class="notranslate">TokenSubscriber</code> <code translate="no" class="notranslate">onKernelController()</code> method will be executed on each request.
+If the controller that is about to be executed implements <code translate="no" class="notranslate">TokenAuthenticatedController</code>,
+token authentication is applied. This lets you have a &quot;before&quot; filter on any controller
+you want.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If your subscriber is <em>not</em> called on each request, double-check that
+you're <a href="service_container.html#service-container-services-load-example" class="reference internal">loading services</a> from
+the <code translate="no" class="notranslate">EventSubscriber</code> directory and have <a href="service_container.html#services-autoconfigure" class="reference internal">autoconfigure</a>
+enabled. You can also manually add the <code translate="no" class="notranslate">kernel.event_subscriber</code> tag.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h3 id="after-filters-with-the-kernel-response-event">
+    After Filters with the <code translate="no" class="notranslate">kernel.response</code> Event
+    <a class="headerlink" href="#after-filters-with-the-kernel-response-event" title="Permalink to this headline">¶</a>
+</h3>
+<p>In addition to having a &quot;hook&quot; that's executed <em>before</em> your controller, you
+can also add a hook that's executed <em>after</em> your controller. For this example,
+imagine that you want to add a <code translate="no" class="notranslate">sha1</code> hash (with a salt using that token) to
+all responses that have passed this token authentication.</p>
+<p>Another core Symfony event - called <code translate="no" class="notranslate">kernel.response</code> (aka <code translate="no" class="notranslate">KernelEvents::RESPONSE</code>) -
+is notified on every request, but after the controller returns a Response object.
+To create an &quot;after&quot; listener, create a listener class and register
+it as a service on this event.</p>
+<p>For example, take the <code translate="no" class="notranslate">TokenSubscriber</code> from the previous example and first
+record the authentication token inside the request attributes. This will
+serve as a basic flag that this request underwent token authentication:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelController</span><span class="hljs-params">(ControllerEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controller</span> <span class="hljs-keyword">instanceof</span> TokenAuthenticatedController) {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getRequest()<span class="hljs-operator">-&gt;</span>query<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'token'</span>);
+        <span class="hljs-keyword">if</span> (!in_array(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>tokens)) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> AccessDeniedHttpException(<span class="hljs-string">'This action needs a valid token!'</span>);
+        }
+
+        <span class="hljs-comment">// mark the request as having passed token authentication</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getRequest()<span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'auth_token'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, configure the subscriber to listen to another event and add <code translate="no" class="notranslate">onKernelResponse()</code>.
+This will look for the <code translate="no" class="notranslate">auth_token</code> flag on the request object and set a custom
+header on the response if it's found:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// add the new use statement at the top of your file</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ResponseEvent</span>;
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelResponse</span><span class="hljs-params">(ResponseEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+</span>{
+    <span class="hljs-comment">// check to see if onKernelController marked this as a token "auth'ed" request</span>
+    <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getRequest()<span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'auth_token'</span>)) {
+        <span class="hljs-keyword">return</span>;
+    }
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getResponse();
+
+    <span class="hljs-comment">// create a hash and set it as a response header</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hash</span> = sha1(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>getContent().<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>token</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>headers<span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'X-CONTENT-HASH'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hash</span>);
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubscribedEvents</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-keyword">return</span> [
+        KernelEvents<span class="hljs-operator">::</span>CONTROLLER =&gt; <span class="hljs-string">'onKernelController'</span>,
+        KernelEvents<span class="hljs-operator">::</span>RESPONSE =&gt; <span class="hljs-string">'onKernelResponse'</span>,
+    ];
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! The <code translate="no" class="notranslate">TokenSubscriber</code> is now notified before every controller is
+executed (<code translate="no" class="notranslate">onKernelController()</code>) and after every controller returns a response
+(<code translate="no" class="notranslate">onKernelResponse()</code>). By making specific controllers implement the <code translate="no" class="notranslate">TokenAuthenticatedController</code>
+interface, your listener knows which controllers it should take action on.
+And by storing a value in the request's &quot;attributes&quot; bag, the <code translate="no" class="notranslate">onKernelResponse()</code>
+method knows to add the extra header. Have fun!</p>
+<span id="event-dispatcher-method-behavior"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="how-to-customize-a-method-behavior-without-using-inheritance">
+    How to Customize a Method Behavior without Using Inheritance
+    <a class="headerlink" href="#how-to-customize-a-method-behavior-without-using-inheritance" title="Permalink to this headline">¶</a>
+</h2>
+<p>If you want to do something right before, or directly after a method is
+called, you can dispatch an event respectively at the beginning or at the
+end of the method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CustomMailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">send</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span>)</span>
+    </span>{
+        <span class="hljs-comment">// dispatch an event before the method</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span> = <span class="hljs-keyword">new</span> BeforeSendMailEvent(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>dispatcher<span class="hljs-operator">-&gt;</span>dispatch(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>, <span class="hljs-string">'mailer.pre_send'</span>);
+
+        <span class="hljs-comment">// get $subject and $message from the event, they may have been modified</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getSubject();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getMessage();
+
+        <span class="hljs-comment">// the real method implementation is here</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>returnValue</span> = ...;
+
+        <span class="hljs-comment">// do something after the method</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span> = <span class="hljs-keyword">new</span> AfterSendMailEvent(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>returnValue</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>dispatcher<span class="hljs-operator">-&gt;</span>dispatch(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>, <span class="hljs-string">'mailer.post_send'</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getReturnValue();
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In this example, two events are dispatched:</p>
+<ol class="arabic">
+    <li><code translate="no" class="notranslate">mailer.pre_send</code>, before the method is called,</li>
+<li>and <code translate="no" class="notranslate">mailer.post_send</code> after the method is called.</li>
+</ol>
+<p>Each uses a custom Event class to communicate information to the listeners
+of the two events. For example, <code translate="no" class="notranslate">BeforeSendMailEvent</code> might look like
+this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Event/BeforeSendMailEvent.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Event</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">Event</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BeforeSendMailEvent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Event</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span>,
+        private <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubject</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>subject;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setSubject</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>subject = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>subject</span>;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getMessage</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>message;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setMessage</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>message = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>And the <code translate="no" class="notranslate">AfterSendMailEvent</code> even like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Event/AfterSendMailEvent.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Event</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">Event</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AfterSendMailEvent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Event</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>returnValue</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getReturnValue</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>returnValue;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setReturnValue</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>returnValue</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>returnValue = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>returnValue</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Both events allow you to get some information (e.g. <code translate="no" class="notranslate">getMessage()</code>) and even change
+that information (e.g. <code translate="no" class="notranslate">setMessage()</code>).</p>
+<p>Now, you can create an event subscriber to hook into this event. For example, you
+could listen to the <code translate="no" class="notranslate">mailer.post_send</code> event and change the method's return value:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/EventSubscriber/MailPostSendSubscriber.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventSubscriber</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">AfterSendMailEvent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventSubscriberInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MailPostSendSubscriber</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">EventSubscriberInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onMailerPostSend</span><span class="hljs-params">(AfterSendMailEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>returnValue</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getReturnValue();
+        <span class="hljs-comment">// modify the original ``$returnValue`` value</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setReturnValue(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>returnValue</span>);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubscribedEvents</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-string">'mailer.post_send'</span> =&gt; <span class="hljs-string">'onMailerPostSend'</span>,
+        ];
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! Your subscriber should be called automatically (or read more about
+<a href="event_dispatcher.html#ref-event-subscriber-configuration" class="reference internal">event subscriber configuration</a>).</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

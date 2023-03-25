@@ -1,0 +1,693 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="http-cache">
+    HTTP Cache
+    <a class="headerlink" href="#http-cache" title="Permalink to this headline">¶</a>
+</h1>
+<p>The nature of rich web applications means that they're dynamic. No matter
+how efficient your application, each request will always contain more overhead
+than serving a static file. Usually, that's fine. But when you need your requests
+to be lightning fast, you need HTTP caching.</p>
+<div class="section">
+<h2 id="caching-on-the-shoulders-of-giants">
+    Caching on the Shoulders of Giants
+    <a class="headerlink" href="#caching-on-the-shoulders-of-giants" title="Permalink to this headline">¶</a>
+</h2>
+<p>With HTTP Caching, you cache the full output of a page (i.e. the response) and bypass
+your application <em>entirely</em> on subsequent requests. Caching entire responses
+isn't always possible for highly dynamic sites, or is it? With
+<a href="http_cache/esi.html" class="reference internal">Edge Side Includes (ESI)</a>, you can use the power of HTTP caching
+on only <em>fragments</em> of your site.</p>
+<p>The Symfony cache system is different because it relies on the simplicity
+and power of the HTTP cache as defined in <a href="https://tools.ietf.org/html/rfc7234" class="reference external" rel="external noopener noreferrer" target="_blank">RFC 7234 - Caching</a>. Instead of
+reinventing a caching methodology, Symfony embraces the standard that defines
+basic communication on the Web. Once you understand the fundamental HTTP
+validation and expiration caching models, you'll be ready to master the Symfony
+cache system.</p>
+<p>Since caching with HTTP isn't unique to Symfony, many articles already exist
+on the topic. If you're new to HTTP caching, Ryan Tomayko's article
+<a href="https://2ndscale.com/writings/things-caches-do" class="reference external" rel="external noopener noreferrer" target="_blank">Things Caches Do</a> is <em>highly</em> recommended. Another in-depth resource is Mark
+Nottingham's <a href="https://www.mnot.net/cache_docs/" class="reference external" rel="external noopener noreferrer" target="_blank">Cache Tutorial</a>.</p>
+<span id="gateway-caches"></span>
+</div>
+<div class="section">
+<h2 id="caching-with-a-gateway-cache">
+    Caching with a Gateway Cache
+    <a class="headerlink" href="#caching-with-a-gateway-cache" title="Permalink to this headline">¶</a>
+</h2>
+<p>When caching with HTTP, the <em>cache</em> is separated from your application entirely
+and sits between your application and the client making the request.</p>
+<p>The job of the cache is to accept requests from the client and pass them
+back to your application. The cache will also receive responses back from
+your application and forward them on to the client. The cache is the &quot;middle-man&quot;
+of the request-response communication between the client and your application.</p>
+<p>Along the way, the cache will store each response that is deemed &quot;cacheable&quot;
+(See <a href="http_cache.html#http-cache-introduction" class="reference internal">HTTP Cache</a>). If the same resource is requested again,
+the cache sends the cached response to the client, ignoring your application
+entirely.</p>
+<p>This type of cache is known as an HTTP gateway cache and many exist such
+as <a href="https://varnish-cache.org/" class="reference external" rel="external noopener noreferrer" target="_blank">Varnish</a>, <a href="https://wiki.squid-cache.org/SquidFaq/ReverseProxy" class="reference external" rel="external noopener noreferrer" target="_blank">Squid in reverse proxy mode</a>, and the Symfony reverse proxy.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Gateway caches are sometimes referred to as reverse proxy caches,
+surrogate caches, or even HTTP accelerators.</p>
+</div>
+<span id="symfony-gateway-cache"></span>
+<span id="symfony2-reverse-proxy"></span>
+<div class="section">
+<h3 id="symfony-reverse-proxy">
+    Symfony Reverse Proxy
+    <a class="headerlink" href="#symfony-reverse-proxy" title="Permalink to this headline">¶</a>
+</h3>
+<p>Symfony comes with a reverse proxy (i.e. gateway cache) written in PHP.
+<a href="http_cache.html#http-cache-symfony-versus-varnish" class="reference internal">It's not a fully-featured reverse proxy cache like Varnish</a>,
+but it is a great way to start.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>For details on setting up Varnish, see <a href="http_cache/varnish.html" class="reference internal">How to Use Varnish to Speed up my Website</a>.</p>
+</div>
+<p>Use the <code translate="no" class="notranslate">framework.http_cache</code> option to enable the proxy for the
+<a href="configuration.html#configuration-environments" class="reference internal">prod environment</a>:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-e9cb81e75683814138cbf3035c7cb692339ebfe7" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-a69522543a8c4872c0fea1ff45ee88f18abff6ab" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-e3d6f4e8bfd517dd63f195ff3fceb22d1a574a2c" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-e9cb81e75683814138cbf3035c7cb692339ebfe7" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/framework.yaml</span>
+<span class="hljs-string">when@prod:</span>
+    <span class="hljs-attr">framework:</span>
+        <span class="hljs-attr">http_cache:</span> <span class="hljs-literal">true</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-a69522543a8c4872c0fea1ff45ee88f18abff6ab" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/framework.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">when</span> <span class="hljs-attr">env</span>=<span class="hljs-string">"prod"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+          <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">framework:http-cache</span> <span class="hljs-attr">enabled</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">when</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-e3d6f4e8bfd517dd63f195ff3fceb22d1a574a2c" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/framework.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>, string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>env</span>)</span> </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-string">'prod'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>env</span>) {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>httpCache()<span class="hljs-operator">-&gt;</span>enabled(<span class="hljs-keyword">true</span>);
+    }
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>The kernel will immediately act as a reverse proxy: caching responses
+from your application and returning them to the client.</p>
+<p>The proxy has a sensible default configuration, but it can be
+finely tuned via <a href="reference/configuration/framework.html#configuration-framework-http_cache" class="reference internal">a set of options</a>.</p>
+<p>When in <a href="configuration/front_controllers_and_kernel.html#debug-mode" class="reference internal">debug mode</a>, Symfony automatically adds an
+<code translate="no" class="notranslate">X-Symfony-Cache</code> header to the response. You can also use the <code translate="no" class="notranslate">trace_level</code>
+config option and set it to either <code translate="no" class="notranslate">none</code>, <code translate="no" class="notranslate">short</code> or <code translate="no" class="notranslate">full</code> to add this
+information.</p>
+<p><code translate="no" class="notranslate">short</code> will add the information for the main request only.
+It's written in a concise way that makes it easy to record the
+information in your server log files. For example, in Apache you can
+use <code translate="no" class="notranslate">%{X-Symfony-Cache}o</code> in <code translate="no" class="notranslate">LogFormat</code> format statements.
+This information can be used to extract general information about
+cache efficiency of your routes.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can change the name of the header used for the trace
+information using the <code translate="no" class="notranslate">trace_header</code> config option.</p>
+</div>
+<span id="http-cache-symfony-versus-varnish"></span>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span>Changing from one Reverse Proxy to another</span></p><p>The Symfony reverse proxy is a great tool to use when developing your
+website or when you deploy your website to a shared host where you cannot
+install anything beyond PHP code. But being written in PHP, it cannot
+be as fast as a proxy written in C.</p>
+<p>Fortunately, since all reverse proxies are effectively the same, you should
+be able to switch to something more robust - like Varnish - without any problems.
+See <a href="http_cache/varnish.html" class="reference internal">How to use Varnish</a></p>
+</div></div>
+<span id="http-cache-introduction"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="making-your-responses-http-cacheable">
+    Making your Responses HTTP Cacheable
+    <a class="headerlink" href="#making-your-responses-http-cacheable" title="Permalink to this headline">¶</a>
+</h2>
+<p>Once you've added a reverse proxy cache (e.g. like the Symfony reverse proxy or Varnish),
+you're ready to cache your responses. To do that, you need to <em>communicate</em> to your
+cache <em>which</em> responses are cacheable and for how long. This is done by setting HTTP
+cache headers on the response.</p>
+<p>HTTP specifies four response cache headers that you can set to enable caching:</p>
+<ul>
+    <li><code translate="no" class="notranslate">Cache-Control</code></li>
+<li><code translate="no" class="notranslate">Expires</code></li>
+<li><code translate="no" class="notranslate">ETag</code></li>
+<li><code translate="no" class="notranslate">Last-Modified</code></li>
+</ul>
+<p>These four headers are used to help cache your responses via <em>two</em> different models:</p>
+<span id="http-expiration-validation"></span>
+<span id="http-expiration-and-validation"></span>
+<ol class="arabic">
+    <li><a href="http_cache.html#http-cache-expiration-intro" class="reference internal">Expiration Caching</a>
+Used to cache your entire response for a specific amount of time (e.g. 24 hours).
+Simple, but cache invalidation is more difficult.</li>
+<li><a href="http_cache.html#http-cache-validation-intro" class="reference internal">Validation Caching</a>
+More complex: used to cache your response, but allows you to dynamically invalidate
+it as soon as your content changes.</li>
+</ol>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span>Reading the HTTP Specification</span></p><p>All of the HTTP headers you'll read about are <em>not</em> invented by Symfony! They're
+part of an HTTP specification that's used by sites all over the web. To dig deeper
+into HTTP Caching, check out the documents <a href="https://tools.ietf.org/html/rfc7234" class="reference external" rel="external noopener noreferrer" target="_blank">RFC 7234 - Caching</a> and
+<a href="https://tools.ietf.org/html/rfc7232" class="reference external" rel="external noopener noreferrer" target="_blank">RFC 7232 - Conditional Requests</a>.</p>
+<p>As a web developer, you are strongly urged to read the specification. Its
+clarity and power - even more than fifteen years after its creation - is
+invaluable. Don't be put-off by the appearance of the spec - its contents
+are much more beautiful than its cover!</p>
+</div></div>
+<span id="http-cache-expiration-intro"></span>
+<div class="section">
+<h3 id="expiration-caching">
+    Expiration Caching
+    <a class="headerlink" href="#expiration-caching" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <em>easiest</em> way to cache a response is by caching it for a specific amount of time:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-2">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-a4c659cf26cc6c2e6c27fb17545fc9c330846008" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-aa298572089ce651379dda93e1130e5349630a34" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-a4c659cf26cc6c2e6c27fb17545fc9c330846008" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Controller/BlogController.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">Cache</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">#[Cache(public: true, maxage: 3600, mustRevalidate: true)]</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'blog/index.html.twig'</span>, []);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-aa298572089ce651379dda93e1130e5349630a34" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/BlogController.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-comment">// somehow create a Response object, like by rendering a template</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'blog/index.html.twig'</span>, []);
+
+    <span class="hljs-comment">// cache publicly for 3600 seconds</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setPublic();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setMaxAge(<span class="hljs-number">3600</span>);
+
+    <span class="hljs-comment">// (optional) set a custom Cache-Control directive</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>headers<span class="hljs-operator">-&gt;</span>addCacheControlDirective(<span class="hljs-string">'must-revalidate'</span>, <span class="hljs-keyword">true</span>);
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">#[Cache()]</code> attribute was introduced in Symfony 6.2.</p>
+</div>
+<p>Thanks to this new code, your HTTP response will have the following header:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">Cache-Control: public, maxage=3600, must-revalidate</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This tells your HTTP reverse proxy to cache this response for 3600 seconds. If <em>anyone</em>
+requests this URL again before 3600 seconds, your application <em>won't</em> be hit at all.
+If you're using the Symfony reverse proxy, look at the <code translate="no" class="notranslate">X-Symfony-Cache</code> header
+for debugging information about cache hits and misses.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The URI of the request is used as the cache key (unless you <a href="http_cache/cache_vary.html" class="reference internal">vary</a>).</p>
+</div>
+<p>This provides great performance and is simple to use. But, cache <em>invalidation</em>
+is not supported. If your content change, you'll need to wait until your cache
+expires for the page to update.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Actually, you <em>can</em> manually invalidate your cache, but it's not part of the
+HTTP Caching spec. See <a href="http_cache/cache_invalidation.html#http-cache-invalidation" class="reference internal">Cache Invalidation</a>.</p>
+</div>
+<p>If you need to set cache headers for many different controller actions, check out
+<a href="https://foshttpcachebundle.readthedocs.org/" class="reference external" rel="external noopener noreferrer" target="_blank">FOSHttpCacheBundle</a>. It provides a way to define cache headers based on the URL
+pattern and other request properties.</p>
+<p>Finally, for more information about expiration caching, see <a href="http_cache/expiration.html" class="reference internal">HTTP Cache Expiration</a>.</p>
+<span id="http-cache-validation-intro"></span>
+</div>
+<div class="section">
+<h3 id="validation-caching">
+    Validation Caching
+    <a class="headerlink" href="#validation-caching" title="Permalink to this headline">¶</a>
+</h3>
+<p>With expiration caching, you say &quot;cache for 3600 seconds!&quot;. But, when someone
+updates cached content, you won't see that content on your site until the cache
+expires.</p>
+<p>If you need to see updated content <em>immediately</em>, you either need to
+<a href="http_cache/cache_invalidation.html#http-cache-invalidation" class="reference internal">invalidate</a> your cache <em>or</em> use the validation
+caching model.</p>
+<p>For details, see <a href="http_cache/validation.html" class="reference internal">HTTP Cache Validation</a>.</p>
+</div>
+<div class="section">
+<h3 id="safe-methods-only-caching-get-or-head-requests">
+    Safe Methods: Only caching GET or HEAD requests
+    <a class="headerlink" href="#safe-methods-only-caching-get-or-head-requests" title="Permalink to this headline">¶</a>
+</h3>
+<p>HTTP caching only works for &quot;safe&quot; HTTP methods (like GET and HEAD). This means
+three things:</p>
+<ul>
+    <li>Don't try to cache PUT or DELETE requests. It won't work and with good reason.
+These methods are meant to be used when mutating the state of your application
+(e.g. deleting a blog post). Caching them would prevent certain requests from hitting
+and mutating your application.</li>
+<li>POST requests are generally considered uncacheable, but <a href="https://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-20#section-2.3.4" class="reference external" rel="external noopener noreferrer" target="_blank">they can be cached</a>
+when they include explicit freshness information. However, POST caching is not
+widely implemented, so you should avoid it if possible.</li>
+<li>You should <em>never</em> change the state of your application (e.g. update a blog post)
+when responding to a GET or HEAD request. If those requests are cached, future
+requests may not actually hit your server.</li>
+</ul>
+</div>
+<div class="section">
+<h3 id="more-response-methods">
+    More Response Methods
+    <a class="headerlink" href="#more-response-methods" title="Permalink to this headline">¶</a>
+</h3>
+<p>The Response class provides many more methods related to the cache. Here are
+the most useful ones:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// marks the Response stale</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>expire();
+
+<span class="hljs-comment">// forces the response to return a proper 304 response with no content</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setNotModified();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Additionally, most cache-related HTTP headers can be set via the single
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Response.php#method_setCache" class="reference external" title="Symfony\Component\HttpFoundation\Response::setCache()" rel="external noopener noreferrer" target="_blank">setCache()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// use this method to set several cache settings in one call</span>
+<span class="hljs-comment">// (this example lists all the available cache settings)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setCache([
+    <span class="hljs-string">'must_revalidate'</span>  =&gt; <span class="hljs-keyword">false</span>,
+    <span class="hljs-string">'no_cache'</span>         =&gt; <span class="hljs-keyword">false</span>,
+    <span class="hljs-string">'no_store'</span>         =&gt; <span class="hljs-keyword">false</span>,
+    <span class="hljs-string">'no_transform'</span>     =&gt; <span class="hljs-keyword">false</span>,
+    <span class="hljs-string">'public'</span>           =&gt; <span class="hljs-keyword">true</span>,
+    <span class="hljs-string">'private'</span>          =&gt; <span class="hljs-keyword">false</span>,
+    <span class="hljs-string">'proxy_revalidate'</span> =&gt; <span class="hljs-keyword">false</span>,
+    <span class="hljs-string">'max_age'</span>          =&gt; <span class="hljs-number">600</span>,
+    <span class="hljs-string">'s_maxage'</span>         =&gt; <span class="hljs-number">600</span>,
+    <span class="hljs-string">'immutable'</span>        =&gt; <span class="hljs-keyword">true</span>,
+    <span class="hljs-string">'last_modified'</span>    =&gt; <span class="hljs-keyword">new</span> \DateTime(),
+    <span class="hljs-string">'etag'</span>             =&gt; <span class="hljs-string">'abcdef'</span>
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>All these options are also available when using the <code translate="no" class="notranslate">#[Cache()]</code> attribute.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="cache-invalidation">
+    Cache Invalidation
+    <a class="headerlink" href="#cache-invalidation" title="Permalink to this headline">¶</a>
+</h2>
+<p>Cache invalidation is <em>not</em> part of the HTTP specification. Still, it can be really
+useful to delete various HTTP cache entries as soon as some content on your site
+is updated.</p>
+<p>For details, see <a href="http_cache/cache_invalidation.html" class="reference internal">Cache Invalidation</a>.</p>
+</div>
+<div class="section">
+<h2 id="using-edge-side-includes">
+    Using Edge Side Includes
+    <a class="headerlink" href="#using-edge-side-includes" title="Permalink to this headline">¶</a>
+</h2>
+<p>When pages contain dynamic parts, you may not be able to cache entire pages,
+but only parts of it. Read <a href="http_cache/esi.html" class="reference internal">Working with Edge Side Includes</a> to find out how to configure
+different cache strategies for specific parts of your page.</p>
+</div>
+<div class="section">
+<h2 id="http-caching-and-user-sessions">
+    HTTP Caching and User Sessions
+    <a class="headerlink" href="#http-caching-and-user-sessions" title="Permalink to this headline">¶</a>
+</h2>
+<p>Whenever the session is started during a request, Symfony turns the response
+into a private non-cacheable response. This is the best default behavior to not
+cache private user information (e.g. a shopping cart, a user profile details,
+etc.) and expose it to other visitors.</p>
+<p>However, even requests making use of the session can be cached under some
+circumstances. For example, information related to some user group could be
+cached for all the users belonging to that group. Handling these advanced
+caching scenarios is out of the scope of Symfony, but they can be solved with
+the <a href="https://foshttpcachebundle.readthedocs.org/" class="reference external" rel="external noopener noreferrer" target="_blank">FOSHttpCacheBundle</a>.</p>
+<p>In order to disable the default Symfony behavior that makes requests using the
+session uncacheable, add the following internal header to your response and
+Symfony won't modify it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">EventListener</span>\<span class="hljs-title">AbstractSessionListener</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>headers<span class="hljs-operator">-&gt;</span>set(AbstractSessionListener<span class="hljs-operator">::</span>NO_AUTO_CACHE_CONTROL_HEADER, <span class="hljs-string">'true'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="summary">
+    Summary
+    <a class="headerlink" href="#summary" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony was designed to follow the proven rules of the road: HTTP. Caching
+is no exception. Mastering the Symfony cache system means becoming familiar
+with the HTTP cache models and using them effectively. This means that, instead
+of relying only on Symfony documentation and code examples, you have access
+to a world of knowledge related to HTTP caching and gateway caches such as
+Varnish.</p>
+</div>
+<div class="section">
+<h2 id="learn-more">
+    Learn more
+    <a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a>
+</h2>
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-7"><li><a href="http_cache/cache_invalidation.html">Cache Invalidation</a></li><li><a href="http_cache/cache_vary.html">Varying the Response for HTTP Cache</a></li><li><a href="http_cache/esi.html">Working with Edge Side Includes</a></li><li><a href="http_cache/expiration.html">HTTP Cache Expiration</a></li><li><a href="http_cache/ssi.html">Working with Server Side Includes</a></li><li><a href="http_cache/validation.html">HTTP Cache Validation</a></li><li><a href="http_cache/varnish.html">How to Use Varnish to Speed up my Website</a></li></ul></div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

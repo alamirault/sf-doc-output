@@ -1,0 +1,749 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-override-symfony-s-default-directory-structure">
+    How to Override Symfony's default Directory Structure
+    <a class="headerlink" href="#how-to-override-symfony-s-default-directory-structure" title="Permalink to this headline">¶</a>
+</h1>
+<p>Symfony applications have the following default directory structure, but you can
+override it to create your own structure:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">your-project/
+├─ assets/
+├─ bin/
+│  └─ console
+├─ config/
+├─ public/
+│  └─ index.php
+├─ src/
+│  └─ ...
+├─ templates/
+├─ tests/
+├─ translations/
+├─ var/
+│  ├─ cache/
+│  ├─ log/
+│  └─ ...
+├─ vendor/
+└─ .env</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="override-env-dir"></span>
+<div class="section">
+<h2 id="override-the-environment-dotenv-files-directory">
+    Override the Environment (DotEnv) Files Directory
+    <a class="headerlink" href="#override-the-environment-dotenv-files-directory" title="Permalink to this headline">¶</a>
+</h2>
+<p>By default, the <a href="../configuration.html#config-dot-env" class="reference internal">.env configuration file</a> is located at
+the root directory of the project. If you store it in a different location,
+define the <code translate="no" class="notranslate">runtime.dotenv_path</code> option in the <code translate="no" class="notranslate">composer.json</code> file:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"..."</span>: <span class="hljs-string">"..."</span>,
+    <span class="hljs-attr">"extra"</span>: {
+        <span class="hljs-attr">"..."</span>: <span class="hljs-string">"..."</span>,
+        <span class="hljs-attr">"runtime"</span>: {
+            <span class="hljs-attr">"dotenv_path"</span>: <span class="hljs-string">"my/custom/path/to/.env"</span>
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, update your Composer files (running <code translate="no" class="notranslate">composer dump-autoload</code>, for instance),
+so that the <code translate="no" class="notranslate">vendor/autoload_runtime.php</code> files gets regenerated with the new
+<code translate="no" class="notranslate">.env</code> path.</p>
+<p>You can also set up different <code translate="no" class="notranslate">.env</code> paths for your console and web server
+calls. Edit the <code translate="no" class="notranslate">public/index.php</code> and/or <code translate="no" class="notranslate">bin/console</code> files to define the
+new file path.</p>
+<p>Console script:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// bin/console</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'APP_RUNTIME_OPTIONS'</span>][<span class="hljs-string">'dotenv_path'</span>] = <span class="hljs-string">'some/custom/path/to/.env'</span>;
+
+<span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Web front-controller:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// public/index.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'APP_RUNTIME_OPTIONS'</span>][<span class="hljs-string">'dotenv_path'</span>] = <span class="hljs-string">'another/custom/path/to/.env'</span>;
+
+<span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="override-config-dir"></span>
+</div>
+<div class="section">
+<h2 id="override-the-configuration-directory">
+    Override the Configuration Directory
+    <a class="headerlink" href="#override-the-configuration-directory" title="Permalink to this headline">¶</a>
+</h2>
+<p>The configuration directory is the only one which cannot be overridden in a
+Symfony application. Its location is hardcoded as the <code translate="no" class="notranslate">config/</code> directory
+at your project root directory.</p>
+<span id="override-cache-dir"></span>
+</div>
+<div class="section">
+<h2 id="override-the-cache-directory">
+    Override the Cache Directory
+    <a class="headerlink" href="#override-the-cache-directory" title="Permalink to this headline">¶</a>
+</h2>
+<p>Changing the cache directory can be achieved by overriding the
+<code translate="no" class="notranslate">getCacheDir()</code> method in the <code translate="no" class="notranslate">Kernel</code> class of your application:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Kernel.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Kernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseKernel</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getCacheDir</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/var/'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>environment.<span class="hljs-string">'/cache'</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In this code, <code translate="no" class="notranslate">$this-&gt;environment</code> is the current environment (i.e. <code translate="no" class="notranslate">dev</code>).
+In this case you have changed the location of the cache directory to
+<code translate="no" class="notranslate">var/{environment}/cache/</code>.</p>
+<p>You can also change the cache directory defining an environment variable named
+<code translate="no" class="notranslate">APP_CACHE_DIR</code> whose value is the full path of the cache folder.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>You should keep the cache directory different for each environment,
+otherwise some unexpected behavior may happen. Each environment generates
+its own cached configuration files, and so each needs its own directory to
+store those cache files.</p>
+</div>
+<span id="override-logs-dir"></span>
+</div>
+<div class="section">
+<h2 id="override-the-log-directory">
+    Override the Log Directory
+    <a class="headerlink" href="#override-the-log-directory" title="Permalink to this headline">¶</a>
+</h2>
+<p>Overriding the <code translate="no" class="notranslate">var/log/</code> directory is almost the same as overriding the
+<code translate="no" class="notranslate">var/cache/</code> directory.</p>
+<p>You can do it overriding the <code translate="no" class="notranslate">getLogDir()</code> method in the <code translate="no" class="notranslate">Kernel</code> class of
+your application:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Kernel.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Kernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseKernel</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getLogDir</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/var/'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>environment.<span class="hljs-string">'/log'</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Here you have changed the location of the directory to <code translate="no" class="notranslate">var/{environment}/log/</code>.</p>
+<p>You can also change the log directory defining an environment variable named
+<code translate="no" class="notranslate">APP_LOG_DIR</code> whose value is the full path of the log folder.</p>
+<span id="override-templates-dir"></span>
+</div>
+<div class="section">
+<h2 id="override-the-templates-directory">
+    Override the Templates Directory
+    <a class="headerlink" href="#override-the-templates-directory" title="Permalink to this headline">¶</a>
+</h2>
+<p>If your templates are not stored in the default <code translate="no" class="notranslate">templates/</code> directory, use
+the <a href="../reference/configuration/twig.html#config-twig-default-path" class="reference internal">twig.default_path</a> configuration
+option to define your own templates directory (use <a href="../reference/configuration/twig.html#config-twig-paths" class="reference internal">twig.paths</a>
+for multiple directories):</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-57628d0593e2b5700ab506c3dedf5001981f9197" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-872dc26319ba747ab02b5b5dc4dd1d2149e1c430" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-49fa2fe6a3ac65a56536851abfd392a1dee1e702" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-57628d0593e2b5700ab506c3dedf5001981f9197" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/twig.yaml</span>
+<span class="hljs-attr">twig:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">default_path:</span> <span class="hljs-string">"%kernel.project_dir%/resources/views"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-872dc26319ba747ab02b5b5dc4dd1d2149e1c430" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/twig.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:twig</span>=<span class="hljs-string">"http://symfony.com/schema/dic/twig"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/twig
+        https://symfony.com/schema/dic/twig/twig-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">twig:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">twig:default-path</span>&gt;</span>%kernel.project_dir%/resources/views<span class="hljs-tag">&lt;/<span class="hljs-name">twig:default-path</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">twig:config</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-49fa2fe6a3ac65a56536851abfd392a1dee1e702" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/twig.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">TwigConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(TwigConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span><span class="hljs-operator">-&gt;</span>defaultPath(<span class="hljs-string">'%kernel.project_dir%/resources/views'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h2 id="override-the-translations-directory">
+    Override the Translations Directory
+    <a class="headerlink" href="#override-the-translations-directory" title="Permalink to this headline">¶</a>
+</h2>
+<p>If your translation files are not stored in the default <code translate="no" class="notranslate">translations/</code>
+directory, use the <a href="../reference/configuration/framework.html#reference-translator-default_path" class="reference internal">framework.translator.default_path</a>
+configuration option to define your own translations directory (use <a href="../reference/configuration/framework.html#reference-translator-paths" class="reference internal">framework.translator.paths</a> for multiple directories):</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-0f173290866fbfb38a76db0d84819ff4d901d719" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-99ee9e4ef7f0721e5bd1f7225c545918445fa884" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-a89782cf9ccfd03a1fa5946646eb794a717a3714" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-0f173290866fbfb38a76db0d84819ff4d901d719" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/translation.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">translator:</span>
+        <span class="hljs-comment"># ...</span>
+        <span class="hljs-attr">default_path:</span> <span class="hljs-string">"%kernel.project_dir%/i18n"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-99ee9e4ef7f0721e5bd1f7225c545918445fa884" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/translation.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:twig</span>=<span class="hljs-string">"http://symfony.com/schema/dic/twig"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/twig
+        https://symfony.com/schema/dic/twig/twig-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:translator</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:default-path</span>&gt;</span>%kernel.project_dir%/i18n<span class="hljs-tag">&lt;/<span class="hljs-name">framework:default-path</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:translator</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-a89782cf9ccfd03a1fa5946646eb794a717a3714" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/translation.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>translator()
+        <span class="hljs-operator">-&gt;</span>defaultPath(<span class="hljs-string">'%kernel.project_dir%/i18n'</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<span id="override-web-dir"></span>
+<span id="override-the-web-directory"></span>
+</div>
+<div class="section">
+<h2 id="override-the-public-directory">
+    Override the Public Directory
+    <a class="headerlink" href="#override-the-public-directory" title="Permalink to this headline">¶</a>
+</h2>
+<p>If you need to rename or move your <code translate="no" class="notranslate">public/</code> directory, the only thing you
+need to guarantee is that the path to the <code translate="no" class="notranslate">vendor/</code> directory is still correct in
+your <code translate="no" class="notranslate">index.php</code> front controller. If you renamed the directory, you're fine.
+But if you moved it in some way, you may need to modify these paths inside those
+files:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../path/to/vendor/autoload.php'</span>;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You also need to change the <code translate="no" class="notranslate">extra.public-dir</code> option in the <code translate="no" class="notranslate">composer.json</code>
+file:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"..."</span>: <span class="hljs-string">"..."</span>,
+    <span class="hljs-attr">"extra"</span>: {
+        <span class="hljs-attr">"..."</span>: <span class="hljs-string">"..."</span>,
+        <span class="hljs-attr">"public-dir"</span>: <span class="hljs-string">"my_new_public_dir"</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Some shared hosts have a <code translate="no" class="notranslate">public_html/</code> web directory root. Renaming
+your web directory from <code translate="no" class="notranslate">public/</code> to <code translate="no" class="notranslate">public_html/</code> is one way to make
+your Symfony project work on your shared host. Another way is to deploy
+your application to a directory outside of your web root, delete your
+<code translate="no" class="notranslate">public_html/</code> directory, and then replace it with a symbolic link to
+the <code translate="no" class="notranslate">public/</code> dir in your project.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="override-the-vendor-directory">
+    Override the Vendor Directory
+    <a class="headerlink" href="#override-the-vendor-directory" title="Permalink to this headline">¶</a>
+</h2>
+<p>To override the <code translate="no" class="notranslate">vendor/</code> directory, you need to define the <code translate="no" class="notranslate">vendor-dir</code>
+option in your <code translate="no" class="notranslate">composer.json</code> file like this:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"config"</span>: {
+        <span class="hljs-attr">"bin-dir"</span>: <span class="hljs-string">"bin"</span>,
+        <span class="hljs-attr">"vendor-dir"</span>: <span class="hljs-string">"/some/dir/vendor"</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>This modification can be of interest if you are working in a virtual
+environment and cannot use NFS - for example, if you're running a Symfony
+application using Vagrant/VirtualBox in a guest operating system.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

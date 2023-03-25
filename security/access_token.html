@@ -1,0 +1,887 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-use-access-token-authentication">
+    How to use Access Token Authentication
+    <a class="headerlink" href="#how-to-use-access-token-authentication" title="Permalink to this headline">¶</a>
+</h1>
+<p>Access tokens or API tokens are commonly used as authentication mechanism
+in API contexts. The access token is a string, obtained during authentication
+(using the application or an authorization server). The access token's role
+is to verify the user identity and receive consent before the token is
+issued.</p>
+<p>Access tokens can be of any kind, for instance opaque strings,
+<a href="https://datatracker.ietf.org/doc/html/rfc7519" class="reference external" rel="external noopener noreferrer" target="_blank">JSON Web Tokens (JWT)</a> or <a href="https://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-tech-overview-2.0.html" class="reference external" rel="external noopener noreferrer" target="_blank">SAML2 (XML structures)</a>. Please refer to the
+<a href="https://datatracker.ietf.org/doc/html/rfc6750" class="reference external" rel="external noopener noreferrer" target="_blank">RFC6750</a>: <em>The OAuth 2.0 Authorization Framework: Bearer Token Usage</em> for
+a detailed specification.</p>
+<div class="section">
+<h2 id="using-the-access-token-authenticator">
+    Using the Access Token Authenticator
+    <a class="headerlink" href="#using-the-access-token-authenticator" title="Permalink to this headline">¶</a>
+</h2>
+<p>This guide assumes you have setup security and have created a user object
+in your application. Follow <a href="../security.html" class="reference internal">the main security guide</a> if
+this is not yet the case.</p>
+<div class="section">
+<h3 id="1-configure-the-access-token-authenticator">
+    1) Configure the Access Token Authenticator
+    <a class="headerlink" href="#1-configure-the-access-token-authenticator" title="Permalink to this headline">¶</a>
+</h3>
+<p>To use the access token authenticator, you must configure a <code translate="no" class="notranslate">token_handler</code>.
+The token handler receives the token from the request and returns the
+correct user identifier. To get the user identifier, implementations may
+need to load and validate the token (e.g. revocation, expiration time,
+digital signature, etc.).</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-83318ee9acff1faa23190f61526a2557317492a7" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-923d7784eb46f7d64fadf9f7039223477e80cb64" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-252d56214e4446f60698debffa01bb6b5ec1f42a" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-83318ee9acff1faa23190f61526a2557317492a7" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">firewalls:</span>
+        <span class="hljs-attr">main:</span>
+            <span class="hljs-attr">access_token:</span>
+                <span class="hljs-attr">token_handler:</span> <span class="hljs-string">App\Security\AccessTokenHandler</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-923d7784eb46f7d64fadf9f7039223477e80cb64" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/security
+        https://symfony.com/schema/dic/security/security-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">firewall</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">access-token</span> <span class="hljs-attr">token-handler</span>=<span class="hljs-string">"App\Security\AccessTokenHandler"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">firewall</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-252d56214e4446f60698debffa01bb6b5ec1f42a" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">AccessTokenHandler</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>firewall(<span class="hljs-string">'main'</span>)
+        <span class="hljs-operator">-&gt;</span>accessToken()
+            <span class="hljs-operator">-&gt;</span>tokenHandler(AccessTokenHandler<span class="hljs-operator">::</span>class)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>This handler must implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/AccessToken/AccessTokenHandlerInterface.php" class="reference external" title="Symfony\Component\Security\Http\AccessToken\AccessTokenHandlerInterface" rel="external noopener noreferrer" target="_blank">AccessTokenHandlerInterface</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Security/AccessTokenHandler.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repository</span>\<span class="hljs-title">AccessTokenRepository</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">AccessToken</span>\<span class="hljs-title">AccessTokenHandlerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Authenticator</span>\<span class="hljs-title">Passport</span>\<span class="hljs-title">Badge</span>\<span class="hljs-title">UserBadge</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AccessTokenHandler</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">AccessTokenHandlerInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private AccessTokenRepository <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>repository</span>
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getUserBadgeFrom</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>accessToken</span>)</span>: <span class="hljs-title">UserBadge</span>
+    </span>{
+        <span class="hljs-comment">// e.g. query the "access token" database to search for this token</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>accessToken</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>repository<span class="hljs-operator">-&gt;</span>findOneByValue(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>accessToken</span>);
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">null</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>accessToken</span> || !<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>accessToken</span><span class="hljs-operator">-&gt;</span>isValid()) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadCredentialsException(<span class="hljs-string">'Invalid credentials.'</span>);
+        }
+
+        <span class="hljs-comment">// and return a UserBadge object containing the user identifier from the found token</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> UserBadge(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>accessToken</span><span class="hljs-operator">-&gt;</span>getUserId());
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The access token authenticator will use the returned user identifier to
+load the user using the <a href="../security.html#security-user-providers" class="reference internal">user provider</a>.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>It is important to check the token if is valid. For instance, the
+example above verifies whether the token has not expired. With
+self-contained access tokens such as JWT, the handler is required to
+verify the digital signature and understand all claims, especially
+<code translate="no" class="notranslate">sub</code>, <code translate="no" class="notranslate">iat</code>, <code translate="no" class="notranslate">nbf</code> and <code translate="no" class="notranslate">exp</code>.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="2-configure-the-token-extractor-optional">
+    2) Configure the Token Extractor (Optional)
+    <a class="headerlink" href="#2-configure-the-token-extractor-optional" title="Permalink to this headline">¶</a>
+</h3>
+<p>The application is now ready to handle incoming tokens. A <em>token extractor</em>
+retrieves the token from the request (e.g. a header or request body).</p>
+<p>By default, the access token is read from the request header parameter
+<code translate="no" class="notranslate">Authorization</code> with the scheme <code translate="no" class="notranslate">Bearer</code> (e.g. <code translate="no" class="notranslate">Authorization: Bearer
+the-token-value</code>).</p>
+<p>Symfony provides other extractors as per the <a href="https://datatracker.ietf.org/doc/html/rfc6750" class="reference external" rel="external noopener noreferrer" target="_blank">RFC6750</a>:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">header</code> (default)</dt>
+        
+        <dd>
+                            The token is sent through the request header. Usually <code translate="no" class="notranslate">Authorization</code>
+with the <code translate="no" class="notranslate">Bearer</code> scheme.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">query_string</code></dt>
+        
+        <dd>
+                            The token is part of the request query string. Usually <code translate="no" class="notranslate">access_token</code>.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">request_body</code></dt>
+        
+        <dd>
+                            The token is part of the request body during a POST request. Usually
+<code translate="no" class="notranslate">access_token</code>.
+                    </dd>
+    </dl>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Because of the security weaknesses associated with the URI method,
+including the high likelihood that the URL or the request body
+containing the access token will be logged, methods <code translate="no" class="notranslate">query_string</code>
+and <code translate="no" class="notranslate">request_body</code> <strong>SHOULD NOT</strong> be used unless it is impossible to
+transport the access token in the request header field.</p>
+</div>
+<p>You can also create a custom extractor. The class must implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/AccessToken/AccessTokenExtractorInterface.php" class="reference external" title="Symfony\Component\Security\Http\AccessToken\AccessTokenExtractorInterface" rel="external noopener noreferrer" target="_blank">AccessTokenExtractorInterface</a>.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-39b6392e139acdcf753925b515031e59a591b3b7" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-8e8ceff3e8a1b726fe4ce0ad75647875177da2f9" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-a42c88ec46cfce6adbba563c7bb3d1af73695b63" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-39b6392e139acdcf753925b515031e59a591b3b7" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">firewalls:</span>
+        <span class="hljs-attr">main:</span>
+            <span class="hljs-attr">access_token:</span>
+                <span class="hljs-attr">token_handler:</span> <span class="hljs-string">App\Security\AccessTokenHandler</span>
+
+                <span class="hljs-comment"># use a different built-in extractor</span>
+                <span class="hljs-attr">token_extractors:</span> <span class="hljs-string">request_body</span>
+
+                <span class="hljs-comment"># or provide the service ID of a custom extractor</span>
+                <span class="hljs-attr">token_extractors:</span> <span class="hljs-string">'App\Security\CustomTokenExtractor'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-8e8ceff3e8a1b726fe4ce0ad75647875177da2f9" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/security
+        https://symfony.com/schema/dic/security/security-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">firewall</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">access-token</span> <span class="hljs-attr">token-handler</span>=<span class="hljs-string">"App\Security\AccessTokenHandler"</span>&gt;</span>
+                <span class="hljs-comment">&lt;!-- use a different built-in extractor --&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">token-extractor</span>&gt;</span>request_body<span class="hljs-tag">&lt;/<span class="hljs-name">token-extractor</span>&gt;</span>
+
+                <span class="hljs-comment">&lt;!-- or provide the service ID of a custom extractor --&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">token-extractor</span>&gt;</span>App\Security\CustomTokenExtractor<span class="hljs-tag">&lt;/<span class="hljs-name">token-extractor</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">access-token</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">firewall</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-a42c88ec46cfce6adbba563c7bb3d1af73695b63" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">AccessTokenHandler</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">CustomTokenExtractor</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>firewall(<span class="hljs-string">'main'</span>)
+        <span class="hljs-operator">-&gt;</span>accessToken()
+            <span class="hljs-operator">-&gt;</span>tokenHandler(AccessTokenHandler<span class="hljs-operator">::</span>class)
+
+            <span class="hljs-comment">// use a different built-in extractor</span>
+            <span class="hljs-operator">-&gt;</span>tokenExtractors(<span class="hljs-string">'request_body'</span>)
+
+            <span class="hljs-comment"># or provide the service ID of a custom extractor</span>
+            <span class="hljs-operator">-&gt;</span>tokenExtractors(CustomTokenExtractor<span class="hljs-operator">::</span>class)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>It is possible to set multiple extractors. In this case, <strong>the order is
+important</strong>: the first in the list is called first.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-cd1f85d7a94f6b6cd053c3e1cb28e29a948b9101" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-626e5836ae871f7c8f74e4c953ac52cace0aa5c7" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-2a79d74dee20c9cf8453565cc54ff54ec2c5d337" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-cd1f85d7a94f6b6cd053c3e1cb28e29a948b9101" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">firewalls:</span>
+        <span class="hljs-attr">main:</span>
+            <span class="hljs-attr">access_token:</span>
+                <span class="hljs-attr">token_handler:</span> <span class="hljs-string">App\Security\AccessTokenHandler</span>
+                <span class="hljs-attr">token_extractors:</span>
+                    <span class="hljs-bullet">-</span> <span class="hljs-string">'header'</span>
+                    <span class="hljs-bullet">-</span> <span class="hljs-string">'App\Security\CustomTokenExtractor'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-626e5836ae871f7c8f74e4c953ac52cace0aa5c7" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/security
+        https://symfony.com/schema/dic/security/security-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">firewall</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">access-token</span> <span class="hljs-attr">token-handler</span>=<span class="hljs-string">"App\Security\AccessTokenHandler"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">token-extractor</span>&gt;</span>header<span class="hljs-tag">&lt;/<span class="hljs-name">token-extractor</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">token-extractor</span>&gt;</span>App\Security\CustomTokenExtractor<span class="hljs-tag">&lt;/<span class="hljs-name">token-extractor</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">access-token</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">firewall</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-2a79d74dee20c9cf8453565cc54ff54ec2c5d337" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">AccessTokenHandler</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">CustomTokenExtractor</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>firewall(<span class="hljs-string">'main'</span>)
+        <span class="hljs-operator">-&gt;</span>accessToken()
+            <span class="hljs-operator">-&gt;</span>tokenHandler(AccessTokenHandler<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>tokenExtractors([
+                <span class="hljs-string">'header'</span>,
+                CustomTokenExtractor<span class="hljs-operator">::</span>class,
+            ])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h3 id="3-submit-a-request">
+    3) Submit a Request
+    <a class="headerlink" href="#3-submit-a-request" title="Permalink to this headline">¶</a>
+</h3>
+<p>That's it! Your application can now authenticate incoming requests using an
+API token.</p>
+<p>Using the default header extractor, you can test the feature by submitting
+a request like this:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>curl -H <span class="hljs-string">'Authorization: Bearer an-accepted-token-value'</span> \
+    https://localhost:8000/api/some-route</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="customizing-the-success-handler">
+    Customizing the Success Handler
+    <a class="headerlink" href="#customizing-the-success-handler" title="Permalink to this headline">¶</a>
+</h2>
+<p>By default, the request continues (e.g. the controller for the route is
+run). If you want to customize success handling, create your own success
+handler by creating a class that implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/Authentication/AuthenticationSuccessHandlerInterface.php" class="reference external" title="Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface" rel="external noopener noreferrer" target="_blank">AuthenticationSuccessHandlerInterface</a>
+and configure the service ID as the <code translate="no" class="notranslate">success_handler</code>:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-580d806a7787fc7fbc2cd92c0f728831d880abc8" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-1cbfb42a892fa5d6ee1bab20c69e23c71afca0a1" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-e77409da5fa1dbc0228a59c997064cdb7f37e8d2" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-580d806a7787fc7fbc2cd92c0f728831d880abc8" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">firewalls:</span>
+        <span class="hljs-attr">main:</span>
+            <span class="hljs-attr">access_token:</span>
+                <span class="hljs-attr">token_handler:</span> <span class="hljs-string">App\Security\AccessTokenHandler</span>
+                <span class="hljs-attr">success_handler:</span> <span class="hljs-string">App\Security\Authentication\AuthenticationSuccessHandler</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-1cbfb42a892fa5d6ee1bab20c69e23c71afca0a1" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/security
+        https://symfony.com/schema/dic/security/security-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">firewall</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">access-token</span> <span class="hljs-attr">token-handler</span>=<span class="hljs-string">"App\Security\AccessTokenHandler"</span>
+                <span class="hljs-attr">success-handler</span>=<span class="hljs-string">"App\Security\Authentication\AuthenticationSuccessHandler"</span>
+            /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">firewall</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-e77409da5fa1dbc0228a59c997064cdb7f37e8d2" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">AccessTokenHandler</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Authentication</span>\<span class="hljs-title">AuthenticationSuccessHandler</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>firewall(<span class="hljs-string">'main'</span>)
+        <span class="hljs-operator">-&gt;</span>accessToken()
+            <span class="hljs-operator">-&gt;</span>tokenHandler(AccessTokenHandler<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>successHandler(AuthenticationSuccessHandler<span class="hljs-operator">::</span>class)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you want to customize the default failure handling, use the
+<code translate="no" class="notranslate">failure_handler</code> option and create a class that implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/Authentication/AuthenticationFailureHandlerInterface.php" class="reference external" title="Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface" rel="external noopener noreferrer" target="_blank">AuthenticationFailureHandlerInterface</a>.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

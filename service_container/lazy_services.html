@@ -1,0 +1,508 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="lazy-services">
+    Lazy Services
+    <a class="headerlink" href="#lazy-services" title="Permalink to this headline">¶</a>
+</h1>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Other ways to inject services lazily are via a <a href="service_closures.html" class="reference internal">service closure</a> or
+<a href="service_subscribers_locators.html" class="reference internal">service subscriber</a>.</p>
+</div>
+<div class="section">
+<h2 id="why-lazy-services">
+    Why Lazy Services?
+    <a class="headerlink" href="#why-lazy-services" title="Permalink to this headline">¶</a>
+</h2>
+<p>In some cases, you may want to inject a service that is a bit heavy to instantiate,
+but is not always used inside your object. For example, imagine you have
+a <code translate="no" class="notranslate">NewsletterManager</code> and you inject a <code translate="no" class="notranslate">mailer</code> service into it. Only
+a few methods on your <code translate="no" class="notranslate">NewsletterManager</code> actually use the <code translate="no" class="notranslate">mailer</code>,
+but even when you don't need it, a <code translate="no" class="notranslate">mailer</code> service is always instantiated
+in order to construct your <code translate="no" class="notranslate">NewsletterManager</code>.</p>
+<p>Configuring lazy services is one answer to this. With a lazy service, a
+&quot;proxy&quot; of the <code translate="no" class="notranslate">mailer</code> service is actually injected. It looks and acts
+like the <code translate="no" class="notranslate">mailer</code>, except that the <code translate="no" class="notranslate">mailer</code> isn't actually instantiated
+until you interact with the proxy in some way.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Lazy services do not support <a href="https://www.php.net/manual/en/language.oop5.final.php" class="reference external" rel="external noopener noreferrer" target="_blank">final</a> classes, but you can use
+<a href="lazy_services.html#interface-proxifying" class="reference internal">Interface Proxifying</a> to work around this limitation.</p>
+<p>In PHP versions prior to 8.0 lazy services do not support parameters with
+default values for built-in PHP classes (e.g. <code translate="no" class="notranslate">PDO</code>).</p>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>Starting from Symfony 6.2, service laziness is supported out of the box
+without having to install any additional package.</p>
+</div>
+<span id="lazy-services_configuration"></span>
+</div>
+<div class="section">
+<h2 id="configuration">
+    Configuration
+    <a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can mark the service as <code translate="no" class="notranslate">lazy</code> by manipulating its definition:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-be37623a5b05bab997cb7cfb23f580dad65a6421" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-37a396eaeb5ef8ec06aa744b04cd131cd79fa296" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-54bd62ef915b5dedb31caef6db448008a5690a1e" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-be37623a5b05bab997cb7cfb23f580dad65a6421" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">App\Twig\AppExtension:</span>
+        <span class="hljs-attr">lazy:</span> <span class="hljs-literal">true</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-37a396eaeb5ef8ec06aa744b04cd131cd79fa296" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Twig\AppExtension"</span> <span class="hljs-attr">lazy</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-54bd62ef915b5dedb31caef6db448008a5690a1e" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Twig</span>\<span class="hljs-title">AppExtension</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(AppExtension<span class="hljs-operator">::</span>class)<span class="hljs-operator">-&gt;</span>lazy();
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Once you inject the service into another service, a lazy ghost object with the
+same signature of the class representing the service should be injected. A lazy
+<a href="https://en.wikipedia.org/wiki/Lazy_loading#Ghost" class="reference external" rel="external noopener noreferrer" target="_blank">ghost object</a> is an object that is created empty and that is able to initialize
+itself when being accessed for the first time). The same happens when calling
+<code translate="no" class="notranslate">Container::get()</code> directly.</p>
+<p>To check if your lazy service works you can check the interface of the received object:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">dump(class_implements(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>service</span>));
+<span class="hljs-comment">// the output should include "Symfony\Component\VarExporter\LazyGhostObjectInterface"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also configure your service's laziness thanks to the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Attribute/Autoconfigure.php" class="reference external" title="Symfony\Component\DependencyInjection\Attribute\Autoconfigure" rel="external noopener noreferrer" target="_blank">Autoconfigure</a> attribute.
+For example, to define your service as lazy use the following:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Twig</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">Autoconfigure</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">ExtensionInterface</span>;
+
+<span class="hljs-comment">#[Autoconfigure(lazy: true)]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppExtension</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ExtensionInterface</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="interface-proxifying">
+    Interface Proxifying
+    <a class="headerlink" href="#interface-proxifying" title="Permalink to this headline">¶</a>
+</h2>
+<p>Under the hood, proxies generated to lazily load services inherit from the class
+used by the service. However, sometimes this is not possible at all (e.g. because
+the class is <a href="https://www.php.net/manual/en/language.oop5.final.php" class="reference external" rel="external noopener noreferrer" target="_blank">final</a> and can not be extended) or not convenient.</p>
+<p>To workaround this limitation, you can configure a proxy to only implement
+specific interfaces.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-70ba3e3789641f6c71de00b34f786159829bbf51" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-88eddef4735c91c3c92496c36a3bd58e723aefb0" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-e3b67d70eb2eacde8b645cd7a2c2be18a1f7678e" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-70ba3e3789641f6c71de00b34f786159829bbf51" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">App\Twig\AppExtension:</span>
+        <span class="hljs-attr">lazy:</span> <span class="hljs-string">'Twig\Extension\ExtensionInterface'</span>
+        <span class="hljs-comment"># or a complete definition:</span>
+        <span class="hljs-attr">lazy:</span> <span class="hljs-literal">true</span>
+        <span class="hljs-attr">tags:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">name:</span> <span class="hljs-string">'proxy'</span><span class="hljs-string">,</span> <span class="hljs-attr">interface:</span> <span class="hljs-string">'Twig\Extension\ExtensionInterface'</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-88eddef4735c91c3c92496c36a3bd58e723aefb0" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Twig\AppExtension"</span> <span class="hljs-attr">lazy</span>=<span class="hljs-string">"Twig\Extension\ExtensionInterface"</span>/&gt;</span>
+        <span class="hljs-comment">&lt;!-- or a complete definition: --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Twig\AppExtension"</span> <span class="hljs-attr">lazy</span>=<span class="hljs-string">"true"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"proxy"</span> <span class="hljs-attr">interface</span>=<span class="hljs-string">"Twig\Extension\ExtensionInterface"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-e3b67d70eb2eacde8b645cd7a2c2be18a1f7678e" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Twig</span>\<span class="hljs-title">AppExtension</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">ExtensionInterface</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(AppExtension<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>lazy()
+        <span class="hljs-operator">-&gt;</span>tag(<span class="hljs-string">'proxy'</span>, [<span class="hljs-string">'interface'</span> =&gt; ExtensionInterface<span class="hljs-operator">::</span>class])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Just like in the <a href="lazy_services.html#lazy-services_configuration" class="reference internal">Configuration</a> section, you can
+use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Attribute/Autoconfigure.php" class="reference external" title="Symfony\Component\DependencyInjection\Attribute\Autoconfigure" rel="external noopener noreferrer" target="_blank">Autoconfigure</a>
+attribute to configure the interface to proxify by passing its FQCN as the <code translate="no" class="notranslate">lazy</code>
+parameter value:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Twig</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">Autoconfigure</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">ExtensionInterface</span>;
+
+<span class="hljs-comment">#[Autoconfigure(lazy: ExtensionInterface::class)]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppExtension</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ExtensionInterface</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The virtual <a href="https://en.wikipedia.org/wiki/Proxy_pattern" class="reference external" rel="external noopener noreferrer" target="_blank">proxy</a> injected into other services will only implement the
+specified interfaces and will not extend the original service class, allowing to
+lazy load services using <a href="https://www.php.net/manual/en/language.oop5.final.php" class="reference external" rel="external noopener noreferrer" target="_blank">final</a> classes. You can configure the proxy to
+implement multiple interfaces by adding new &quot;proxy&quot; tags.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>This feature can also act as a safe guard: given that the proxy does not
+extend the original class, only the methods defined by the interface can
+be called, preventing to call implementation specific methods. It also
+prevents injecting the dependency at all if you type-hinted a concrete
+implementation instead of the interface.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

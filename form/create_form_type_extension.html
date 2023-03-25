@@ -1,0 +1,551 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-create-a-form-type-extension">
+    How to Create a Form Type Extension
+    <a class="headerlink" href="#how-to-create-a-form-type-extension" title="Permalink to this headline">¶</a>
+</h1>
+<p>Form type extensions are <em>incredibly</em> powerful: they allow you to <em>modify</em> any
+existing form field types across the entire system.</p>
+<p>They have 2 main use-cases:</p>
+<ol class="arabic">
+    <li>You want to add a <strong>specific feature to a single form type</strong> (such
+as adding a &quot;download&quot; feature to the <code translate="no" class="notranslate">FileType</code> field type);</li>
+<li>You want to add a <strong>generic feature to several types</strong> (such as
+adding a &quot;help&quot; text to every &quot;input text&quot;-like type).</li>
+</ol>
+<p>Imagine that you have a <code translate="no" class="notranslate">Media</code> entity, and that each media is associated
+to a file. Your <code translate="no" class="notranslate">Media</code> form uses a file type, but when editing the entity,
+you would like to see its image automatically rendered next to the file
+input.</p>
+<div class="section">
+<h2 id="defining-the-form-type-extension">
+    Defining the Form Type Extension
+    <a class="headerlink" href="#defining-the-form-type-extension" title="Permalink to this headline">¶</a>
+</h2>
+<p>First, create the form type extension class extending from
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/AbstractTypeExtension.php" class="reference external" title="Symfony\Component\Form\AbstractTypeExtension" rel="external noopener noreferrer" target="_blank">AbstractTypeExtension</a> (you can implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormTypeExtensionInterface.php" class="reference external" title="Symfony\Component\Form\FormTypeExtensionInterface" rel="external noopener noreferrer" target="_blank">FormTypeExtensionInterface</a> instead if you prefer):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Extension/ImageTypeExtension.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractTypeExtension</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">FileType</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ImageTypeExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractTypeExtension</span>
+</span>{
+    <span class="hljs-comment">/**
+     * Returns an array of extended types.
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getExtendedTypes</span><span class="hljs-params">()</span>: <span class="hljs-title">iterable</span>
+    </span>{
+        <span class="hljs-comment">// return [FormType::class] to modify (nearly) every field in the system</span>
+        <span class="hljs-keyword">return</span> [FileType<span class="hljs-operator">::</span>class];
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The only method you <strong>must</strong> implement is <code translate="no" class="notranslate">getExtendedTypes()</code>, which is used
+to configure <em>which</em> field types you want to modify.</p>
+<p>Depending on your use case, you may need to override some of the following methods:</p>
+<ul>
+    <li><code translate="no" class="notranslate">buildForm()</code></li>
+<li><code translate="no" class="notranslate">buildView()</code></li>
+<li><code translate="no" class="notranslate">configureOptions()</code></li>
+<li><code translate="no" class="notranslate">finishView()</code></li>
+</ul>
+<p>For more information on what those methods do, see the
+<a href="create_custom_field_type.html#form-type-methods-explanation" class="reference internal">custom form field type</a> article.</p>
+</div>
+<div class="section">
+<h2 id="registering-your-form-type-extension-as-a-service">
+    Registering your Form Type Extension as a Service
+    <a class="headerlink" href="#registering-your-form-type-extension-as-a-service" title="Permalink to this headline">¶</a>
+</h2>
+<p>Form type extensions must be <a href="../service_container.html#service-container-creating-service" class="reference internal">registered as services</a>
+and <a href="../service_container/tags.html" class="reference internal">tagged</a> with the <code translate="no" class="notranslate">form.type_extension</code> tag.
+If you're using the
+<a href="../service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>,
+this is already done for you, thanks to <a href="../service_container.html#services-autoconfigure" class="reference internal">autoconfiguration</a>.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>There is an optional tag attribute called <code translate="no" class="notranslate">priority</code>, which defaults to
+<code translate="no" class="notranslate">0</code> and controls the order in which the form type extensions are loaded
+(the higher the priority, the earlier an extension is loaded). This is
+useful when you need to guarantee that one extension is loaded before or
+after another extension. Using this attribute requires you to add the
+service configuration explicitly.</p>
+</div>
+<p>Once the extension is registered, any method that you've overridden (e.g.
+<code translate="no" class="notranslate">buildForm()</code>) will be called whenever <em>any</em> field of the given type
+(<code translate="no" class="notranslate">FileType</code>) is built.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Run the following command to verify that the form type extension was
+successfully registered in the application:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:form</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="adding-the-extension-business-logic">
+    Adding the extension Business Logic
+    <a class="headerlink" href="#adding-the-extension-business-logic" title="Permalink to this headline">¶</a>
+</h2>
+<p>The goal of your extension is to display a nice image next to file input
+(when the underlying model contains images). For that purpose, suppose that
+you use an approach similar to the one described in
+<a href="../controller/upload_file.html" class="reference internal">How to handle File Uploads with Doctrine</a>:
+you have a Media model with a path property, corresponding to the image path in
+the database:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Entity/Media.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Media</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@var</span> string The path - typically stored in the database
+     */</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>;
+
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getWebPath</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-comment">// ... $webPath being the full image URL, to be used in templates</span>
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>webPath</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Your form type extension class will need to do two things in order to extend
+the <code translate="no" class="notranslate">FileType::class</code> form type:</p>
+<ol class="arabic">
+    <li>Override the <code translate="no" class="notranslate">configureOptions()</code> method so that any <code translate="no" class="notranslate">FileType</code> field can
+have an  <code translate="no" class="notranslate">image_property</code> option;</li>
+<li>Override the <code translate="no" class="notranslate">buildView()</code> methods to pass the image URL to the view.</li>
+</ol>
+<p>For example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Extension/ImageTypeExtension.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractTypeExtension</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">FileType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormView</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">PropertyAccess</span>\<span class="hljs-title">PropertyAccess</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ImageTypeExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractTypeExtension</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getExtendedTypes</span><span class="hljs-params">()</span>: <span class="hljs-title">iterable</span>
+    </span>{
+        <span class="hljs-comment">// return [FormType::class] to modify (nearly) every field in the system</span>
+        <span class="hljs-keyword">return</span> [FileType<span class="hljs-operator">::</span>class];
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// makes it legal for FileType fields to have an image_property option</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefined([<span class="hljs-string">'image_property'</span>]);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildView</span><span class="hljs-params">(FormView <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>view</span>, FormInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>[<span class="hljs-string">'image_property'</span>])) {
+            <span class="hljs-comment">// this will be whatever class/entity is bound to your form (e.g. Media)</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>parentData</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>getParent()<span class="hljs-operator">-&gt;</span>getData();
+
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>imageUrl</span> = <span class="hljs-keyword">null</span>;
+            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">null</span> !== <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>parentData</span>) {
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>accessor</span> = PropertyAccess<span class="hljs-operator">::</span>createPropertyAccessor();
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>imageUrl</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>accessor</span><span class="hljs-operator">-&gt;</span>getValue(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>parentData</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>[<span class="hljs-string">'image_property'</span>]);
+            }
+
+            <span class="hljs-comment">// sets an "image_url" variable that will be available when rendering this field</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>view</span><span class="hljs-operator">-&gt;</span>vars[<span class="hljs-string">'image_url'</span>] = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>imageUrl</span>;
+        }
+    }
+
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="override-the-file-widget-template-fragment">
+    Override the File Widget Template Fragment
+    <a class="headerlink" href="#override-the-file-widget-template-fragment" title="Permalink to this headline">¶</a>
+</h2>
+<p>Each field type is rendered by a template fragment. Those template fragments
+can be overridden in order to customize form rendering. For more information,
+you can refer to the <a href="form_themes.html#form-fragment-naming" class="reference internal">form fragment naming</a> rules.</p>
+<p>In your extension class, you added a new variable (<code translate="no" class="notranslate">image_url</code>), but
+you still need to take advantage of this new variable in your templates.
+Specifically, you need to override the <code translate="no" class="notranslate">file_widget</code> block:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/form/fields.html.twig #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">extends</span></span> 'form_div_layout.html.twig' %}</span><span class="xml">
+
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> file_widget %}</span><span class="xml">
+    </span><span class="hljs-template-variable">{{ <span class="hljs-name">block</span><span class="hljs-params">('form_widget')</span> }}</span><span class="xml">
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">if</span></span> image_url is defined and image_url is not null %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ asset(image_url) }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>/&gt;</span>
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endif</span></span> %}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Be sure to <a href="form_themes.html#forms-theming-global" class="reference internal">configure this form theme template</a> so that
+the form system sees it.</p>
+</div>
+<div class="section">
+<h2 id="using-the-form-type-extension">
+    Using the Form Type Extension
+    <a class="headerlink" href="#using-the-form-type-extension" title="Permalink to this headline">¶</a>
+</h2>
+<p>From now on, when adding a field of type <code translate="no" class="notranslate">FileType::class</code> to your form, you can
+specify an <code translate="no" class="notranslate">image_property</code> option that will be used to display an image
+next to the file field. For example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/MediaType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">FileType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormBuilderInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MediaType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'name'</span>, TextType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'file'</span>, FileType<span class="hljs-operator">::</span>class, [<span class="hljs-string">'image_property'</span> =&gt; <span class="hljs-string">'webPath'</span>]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When displaying the form, if the underlying model has already been associated
+with an image, you will see it displayed next to the file input.</p>
+</div>
+<div class="section">
+<h2 id="generic-form-type-extensions">
+    Generic Form Type Extensions
+    <a class="headerlink" href="#generic-form-type-extensions" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can modify several form types at once by specifying their common parent
+(<a href="../reference/forms/types.html" class="reference internal">Form Types Reference</a>). For example, several form types inherit from the
+<code translate="no" class="notranslate">TextType</code> form type (such as <code translate="no" class="notranslate">EmailType</code>, <code translate="no" class="notranslate">SearchType</code>, <code translate="no" class="notranslate">UrlType</code>, etc.).
+A form type extension applying to <code translate="no" class="notranslate">TextType</code> (i.e. whose <code translate="no" class="notranslate">getExtendedType()</code>
+method returns <code translate="no" class="notranslate">TextType::class</code>) would apply to all of these form types.</p>
+<p>In the same way, since <strong>most</strong> form types natively available in Symfony inherit
+from the <code translate="no" class="notranslate">FormType</code> form type, a form type extension applying to <code translate="no" class="notranslate">FormType</code>
+would apply to all of these (notable exceptions are the <code translate="no" class="notranslate">ButtonType</code> form
+types). Also keep in mind that if you created (or are using) a <em>custom</em> form type,
+it's possible that it does <em>not</em> extend <code translate="no" class="notranslate">FormType</code>, and so your form type extension
+may not be applied to it.</p>
+<p>Another option is to return multiple form types in the <code translate="no" class="notranslate">getExtendedTypes()</code>
+method to extend all of them:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Extension/DateTimeExtension.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>;
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">DateTimeType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">DateType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TimeType</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DateTimeExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractTypeExtension</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getExtendedTypes</span><span class="hljs-params">()</span>: <span class="hljs-title">iterable</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [DateTimeType<span class="hljs-operator">::</span>class, DateType<span class="hljs-operator">::</span>class, TimeType<span class="hljs-operator">::</span>class];
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

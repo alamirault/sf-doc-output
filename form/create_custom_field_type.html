@@ -1,0 +1,1093 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-create-a-custom-form-field-type">
+    How to Create a Custom Form Field Type
+    <a class="headerlink" href="#how-to-create-a-custom-form-field-type" title="Permalink to this headline">¶</a>
+</h1>
+<p>Symfony comes with <a href="../reference/forms/types.html" class="reference internal">tens of form types</a> (called
+&quot;form fields&quot; in other projects) ready to use in your applications. However,
+it's common to create custom form types to solve specific purposes in your
+projects.</p>
+<div class="section">
+<h2 id="creating-form-types-based-on-symfony-built-in-types">
+    Creating Form Types Based on Symfony Built-in Types
+    <a class="headerlink" href="#creating-form-types-based-on-symfony-built-in-types" title="Permalink to this headline">¶</a>
+</h2>
+<p>The easiest way to create a form type is to base it on one of the
+<a href="../reference/forms/types.html" class="reference internal">existing form types</a>. Imagine that your project
+displays a list of &quot;shipping options&quot; as a <code translate="no" class="notranslate">&lt;select&gt;</code> HTML element. This can
+be implemented with a <a href="../reference/forms/types/choice.html" class="reference internal">ChoiceType</a> where the
+<code translate="no" class="notranslate">choices</code> option is set to the list of available shipping options.</p>
+<p>However, if you use the same form type in several forms, repeating the list of
+<code translate="no" class="notranslate">choices</code> every time you use it quickly becomes boring. In this example, a
+better solution is to create a custom form type based on <code translate="no" class="notranslate">ChoiceType</code>. The
+custom type looks and behaves like a <code translate="no" class="notranslate">ChoiceType</code> but the list of choices is
+already populated with the shipping options so you don't need to define them.</p>
+<p>Form types are PHP classes that implement <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormTypeInterface.php" class="reference external" title="Symfony\Component\Form\FormTypeInterface" rel="external noopener noreferrer" target="_blank">FormTypeInterface</a>,
+but you should instead extend from <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/AbstractType.php" class="reference external" title="Symfony\Component\Form\AbstractType" rel="external noopener noreferrer" target="_blank">AbstractType</a>,
+which already implements that interface and provides some utilities.
+By convention they are stored in the <code translate="no" class="notranslate">src/Form/Type/</code> directory:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/ShippingType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">ChoiceType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ShippingType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-string">'choices'</span> =&gt; [
+                <span class="hljs-string">'Standard Shipping'</span> =&gt; <span class="hljs-string">'standard'</span>,
+                <span class="hljs-string">'Expedited Shipping'</span> =&gt; <span class="hljs-string">'expedited'</span>,
+                <span class="hljs-string">'Priority Shipping'</span> =&gt; <span class="hljs-string">'priority'</span>,
+            ],
+        ]);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getParent</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> ChoiceType<span class="hljs-operator">::</span>class;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p><code translate="no" class="notranslate">getParent()</code> tells Symfony to take <code translate="no" class="notranslate">ChoiceType</code> as a starting point,
+then <code translate="no" class="notranslate">configureOptions()</code> overrides some of its options. (All methods of the
+<code translate="no" class="notranslate">FormTypeInterface</code> are explained in detail later in this article.)
+The resulting form type is a choice field with predefined choices.</p>
+<p>Now you can add this form type when <a href="../forms.html" class="reference internal">creating Symfony forms</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/OrderType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">ShippingType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormBuilderInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OrderType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-comment">// ...</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'shipping'</span>, ShippingType<span class="hljs-operator">::</span>class)
+        ;
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's all. The <code translate="no" class="notranslate">shipping</code> form field will be rendered correctly in any
+template because it reuses the templating logic defined by its parent type
+<code translate="no" class="notranslate">ChoiceType</code>. If you prefer, you can also define a template for your custom
+types, as explained later in this article.</p>
+</div>
+<div class="section">
+<h2 id="creating-form-types-created-from-scratch">
+    Creating Form Types Created From Scratch
+    <a class="headerlink" href="#creating-form-types-created-from-scratch" title="Permalink to this headline">¶</a>
+</h2>
+<p>Some form types are so specific to your projects that they cannot be based on
+any <a href="../reference/forms/types.html" class="reference internal">existing form types</a> because they are too
+different. Consider an application that wants to reuse in different forms the
+following set of fields as the &quot;postal address&quot;:</p>
+<object data="../_images/form/form-custom-type-postal-address.svg" type="image/svg+xml"></object>
+<p>As explained above, form types are PHP classes that implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormTypeInterface.php" class="reference external" title="Symfony\Component\Form\FormTypeInterface" rel="external noopener noreferrer" target="_blank">FormTypeInterface</a>, although it's more
+convenient to extend instead from <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/AbstractType.php" class="reference external" title="Symfony\Component\Form\AbstractType" rel="external noopener noreferrer" target="_blank">AbstractType</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/PostalAddressType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">FormType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostalAddressType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>These are the most important methods that a form type class can define:</p>
+<span id="form-type-methods-explanation"></span>
+<dl>
+                        <dt><code translate="no" class="notranslate">buildForm()</code></dt>
+        
+        <dd>
+                            It adds and configures other types into this type. It's the same method used
+when <a href="../forms.html#creating-forms-in-classes" class="reference internal">creating Symfony form classes</a>.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">buildView()</code></dt>
+        
+        <dd>
+                            It sets any extra variables you'll need when rendering the field in a template.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">finishView()</code></dt>
+        
+        <dd>
+                            This method allows to modify the &quot;view&quot; of any rendered widget. This is useful
+if your form type consists of many fields, or contains a type that produces
+many HTML elements (e.g. <code translate="no" class="notranslate">ChoiceType</code>). For any other use case, it's
+recommended to use <code translate="no" class="notranslate">buildView()</code> instead.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">configureOptions()</code></dt>
+        
+        <dd>
+                            It defines the options configurable when using the form type, which are also
+the options that can be used in <code translate="no" class="notranslate">buildForm()</code> and <code translate="no" class="notranslate">buildView()</code>
+methods. Options are inherited from parent types and parent type
+extensions, but you can create any custom option you need.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">getParent()</code></dt>
+        
+        <dd>
+                            <p class="first">If your custom type is based on another type (i.e. they share some
+functionality), add this method to return the fully-qualified class name
+of that original type. Do not use PHP inheritance for this.
+Symfony will call all the form type methods (<code translate="no" class="notranslate">buildForm()</code>,
+<code translate="no" class="notranslate">buildView()</code>, etc.) and type extensions of the parent before
+calling the ones defined in your custom type.</p>
+                            <p>Otherwise, if your custom type is build from scratch, you can omit <code translate="no" class="notranslate">getParent()</code>.</p>
+                            <p class="last">By default, the <code translate="no" class="notranslate">AbstractType</code> class returns the generic
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Extension/Core/Type/FormType.php" class="reference external" title="Symfony\Component\Form\Extension\Core\Type\FormType" rel="external noopener noreferrer" target="_blank">FormType</a>
+type, which is the root parent for all form types in the Form component.</p>
+                    </dd>
+    </dl>
+<div class="section">
+<h3 id="defining-the-form-type">
+    Defining the Form Type
+    <a class="headerlink" href="#defining-the-form-type" title="Permalink to this headline">¶</a>
+</h3>
+<p>Start by adding the <code translate="no" class="notranslate">buildForm()</code> method to configure all the types included
+in the postal address. For the moment, all fields are of type <code translate="no" class="notranslate">TextType</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/PostalAddressType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormBuilderInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostalAddressType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'addressLine1'</span>, TextType<span class="hljs-operator">::</span>class, [
+                <span class="hljs-string">'help'</span> =&gt; <span class="hljs-string">'Street address, P.O. box, company name'</span>,
+            ])
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'addressLine2'</span>, TextType<span class="hljs-operator">::</span>class, [
+                <span class="hljs-string">'help'</span> =&gt; <span class="hljs-string">'Apartment, suite, unit, building, floor'</span>,
+            ])
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'city'</span>, TextType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'state'</span>, TextType<span class="hljs-operator">::</span>class, [
+                <span class="hljs-string">'label'</span> =&gt; <span class="hljs-string">'State'</span>,
+            ])
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'zipCode'</span>, TextType<span class="hljs-operator">::</span>class, [
+                <span class="hljs-string">'label'</span> =&gt; <span class="hljs-string">'ZIP Code'</span>,
+            ])
+        ;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Run the following command to verify that the form type was successfully
+registered in the application:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:form</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<p>This form type is ready to use it inside other forms and all its fields will be
+correctly rendered in any template:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/OrderType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">PostalAddressType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormBuilderInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OrderType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-comment">// ...</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'address'</span>, PostalAddressType<span class="hljs-operator">::</span>class)
+        ;
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>However, the real power of custom form types is achieved with custom form
+options (to make them flexible) and with custom templates (to make them look
+better).</p>
+<span id="form-type-config-options"></span>
+</div>
+<div class="section">
+<h3 id="adding-configuration-options-for-the-form-type">
+    Adding Configuration Options for the Form Type
+    <a class="headerlink" href="#adding-configuration-options-for-the-form-type" title="Permalink to this headline">¶</a>
+</h3>
+<p>Imagine that your project requires to make the <code translate="no" class="notranslate">PostalAddressType</code>
+configurable in two ways:</p>
+<ul>
+    <li>In addition to &quot;address line 1&quot; and &quot;address line 2&quot;, some addresses should be
+allowed to display an &quot;address line 3&quot; to store extended address information;</li>
+<li>Instead of displaying a free text input, some addresses should be able to
+restrict the possible states to a given list.</li>
+</ul>
+<p>This is solved with &quot;form type options&quot;, which allow to configure the behavior
+of the form types. The options are defined in the <code translate="no" class="notranslate">configureOptions()</code> method
+and you can use all the <a href="../components/options_resolver.html" class="reference internal">OptionsResolver component features</a>
+to define, validate and process their values:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/PostalAddressType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">Options</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostalAddressType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// this defines the available options and their default values when</span>
+        <span class="hljs-comment">// they are not configured explicitly when using the form type</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-string">'allowed_states'</span> =&gt; <span class="hljs-keyword">null</span>,
+            <span class="hljs-string">'is_extended_address'</span> =&gt; <span class="hljs-keyword">false</span>,
+        ]);
+
+        <span class="hljs-comment">// optionally you can also restrict the options type or types (to get</span>
+        <span class="hljs-comment">// automatic type validation and useful error messages for end users)</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setAllowedTypes(<span class="hljs-string">'allowed_states'</span>, [<span class="hljs-string">'null'</span>, <span class="hljs-string">'string'</span>, <span class="hljs-string">'array'</span>]);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setAllowedTypes(<span class="hljs-string">'is_extended_address'</span>, <span class="hljs-string">'bool'</span>);
+
+        <span class="hljs-comment">// optionally you can transform the given values for the options to</span>
+        <span class="hljs-comment">// simplify the further processing of those options</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setNormalizer(<span class="hljs-string">'allowed_states'</span>, <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Options <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>states</span>)</span>: ?<span class="hljs-title">array</span> 
+        </span>{
+            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">null</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>states</span>) {
+                <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>states</span>;
+            }
+
+            <span class="hljs-keyword">if</span> (is_string(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>states</span>)) {
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>states</span> = (<span class="hljs-keyword">array</span>) <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>states</span>;
+            }
+
+            <span class="hljs-keyword">return</span> array_combine(array_values(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>states</span>), array_values(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>states</span>));
+        });
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now you can configure these options when using the form type:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/OrderType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OrderType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-comment">// ...</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'address'</span>, PostalAddressType<span class="hljs-operator">::</span>class, [
+                <span class="hljs-string">'is_extended_address'</span> =&gt; <span class="hljs-keyword">true</span>,
+                <span class="hljs-string">'allowed_states'</span> =&gt; [<span class="hljs-string">'CA'</span>, <span class="hljs-string">'FL'</span>, <span class="hljs-string">'TX'</span>],
+                <span class="hljs-comment">// in this example, this config would also be valid:</span>
+                <span class="hljs-comment">// 'allowed_states' =&gt; 'CA',</span>
+            ])
+        ;
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The last step is to use these options when building the form:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/PostalAddressType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostalAddressType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">true</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>[<span class="hljs-string">'is_extended_address'</span>]) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'addressLine3'</span>, TextType<span class="hljs-operator">::</span>class, [
+                <span class="hljs-string">'help'</span> =&gt; <span class="hljs-string">'Extended address info'</span>,
+            ]);
+        }
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">null</span> !== <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>[<span class="hljs-string">'allowed_states'</span>]) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'state'</span>, ChoiceType<span class="hljs-operator">::</span>class, [
+                <span class="hljs-string">'choices'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>[<span class="hljs-string">'allowed_states'</span>],
+            ]);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'state'</span>, TextType<span class="hljs-operator">::</span>class, [
+                <span class="hljs-string">'label'</span> =&gt; <span class="hljs-string">'State/Province/Region'</span>,
+            ]);
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="creating-the-form-type-template">
+    Creating the Form Type Template
+    <a class="headerlink" href="#creating-the-form-type-template" title="Permalink to this headline">¶</a>
+</h3>
+<p>By default, custom form types will be rendered using the
+<a href="form_themes.html" class="reference internal">form themes</a> configured in the application. However,
+for some types you may prefer to create a custom template in order to customize
+how they look or their HTML structure.</p>
+<p>First, create a new Twig template anywhere in the application to store the
+fragments used to render the types:</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-comment">{# templates/form/custom_types.html.twig #}</span><span class="xml">
+
+</span><span class="hljs-comment">{# ... here you will add the Twig code ... #}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, update the <a href="../reference/twig_reference.html#reference-twig-tag-form-theme" class="reference internal">form_themes option</a> to
+add this new template at the beginning of the list (the first one overrides the
+rest of files):</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-1b1d785544ddd43dc7f172a21b198e1d7af1a77a" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-81f706718006392c6d9ec716bd4232a609b45dc6" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-b27f63c9e7fa550c4967b6b9843dcb053e5b429c" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-1b1d785544ddd43dc7f172a21b198e1d7af1a77a" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/twig.yaml</span>
+<span class="hljs-attr">twig:</span>
+    <span class="hljs-attr">form_themes:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-string">'form/custom_types.html.twig'</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-string">'...'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-81f706718006392c6d9ec716bd4232a609b45dc6" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/twig.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:twig</span>=<span class="hljs-string">"http://symfony.com/schema/dic/twig"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/twig
+        https://symfony.com/schema/dic/twig/twig-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">twig:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">twig:form-theme</span>&gt;</span>form/custom_types.html.twig<span class="hljs-tag">&lt;/<span class="hljs-name">twig:form-theme</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">twig:form-theme</span>&gt;</span>...<span class="hljs-tag">&lt;/<span class="hljs-name">twig:form-theme</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">twig:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-b27f63c9e7fa550c4967b6b9843dcb053e5b429c" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/twig.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">TwigConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(TwigConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span><span class="hljs-operator">-&gt;</span>formThemes([
+        <span class="hljs-string">'form/custom_types.html.twig'</span>,
+        <span class="hljs-string">'...'</span>,
+    ]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>The last step is to create the actual Twig template that will render the type.
+The template contents depend on which HTML, CSS and JavaScript frameworks and
+libraries are used in your application:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/form/custom_types.html.twig #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> postal_address_row %}</span><span class="xml">
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">for</span></span> child in form.children|<span class="hljs-keyword">filter</span>(child =&gt; not child.rendered) %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-group"</span>&gt;</span>
+            </span><span class="hljs-template-variable">{{ form_label(child) }}</span><span class="xml">
+            </span><span class="hljs-template-variable">{{ form_widget(child) }}</span><span class="xml">
+            </span><span class="hljs-template-variable">{{ form_help(child) }}</span><span class="xml">
+            </span><span class="hljs-template-variable">{{ form_errors(child) }}</span><span class="xml">
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endfor</span></span> %}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The first part of the Twig block name (e.g. <code translate="no" class="notranslate">postal_address</code>) comes from the
+class name (<code translate="no" class="notranslate">PostalAddressType</code> -&gt; <code translate="no" class="notranslate">postal_address</code>). This can be controlled
+by overriding the <code translate="no" class="notranslate">getBlockPrefix()</code> method in <code translate="no" class="notranslate">PostalAddressType</code>. The
+second part of the Twig block name (e.g. <code translate="no" class="notranslate">_row</code>) defines which form type part
+is being rendered (row, widget, help, errors, etc.)</p>
+<p>The article about form themes explains the
+<a href="form_themes.html#form-fragment-naming" class="reference internal">form fragment naming rules</a> in detail. The
+following diagram shows some of the Twig block names defined in this example:</p>
+<object data="../_images/form/form-custom-type-postal-address-fragment-names.svg" type="image/svg+xml"></object>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When the name of your form class matches any of the built-in field types,
+your form might not be rendered correctly. A form type named
+<code translate="no" class="notranslate">App\Form\PasswordType</code> will have the same block name as the built-in
+<code translate="no" class="notranslate">PasswordType</code> and won't be rendered correctly. Override the
+<code translate="no" class="notranslate">getBlockPrefix()</code> method to return a unique block prefix (e.g.
+<code translate="no" class="notranslate">app_password</code>) to avoid collisions.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="passing-variables-to-the-form-type-template">
+    Passing Variables to the Form Type Template
+    <a class="headerlink" href="#passing-variables-to-the-form-type-template" title="Permalink to this headline">¶</a>
+</h3>
+<p>Symfony passes a series of variables to the template used to render the form
+type. You can also pass your own variables, which can be based on the options
+defined by the form or be completely independent:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/PostalAddressType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">EntityManagerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormView</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostalAddressType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private EntityManagerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildView</span><span class="hljs-params">(FormView <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>view</span>, FormInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// pass the form type option directly to the template</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>view</span><span class="hljs-operator">-&gt;</span>vars[<span class="hljs-string">'isExtendedAddress'</span>] = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>[<span class="hljs-string">'is_extended_address'</span>];
+
+        <span class="hljs-comment">// make a database query to find possible notifications related to postal addresses (e.g. to</span>
+        <span class="hljs-comment">// display dynamic messages such as 'Delivery to XX and YY states will be added next week!')</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>view</span><span class="hljs-operator">-&gt;</span>vars[<span class="hljs-string">'notification'</span>] = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>entityManager<span class="hljs-operator">-&gt;</span>find(<span class="hljs-string">'...'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you're using the <a href="../service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>,
+this example will already work! Otherwise, <a href="../service_container.html#service-container-creating-service" class="reference internal">create a service</a>
+for this form class and <a href="../service_container/tags.html" class="reference internal">tag it</a> with <code translate="no" class="notranslate">form.type</code>.</p>
+<p>The variables added in <code translate="no" class="notranslate">buildView()</code> are available in the form type template
+as any other regular Twig variable:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/form/custom_types.html.twig #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> postal_address_row %}</span><span class="xml">
+    </span><span class="hljs-comment">{# ... #}</span><span class="xml">
+
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">if</span></span> isExtendedAddress %}</span><span class="xml">
+        </span><span class="hljs-comment">{# ... #}</span><span class="xml">
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endif</span></span> %}</span><span class="xml">
+
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">if</span></span> notification is not empty %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"alert alert-primary"</span> <span class="hljs-attr">role</span>=<span class="hljs-string">"alert"</span>&gt;</span>
+            </span><span class="hljs-template-variable">{{ notification }}</span><span class="xml">
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endif</span></span> %}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

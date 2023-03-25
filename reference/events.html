@@ -1,0 +1,665 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="built-in-symfony-events">
+    Built-in Symfony Events
+    <a class="headerlink" href="#built-in-symfony-events" title="Permalink to this headline">¶</a>
+</h1>
+<p>The Symfony framework is an HTTP Request-Response one.
+During the handling of an HTTP request, the framework (or any
+application using the <a href="../components/http_kernel.html" class="reference internal">HttpKernel component</a>)
+dispatches some <a href="../event_dispatcher.html" class="reference internal">events</a> which you can use to modify
+how the request is handled and how the response is returned.</p>
+<div class="section">
+<h2 id="kernel-events">
+    Kernel Events
+    <a class="headerlink" href="#kernel-events" title="Permalink to this headline">¶</a>
+</h2>
+<p>Each event dispatched by the HttpKernel component is a subclass of
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/KernelEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\KernelEvent" rel="external noopener noreferrer" target="_blank">KernelEvent</a>, which provides the
+following information:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/KernelEvent.php#method_getRequestType" class="reference external" title="Symfony\Component\HttpKernel\Event\KernelEvent::getRequestType()" rel="external noopener noreferrer" target="_blank">getRequestType()</a></dt>
+        
+        <dd>
+                            Returns the <em>type</em> of the request (<code translate="no" class="notranslate">HttpKernelInterface::MAIN_REQUEST</code>
+or <code translate="no" class="notranslate">HttpKernelInterface::SUB_REQUEST</code>).
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/KernelEvent.php#method_getKernel" class="reference external" title="Symfony\Component\HttpKernel\Event\KernelEvent::getKernel()" rel="external noopener noreferrer" target="_blank">getKernel()</a></dt>
+        
+        <dd>
+                            Returns the Kernel handling the request.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/KernelEvent.php#method_getRequest" class="reference external" title="Symfony\Component\HttpKernel\Event\KernelEvent::getRequest()" rel="external noopener noreferrer" target="_blank">getRequest()</a></dt>
+        
+        <dd>
+                            Returns the current <code translate="no" class="notranslate">Request</code> being handled.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/KernelEvent.php#method_isMainRequest" class="reference external" title="Symfony\Component\HttpKernel\Event\KernelEvent::isMainRequest()" rel="external noopener noreferrer" target="_blank">isMainRequest()</a></dt>
+        
+        <dd>
+                            Checks if this is a main request.
+                    </dd>
+    </dl>
+<span id="kernel-core-request"></span>
+<div class="section">
+<h3 id="kernel-request">
+    <code translate="no" class="notranslate">kernel.request</code>
+    <a class="headerlink" href="#kernel-request" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Event Class</strong>: <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/RequestEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\RequestEvent" rel="external noopener noreferrer" target="_blank">RequestEvent</a></p>
+<p>This event is dispatched very early in Symfony, before the controller is
+determined. It's useful to add information to the Request or return a Response
+early to stop the handling of the request.</p>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Read more on the <a href="../components/http_kernel.html#component-http-kernel-kernel-request" class="reference internal">kernel.request event</a>.</p>
+</div>
+<p>Execute this command to find out which listeners are registered for this event and
+their priorities:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:event-dispatcher kernel.request</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="kernel-controller">
+    <code translate="no" class="notranslate">kernel.controller</code>
+    <a class="headerlink" href="#kernel-controller" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Event Class</strong>: <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ControllerEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\ControllerEvent" rel="external noopener noreferrer" target="_blank">ControllerEvent</a></p>
+<p>This event is dispatched after the controller has been resolved but before executing
+it. It's useful to initialize things later needed by the
+controller, such as <a href="https://symfony.com/doc/master/bundles/SensioFrameworkExtraBundle/annotations/converters.html" class="reference external">param converters</a>, and even to change the controller
+entirely:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ControllerEvent</span>;
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelController</span><span class="hljs-params">(ControllerEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-comment">// the controller can be changed to any PHP callable</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setController(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myCustomController</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Read more on the <a href="../components/http_kernel.html#component-http-kernel-kernel-controller" class="reference internal">kernel.controller event</a>.</p>
+</div>
+<p>Execute this command to find out which listeners are registered for this event and
+their priorities:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:event-dispatcher kernel.controller</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="kernel-controller-arguments">
+    <code translate="no" class="notranslate">kernel.controller_arguments</code>
+    <a class="headerlink" href="#kernel-controller-arguments" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Event Class</strong>: <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ControllerArgumentsEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent" rel="external noopener noreferrer" target="_blank">ControllerArgumentsEvent</a></p>
+<p>This event is dispatched just before a controller is called. It's useful to
+configure the arguments that are going to be passed to the controller.
+Typically, this is used to map URL routing parameters to their corresponding
+named arguments; or pass the current request when the <code translate="no" class="notranslate">Request</code> type-hint is
+found:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ControllerArgumentsEvent</span>;
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelControllerArguments</span><span class="hljs-params">(ControllerArgumentsEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-comment">// get controller and request arguments</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>namedArguments</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getRequest()<span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>all();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controllerArguments</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getArguments();
+
+    <span class="hljs-comment">// set the controller arguments to modify the original arguments or add new ones</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setArguments(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>newArguments</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Execute this command to find out which listeners are registered for this event and
+their priorities:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:event-dispatcher kernel.controller_arguments</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="kernel-view">
+    <code translate="no" class="notranslate">kernel.view</code>
+    <a class="headerlink" href="#kernel-view" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Event Class</strong>: <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ViewEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\ViewEvent" rel="external noopener noreferrer" target="_blank">ViewEvent</a></p>
+<p>This event is dispatched after the controller has been executed but <em>only</em> if
+the controller does <em>not</em> return a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Response.php" class="reference external" title="Symfony\Component\HttpFoundation\Response" rel="external noopener noreferrer" target="_blank">Response</a>
+object. It's useful to transform the returned value (e.g. a string with some
+HTML contents) into the <code translate="no" class="notranslate">Response</code> object needed by Symfony:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ViewEvent</span>;
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelView</span><span class="hljs-params">(ViewEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getControllerResult();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response();
+
+    <span class="hljs-comment">// ... somehow customize the Response from the return value</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setResponse(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Read more on the <a href="../components/http_kernel.html#component-http-kernel-kernel-view" class="reference internal">kernel.view event</a>.</p>
+</div>
+<p>Execute this command to find out which listeners are registered for this event and
+their priorities:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:event-dispatcher kernel.view</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="kernel-response">
+    <code translate="no" class="notranslate">kernel.response</code>
+    <a class="headerlink" href="#kernel-response" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Event Class</strong>: <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ResponseEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\ResponseEvent" rel="external noopener noreferrer" target="_blank">ResponseEvent</a></p>
+<p>This event is dispatched after the controller or any <code translate="no" class="notranslate">kernel.view</code> listener
+returns a <code translate="no" class="notranslate">Response</code> object. It's useful to modify or replace the response
+before sending it back (e.g. add/modify HTTP headers, add cookies, etc.):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ResponseEvent</span>;
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelResponse</span><span class="hljs-params">(ResponseEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getResponse();
+
+    <span class="hljs-comment">// ... modify the response object</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Read more on the <a href="../components/http_kernel.html#component-http-kernel-kernel-response" class="reference internal">kernel.response event</a>.</p>
+</div>
+<p>Execute this command to find out which listeners are registered for this event and
+their priorities:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:event-dispatcher kernel.response</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="kernel-finish-request">
+    <code translate="no" class="notranslate">kernel.finish_request</code>
+    <a class="headerlink" href="#kernel-finish-request" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Event Class</strong>: <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/FinishRequestEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\FinishRequestEvent" rel="external noopener noreferrer" target="_blank">FinishRequestEvent</a></p>
+<p>This event is dispatched after the <code translate="no" class="notranslate">kernel.response</code> event. It's useful to reset
+the global state of the application (for example, the translator listener resets
+the translator's locale to the one of the parent request):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">FinishRequestEvent</span>;
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelFinishRequest</span><span class="hljs-params">(FinishRequestEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+</span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">null</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>parentRequest</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>requestStack<span class="hljs-operator">-&gt;</span>getParentRequest()) {
+        <span class="hljs-keyword">return</span>;
+    }
+
+    <span class="hljs-comment">// reset the locale of the subrequest to the locale of the parent request</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>setLocale(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>parentRequest</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Execute this command to find out which listeners are registered for this event and
+their priorities:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:event-dispatcher kernel.finish_request</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="kernel-terminate">
+    <code translate="no" class="notranslate">kernel.terminate</code>
+    <a class="headerlink" href="#kernel-terminate" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Event Class</strong>: <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/TerminateEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\TerminateEvent" rel="external noopener noreferrer" target="_blank">TerminateEvent</a></p>
+<p>This event is dispatched after the response has been sent (after the execution
+of the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/HttpKernel.php#method_handle" class="reference external" title="Symfony\Component\HttpKernel\HttpKernel::handle()" rel="external noopener noreferrer" target="_blank">handle()</a> method).
+It's useful to perform slow or complex tasks that don't need to be completed to
+send the response (e.g. sending emails).</p>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Read more on the <a href="../components/http_kernel.html#component-http-kernel-kernel-terminate" class="reference internal">kernel.terminate event</a>.</p>
+</div>
+<p>Execute this command to find out which listeners are registered for this event and
+their priorities:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:event-dispatcher kernel.terminate</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="kernel-kernel.exception"></span>
+</div>
+<div class="section">
+<h3 id="kernel-exception">
+    <code translate="no" class="notranslate">kernel.exception</code>
+    <a class="headerlink" href="#kernel-exception" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Event Class</strong>: <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ExceptionEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\ExceptionEvent" rel="external noopener noreferrer" target="_blank">ExceptionEvent</a></p>
+<p>This event is dispatched as soon as an error occurs during the handling of the
+HTTP request. It's useful to recover from errors or modify the exception details
+sent as response:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ExceptionEvent</span>;
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelException</span><span class="hljs-params">(ExceptionEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getThrowable();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response();
+    <span class="hljs-comment">// setup the Response object based on the caught exception</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setResponse(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>);
+
+    <span class="hljs-comment">// you can alternatively set a new Exception</span>
+    <span class="hljs-comment">// $exception = new \Exception('Some special exception');</span>
+    <span class="hljs-comment">// $event-&gt;setThrowable($exception);</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The TwigBundle registers an <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/EventListener/ErrorListener.php" class="reference external" title="Symfony\Component\HttpKernel\EventListener\ErrorListener" rel="external noopener noreferrer" target="_blank">ErrorListener</a>
+that forwards the <code translate="no" class="notranslate">Request</code> to a given controller defined by the
+<code translate="no" class="notranslate">exception_listener.controller</code> parameter.</p>
+</div>
+<p>Symfony uses the following logic to determine the HTTP status code of the
+response:</p>
+<ul>
+    <li>If <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Response.php#method_isClientError" class="reference external" title="Symfony\Component\HttpFoundation\Response::isClientError()" rel="external noopener noreferrer" target="_blank">isClientError()</a>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Response.php#method_isServerError" class="reference external" title="Symfony\Component\HttpFoundation\Response::isServerError()" rel="external noopener noreferrer" target="_blank">isServerError()</a> or
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Response.php#method_isRedirect" class="reference external" title="Symfony\Component\HttpFoundation\Response::isRedirect()" rel="external noopener noreferrer" target="_blank">isRedirect()</a> is true,
+then the status code on your <code translate="no" class="notranslate">Response</code> object is used;</li>
+<li>If the original exception implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Exception/HttpExceptionInterface.php" class="reference external" title="Symfony\Component\HttpKernel\Exception\HttpExceptionInterface" rel="external noopener noreferrer" target="_blank">HttpExceptionInterface</a>,
+then <code translate="no" class="notranslate">getStatusCode()</code> is called on the exception and used (the headers
+from <code translate="no" class="notranslate">getHeaders()</code> are also added);</li>
+<li>If both of the above aren't true, then a 500 status code is used.</li>
+</ul>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you want to overwrite the status code of the exception response, which
+you should not without a good reason, call
+<code translate="no" class="notranslate">ExceptionEvent::allowCustomResponseCode()</code> first and then
+set the status code on the response:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>allowCustomResponseCode();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'No Content'</span>, <span class="hljs-number">204</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setResponse(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The status code sent to the client in the above example will be <code translate="no" class="notranslate">204</code>. If
+<code translate="no" class="notranslate">$event-&gt;allowCustomResponseCode()</code> is omitted, then the kernel will set
+an appropriate status code based on the type of exception thrown.</p>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Read more on the <a href="../components/http_kernel.html#component-http-kernel-kernel-exception" class="reference internal">kernel.exception event</a>.</p>
+</div>
+<p>Execute this command to find out which listeners are registered for this event and
+their priorities:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:event-dispatcher kernel.exception</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

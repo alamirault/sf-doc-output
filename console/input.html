@@ -1,0 +1,974 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="console-input-arguments-options">
+    Console Input (Arguments &amp; Options)
+    <a class="headerlink" href="#console-input-arguments-options" title="Permalink to this headline">¶</a>
+</h1>
+<p>The most interesting part of the commands are the arguments and options that
+you can make available. These arguments and options allow you to pass dynamic
+information from the terminal to the command.</p>
+<div class="section">
+<h2 id="using-command-arguments">
+    Using Command Arguments
+    <a class="headerlink" href="#using-command-arguments" title="Permalink to this headline">¶</a>
+</h2>
+<p>Arguments are the strings - separated by spaces - that
+come after the command name itself. They are ordered, and can be optional
+or required. For example, to add an optional <code translate="no" class="notranslate">last_name</code> argument to the command
+and make the <code translate="no" class="notranslate">name</code> argument required:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputArgument</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configure</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>
+            <span class="hljs-comment">// ...</span>
+            <span class="hljs-operator">-&gt;</span>addArgument(<span class="hljs-string">'name'</span>, InputArgument<span class="hljs-operator">::</span>REQUIRED, <span class="hljs-string">'Who do you want to greet?'</span>)
+            <span class="hljs-operator">-&gt;</span>addArgument(<span class="hljs-string">'last_name'</span>, InputArgument<span class="hljs-operator">::</span>OPTIONAL, <span class="hljs-string">'Your last name?'</span>)
+        ;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You now have access to a <code translate="no" class="notranslate">last_name</code> argument in your command:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>text</span> = <span class="hljs-string">'Hi '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span><span class="hljs-operator">-&gt;</span>getArgument(<span class="hljs-string">'name'</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lastName</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span><span class="hljs-operator">-&gt;</span>getArgument(<span class="hljs-string">'last_name'</span>);
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lastName</span>) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>text</span> .= <span class="hljs-string">' '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lastName</span>;
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>text</span>.<span class="hljs-string">'!'</span>);
+
+        <span class="hljs-keyword">return</span> Command<span class="hljs-operator">::</span>SUCCESS;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The command can now be used in either of the following ways:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console app:greet Fabien
+Hi Fabien!
+
+<span class="hljs-prompt">$ </span>php bin/console app:greet Fabien Potencier
+Hi Fabien Potencier!</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>It is also possible to let an argument take a list of values (imagine you want
+to greet all your friends). Only the last argument can be a list:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-operator">-&gt;</span>addArgument(
+        <span class="hljs-string">'names'</span>,
+        InputArgument<span class="hljs-operator">::</span>IS_ARRAY,
+        <span class="hljs-string">'Who do you want to greet (separate multiple names with a space)?'</span>
+    )
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>To use this, specify as many names as you want:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console app:greet Fabien Ryan Bernhard</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can access the <code translate="no" class="notranslate">names</code> argument as an array:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>names</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span><span class="hljs-operator">-&gt;</span>getArgument(<span class="hljs-string">'names'</span>);
+<span class="hljs-keyword">if</span> (count(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>names</span>) &gt; <span class="hljs-number">0</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>text</span> .= <span class="hljs-string">' '</span>.implode(<span class="hljs-string">', '</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>names</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>There are three argument variants you can use:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">InputArgument::REQUIRED</code></dt>
+        
+        <dd>
+                            The argument is mandatory. The command doesn't run if the argument isn't
+provided;
+                    </dd>
+                        <dt><code translate="no" class="notranslate">InputArgument::OPTIONAL</code></dt>
+        
+        <dd>
+                            The argument is optional and therefore can be omitted. This is the default
+behavior of arguments;
+                    </dd>
+                        <dt><code translate="no" class="notranslate">InputArgument::IS_ARRAY</code></dt>
+        
+        <dd>
+                            The argument can contain any number of values. For that reason, it must be
+used at the end of the argument list.
+                    </dd>
+    </dl>
+<p>You can combine <code translate="no" class="notranslate">IS_ARRAY</code> with <code translate="no" class="notranslate">REQUIRED</code> or <code translate="no" class="notranslate">OPTIONAL</code> like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-operator">-&gt;</span>addArgument(
+        <span class="hljs-string">'names'</span>,
+        InputArgument<span class="hljs-operator">::</span>IS_ARRAY | InputArgument<span class="hljs-operator">::</span>REQUIRED,
+        <span class="hljs-string">'Who do you want to greet (separate multiple names with a space)?'</span>
+    )
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="using-command-options">
+    Using Command Options
+    <a class="headerlink" href="#using-command-options" title="Permalink to this headline">¶</a>
+</h2>
+<p>Unlike arguments, options are not ordered (meaning you can specify them in any
+order) and are specified with two dashes (e.g. <code translate="no" class="notranslate">--yell</code>). Options are
+<em>always</em> optional, and can be setup to accept a value (e.g. <code translate="no" class="notranslate">--dir=src</code>) or
+as a boolean flag without a value (e.g.  <code translate="no" class="notranslate">--yell</code>).</p>
+<p>For example, add a new option to the command that can be used to specify
+how many times in a row the message should be printed:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputOption</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-operator">-&gt;</span>addOption(
+        <span class="hljs-comment">// this is the name that users must type to pass this option (e.g. --iterations=5)</span>
+        <span class="hljs-string">'iterations'</span>,
+        <span class="hljs-comment">// this is the optional shortcut of the option name, which usually is just a letter</span>
+        <span class="hljs-comment">// (e.g. `i`, so users pass it as `-i`); use it for commonly used options</span>
+        <span class="hljs-comment">// or options with long names</span>
+        <span class="hljs-keyword">null</span>,
+        <span class="hljs-comment">// this is the type of option (e.g. requires a value, can be passed more than once, etc.)</span>
+        InputOption<span class="hljs-operator">::</span>VALUE_REQUIRED,
+        <span class="hljs-comment">// the option description displayed when showing the command help</span>
+        <span class="hljs-string">'How many times should the message be printed?'</span>,
+        <span class="hljs-comment">// the default value of the option (for those which allow to pass values)</span>
+        <span class="hljs-number">1</span>
+    )
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Next, use this in the command to print the message multiple times:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">for</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>i</span> = <span class="hljs-number">0</span>; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>i</span> &lt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span><span class="hljs-operator">-&gt;</span>getOption(<span class="hljs-string">'iterations'</span>); <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>i</span>++) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>text</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, when you run the command, you can optionally specify a <code translate="no" class="notranslate">--iterations</code>
+flag:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># no --iterations provided, the default (1) is used</span>
+<span class="hljs-prompt">$ </span>php bin/console app:greet Fabien
+Hi Fabien!
+
+<span class="hljs-prompt">$ </span>php bin/console app:greet Fabien --iterations=5
+Hi Fabien!
+Hi Fabien!
+Hi Fabien!
+Hi Fabien!
+Hi Fabien!
+
+<span class="hljs-comment"># the order of options isn't important</span>
+<span class="hljs-prompt">$ </span>php bin/console app:greet Fabien --iterations=5 --yell
+<span class="hljs-prompt">$ </span>php bin/console app:greet Fabien --yell --iterations=5
+<span class="hljs-prompt">$ </span>php bin/console app:greet --yell --iterations=5 Fabien</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can also declare a one-letter shortcut that you can call with a single
+dash, like <code translate="no" class="notranslate">-i</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-operator">-&gt;</span>addOption(
+        <span class="hljs-string">'iterations'</span>,
+        <span class="hljs-string">'i'</span>,
+        InputOption<span class="hljs-operator">::</span>VALUE_REQUIRED,
+        <span class="hljs-string">'How many times should the message be printed?'</span>,
+        <span class="hljs-number">1</span>
+    )
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<p>Note that to comply with the <a href="http://docopt.org/" class="reference external" rel="external noopener noreferrer" target="_blank">docopt standard</a>, long options can specify their
+values after a whitespace or an <code translate="no" class="notranslate">=</code> sign (e.g. <code translate="no" class="notranslate">--iterations 5</code> or
+<code translate="no" class="notranslate">--iterations=5</code>), but short options can only use whitespaces or no
+separation at all (e.g. <code translate="no" class="notranslate">-i 5</code> or <code translate="no" class="notranslate">-i5</code>).</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>While it is possible to separate an option from its value with a whitespace,
+using this form leads to an ambiguity should the option appear before the
+command name. For example, <code translate="no" class="notranslate">php bin/console --iterations 5 app:greet Fabien</code>
+is ambiguous; Symfony would interpret <code translate="no" class="notranslate">5</code> as the command name. To avoid
+this situation, always place options after the command name, or avoid using
+a space to separate the option name from its value.</p>
+</div>
+<p>There are five option variants you can use:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">InputOption::VALUE_IS_ARRAY</code></dt>
+        
+        <dd>
+                            This option accepts multiple values (e.g. <code translate="no" class="notranslate">--dir=/foo --dir=/bar</code>);
+                    </dd>
+                        <dt><code translate="no" class="notranslate">InputOption::VALUE_NONE</code></dt>
+        
+        <dd>
+                            Do not accept input for this option (e.g. <code translate="no" class="notranslate">--yell</code>). The value returned
+from is a boolean (<code translate="no" class="notranslate">false</code> if the option is not provided).
+This is the default behavior of options;
+                    </dd>
+                        <dt><code translate="no" class="notranslate">InputOption::VALUE_REQUIRED</code></dt>
+        
+        <dd>
+                            This value is required (e.g. <code translate="no" class="notranslate">--iterations=5</code> or <code translate="no" class="notranslate">-i5</code>), the option
+itself is still optional;
+                    </dd>
+                        <dt><code translate="no" class="notranslate">InputOption::VALUE_OPTIONAL</code></dt>
+        
+        <dd>
+                            This option may or may not have a value (e.g. <code translate="no" class="notranslate">--yell</code> or
+<code translate="no" class="notranslate">--yell=loud</code>).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">InputOption::VALUE_NEGATABLE</code></dt>
+        
+        <dd>
+                            Accept either the flag (e.g. <code translate="no" class="notranslate">--yell</code>) or its negation (e.g.
+<code translate="no" class="notranslate">--no-yell</code>).
+                    </dd>
+    </dl>
+<p>You need to combine <code translate="no" class="notranslate">VALUE_IS_ARRAY</code> with <code translate="no" class="notranslate">VALUE_REQUIRED</code> or
+<code translate="no" class="notranslate">VALUE_OPTIONAL</code> like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-operator">-&gt;</span>addOption(
+        <span class="hljs-string">'colors'</span>,
+        <span class="hljs-keyword">null</span>,
+        InputOption<span class="hljs-operator">::</span>VALUE_REQUIRED | InputOption<span class="hljs-operator">::</span>VALUE_IS_ARRAY,
+        <span class="hljs-string">'Which colors do you like?'</span>,
+        [<span class="hljs-string">'blue'</span>, <span class="hljs-string">'red'</span>]
+    )
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="options-with-optional-arguments">
+    Options with optional arguments
+    <a class="headerlink" href="#options-with-optional-arguments" title="Permalink to this headline">¶</a>
+</h2>
+<p>There is nothing forbidding you to create a command with an option that
+optionally accepts a value, but it's a bit tricky. Consider this example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputOption</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-operator">-&gt;</span>addOption(
+        <span class="hljs-string">'yell'</span>,
+        <span class="hljs-keyword">null</span>,
+        InputOption<span class="hljs-operator">::</span>VALUE_OPTIONAL,
+        <span class="hljs-string">'Should I yell while greeting?'</span>
+    )
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This option can be used in 3 ways: <code translate="no" class="notranslate">greet --yell</code>, <code translate="no" class="notranslate">greet --yell=louder</code>,
+and <code translate="no" class="notranslate">greet</code>. However, it's hard to distinguish between passing the option
+without a value (<code translate="no" class="notranslate">greet --yell</code>) and not passing the option (<code translate="no" class="notranslate">greet</code>).</p>
+<p>To solve this issue, you have to set the option's default value to <code translate="no" class="notranslate">false</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputOption</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-operator">-&gt;</span>addOption(
+        <span class="hljs-string">'yell'</span>,
+        <span class="hljs-keyword">null</span>,
+        InputOption<span class="hljs-operator">::</span>VALUE_OPTIONAL,
+        <span class="hljs-string">'Should I yell while greeting?'</span>,
+        <span class="hljs-keyword">false</span> <span class="hljs-comment">// this is the new default value, instead of null</span>
+    )
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now it's possible to differentiate between not passing the option and not
+passing any value for it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>optionValue</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span><span class="hljs-operator">-&gt;</span>getOption(<span class="hljs-string">'yell'</span>);
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">false</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>optionValue</span>) {
+    <span class="hljs-comment">// in this case, the option was not passed when running the command</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yell</span> = <span class="hljs-keyword">false</span>;
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yellLouder</span> = <span class="hljs-keyword">false</span>;
+} <span class="hljs-keyword">elseif</span> (<span class="hljs-keyword">null</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>optionValue</span>) {
+    <span class="hljs-comment">// in this case, the option was passed when running the command</span>
+    <span class="hljs-comment">// but no value was given to it</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yell</span> = <span class="hljs-keyword">true</span>;
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yellLouder</span> = <span class="hljs-keyword">false</span>;
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-comment">// in this case, the option was passed when running the command and</span>
+    <span class="hljs-comment">// some specific value was given to it</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yell</span> = <span class="hljs-keyword">true</span>;
+    <span class="hljs-keyword">if</span> (<span class="hljs-string">'louder'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>optionValue</span>) {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yellLouder</span> = <span class="hljs-keyword">true</span>;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yellLouder</span> = <span class="hljs-keyword">false</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The above code can be simplified as follows because <code translate="no" class="notranslate">false !== null</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>optionValue</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span><span class="hljs-operator">-&gt;</span>getOption(<span class="hljs-string">'yell'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yell</span> = (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>optionValue</span> !== <span class="hljs-keyword">false</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yellLouder</span> = (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>optionValue</span> === <span class="hljs-string">'louder'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="adding-argument-option-value-completion">
+    Adding Argument/Option Value Completion
+    <a class="headerlink" href="#adding-argument-option-value-completion" title="Permalink to this headline">¶</a>
+</h2>
+<p>If <a href="../console.html#console-completion-setup" class="reference internal">Console completion is installed</a>,
+command and option names will be auto completed by the shell. However, you
+can also implement value completion for the input in your commands. For
+instance, you may want to complete all usernames from the database in the
+<code translate="no" class="notranslate">name</code> argument of your greet command.</p>
+<p>To achieve this, use the 5th argument of <code translate="no" class="notranslate">addArgument()</code>/<code translate="no" class="notranslate">addOption</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Completion</span>\<span class="hljs-title">CompletionInput</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Completion</span>\<span class="hljs-title">CompletionSuggestions</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configure</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>
+            <span class="hljs-operator">-&gt;</span>addArgument(
+                <span class="hljs-string">'names'</span>,
+                InputArgument<span class="hljs-operator">::</span>IS_ARRAY,
+                <span class="hljs-string">'Who do you want to greet (separate multiple names with a space)?'</span>,
+                <span class="hljs-keyword">null</span>,
+                <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(CompletionInput <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>)</span> </span>{
+                    <span class="hljs-comment">// the value the user already typed, e.g. when typing "app:greet Fa" before</span>
+                    <span class="hljs-comment">// pressing Tab, this will contain "Fa"</span>
+                    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>currentValue</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span><span class="hljs-operator">-&gt;</span>getCompletionValue();
+
+                    <span class="hljs-comment">// get the list of username names from somewhere (e.g. the database)</span>
+                    <span class="hljs-comment">// you may use $currentValue to filter down the names</span>
+                    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>availableUsernames</span> = ...;
+
+                    <span class="hljs-comment">// then suggested the usernames as values</span>
+                    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>availableUsernames</span>;
+                }
+            )
+        ;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The argument to <code translate="no" class="notranslate">addOption()</code>/<code translate="no" class="notranslate">addArgument()</code> was introduced in
+Symfony 6.1. Prior to this version, you had to override the
+<code translate="no" class="notranslate">complete()</code> method of the command.</p>
+</div>
+<p>That's all you need! Assuming users &quot;Fabien&quot; and &quot;Fabrice&quot; exist, pressing
+tab after typing <code translate="no" class="notranslate">app:greet Fa</code> will give you these names as a suggestion.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The shell script is able to handle huge amounts of suggestions and will
+automatically filter the suggested values based on the existing input
+from the user. You do not have to implement any filter logic in the
+command.</p>
+<p>You may use <code translate="no" class="notranslate">CompletionInput::getCompletionValue()</code> to get the
+current input if that helps improving performance (e.g. by reducing the
+number of rows fetched from the database).</p>
+</div>
+<div class="section">
+<h3 id="testing-the-completion-script">
+    Testing the Completion script
+    <a class="headerlink" href="#testing-the-completion-script" title="Permalink to this headline">¶</a>
+</h3>
+<p>The Console component comes with a special
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Tester/CommandCompletionTester.php" class="reference external" title="Symfony\Component\Console\Tester\CommandCompletionTester" rel="external noopener noreferrer" target="_blank">CommandCompletionTester</a>` class
+to help you unit test the completion logic:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Application</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetCommandTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testComplete</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span> = <span class="hljs-keyword">new</span> Application();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-keyword">new</span> GreetCommand());
+
+        <span class="hljs-comment">// create a new tester with the greet command</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tester</span> = <span class="hljs-keyword">new</span> CommandCompletionTester(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'app:greet'</span>));
+
+        <span class="hljs-comment">// complete the input without any existing input (the empty string represents</span>
+        <span class="hljs-comment">// the position of the cursor)</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>suggestions</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tester</span><span class="hljs-operator">-&gt;</span>complete([<span class="hljs-string">''</span>]);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertSame([<span class="hljs-string">'Fabien'</span>, <span class="hljs-string">'Fabrice'</span>, <span class="hljs-string">'Wouter'</span>], <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>suggestions</span>);
+
+        <span class="hljs-comment">// If you filter the values inside your own code (not recommended, unless you</span>
+        <span class="hljs-comment">// need to improve performance of e.g. a database query), you can test this</span>
+        <span class="hljs-comment">// by passing the user input</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>suggestions</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tester</span><span class="hljs-operator">-&gt;</span>complete([<span class="hljs-string">'Fa'</span>]);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertSame([<span class="hljs-string">'Fabien'</span>, <span class="hljs-string">'Fabrice'</span>], <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>suggestions</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

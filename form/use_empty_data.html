@@ -1,0 +1,251 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-configure-empty-data-for-a-form-class">
+    How to Configure empty Data for a Form Class
+    <a class="headerlink" href="#how-to-configure-empty-data-for-a-form-class" title="Permalink to this headline">¶</a>
+</h1>
+<p>The <code translate="no" class="notranslate">empty_data</code> option allows you to specify an empty data set for your
+form class. This empty data set would be used if you submit your form, but
+haven't called <code translate="no" class="notranslate">setData()</code> on your form or passed in data when you created
+your form. For example, in a controller:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blog</span> = ...;
+
+    <span class="hljs-comment">// $blog is passed in as the data, so the empty_data</span>
+    <span class="hljs-comment">// option is not needed</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createForm(BlogType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>blog</span>);
+
+    <span class="hljs-comment">// no data is passed in, so empty_data is</span>
+    <span class="hljs-comment">// used to get the "starting data"</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createForm(BlogType<span class="hljs-operator">::</span>class);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>By default, <code translate="no" class="notranslate">empty_data</code> is set to <code translate="no" class="notranslate">null</code>. Or, if you have specified
+a <code translate="no" class="notranslate">data_class</code> option for your form class, it will default to a new instance
+of that class. That instance will be created by calling the constructor
+with no arguments.</p>
+<p>If you want to override this default behavior, there are two ways to do this:</p>
+<ul>
+    <li><a href="use_empty_data.html#option-1-instantiate-a-new-class" class="reference internal">Option 1: Instantiate a new Class</a></li>
+<li><a href="use_empty_data.html#option-2-provide-a-closure" class="reference internal">Option 2: Provide a Closure</a></li>
+</ul>
+<p>If you didn't set the <code translate="no" class="notranslate">data_class</code> option, you can pass the initial data as
+string or pass an array of strings (where the key matches the field name) when
+the form type is compound.</p>
+<div class="section">
+<h2 id="option-1-instantiate-a-new-class">
+    Option 1: Instantiate a new Class
+    <a class="headerlink" href="#option-1-instantiate-a-new-class" title="Permalink to this headline">¶</a>
+</h2>
+<p>One reason you might use this option is if you want to use a constructor
+that takes arguments. Remember, the default <code translate="no" class="notranslate">data_class</code> option calls
+that constructor with no arguments:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/BlogType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Blog</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlogType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>someDependency</span>,
+    )</span> </span>{
+    }
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-string">'empty_data'</span> =&gt; <span class="hljs-keyword">new</span> Blog(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>someDependency),
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can instantiate your class however you want. In this example, you pass
+some dependency into the <code translate="no" class="notranslate">BlogType</code> then use that to instantiate the <code translate="no" class="notranslate">Blog</code> class.
+The point is, you can set <code translate="no" class="notranslate">empty_data</code> to the exact &quot;new&quot; object that you want to use.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>In order to pass arguments to the <code translate="no" class="notranslate">BlogType</code> constructor, you'll need to
+<a href="../service_container.html#service-container-creating-service" class="reference internal">register the form as a service</a>
+and <a href="../service_container/tags.html" class="reference internal">tag it</a> with <code translate="no" class="notranslate">form.type</code>.
+If you're using the
+<a href="../service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>,
+this is already done for you.</p>
+</div>
+<span id="forms-empty-data-closure"></span>
+</div>
+<div class="section">
+<h2 id="option-2-provide-a-closure">
+    Option 2: Provide a Closure
+    <a class="headerlink" href="#option-2-provide-a-closure" title="Permalink to this headline">¶</a>
+</h2>
+<p>Using a closure is the preferred method, since it will only create the object
+if it is needed.</p>
+<p>The closure must accept a <code translate="no" class="notranslate">FormInterface</code> instance as the first argument:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>: <span class="hljs-title">void</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+        <span class="hljs-string">'empty_data'</span> =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FormInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>)</span> </span>{
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Blog(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'title'</span>)<span class="hljs-operator">-&gt;</span>getData());
+        },
+    ]);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

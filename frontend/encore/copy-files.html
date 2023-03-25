@@ -1,0 +1,200 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="copying-referencing-images">
+    Copying &amp; Referencing Images
+    <a class="headerlink" href="#copying-referencing-images" title="Permalink to this headline">¶</a>
+</h1>
+<p>Need to reference a static file - like the path to an image for an <code translate="no" class="notranslate">img</code> tag?
+That can be tricky if you store your assets outside of the public document root.
+Fortunately, depending on your situation, there is a solution!</p>
+<div class="section">
+<h2 id="referencing-images-from-inside-a-webpacked-javascript-file">
+    Referencing Images from Inside a Webpacked JavaScript File
+    <a class="headerlink" href="#referencing-images-from-inside-a-webpacked-javascript-file" title="Permalink to this headline">¶</a>
+</h2>
+<p>To reference an image tag from inside a JavaScript file, <em>require</em> the file:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// assets/app.js</span>
+
+<span class="hljs-comment">// returns the final, public path to this file</span>
+<span class="hljs-comment">// path is relative to this file - e.g. assets/images/logo.png</span>
+<span class="hljs-keyword">import</span> logoPath <span class="hljs-keyword">from</span> <span class="hljs-string">'../images/logo.png'</span>;
+
+<span class="hljs-keyword">let</span> html = <span class="hljs-string">`&lt;img src="<span class="hljs-subst">${logoPath}</span>" alt="ACME logo"&gt;`</span>;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When you <code translate="no" class="notranslate">require</code> (or <code translate="no" class="notranslate">import</code>) an image file, Webpack copies it into your
+output directory and returns the final, <em>public</em> path to that file.</p>
+</div>
+<div class="section">
+<h2 id="referencing-image-files-from-a-template">
+    Referencing Image files from a Template
+    <a class="headerlink" href="#referencing-image-files-from-a-template" title="Permalink to this headline">¶</a>
+</h2>
+<p>To reference an image file from outside of a JavaScript file that's processed by
+Webpack - like a template - you can use the <code translate="no" class="notranslate">copyFiles()</code> method to copy those
+files into your final output directory. First enable it in <code translate="no" class="notranslate">webpack.config.js</code>:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">// webpack.config.js
+
+  Encore
+      // ...
+      .setOutputPath('public/build/')
+
+<span class="hljs-addition">+     .copyFiles({</span>
+<span class="hljs-addition">+         from: './assets/images',</span>
+<span class="hljs-addition">+</span>
+<span class="hljs-addition">+         // optional target path, relative to the output dir</span>
+<span class="hljs-addition">+         to: 'images/[path][name].[ext]',</span>
+<span class="hljs-addition">+</span>
+<span class="hljs-addition">+         // if versioning is enabled, add the file hash too</span>
+<span class="hljs-addition">+         //to: 'images/[path][name].[hash:8].[ext]',</span>
+<span class="hljs-addition">+</span>
+<span class="hljs-addition">+         // only copy files matching this pattern</span>
+<span class="hljs-addition">+         //pattern: /\.(png|jpg|jpeg)$/</span>
+<span class="hljs-addition">+     })</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then restart Encore. When you do, it will give you a command you can run to
+install any missing dependencies. After running that command and restarting
+Encore, you're done!</p>
+<p>This will copy all files from <code translate="no" class="notranslate">assets/images</code> into <code translate="no" class="notranslate">public/build/images</code>.
+If you have <a href="versioning.html" class="reference internal">versioning enabled</a>, the copied files will
+include a hash based on their content.</p>
+<p>To render inside Twig, use the <code translate="no" class="notranslate">asset()</code> function:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# assets/images/logo.png was copied to public/build/images/logo.png #}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ asset('build/images/logo.png') }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">"ACME logo"</span>&gt;</span>
+
+</span><span class="hljs-comment">{# assets/images/subdir/logo.png was copied to public/build/images/subdir/logo.png #}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ asset('build/images/subdir/logo.png') }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">"ACME logo"</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Make sure you've enabled the <a href="versioning.html#load-manifest-files" class="reference internal">json_manifest_path</a> option,
+which tells the <code translate="no" class="notranslate">asset()</code> function to read the final paths from the <code translate="no" class="notranslate">manifest.json</code>
+file. If you're not sure what path argument to pass to the <code translate="no" class="notranslate">asset()</code> function,
+find the file in <code translate="no" class="notranslate">manifest.json</code> and use the <em>key</em> as the argument.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

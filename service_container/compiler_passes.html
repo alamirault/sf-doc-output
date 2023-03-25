@@ -1,0 +1,255 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-work-with-compiler-passes">
+    How to Work with Compiler Passes
+    <a class="headerlink" href="#how-to-work-with-compiler-passes" title="Permalink to this headline">¶</a>
+</h1>
+<p>Compiler passes give you an opportunity to manipulate other
+<a href="definitions.html" class="reference internal">service definitions</a> that have been
+registered with the service container. You can read about how to create them in
+the components section &quot;<a href="../components/dependency_injection/compilation.html#components-di-separate-compiler-passes" class="reference internal">Compiling the Container</a>&quot;.</p>
+<p>Compiler passes are registered in the <code translate="no" class="notranslate">build()</code> method of the application kernel:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Kernel.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Compiler</span>\<span class="hljs-title">CustomPass</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Kernel</span>\<span class="hljs-title">MicroKernelTrait</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Kernel</span> <span class="hljs-title">as</span> <span class="hljs-title">BaseKernel</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Kernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseKernel</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">MicroKernelTrait</span>;
+
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">build</span><span class="hljs-params">(ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>addCompilerPass(<span class="hljs-keyword">new</span> CustomPass());
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="kernel-as-compiler-pass"></span>
+<p>One of the most common use-cases of compiler passes is to work with <a href="tags.html" class="reference internal">tagged
+services</a>. In those cases, instead of creating a
+compiler pass, you can make the kernel implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Compiler/CompilerPassInterface.php" class="reference external" title="Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface" rel="external noopener noreferrer" target="_blank">CompilerPassInterface</a>
+and process the services inside the <code translate="no" class="notranslate">process()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Kernel.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Kernel</span>\<span class="hljs-title">MicroKernelTrait</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Compiler</span>\<span class="hljs-title">CompilerPassInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Kernel</span> <span class="hljs-title">as</span> <span class="hljs-title">BaseKernel</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Kernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseKernel</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">CompilerPassInterface</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">MicroKernelTrait</span>;
+
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">process</span><span class="hljs-params">(ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// in this method you can manipulate the service container:</span>
+        <span class="hljs-comment">// for example, changing some container service:</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>getDefinition(<span class="hljs-string">'app.some_private_service'</span>)<span class="hljs-operator">-&gt;</span>setPublic(<span class="hljs-keyword">true</span>);
+
+        <span class="hljs-comment">// or processing tagged services:</span>
+        <span class="hljs-keyword">foreach</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>findTaggedServiceIds(<span class="hljs-string">'some_tag'</span>) <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tags</span>) {
+            <span class="hljs-comment">// ...</span>
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h2 id="working-with-compiler-passes-in-bundles">
+    Working with Compiler Passes in Bundles
+    <a class="headerlink" href="#working-with-compiler-passes-in-bundles" title="Permalink to this headline">¶</a>
+</h2>
+<p><a href="../bundles.html" class="reference internal">Bundles</a> can define compiler passes in the <code translate="no" class="notranslate">build()</code> method of
+the main bundle class (this is not needed when implementing the <code translate="no" class="notranslate">process()</code>
+method in the extension):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/MyBundle/MyBundle.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">MyBundle</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Compiler</span>\<span class="hljs-title">CustomPass</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">Bundle</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyBundle</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Bundle</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">build</span><span class="hljs-params">(ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>build(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>addCompilerPass(<span class="hljs-keyword">new</span> CustomPass());
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you are using custom <a href="tags.html" class="reference internal">service tags</a> in a
+bundle then by convention, tag names consist of the name of the bundle
+(lowercase, underscores as separators), followed by a dot, and finally the
+&quot;real&quot; name. For example, if you want to introduce some sort of &quot;transport&quot; tag
+in your AcmeMailerBundle, you should call it <code translate="no" class="notranslate">acme_mailer.transport</code>.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

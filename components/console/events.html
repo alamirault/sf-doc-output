@@ -1,0 +1,565 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="using-events">
+    Using Events
+    <a class="headerlink" href="#using-events" title="Permalink to this headline">¶</a>
+</h1>
+<p>The Application class of the Console component allows you to optionally hook
+into the lifecycle of a console application via events. Instead of reinventing
+the wheel, it uses the Symfony EventDispatcher component to do the work:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Application</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventDispatcher</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span> = <span class="hljs-keyword">new</span> EventDispatcher();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span> = <span class="hljs-keyword">new</span> Application();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>setDispatcher(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>run();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Console events are only triggered by the main command being executed.
+Commands called by the main command will not trigger any event.</p>
+</div>
+<div class="section">
+<h2 id="the-consoleevents-command-event">
+    The <code translate="no" class="notranslate">ConsoleEvents::COMMAND</code> Event
+    <a class="headerlink" href="#the-consoleevents-command-event" title="Permalink to this headline">¶</a>
+</h2>
+<p><strong>Typical Purposes</strong>: Doing something before any command is run (like logging
+which command is going to be executed), or displaying something about the event
+to be executed.</p>
+<p>Just before executing any command, the <code translate="no" class="notranslate">ConsoleEvents::COMMAND</code> event is
+dispatched. Listeners receive a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Event/ConsoleCommandEvent.php" class="reference external" title="Symfony\Component\Console\Event\ConsoleCommandEvent" rel="external noopener noreferrer" target="_blank">ConsoleCommandEvent</a> event:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">ConsoleEvents</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ConsoleCommandEvent</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span><span class="hljs-operator">-&gt;</span>addListener(ConsoleEvents<span class="hljs-operator">::</span>COMMAND, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ConsoleCommandEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span> </span>{
+    <span class="hljs-comment">// gets the input instance</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getInput();
+
+    <span class="hljs-comment">// gets the output instance</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getOutput();
+
+    <span class="hljs-comment">// gets the command to be executed</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getCommand();
+
+    <span class="hljs-comment">// writes something about the command</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(sprintf(<span class="hljs-string">'Before running command &lt;info&gt;%s&lt;/info&gt;'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span><span class="hljs-operator">-&gt;</span>getName()));
+
+    <span class="hljs-comment">// gets the application</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span><span class="hljs-operator">-&gt;</span>getApplication();
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="disable-commands-inside-listeners">
+    Disable Commands inside Listeners
+    <a class="headerlink" href="#disable-commands-inside-listeners" title="Permalink to this headline">¶</a>
+</h3>
+<p>Using the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Event/ConsoleCommandEvent.php#method_disableCommand" class="reference external" title="Symfony\Component\Console\Event\ConsoleCommandEvent::disableCommand()" rel="external noopener noreferrer" target="_blank">disableCommand()</a>
+method, you can disable a command inside a listener. The application
+will then <em>not</em> execute the command, but instead will return the code <code translate="no" class="notranslate">113</code>
+(defined in <code translate="no" class="notranslate">ConsoleCommandEvent::RETURN_CODE_DISABLED</code>). This code is one
+of the <a href="https://www.tldp.org/LDP/abs/html/exitcodes.html" class="reference external" rel="external noopener noreferrer" target="_blank">reserved exit codes</a> for console commands that conform with the
+C/C++ standard:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">ConsoleEvents</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ConsoleCommandEvent</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span><span class="hljs-operator">-&gt;</span>addListener(ConsoleEvents<span class="hljs-operator">::</span>COMMAND, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ConsoleCommandEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span> </span>{
+    <span class="hljs-comment">// gets the command to be executed</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getCommand();
+
+    <span class="hljs-comment">// ... check if the command can be executed</span>
+
+    <span class="hljs-comment">// disables the command, this will result in the command being skipped</span>
+    <span class="hljs-comment">// and code 113 being returned from the Application</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>disableCommand();
+
+    <span class="hljs-comment">// it is possible to enable the command in a later listener</span>
+    <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>commandShouldRun()) {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>enableCommand();
+    }
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="the-consoleevents-error-event">
+    The <code translate="no" class="notranslate">ConsoleEvents::ERROR</code> Event
+    <a class="headerlink" href="#the-consoleevents-error-event" title="Permalink to this headline">¶</a>
+</h2>
+<p><strong>Typical Purposes</strong>: Handle exceptions thrown during the execution of a
+command.</p>
+<p>Whenever an exception is thrown by a command, including those triggered from
+event listeners, the <code translate="no" class="notranslate">ConsoleEvents::ERROR</code> event is dispatched. A listener
+can wrap or change the exception or do anything useful before the exception is
+thrown by the application.</p>
+<p>Listeners receive a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Event/ConsoleErrorEvent.php" class="reference external" title="Symfony\Component\Console\Event\ConsoleErrorEvent" rel="external noopener noreferrer" target="_blank">ConsoleErrorEvent</a> event:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">ConsoleEvents</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ConsoleErrorEvent</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span><span class="hljs-operator">-&gt;</span>addListener(ConsoleEvents<span class="hljs-operator">::</span>ERROR, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ConsoleErrorEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getOutput();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getCommand();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(sprintf(<span class="hljs-string">'Oops, exception thrown while running command &lt;info&gt;%s&lt;/info&gt;'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span><span class="hljs-operator">-&gt;</span>getName()));
+
+    <span class="hljs-comment">// gets the current exit code (the exception code)</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exitCode</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getExitCode();
+
+    <span class="hljs-comment">// changes the exception to another one</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setError(<span class="hljs-keyword">new</span> \LogicException(<span class="hljs-string">'Caught exception'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exitCode</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getError()));
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="console-events-terminate"></span>
+</div>
+<div class="section">
+<h2 id="the-consoleevents-terminate-event">
+    The <code translate="no" class="notranslate">ConsoleEvents::TERMINATE</code> Event
+    <a class="headerlink" href="#the-consoleevents-terminate-event" title="Permalink to this headline">¶</a>
+</h2>
+<p><strong>Typical Purposes</strong>: To perform some cleanup actions after the command has
+been executed.</p>
+<p>After the command has been executed, the <code translate="no" class="notranslate">ConsoleEvents::TERMINATE</code> event is
+dispatched. It can be used to do any actions that need to be executed for all
+commands or to cleanup what you initiated in a <code translate="no" class="notranslate">ConsoleEvents::COMMAND</code>
+listener (like sending logs, closing a database connection, sending emails,
+...). A listener might also change the exit code.</p>
+<p>Listeners receive a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Event/ConsoleTerminateEvent.php" class="reference external" title="Symfony\Component\Console\Event\ConsoleTerminateEvent" rel="external noopener noreferrer" target="_blank">ConsoleTerminateEvent</a> event:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">ConsoleEvents</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ConsoleTerminateEvent</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span><span class="hljs-operator">-&gt;</span>addListener(ConsoleEvents<span class="hljs-operator">::</span>TERMINATE, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ConsoleTerminateEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span> </span>{
+    <span class="hljs-comment">// gets the output</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getOutput();
+
+    <span class="hljs-comment">// gets the command that has been executed</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getCommand();
+
+    <span class="hljs-comment">// displays the given content</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln(sprintf(<span class="hljs-string">'After running command &lt;info&gt;%s&lt;/info&gt;'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span><span class="hljs-operator">-&gt;</span>getName()));
+
+    <span class="hljs-comment">// changes the exit code</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setExitCode(<span class="hljs-number">128</span>);
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>This event is also dispatched when an exception is thrown by the command.
+It is then dispatched just after the <code translate="no" class="notranslate">ConsoleEvents::ERROR</code> event.
+The exit code received in this case is the exception code.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="the-consoleevents-signal-event">
+    The <code translate="no" class="notranslate">ConsoleEvents::SIGNAL</code> Event
+    <a class="headerlink" href="#the-consoleevents-signal-event" title="Permalink to this headline">¶</a>
+</h2>
+<p><strong>Typical Purposes</strong>: To perform some actions after the command execution was interrupted.</p>
+<p><a href="https://en.wikipedia.org/wiki/Signal_(IPC)" class="reference external" rel="external noopener noreferrer" target="_blank">Signals</a> are asynchronous notifications sent to a process in order to notify
+it of an event that occurred. For example, when you press <code translate="no" class="notranslate">Ctrl + C</code> in a
+command, the operating system sends the <code translate="no" class="notranslate">SIGINT</code> signal to it.</p>
+<p>When a command is interrupted, Symfony dispatches the <code translate="no" class="notranslate">ConsoleEvents::SIGNAL</code>
+event. Listen to this event so you can perform some actions (e.g. logging some
+results, cleaning some temporary files, etc.) before finishing the command execution.</p>
+<p>Listeners receive a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Event/ConsoleSignalEvent.php" class="reference external" title="Symfony\Component\Console\Event\ConsoleSignalEvent" rel="external noopener noreferrer" target="_blank">ConsoleSignalEvent</a> event:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">ConsoleEvents</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ConsoleSignalEvent</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span><span class="hljs-operator">-&gt;</span>addListener(ConsoleEvents<span class="hljs-operator">::</span>SIGNAL, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ConsoleSignalEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span> </span>{
+
+    <span class="hljs-comment">// gets the signal number</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>signal</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getHandlingSignal();
+
+    <span class="hljs-comment">// sets the exit code</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setExitCode(<span class="hljs-number">0</span>);
+
+    <span class="hljs-keyword">if</span> (\SIGINT === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>signal</span>) {
+        <span class="hljs-keyword">echo</span> <span class="hljs-string">"bye bye!"</span>;
+    }
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>It is also possible to abort the exit if you want the command to continue its
+execution even after the event has been dispatched, thanks to the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Event/ConsoleSignalEvent.php#method_abortExit" class="reference external" title="Symfony\Component\Console\Event\ConsoleSignalEvent::abortExit()" rel="external noopener noreferrer" target="_blank">abortExit()</a>
+method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">ConsoleEvents</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ConsoleSignalEvent</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span><span class="hljs-operator">-&gt;</span>addListener(ConsoleEvents<span class="hljs-operator">::</span>SIGNAL, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ConsoleSignalEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>abortExit();
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The <code translate="no" class="notranslate">setExitCode()</code>, <code translate="no" class="notranslate">getExitCode()</code> and <code translate="no" class="notranslate">abortExit()</code> methods were introduced
+in Symfony 6.3.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>All the available signals (<code translate="no" class="notranslate">SIGINT</code>, <code translate="no" class="notranslate">SIGQUIT</code>, etc.) are defined as
+<a href="https://www.php.net/manual/en/pcntl.constants.php" class="reference external" rel="external noopener noreferrer" target="_blank">constants of the PCNTL PHP extension</a>.</p>
+</div>
+<p>If you use the Console component inside a Symfony application, commands can
+handle signals themselves. To do so, implement the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Command/SignalableCommandInterface.php" class="reference external" title="Symfony\Component\Console\Command\SignalableCommandInterface" rel="external noopener noreferrer" target="_blank">SignalableCommandInterface</a> and subscribe to one or more signals:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Command/SomeCommand.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Command</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">SignalableCommandInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SomeCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">SignalableCommandInterface</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubscribedSignals</span><span class="hljs-params">()</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-comment">// return here any of the constants defined by PCNTL extension</span>
+        <span class="hljs-keyword">return</span> [\SIGINT, \SIGTERM];
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleSignal</span><span class="hljs-params">(int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>signal</span>)</span>: <span class="hljs-title">int</span>|<span class="hljs-title">false</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (\SIGINT === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>signal</span>) {
+            <span class="hljs-comment">// ...</span>
+        }
+
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-comment">// return an integer to set the exit code, or</span>
+        <span class="hljs-comment">// false to continue normal execution</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Symfony doesn't handle any signal received by the command (not even <code translate="no" class="notranslate">SIGKILL</code>,
+<code translate="no" class="notranslate">SIGTERM</code>, etc). This behavior is intended, as it gives you the flexibility to
+handle all signals e.g. to do some tasks before terminating the command.</p>
+<div class="admonition admonition-deprecated ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>In Symfony versions previous to 6.3, all signals (except <code translate="no" class="notranslate">SIGUSR1</code> and
+<code translate="no" class="notranslate">SIGUSR2</code>) would terminate the script by calling <code translate="no" class="notranslate">exit(0)</code>. Starting
+from Symfony 6.3, no more signal is automatically calling <code translate="no" class="notranslate">exit(0)</code>.</p>
+</div>
+<div class="admonition admonition-deprecated ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>Not returning a value in <code translate="no" class="notranslate">handleSignal()</code> is deprecated since Symfony 6.3.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

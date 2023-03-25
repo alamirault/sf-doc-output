@@ -1,0 +1,581 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="traverse">
+    Traverse
+    <a class="headerlink" href="#traverse" title="Permalink to this headline">¶</a>
+</h1>
+<p>Object properties are only validated if they are accessible, either by being
+public or having public accessor methods (e.g. a public getter).
+If your object needs to be traversed to validate its data, you can use this
+constraint.</p>
+<div class="table-wrapper">
+<table>
+        <tbody>
+                    <tr>
+                                    <td>Applies to</td>
+                                    <td><a href="../../validation.html#validation-class-target" class="reference internal">class</a></td>
+                            </tr>
+                    <tr>
+                                    <td>Class</td>
+                                    <td><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/Constraints/Traverse.php" class="reference external" title="Symfony\Component\Validator\Constraints\Traverse" rel="external noopener noreferrer" target="_blank">Traverse</a></td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<div class="section">
+<h2 id="basic-usage">
+    Basic Usage
+    <a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>In the following example, create two classes <code translate="no" class="notranslate">BookCollection</code> and <code translate="no" class="notranslate">Book</code>
+that all have constraints on their properties.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-4">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-5207ca249954de729cefaa252701d90cc01db4ea" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-57a6792c17f4b156127b3c50f99fa524b81ff09e" aria-selected="false"
+                 tabindex="-1">
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-2e90323694c7d64799bfa38e82496c034ec340e0" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-5ec5eb48e9928f66b44b4156611d181ddf93fbe1" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-5207ca249954de729cefaa252701d90cc01db4ea" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Entity/BookCollection.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Book</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Common</span>\<span class="hljs-title">Collections</span>\<span class="hljs-title">ArrayCollection</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Common</span>\<span class="hljs-title">Collections</span>\<span class="hljs-title">Collection</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Mapping</span> <span class="hljs-title">as</span> <span class="hljs-title">ORM</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+
+<span class="hljs-comment">#[ORM\Entity]</span>
+<span class="hljs-comment">#[Assert\Traverse]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BookCollection</span> <span class="hljs-keyword">implements</span> \<span class="hljs-title">IteratorAggregate</span>
+</span>{
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@var</span> string
+     */</span>
+    <span class="hljs-comment">#[ORM\Column]</span>
+    <span class="hljs-comment">#[Assert\NotBlank]</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span> = <span class="hljs-string">''</span>;
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@var</span> Collection|Book[]
+     */</span>
+    <span class="hljs-comment">#[ORM\ManyToMany(targetEntity: Book::class)]</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>books</span>;
+
+    <span class="hljs-comment">// some other properties</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>books = <span class="hljs-keyword">new</span> ArrayCollection();
+    }
+
+    <span class="hljs-comment">// ... setter for name, adder and remover for books</span>
+
+    <span class="hljs-comment">// the name can be validated by calling the getter</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getName</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>name;
+    }
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@return</span> \Generator|Book[] The books for a given author
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getBooksForAuthor</span><span class="hljs-params">(Author <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>author</span>)</span>: <span class="hljs-title">iterable</span>
+    </span>{
+        <span class="hljs-keyword">foreach</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>books <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>book</span>) {
+            <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>book</span><span class="hljs-operator">-&gt;</span>isAuthoredBy(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>author</span>)) {
+                <span class="hljs-keyword">yield</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>book</span>;
+            }
+        }
+    }
+
+    <span class="hljs-comment">// neither the method above nor any other specific getter</span>
+    <span class="hljs-comment">// could be used to validated all nested books;</span>
+    <span class="hljs-comment">// this object needs to be traversed to call the iterator</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getIterator</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>books<span class="hljs-operator">-&gt;</span>getIterator();
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-57a6792c17f4b156127b3c50f99fa524b81ff09e" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="display: none">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/validator/validation.yaml</span>
+<span class="hljs-string">App\Entity\BookCollection:</span>
+    <span class="hljs-attr">constraints:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">Traverse:</span> <span class="hljs-string">~</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-2e90323694c7d64799bfa38e82496c034ec340e0" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/validator/validation.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">constraint-mapping</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/constraint-mapping"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/constraint-mapping https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">class</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"App\Entity\BookCollection"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">constraint</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Traverse"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">class</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">constraint-mapping</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-5ec5eb48e9928f66b44b4156611d181ddf93fbe1" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Entity/BookCollection.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Mapping</span>\<span class="hljs-title">ClassMetadata</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BookCollection</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadValidatorMetadata</span><span class="hljs-params">(ClassMetadata <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addConstraint(<span class="hljs-keyword">new</span> Assert\Traverse());
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>When the object implements <code translate="no" class="notranslate">\Traversable</code> (like here with its child
+<code translate="no" class="notranslate">\IteratorAggregate</code>), its traversal strategy will implicitly be set and the
+object will be iterated over without defining the constraint.
+It's mostly useful to add it to be explicit or to disable the traversal using
+the <code translate="no" class="notranslate">traverse</code> option.
+If a public getter exists to return the inner books collection like
+<code translate="no" class="notranslate">getBooks(): Collection</code>, the <a href="Valid.html" class="reference internal">Valid</a> constraint
+can be used on the <code translate="no" class="notranslate">$books</code> property instead.</p>
+</div>
+<div class="section">
+<h2 id="options">
+    Options
+    <a class="headerlink" href="#options" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <code translate="no" class="notranslate">groups</code> option is not available for this constraint.</p>
+<span id="traverse-option"></span>
+<div class="section">
+<h3 id="traverse">
+    <code translate="no" class="notranslate">traverse</code>
+    <a class="headerlink" href="#traverse" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">boolean</code> <strong>default</strong>: <code translate="no" class="notranslate">true</code></p>
+<p>Instances of <code translate="no" class="notranslate">\Traversable</code> are traversed by default, use this option to
+disable validating:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-4">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-72c2a0020eb3191dc10b459ae3d9df37aff538a0" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-09759d9432bc62d647e16c4c8b0f5e999006a26c" aria-selected="false"
+                 tabindex="-1">
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-7d0fdb2d83232dcf983cecc53da168d86ba5b857" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-d2bdc6ba4368d92b19eda7db80be2414f8693c52" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-72c2a0020eb3191dc10b459ae3d9df37aff538a0" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Entity/BookCollection.php</span>
+
+<span class="hljs-comment">// ... same as above</span>
+
+<span class="hljs-comment">/**
+ * ...
+ */</span>
+ <span class="hljs-comment">#[Assert\Traverse(false)]</span>
+ <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BookCollection</span> <span class="hljs-keyword">implements</span> \<span class="hljs-title">IteratorAggregate</span>
+ </span>{
+     <span class="hljs-comment">// ...</span>
+ }</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-09759d9432bc62d647e16c4c8b0f5e999006a26c" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="display: none">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/validator/validation.yaml</span>
+<span class="hljs-string">App\Entity\BookCollection:</span>
+    <span class="hljs-attr">constraints:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">Traverse:</span> <span class="hljs-literal">false</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-7d0fdb2d83232dcf983cecc53da168d86ba5b857" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/validator/validation.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">constraint-mapping</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/constraint-mapping"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/constraint-mapping https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">class</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"App\Entity\BookCollection"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">constraint</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Traverse"</span>&gt;</span>false<span class="hljs-tag">&lt;/<span class="hljs-name">constraint</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">class</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">constraint-mapping</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-d2bdc6ba4368d92b19eda7db80be2414f8693c52" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Entity/BookCollection.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Mapping</span>\<span class="hljs-title">ClassMetadata</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BookCollection</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadValidatorMetadata</span><span class="hljs-params">(ClassMetadata <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addConstraint(<span class="hljs-keyword">new</span> Assert\Traverse(<span class="hljs-keyword">false</span>));
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h3 id="payload">
+    <code translate="no" class="notranslate">payload</code>
+    <a class="headerlink" href="#payload" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">mixed</code> <strong>default</strong>: <code translate="no" class="notranslate">null</code></p>
+<p>This option can be used to attach arbitrary domain-specific data to a constraint.
+The configured payload is not used by the Validator component, but its processing
+is completely up to you.</p>
+<p>For example, you may want to use
+<a href="../../validation/severity.html" class="reference internal">several error levels</a> to present failed
+constraints differently in the front-end depending on the severity of the
+error.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

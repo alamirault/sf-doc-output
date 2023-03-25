@@ -1,0 +1,3523 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="creating-and-using-templates">
+    Creating and Using Templates
+    <a class="headerlink" href="#creating-and-using-templates" title="Permalink to this headline">¶</a>
+</h1>
+<p>A template is the best way to organize and render HTML from inside your application,
+whether you need to render HTML from a <a href="controller.html" class="reference internal">controller</a> or generate
+the <a href="mailer.html" class="reference internal">contents of an email</a>. Templates in Symfony are created with
+Twig: a flexible, fast, and secure template engine.</p>
+<span id="twig-language"></span>
+<div class="section">
+<h2 id="twig-templating-language">
+    Twig Templating Language
+    <a class="headerlink" href="#twig-templating-language" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://twig.symfony.com" class="reference external">Twig</a> templating language allows you to write concise, readable templates
+that are more friendly to web designers and, in several ways, more powerful than
+PHP templates. Take a look at the following Twig template example. Even if it's
+the first time you see Twig, you probably understand most of it:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Welcome to Symfony!<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span></span><span class="hljs-template-variable">{{ page_title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">if</span></span> user.isLoggedIn %}</span><span class="xml">
+            Hello </span><span class="hljs-template-variable">{{ user.name }}</span><span class="xml">!
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endif</span></span> %}</span><span class="xml">
+
+        </span><span class="hljs-comment">{# ... #}</span><span class="xml">
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Twig syntax is based on these three constructs:</p>
+<ul>
+    <li><code translate="no" class="notranslate">{{ ... }}</code>, used to display the content of a variable or the result of
+evaluating an expression;</li>
+<li><code translate="no" class="notranslate">{% ... %}</code>, used to run some logic, such as a conditional or a loop;</li>
+<li><code translate="no" class="notranslate">{# ... #}</code>, used to add comments to the template (unlike HTML comments,
+these comments are not included in the rendered page).</li>
+</ul>
+<p>You can't run PHP code inside Twig templates, but Twig provides utilities to
+run some logic in the templates. For example, <strong>filters</strong> modify content before
+being rendered, like the <code translate="no" class="notranslate">upper</code> filter to uppercase contents:</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-template-variable">{{ title|<span class="hljs-keyword">upper</span> }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Twig comes with a long list of <a href="https://twig.symfony.com/doc/3.x/tags/index.html" class="reference external">tags</a>, <a href="https://twig.symfony.com/doc/3.x/filters/index.html" class="reference external">filters</a> and <a href="https://twig.symfony.com/doc/3.x/functions/index.html" class="reference external">functions</a> that are
+available by default. In Symfony applications you can also use these
+<a href="reference/twig_reference.html" class="reference internal">Twig filters and functions defined by Symfony</a>
+and you can <a href="templates.html#templates-twig-extension" class="reference internal">create your own Twig filters and functions</a>.</p>
+<p>Twig is fast in the <code translate="no" class="notranslate">prod</code> <a href="configuration.html#configuration-environments" class="reference internal">environment</a>
+(because templates are compiled into PHP and cached automatically), but
+convenient to use in the <code translate="no" class="notranslate">dev</code> environment (because templates are recompiled
+automatically when you change them).</p>
+<div class="section">
+<h3 id="twig-configuration">
+    Twig Configuration
+    <a class="headerlink" href="#twig-configuration" title="Permalink to this headline">¶</a>
+</h3>
+<p>Twig has several configuration options to define things like the format used
+to display numbers and dates, the template caching, etc. Read the
+<a href="reference/configuration/twig.html" class="reference internal">Twig configuration reference</a> to learn about them.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="creating-templates">
+    Creating Templates
+    <a class="headerlink" href="#creating-templates" title="Permalink to this headline">¶</a>
+</h2>
+<p>Before explaining in detail how to create and render templates, look at the
+following example for a quick overview of the whole process. First, you need to
+create a new file in the <code translate="no" class="notranslate">templates/</code> directory to store the template contents:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/user/notifications.html.twig #}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Hello </span><span class="hljs-template-variable">{{ user_first_name }}</span><span class="xml">!<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>You have </span><span class="hljs-template-variable">{{ notifications|<span class="hljs-keyword">length</span> }}</span><span class="xml"> new notifications.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, create a <a href="controller.html" class="reference internal">controller</a> that renders this template and
+passes to it the needed variables:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/UserController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">notifications</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// get the user information and notifications somehow</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userFirstName</span> = <span class="hljs-string">'...'</span>;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userNotifications</span> = [<span class="hljs-string">'...'</span>, <span class="hljs-string">'...'</span>];
+
+        <span class="hljs-comment">// the template path is the relative file path from `templates/`</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'user/notifications.html.twig'</span>, [
+            <span class="hljs-comment">// this array defines the variables passed to the template,</span>
+            <span class="hljs-comment">// where the key is the variable name and the value is the variable value</span>
+            <span class="hljs-comment">// (Twig recommends using snake_case variable names: 'foo_bar' instead of 'fooBar')</span>
+            <span class="hljs-string">'user_first_name'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userFirstName</span>,
+            <span class="hljs-string">'notifications'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userNotifications</span>,
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="template-naming">
+    Template Naming
+    <a class="headerlink" href="#template-naming" title="Permalink to this headline">¶</a>
+</h3>
+<p>Symfony recommends the following for template names:</p>
+<ul>
+    <li>Use <a href="https://en.wikipedia.org/wiki/Snake_case" class="reference external" rel="external noopener noreferrer" target="_blank">snake case</a> for filenames and directories (e.g. <code translate="no" class="notranslate">blog_posts.html.twig</code>,
+<code translate="no" class="notranslate">admin/default_theme/blog/index.html.twig</code>, etc.);</li>
+<li>Define two extensions for filenames (e.g. <code translate="no" class="notranslate">index.html.twig</code> or
+<code translate="no" class="notranslate">blog_posts.xml.twig</code>) being the first extension (<code translate="no" class="notranslate">html</code>, <code translate="no" class="notranslate">xml</code>, etc.)
+the final format that the template will generate.</li>
+</ul>
+<p>Although templates usually generate HTML contents, they can generate any
+text-based format. That's why the two-extension convention simplifies the way
+templates are created and rendered for multiple formats.</p>
+</div>
+<div class="section">
+<h3 id="template-location">
+    Template Location
+    <a class="headerlink" href="#template-location" title="Permalink to this headline">¶</a>
+</h3>
+<p>Templates are stored by default in the <code translate="no" class="notranslate">templates/</code> directory. When a service
+or controller renders the <code translate="no" class="notranslate">product/index.html.twig</code> template, they are actually
+referring to the <code translate="no" class="notranslate">&lt;your-project&gt;/templates/product/index.html.twig</code> file.</p>
+<p>The default templates directory is configurable with the
+<a href="reference/configuration/twig.html#config-twig-default-path" class="reference internal">twig.default_path</a> option and you can add more
+template directories <a href="templates.html#templates-namespaces" class="reference internal">as explained later</a> in this article.</p>
+</div>
+<div class="section">
+<h3 id="template-variables">
+    Template Variables
+    <a class="headerlink" href="#template-variables" title="Permalink to this headline">¶</a>
+</h3>
+<p>A common need for templates is to print the values stored in the templates
+passed from the controller or service. Variables usually store objects and
+arrays instead of strings, numbers and boolean values. That's why Twig provides
+quick access to complex PHP variables. Consider the following template:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span></span><span class="hljs-template-variable">{{ user.name }}</span><span class="xml"> added this comment on </span><span class="hljs-template-variable">{{ comment.publishedAt|<span class="hljs-keyword">date</span> }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">user.name</code> notation means that you want to display some information
+(<code translate="no" class="notranslate">name</code>) stored in a variable (<code translate="no" class="notranslate">user</code>). Is <code translate="no" class="notranslate">user</code> an array or an object?
+Is <code translate="no" class="notranslate">name</code> a property or a method? In Twig this doesn't matter.</p>
+<p>When using the <code translate="no" class="notranslate">foo.bar</code> notation, Twig tries to get the value of the variable
+in the following order:</p>
+<ol class="arabic">
+    <li><code translate="no" class="notranslate">$foo[&#039;bar&#039;]</code> (array and element);</li>
+<li><code translate="no" class="notranslate">$foo-&gt;bar</code> (object and public property);</li>
+<li><code translate="no" class="notranslate">$foo-&gt;bar()</code> (object and public method);</li>
+<li><code translate="no" class="notranslate">$foo-&gt;getBar()</code> (object and <em>getter</em> method);</li>
+<li><code translate="no" class="notranslate">$foo-&gt;isBar()</code> (object and <em>isser</em> method);</li>
+<li><code translate="no" class="notranslate">$foo-&gt;hasBar()</code> (object and <em>hasser</em> method);</li>
+<li>If none of the above exists, use <code translate="no" class="notranslate">null</code> (or throw a <code translate="no" class="notranslate">Twig\Error\RuntimeError</code>
+exception if the <a href="reference/configuration/twig.html#config-twig-strict-variables" class="reference internal">strict_variables</a>
+option is enabled).</li>
+</ol>
+<p>This allows to evolve your application code without having to change the
+template code (you can start with array variables for the application proof of
+concept, then move to objects with methods, etc.)</p>
+<span id="templates-link-to-pages"></span>
+</div>
+<div class="section">
+<h3 id="linking-to-pages">
+    Linking to Pages
+    <a class="headerlink" href="#linking-to-pages" title="Permalink to this headline">¶</a>
+</h3>
+<p>Instead of writing the link URLs by hand, use the <code translate="no" class="notranslate">path()</code> function to
+generate URLs based on the <a href="routing.html#routing-creating-routes" class="reference internal">routing configuration</a>.</p>
+<p>Later, if you want to modify the URL of a particular page, all you'll need to do
+is change the routing configuration: the templates will automatically generate
+the new URL.</p>
+<p>Consider the following routing configuration:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-4">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-6f6a367b26c6fef5caa6bd881694ca88a6ef176c" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-d156110e6d0fc14d6cd8bf2316a9920891619b8f" aria-selected="false"
+                 tabindex="-1">
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-33ca6f6330bd9806bef7b4df79018357c8c71ab6" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-e5ab1bf8fd848b6eb8f62a2f2300959fd2a13147" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-6f6a367b26c6fef5caa6bd881694ca88a6ef176c" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Controller/BlogController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlogController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/', name: 'blog_index')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-comment">#[Route('/article/{slug}', name: 'blog_post')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slug</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-d156110e6d0fc14d6cd8bf2316a9920891619b8f" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="display: none">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/routes.yaml</span>
+<span class="hljs-attr">blog_index:</span>
+    <span class="hljs-attr">path:</span>       <span class="hljs-string">/</span>
+    <span class="hljs-attr">controller:</span> <span class="hljs-string">App\Controller\BlogController::index</span>
+
+<span class="hljs-attr">blog_post:</span>
+    <span class="hljs-attr">path:</span>       <span class="hljs-string">/article/{slug}</span>
+    <span class="hljs-attr">controller:</span> <span class="hljs-string">App\Controller\BlogController::show</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-33ca6f6330bd9806bef7b4df79018357c8c71ab6" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/routes.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">routes</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/routing"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/routing
+        https://symfony.com/schema/routing/routing-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">route</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"blog_index"</span>
+        <span class="hljs-attr">path</span>=<span class="hljs-string">"/"</span>
+        <span class="hljs-attr">controller</span>=<span class="hljs-string">"App\Controller\BlogController::index"</span>/&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">route</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"blog_post"</span>
+        <span class="hljs-attr">path</span>=<span class="hljs-string">"/article/{slug}"</span>
+        <span class="hljs-attr">controller</span>=<span class="hljs-string">"App\Controller\BlogController::show"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">routes</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-e5ab1bf8fd848b6eb8f62a2f2300959fd2a13147" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/routes.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">BlogController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">RoutingConfigurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(RoutingConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'blog_index'</span>, <span class="hljs-string">'/'</span>)
+        <span class="hljs-operator">-&gt;</span>controller([BlogController<span class="hljs-operator">::</span>class, <span class="hljs-string">'index'</span>])
+    ;
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'blog_post'</span>, <span class="hljs-string">'/articles/{slug}'</span>)
+        <span class="hljs-operator">-&gt;</span>controller([BlogController<span class="hljs-operator">::</span>class, <span class="hljs-string">'show'</span>])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Use the <code translate="no" class="notranslate">path()</code> Twig function to link to these pages and pass the route name
+as the first argument and the route parameters as the optional second argument:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ path('blog_index') }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span>Homepage<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+
+</span><span class="hljs-comment">{# ... #}</span><span class="xml">
+
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">for</span></span> post in blog_posts %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ path('blog_post', {slug: post.slug}) }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span></span><span class="hljs-template-variable">{{ post.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span></span><span class="hljs-template-variable">{{ post.excerpt }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endfor</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">path()</code> function generates relative URLs. If you need to generate
+absolute URLs (for example when rendering templates for emails or RSS feeds),
+use the <code translate="no" class="notranslate">url()</code> function, which takes the same arguments as <code translate="no" class="notranslate">path()</code>
+(e.g. <code translate="no" class="notranslate">&lt;a href=&quot;{{ url(&#039;blog_index&#039;) }}&quot;&gt; ... &lt;/a&gt;</code>).</p>
+<span id="templates-link-to-assets"></span>
+</div>
+<div class="section">
+<h3 id="linking-to-css-javascript-and-image-assets">
+    Linking to CSS, JavaScript and Image Assets
+    <a class="headerlink" href="#linking-to-css-javascript-and-image-assets" title="Permalink to this headline">¶</a>
+</h3>
+<p>If a template needs to link to a static asset (e.g. an image), Symfony provides
+an <code translate="no" class="notranslate">asset()</code> Twig function to help generate that URL. First, install the
+<code translate="no" class="notranslate">asset</code> package:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/asset</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can now use the <code translate="no" class="notranslate">asset()</code> function:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# the image lives at "public/images/logo.png" #}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ asset('images/logo.png') }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">"Symfony!"</span>/&gt;</span>
+
+</span><span class="hljs-comment">{# the CSS file lives at "public/css/blog.css" #}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ asset('css/blog.css') }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span>/&gt;</span>
+
+</span><span class="hljs-comment">{# the JS file lives at "public/bundles/acme/js/loader.js" #}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ asset('bundles/acme/js/loader.js') }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">asset()</code> function's main purpose is to make your application more portable.
+If your application lives at the root of your host (e.g. <code translate="no" class="notranslate">https://example.com</code>),
+then the rendered path should be <code translate="no" class="notranslate">/images/logo.png</code>. But if your application
+lives in a subdirectory (e.g. <code translate="no" class="notranslate">https://example.com/my_app</code>), each asset path
+should render with the subdirectory (e.g. <code translate="no" class="notranslate">/my_app/images/logo.png</code>). The
+<code translate="no" class="notranslate">asset()</code> function takes care of this by determining how your application is
+being used and generating the correct paths accordingly.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The <code translate="no" class="notranslate">asset()</code> function supports various cache busting techniques via the
+<a href="reference/configuration/framework.html#reference-framework-assets-version" class="reference internal">version</a>,
+<a href="reference/configuration/framework.html#reference-assets-version-format" class="reference internal">version_format</a>, and
+<a href="reference/configuration/framework.html#reference-assets-json-manifest-path" class="reference internal">json_manifest_path</a> configuration options.</p>
+</div>
+<p>If you need absolute URLs for assets, use the <code translate="no" class="notranslate">absolute_url()</code> Twig function
+as follows:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ absolute_url(asset('images/logo.png')) }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">"Symfony!"</span>/&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"shortcut icon"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ absolute_url('favicon.png') }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="build-versioning-more-advanced-css-javascript-and-image-handling">
+    Build, Versioning &amp; More Advanced CSS, JavaScript and Image Handling
+    <a class="headerlink" href="#build-versioning-more-advanced-css-javascript-and-image-handling" title="Permalink to this headline">¶</a>
+</h3>
+<p>For help building, versioning and minifying your JavaScript and
+CSS assets in a modern way, read about <a href="frontend.html" class="reference internal">Symfony's Webpack Encore</a>.</p>
+<span id="twig-app-variable"></span>
+</div>
+<div class="section">
+<h3 id="the-app-global-variable">
+    The App Global Variable
+    <a class="headerlink" href="#the-app-global-variable" title="Permalink to this headline">¶</a>
+</h3>
+<p>Symfony creates a context object that is injected into every Twig template
+automatically as a variable called <code translate="no" class="notranslate">app</code>. It provides access to some
+application information:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Username: </span><span class="hljs-template-variable">{{ app.user.username ?? 'Anonymous user' }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">if</span></span> app.debug %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Request method: </span><span class="hljs-template-variable">{{ app.request.method }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Application Environment: </span><span class="hljs-template-variable">{{ app.environment }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endif</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">app</code> variable (which is an instance of <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Twig/AppVariable.php" class="reference external" title="Symfony\Bridge\Twig\AppVariable" rel="external noopener noreferrer" target="_blank">AppVariable</a>)
+gives you access to these variables:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">app.user</code></dt>
+        
+        <dd>
+                            The <a href="security.html#create-user-class" class="reference internal">current user object</a> or <code translate="no" class="notranslate">null</code> if the user
+is not authenticated.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">app.request</code></dt>
+        
+        <dd>
+                            The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Request.php" class="reference external" title="Symfony\Component\HttpFoundation\Request" rel="external noopener noreferrer" target="_blank">Request</a> object that stores
+the current <a href="components/http_foundation.html#accessing-request-data" class="reference internal">request data</a> (depending on your
+application, this can be a <a href="components/http_kernel.html#http-kernel-sub-requests" class="reference internal">sub-request</a>
+or a regular request).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">app.session</code></dt>
+        
+        <dd>
+                            The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Session/Session.php" class="reference external" title="Symfony\Component\HttpFoundation\Session\Session" rel="external noopener noreferrer" target="_blank">Session</a> object that
+represents the current <a href="session.html" class="reference internal">user's session</a> or <code translate="no" class="notranslate">null</code> if there is none.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">app.flashes</code></dt>
+        
+        <dd>
+                            An array of all the <a href="session.html#flash-messages" class="reference internal">flash messages</a> stored in the session.
+You can also get only the messages of some type (e.g. <code translate="no" class="notranslate">app.flashes(&#039;notice&#039;)</code>).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">app.environment</code></dt>
+        
+        <dd>
+                            The name of the current <a href="configuration.html#configuration-environments" class="reference internal">configuration environment</a>
+(<code translate="no" class="notranslate">dev</code>, <code translate="no" class="notranslate">prod</code>, etc).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">app.debug</code></dt>
+        
+        <dd>
+                            True if in <a href="configuration/front_controllers_and_kernel.html#debug-mode" class="reference internal">debug mode</a>. False otherwise.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">app.token</code></dt>
+        
+        <dd>
+                            A <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Core/Authentication/Token/TokenInterface.php" class="reference external" title="Symfony\Component\Security\Core\Authentication\Token\TokenInterface" rel="external noopener noreferrer" target="_blank">TokenInterface</a>
+object representing the security token.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">app.current_route</code></dt>
+        
+        <dd>
+                            The name of the route associated with the current request or <code translate="no" class="notranslate">null</code> if no
+request is available (equivalent to <code translate="no" class="notranslate">app.request.attributes.get(&#039;_route&#039;)</code>)
+                    </dd>
+                        <dt><code translate="no" class="notranslate">app.current_route_parameters</code></dt>
+        
+        <dd>
+                            An array with the parameters passed to the route of the current request or an
+empty array if no request is available (equivalent to <code translate="no" class="notranslate">app.request.attributes.get(&#039;_route_params&#039;)</code>)
+                    </dd>
+    </dl>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">app.current_route</code> and <code translate="no" class="notranslate">app.current_route_parameters</code> variables
+were introduced in Symfony 6.2.</p>
+</div>
+<p>In addition to the global <code translate="no" class="notranslate">app</code> variable injected by Symfony, you can also
+inject variables automatically to all Twig templates as explained in the next
+section.</p>
+<span id="templating-global-variables"></span>
+</div>
+<div class="section">
+<h3 id="global-variables">
+    Global Variables
+    <a class="headerlink" href="#global-variables" title="Permalink to this headline">¶</a>
+</h3>
+<p>Twig allows you to automatically inject one or more variables into all
+templates. These global variables are defined in the <code translate="no" class="notranslate">twig.globals</code> option
+inside the main Twig configuration file:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-dd27f044eda216c01e9e3f595c8b8acf7019434c" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-273c2ed53481f92409cc9f551ce34caef3e0a249" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-bee253c017f6334dc53bedf2897ba8af1f9ce410" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-dd27f044eda216c01e9e3f595c8b8acf7019434c" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/twig.yaml</span>
+<span class="hljs-attr">twig:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">globals:</span>
+        <span class="hljs-attr">ga_tracking:</span> <span class="hljs-string">'UA-xxxxx-x'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-273c2ed53481f92409cc9f551ce34caef3e0a249" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/twig.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:twig</span>=<span class="hljs-string">"http://symfony.com/schema/dic/twig"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/twig
+        https://symfony.com/schema/dic/twig/twig-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">twig:config</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">twig:global</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"ga_tracking"</span>&gt;</span>UA-xxxxx-x<span class="hljs-tag">&lt;/<span class="hljs-name">twig:global</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">twig:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-bee253c017f6334dc53bedf2897ba8af1f9ce410" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/twig.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">TwigConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(TwigConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span><span class="hljs-operator">-&gt;</span><span class="hljs-keyword">global</span>(<span class="hljs-string">'ga_tracking'</span>)<span class="hljs-operator">-&gt;</span>value(<span class="hljs-string">'UA-xxxxx-x'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Now, the variable <code translate="no" class="notranslate">ga_tracking</code> is available in all Twig templates, so you
+can use it without having to pass it explicitly from the controller or service
+that renders the template:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>The Google tracking code is: </span><span class="hljs-template-variable">{{ ga_tracking }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In addition to static values, Twig global variables can also reference services
+from the <a href="service_container.html" class="reference internal">service container</a>. The main drawback is
+that these services are not loaded lazily. In other words, as soon as Twig is
+loaded, your service is instantiated, even if you never use that global
+variable.</p>
+<p>To define a service as a global Twig variable, prefix the service ID string
+with the <code translate="no" class="notranslate">@</code> character, which is the usual syntax to <a href="service_container.html#service-container-parameters" class="reference internal">refer to services
+in container parameters</a>:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-346bb3216ef9f29d9d966fd3ce4e030217407523" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-7d5bcefa28ada072fc73fc2bf12c785adc56d7bc" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-11848b9a39aa34aa68f9ed53151b8ce3b6448b06" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-346bb3216ef9f29d9d966fd3ce4e030217407523" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/twig.yaml</span>
+<span class="hljs-attr">twig:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">globals:</span>
+        <span class="hljs-comment"># the value is the service's id</span>
+        <span class="hljs-attr">uuid:</span> <span class="hljs-string">'@App\Generator\UuidGenerator'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-7d5bcefa28ada072fc73fc2bf12c785adc56d7bc" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/twig.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:twig</span>=<span class="hljs-string">"http://symfony.com/schema/dic/twig"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/twig
+        https://symfony.com/schema/dic/twig/twig-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">twig:config</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">twig:global</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"uuid"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Generator\UuidGenerator"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"service"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">twig:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-11848b9a39aa34aa68f9ed53151b8ce3b6448b06" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/twig.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">function</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">service</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">TwigConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(TwigConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span><span class="hljs-operator">-&gt;</span><span class="hljs-keyword">global</span>(<span class="hljs-string">'uuid'</span>)<span class="hljs-operator">-&gt;</span>value(service(<span class="hljs-string">'App\Generator\UuidGenerator'</span>));
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Now you can use the <code translate="no" class="notranslate">uuid</code> variable in any Twig template to access to the
+<code translate="no" class="notranslate">UuidGenerator</code> service:</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="xml">UUID: </span><span class="hljs-template-variable">{{ uuid.generate }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="twig-components">
+    Twig Components
+    <a class="headerlink" href="#twig-components" title="Permalink to this headline">¶</a>
+</h2>
+<p>Twig components are an alternative way to render templates, where each template
+is bound to a &quot;component class&quot;. This makes it easier to render and re-use
+small template &quot;units&quot; - like an alert, markup for a modal, or a category sidebar.</p>
+<p>For more information, see <a href="https://symfony.com/bundles/ux-twig-component/current/index.html" class="reference external">UX Twig Component</a>.</p>
+<p>Twig components also have one other superpower: they can become &quot;live&quot;, where
+they automatically update (via Ajax) as the user interacts with them. For example,
+when your user types into a box, your Twig component will re-render via Ajax to
+show a list of results!</p>
+<p>To learn more, see <a href="https://symfony.com/bundles/ux-live-component/current/index.html" class="reference external">UX Live Component</a>.</p>
+<span id="templates-rendering"></span>
+</div>
+<div class="section">
+<h2 id="rendering-templates">
+    Rendering Templates
+    <a class="headerlink" href="#rendering-templates" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="rendering-a-template-in-controllers">
+    Rendering a Template in Controllers
+    <a class="headerlink" href="#rendering-a-template-in-controllers" title="Permalink to this headline">¶</a>
+</h3>
+<p>If your controller extends from the <a href="controller.html#the-base-controller-class-services" class="reference internal">AbstractController</a>,
+use the <code translate="no" class="notranslate">render()</code> helper:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ProductController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-comment">// the `render()` method returns a `Response` object with the</span>
+        <span class="hljs-comment">// contents created by the template</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'product/index.html.twig'</span>, [
+            <span class="hljs-string">'category'</span> =&gt; <span class="hljs-string">'...'</span>,
+            <span class="hljs-string">'promotions'</span> =&gt; [<span class="hljs-string">'...'</span>, <span class="hljs-string">'...'</span>],
+        ]);
+
+        <span class="hljs-comment">// the `renderView()` method only returns the contents created by the</span>
+        <span class="hljs-comment">// template, so you can use those contents later in a `Response` object</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>contents</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>renderView(<span class="hljs-string">'product/index.html.twig'</span>, [
+            <span class="hljs-string">'category'</span> =&gt; <span class="hljs-string">'...'</span>,
+            <span class="hljs-string">'promotions'</span> =&gt; [<span class="hljs-string">'...'</span>, <span class="hljs-string">'...'</span>],
+        ]);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>contents</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If your controller does not extend from <code translate="no" class="notranslate">AbstractController</code>, you'll need to
+<a href="controller.html#controller-accessing-services" class="reference internal">fetch services in your controller</a> and
+use the <code translate="no" class="notranslate">render()</code> method of the <code translate="no" class="notranslate">twig</code> service.</p>
+<span id="templates-template-attribute"></span>
+<p>Another option is to use the <code translate="no" class="notranslate">#[Template()]</code> attribute on the controller method
+to define the template to render:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ProductController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Twig</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">Template</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Template('product/index.html.twig')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-comment">// when using the #[Template()] attribute, you only need to return</span>
+        <span class="hljs-comment">// an array with the parameters to pass to the template (the attribute</span>
+        <span class="hljs-comment">// is the one which will create and return the Response object).</span>
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-string">'category'</span> =&gt; <span class="hljs-string">'...'</span>,
+            <span class="hljs-string">'promotions'</span> =&gt; [<span class="hljs-string">'...'</span>, <span class="hljs-string">'...'</span>],
+        ];
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">#[Template()]</code> attribute was introduced in Symfony 6.2.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="rendering-a-template-in-services">
+    Rendering a Template in Services
+    <a class="headerlink" href="#rendering-a-template-in-services" title="Permalink to this headline">¶</a>
+</h3>
+<p>Inject the <code translate="no" class="notranslate">twig</code> Symfony service into your own services and use its
+<code translate="no" class="notranslate">render()</code> method. When using <a href="service_container/autowiring.html" class="reference internal">service autowiring</a>
+you only need to add an argument in the service constructor and type-hint it with
+the <a href="https://github.com/symfony/symfony/blob/5.4/src/Twig/Environment.php" class="reference external" title="Twig\Environment" rel="external noopener noreferrer" target="_blank">Environment</a> class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Service/SomeService.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Service</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">Environment</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SomeService</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private Environment <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">someMethod</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>htmlContents</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>twig<span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'product/index.html.twig'</span>, [
+            <span class="hljs-string">'category'</span> =&gt; <span class="hljs-string">'...'</span>,
+            <span class="hljs-string">'promotions'</span> =&gt; [<span class="hljs-string">'...'</span>, <span class="hljs-string">'...'</span>],
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="rendering-a-template-in-emails">
+    Rendering a Template in Emails
+    <a class="headerlink" href="#rendering-a-template-in-emails" title="Permalink to this headline">¶</a>
+</h3>
+<p>Read the docs about the <a href="mailer.html#mailer-twig" class="reference internal">mailer and Twig integration</a>.</p>
+<span id="templates-render-from-route"></span>
+</div>
+<div class="section">
+<h3 id="rendering-a-template-directly-from-a-route">
+    Rendering a Template Directly from a Route
+    <a class="headerlink" href="#rendering-a-template-directly-from-a-route" title="Permalink to this headline">¶</a>
+</h3>
+<p>Although templates are usually rendered in controllers and services, you can
+render static pages that don't need any variables directly from the route
+definition. Use the special <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Controller/TemplateController.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Controller\TemplateController" rel="external noopener noreferrer" target="_blank">TemplateController</a>
+provided by Symfony:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-eab14f0f6bf62689ad1d7bd99117621f3819403d" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-2cba34097b17786df0c4c1f1b8b3e720690942bd" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-fd22bc4fa19893b1bf225c554fcc72b665fdfe0a" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-eab14f0f6bf62689ad1d7bd99117621f3819403d" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/routes.yaml</span>
+<span class="hljs-attr">acme_privacy:</span>
+    <span class="hljs-attr">path:</span>          <span class="hljs-string">/privacy</span>
+    <span class="hljs-attr">controller:</span>    <span class="hljs-string">Symfony\Bundle\FrameworkBundle\Controller\TemplateController</span>
+    <span class="hljs-attr">defaults:</span>
+        <span class="hljs-comment"># the path of the template to render</span>
+        <span class="hljs-attr">template:</span>  <span class="hljs-string">'static/privacy.html.twig'</span>
+
+        <span class="hljs-comment"># the response status code (default: 200)</span>
+        <span class="hljs-attr">statusCode:</span> <span class="hljs-number">200</span>
+
+        <span class="hljs-comment"># special options defined by Symfony to set the page cache</span>
+        <span class="hljs-attr">maxAge:</span>    <span class="hljs-number">86400</span>
+        <span class="hljs-attr">sharedAge:</span> <span class="hljs-number">86400</span>
+
+        <span class="hljs-comment"># whether or not caching should apply for client caches only</span>
+        <span class="hljs-attr">private:</span> <span class="hljs-literal">true</span>
+
+        <span class="hljs-comment"># optionally you can define some arguments passed to the template</span>
+        <span class="hljs-attr">context:</span>
+            <span class="hljs-attr">site_name:</span> <span class="hljs-string">'ACME'</span>
+            <span class="hljs-attr">theme:</span> <span class="hljs-string">'dark'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-2cba34097b17786df0c4c1f1b8b3e720690942bd" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/routes.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">routes</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/routing"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/routing https://symfony.com/schema/routing/routing-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">route</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"acme_privacy"</span>
+        <span class="hljs-attr">path</span>=<span class="hljs-string">"/privacy"</span>
+        <span class="hljs-attr">controller</span>=<span class="hljs-string">"Symfony\Bundle\FrameworkBundle\Controller\TemplateController"</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- the path of the template to render --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">default</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"template"</span>&gt;</span>static/privacy.html.twig<span class="hljs-tag">&lt;/<span class="hljs-name">default</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- the response status code (default: 200) --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">default</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"statusCode"</span>&gt;</span>200<span class="hljs-tag">&lt;/<span class="hljs-name">default</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- special options defined by Symfony to set the page cache --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">default</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"maxAge"</span>&gt;</span>86400<span class="hljs-tag">&lt;/<span class="hljs-name">default</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">default</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"sharedAge"</span>&gt;</span>86400<span class="hljs-tag">&lt;/<span class="hljs-name">default</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- whether or not caching should apply for client caches only --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">default</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"private"</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">default</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- optionally you can define some arguments passed to the template --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">default</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"context"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">default</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"site_name"</span>&gt;</span>ACME<span class="hljs-tag">&lt;/<span class="hljs-name">default</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">default</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"theme"</span>&gt;</span>dark<span class="hljs-tag">&lt;/<span class="hljs-name">default</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">default</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">route</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">routes</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-fd22bc4fa19893b1bf225c554fcc72b665fdfe0a" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/routes.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">TemplateController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">RoutingConfigurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(RoutingConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'acme_privacy'</span>, <span class="hljs-string">'/privacy'</span>)
+        <span class="hljs-operator">-&gt;</span>controller(TemplateController<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>defaults([
+            <span class="hljs-comment">// the path of the template to render</span>
+            <span class="hljs-string">'template'</span>  =&gt; <span class="hljs-string">'static/privacy.html.twig'</span>,
+
+            <span class="hljs-comment">// the response status code (default: 200)</span>
+            <span class="hljs-string">'statusCode'</span> =&gt; <span class="hljs-number">200</span>,
+
+            <span class="hljs-comment">// special options defined by Symfony to set the page cache</span>
+            <span class="hljs-string">'maxAge'</span>    =&gt; <span class="hljs-number">86400</span>,
+            <span class="hljs-string">'sharedAge'</span> =&gt; <span class="hljs-number">86400</span>,
+
+            <span class="hljs-comment">// whether or not caching should apply for client caches only</span>
+            <span class="hljs-string">'private'</span> =&gt; <span class="hljs-keyword">true</span>,
+
+            <span class="hljs-comment">// optionally you can define some arguments passed to the template</span>
+            <span class="hljs-string">'context'</span> =&gt; [
+                <span class="hljs-string">'site_name'</span> =&gt; <span class="hljs-string">'ACME'</span>,
+                <span class="hljs-string">'theme'</span> =&gt; <span class="hljs-string">'dark'</span>,
+            ]
+        ])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h3 id="checking-if-a-template-exists">
+    Checking if a Template Exists
+    <a class="headerlink" href="#checking-if-a-template-exists" title="Permalink to this headline">¶</a>
+</h3>
+<p>Templates are loaded in the application using a <a href="https://twig.symfony.com/doc/3.x/api.html#loaders" class="reference external">Twig template loader</a>, which
+also provides a method to check for template existence. First, get the loader:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">Environment</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">YourService</span>
+</span>{
+    <span class="hljs-comment">// this code assumes that your service uses autowiring to inject dependencies</span>
+    <span class="hljs-comment">// otherwise, inject the service called 'twig' manually</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(Environment <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span><span class="hljs-operator">-&gt;</span>getLoader();
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, pass the path of the Twig template to the <code translate="no" class="notranslate">exists()</code> method of the loader:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span><span class="hljs-operator">-&gt;</span>exists(<span class="hljs-string">'theme/layout_responsive.html.twig'</span>)) {
+    <span class="hljs-comment">// the template exists, do something</span>
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="debugging-templates">
+    Debugging Templates
+    <a class="headerlink" href="#debugging-templates" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony provides several utilities to help you debug issues in your templates.</p>
+<div class="section">
+<h3 id="linting-twig-templates">
+    Linting Twig Templates
+    <a class="headerlink" href="#linting-twig-templates" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <code translate="no" class="notranslate">lint:twig</code> command checks that your Twig templates don't have any syntax
+errors. It's useful to run it before deploying your application to production
+(e.g. in your continuous integration server):</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># check all the application templates</span>
+<span class="hljs-prompt">$ </span>php bin/console lint:twig
+
+<span class="hljs-comment"># you can also check directories and individual templates</span>
+<span class="hljs-prompt">$ </span>php bin/console lint:twig templates/email/
+<span class="hljs-prompt">$ </span>php bin/console lint:twig templates/article/recent_list.html.twig
+
+<span class="hljs-comment"># you can also show the deprecated features used in your templates</span>
+<span class="hljs-prompt">$ </span>php bin/console lint:twig --show-deprecations templates/email/</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When running the linter inside <a href="https://docs.github.com/en/free-pro-team@latest/actions" class="reference external" rel="external noopener noreferrer" target="_blank">GitHub Actions</a>, the output is automatically
+adapted to the format required by GitHub, but you can force that format too:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console lint:twig --format=github</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="inspecting-twig-information">
+    Inspecting Twig Information
+    <a class="headerlink" href="#inspecting-twig-information" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <code translate="no" class="notranslate">debug:twig</code> command lists all the information available about Twig
+(functions, filters, global variables, etc.). It's useful to check if your
+<a href="templates.html#templates-twig-extension" class="reference internal">custom Twig extensions</a> are working properly
+and also to check the Twig features added when <a href="setup.html#symfony-flex" class="reference internal">installing packages</a>:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># list general information</span>
+<span class="hljs-prompt">$ </span>php bin/console debug:twig
+
+<span class="hljs-comment"># filter output by any keyword</span>
+<span class="hljs-prompt">$ </span>php bin/console debug:twig --filter=date
+
+<span class="hljs-comment"># pass a template path to show the physical file which will be loaded</span>
+<span class="hljs-prompt">$ </span>php bin/console debug:twig @Twig/Exception/error.html.twig</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="twig-dump-utilities"></span>
+</div>
+<div class="section">
+<h3 id="the-dump-twig-utilities">
+    The Dump Twig Utilities
+    <a class="headerlink" href="#the-dump-twig-utilities" title="Permalink to this headline">¶</a>
+</h3>
+<p>Symfony provides a <a href="components/var_dumper.html#components-var-dumper-dump" class="reference internal">dump() function</a> as an
+improved alternative to PHP's <code translate="no" class="notranslate">var_dump()</code> function. This function is useful
+to inspect the contents of any variable and you can use it in Twig templates too.</p>
+<p>First, make sure that the VarDumper component is installed in the application:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require --dev symfony/debug-bundle</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, use either the <code translate="no" class="notranslate">{% dump %}</code> tag or the <code translate="no" class="notranslate">{{ dump() }}</code> function
+depending on your needs:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/article/recent_list.html.twig #}</span><span class="xml">
+</span><span class="hljs-comment">{# the contents of this variable are sent to the Web Debug Toolbar
+   instead of dumping them inside the page contents #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name">dump</span> articles %}</span><span class="xml">
+
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">for</span></span> article in articles %}</span><span class="xml">
+    </span><span class="hljs-comment">{# the contents of this variable are dumped inside the page contents
+       and they are visible on the web page #}</span><span class="xml">
+    </span><span class="hljs-template-variable">{{ <span class="hljs-name">dump</span><span class="hljs-params">(article)</span> }}</span><span class="xml">
+
+    </span><span class="hljs-comment">{# optionally, use named arguments to display them as labels next to
+       the dumped contents #}</span><span class="xml">
+    </span><span class="hljs-template-variable">{{ <span class="hljs-name">dump</span><span class="hljs-params">(blog_posts: articles, user: app.user)</span> }}</span><span class="xml">
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/article/</span></span></span><span class="hljs-template-variable">{{ article.slug }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span>
+        </span><span class="hljs-template-variable">{{ article.title }}</span><span class="xml">
+    <span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endfor</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The option to use named arguments in <code translate="no" class="notranslate">dump()</code> was introduced in Symfony 6.3.</p>
+</div>
+<p>To avoid leaking sensitive information, the <code translate="no" class="notranslate">dump()</code> function/tag is only
+available in the <code translate="no" class="notranslate">dev</code> and <code translate="no" class="notranslate">test</code> <a href="configuration.html#configuration-environments" class="reference internal">configuration environments</a>.
+If you try to use it in the <code translate="no" class="notranslate">prod</code> environment, you will see a PHP error.</p>
+<span id="templates-reuse-contents"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="reusing-template-contents">
+    Reusing Template Contents
+    <a class="headerlink" href="#reusing-template-contents" title="Permalink to this headline">¶</a>
+</h2>
+<span id="templates-include"></span>
+<div class="section">
+<h3 id="including-templates">
+    Including Templates
+    <a class="headerlink" href="#including-templates" title="Permalink to this headline">¶</a>
+</h3>
+<p>If certain Twig code is repeated in several templates, you can extract it into a
+single &quot;template fragment&quot; and include it in other templates. Imagine that the
+following code to display the user information is repeated in several places:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/blog/index.html.twig #}</span><span class="xml">
+
+</span><span class="hljs-comment">{# ... #}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"user-profile"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ user.profileImageUrl }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ user.fullName }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span></span><span class="hljs-template-variable">{{ user.fullName }}</span><span class="xml"> - </span><span class="hljs-template-variable">{{ user.email }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>First, create a new Twig template called <code translate="no" class="notranslate">blog/_user_profile.html.twig</code> (the
+<code translate="no" class="notranslate">_</code> prefix is optional, but it's a convention used to better differentiate
+between full templates and template fragments).</p>
+<p>Then, remove that content from the original <code translate="no" class="notranslate">blog/index.html.twig</code> template
+and add the following to include the template fragment:</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-comment">{# templates/blog/index.html.twig #}</span><span class="xml">
+
+</span><span class="hljs-comment">{# ... #}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ <span class="hljs-name">include</span><span class="hljs-params">('blog/_user_profile.html.twig')</span> }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">include()</code> Twig function takes as argument the path of the template to
+include. The included template has access to all the variables of the template
+that includes it (use the <a href="https://twig.symfony.com/doc/3.x/functions/include.html" class="reference external">with_context</a> option to control this).</p>
+<p>You can also pass variables to the included template. This is useful for example
+to rename variables. Imagine that your template stores the user information in a
+variable called <code translate="no" class="notranslate">blog_post.author</code> instead of the <code translate="no" class="notranslate">user</code> variable that the
+template fragment expects. Use the following to <em>rename</em> the variable:</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-comment">{# templates/blog/index.html.twig #}</span><span class="xml">
+
+</span><span class="hljs-comment">{# ... #}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ <span class="hljs-name">include</span><span class="hljs-params">('blog/_user_profile.html.twig', {user: blog_post.author})</span> }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="templates-embed-controllers"></span>
+</div>
+<div class="section">
+<h3 id="embedding-controllers">
+    Embedding Controllers
+    <a class="headerlink" href="#embedding-controllers" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="templates.html#templates-include" class="reference internal">Including template fragments</a> is useful to reuse the
+same content on several pages. However, this technique is not the best solution
+in some cases.</p>
+<p>Imagine that the template fragment displays the three most recent blog articles.
+To do that, it needs to make a database query to get those articles. When using
+the <code translate="no" class="notranslate">include()</code> function, you'd need to do the same database query in every
+page that includes the fragment. This is not very convenient.</p>
+<p>A better alternative is to <strong>embed the result of executing some controller</strong>
+with the <code translate="no" class="notranslate">render()</code> and <code translate="no" class="notranslate">controller()</code> Twig functions.</p>
+<p>First, create the controller that renders a certain number of recent articles:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/BlogController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlogController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">recentArticles</span><span class="hljs-params">(int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>max</span> = <span class="hljs-number">3</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// get the recent articles somehow (e.g. making a database query)</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>articles</span> = [<span class="hljs-string">'...'</span>, <span class="hljs-string">'...'</span>, <span class="hljs-string">'...'</span>];
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'blog/_recent_articles.html.twig'</span>, [
+            <span class="hljs-string">'articles'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>articles</span>
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, create the <code translate="no" class="notranslate">blog/_recent_articles.html.twig</code> template fragment (the
+<code translate="no" class="notranslate">_</code> prefix in the template name is optional, but it's a convention used to
+better differentiate between full templates and template fragments):</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/blog/_recent_articles.html.twig #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">for</span></span> article in articles %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ path('blog_show', {slug: article.slug}) }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span>
+        </span><span class="hljs-template-variable">{{ article.title }}</span><span class="xml">
+    <span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endfor</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now you can call to this controller from any template to embed its result:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/base.html.twig #}</span><span class="xml">
+
+</span><span class="hljs-comment">{# ... #}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"sidebar"</span>&gt;</span>
+    </span><span class="hljs-comment">{# if the controller is associated with a route, use the path() or url() functions #}</span><span class="xml">
+    </span><span class="hljs-template-variable">{{ render(path('latest_articles', {<span class="hljs-name">max</span>: 3})) }}</span><span class="xml">
+    </span><span class="hljs-template-variable">{{ render(url('latest_articles', {<span class="hljs-name">max</span>: 3})) }}</span><span class="xml">
+
+    </span><span class="hljs-comment">{# if you don't want to expose the controller with a public URL,
+       use the controller() function to define the controller to execute #}</span><span class="xml">
+    </span><span class="hljs-template-variable">{{ render(controller(
+        'App\\Controller\\BlogController::recentArticles', {<span class="hljs-name">max</span>: 3}
+    )) }}</span><span class="xml">
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="fragments-path-config"></span>
+<p>When using the <code translate="no" class="notranslate">controller()</code> function, controllers are not accessed using a
+regular Symfony route but through a special URL used exclusively to serve those
+template fragments. Configure that special URL in the <code translate="no" class="notranslate">fragments</code> option:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-2b7cd55e49c88b8324b955ffa0d4dcb62848a05c" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-3e64e3438076f530a82a3ce55679a4de7c6c170f" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-b1bc8f1fcf591b3ffe1eb1c1d603e7ce02d3eb8d" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-2b7cd55e49c88b8324b955ffa0d4dcb62848a05c" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/framework.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">fragments:</span> <span class="hljs-string">{</span> <span class="hljs-attr">path:</span> <span class="hljs-string">/_fragment</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-3e64e3438076f530a82a3ce55679a4de7c6c170f" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/framework.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:fragment</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/_fragment"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-b1bc8f1fcf591b3ffe1eb1c1d603e7ce02d3eb8d" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/framework.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>fragments()<span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'/_fragment'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Embedding controllers requires making requests to those controllers and
+rendering some templates as result. This can have a significant impact on
+the application performance if you embed lots of controllers. If possible,
+<a href="http_cache/esi.html" class="reference internal">cache the template fragment</a>.</p>
+</div>
+<span id="templates-hinclude"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="how-to-embed-asynchronous-content-with-hinclude-js">
+    How to Embed Asynchronous Content with hinclude.js
+    <a class="headerlink" href="#how-to-embed-asynchronous-content-with-hinclude-js" title="Permalink to this headline">¶</a>
+</h2>
+<p>Templates can also embed contents asynchronously with the <code translate="no" class="notranslate">hinclude.js</code>
+JavaScript library.</p>
+<p>First, include the <a href="http://mnot.github.io/hinclude/" class="reference external" rel="external noopener noreferrer" target="_blank">hinclude.js</a> library in your page
+<a href="templates.html#templates-link-to-assets" class="reference internal">linking to it</a> from the template or adding it
+to your application JavaScript <a href="frontend.html" class="reference internal">using Webpack Encore</a>.</p>
+<p>As the embedded content comes from another page (or controller for that matter),
+Symfony uses a version of the standard <code translate="no" class="notranslate">render()</code> function to configure
+<code translate="no" class="notranslate">hinclude</code> tags in templates:</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-template-variable">{{ render_hinclude(controller('...')) }}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ render_hinclude(url('...')) }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When using the <code translate="no" class="notranslate">controller()</code> function, you must also configure the
+<a href="templates.html#fragments-path-config" class="reference internal">fragments path option</a>.</p>
+</div>
+<p>When JavaScript is disabled or it takes a long time to load you can display a
+default content rendering some template:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-88a78c509b0f212f3d3281ae231e03023086a927" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-5b06cd097b8e20d82b3c8290a85392daf20843ca" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-f8bf2a6091842d791a0a78e78e09397202c482d8" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-88a78c509b0f212f3d3281ae231e03023086a927" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/framework.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">fragments:</span>
+        <span class="hljs-attr">hinclude_default_template:</span> <span class="hljs-string">hinclude.html.twig</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-5b06cd097b8e20d82b3c8290a85392daf20843ca" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/framework.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:fragments</span> <span class="hljs-attr">hinclude-default-template</span>=<span class="hljs-string">"hinclude.html.twig"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-f8bf2a6091842d791a0a78e78e09397202c482d8" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/framework.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>fragments()
+        <span class="hljs-operator">-&gt;</span>hincludeDefaultTemplate(<span class="hljs-string">'hinclude.html.twig'</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>You can define default templates per <code translate="no" class="notranslate">render()</code> function (which will override
+any global default template that is defined):</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-template-variable">{{ render_hinclude(controller('...'),  {
+    default: 'default/content.html.twig'
+}) }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Or you can also specify a string to display as the default content:</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-template-variable">{{ render_hinclude(controller('...'), {default: 'Loading...'}) }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Use the <code translate="no" class="notranslate">attributes</code> option to define the value of hinclude.js options:</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-comment">{# by default, cross-site requests don't use credentials such as cookies, authorization
+   headers or TLS client certificates; set this option to 'true' to use them #}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ render_hinclude(controller('...'), {attributes: {'data-with-credentials': 'true'}}</span><span class="xml">) }}
+
+</span><span class="hljs-comment">{# by default, the JavaScript code included in the loaded contents is not run;
+   set this option to 'true' to run that JavaScript code #}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ render_hinclude(controller('...'), {attributes: {evaljs: 'true'}}</span><span class="xml">) }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="template-inheritance-and-layouts">
+    Template Inheritance and Layouts
+    <a class="headerlink" href="#template-inheritance-and-layouts" title="Permalink to this headline">¶</a>
+</h3>
+<p>As your application grows you'll find more and more repeated elements between
+pages, such as headers, footers, sidebars, etc. <a href="templates.html#templates-include" class="reference internal">Including templates</a>
+and <a href="templates.html#templates-embed-controllers" class="reference internal">embedding controllers</a> can help, but
+when pages share a common structure, it's better to use <strong>inheritance</strong>.</p>
+<p>The concept of <a href="https://twig.symfony.com/doc/3.x/tags/extends.html" class="reference external">Twig template inheritance</a> is similar to PHP class inheritance.
+You define a parent template that other templates can extend from and child
+templates can override parts of the parent template.</p>
+<p>Symfony recommends the following three-level template inheritance for medium and
+complex applications:</p>
+<ul>
+    <li><code translate="no" class="notranslate">templates/base.html.twig</code>, defines the common elements of all application
+templates, such as <code translate="no" class="notranslate">&lt;head&gt;</code>, <code translate="no" class="notranslate">&lt;header&gt;</code>, <code translate="no" class="notranslate">&lt;footer&gt;</code>, etc.;</li>
+<li><code translate="no" class="notranslate">templates/layout.html.twig</code>, extends from <code translate="no" class="notranslate">base.html.twig</code> and defines
+the content structure used in all or most of the pages, such as a two-column
+content + sidebar layout. Some sections of the application can define their
+own layouts (e.g. <code translate="no" class="notranslate">templates/blog/layout.html.twig</code>);</li>
+<li><code translate="no" class="notranslate">templates/*.html.twig</code>, the application pages which extend from the main
+<code translate="no" class="notranslate">layout.html.twig</code> template or any other section layout.</li>
+</ul>
+<p>In practice, the <code translate="no" class="notranslate">base.html.twig</code> template would look like this:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/base.html.twig #}</span><span class="xml">
+<span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> title %}</span><span class="xml">My Application</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> stylesheets %}</span><span class="xml">
+            <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/css"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/css/base.css"</span>/&gt;</span>
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span><span class="xml">
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> body %}</span><span class="xml">
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"sidebar"</span>&gt;</span>
+                </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> sidebar %}</span><span class="xml">
+                    <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ path('homepage') }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span>Home<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ path('blog_index') }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span>Blog<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+                </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span><span class="xml">
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"content"</span>&gt;</span>
+                </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> content %}</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span><span class="xml">
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span><span class="xml">
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <a href="https://twig.symfony.com/doc/3.x/tags/block.html" class="reference external">Twig block tag</a> defines the page sections that can be overridden in the
+child templates. They can be empty, like the <code translate="no" class="notranslate">content</code> block or define a default
+content, like the <code translate="no" class="notranslate">title</code> block, which is displayed when child templates don't
+override them.</p>
+<p>The <code translate="no" class="notranslate">blog/layout.html.twig</code> template could be like this:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/blog/layout.html.twig #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">extends</span></span> 'base.html.twig' %}</span><span class="xml">
+
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> content %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Blog<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> page_contents %}</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The template extends from <code translate="no" class="notranslate">base.html.twig</code> and only defines the contents of
+the <code translate="no" class="notranslate">content</code> block. The rest of the parent template blocks will display their
+default contents. However, they can be overridden by the third-level inheritance
+template, such as <code translate="no" class="notranslate">blog/index.html.twig</code>, which displays the blog index:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/blog/index.html.twig #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">extends</span></span> 'blog/layout.html.twig' %}</span><span class="xml">
+
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> title %}</span><span class="xml">Blog Index</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span><span class="xml">
+
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> page_contents %}</span><span class="xml">
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">for</span></span> article in articles %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span></span><span class="hljs-template-variable">{{ article.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span></span><span class="hljs-template-variable">{{ article.body }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endfor</span></span> %}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This template extends from the second-level template (<code translate="no" class="notranslate">blog/layout.html.twig</code>)
+but overrides blocks of different parent templates: <code translate="no" class="notranslate">page_contents</code> from
+<code translate="no" class="notranslate">blog/layout.html.twig</code> and <code translate="no" class="notranslate">title</code> from <code translate="no" class="notranslate">base.html.twig</code>.</p>
+<p>When you render the <code translate="no" class="notranslate">blog/index.html.twig</code> template, Symfony uses three
+different templates to create the final contents. This inheritance mechanism
+boosts your productivity because each template includes only its unique contents
+and leaves the repeated contents and HTML structure to some parent templates.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When using <code translate="no" class="notranslate">extends</code>, a child template is forbidden to define template
+parts outside of a block. The following code throws a <code translate="no" class="notranslate">SyntaxError</code>:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# app/Resources/views/blog/index.html.twig #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">extends</span></span> 'base.html.twig' %}</span><span class="xml">
+
+</span><span class="hljs-comment">{# the line below is not captured by a "block" tag #}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"alert"</span>&gt;</span>Some Alert<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+</span><span class="hljs-comment">{# the following is valid #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> content %}</span><span class="xml">My cool blog posts</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<p>Read the <a href="https://twig.symfony.com/doc/3.x/tags/extends.html" class="reference external">Twig template inheritance</a> docs to learn more about how to reuse
+parent block contents when overriding templates and other advanced features.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="output-escaping">
+    Output Escaping
+    <a class="headerlink" href="#output-escaping" title="Permalink to this headline">¶</a>
+</h2>
+<p>Imagine that your template includes the <code translate="no" class="notranslate">Hello {{ name }}</code> code to display the
+user name. If a malicious user sets <code translate="no" class="notranslate">&lt;script&gt;alert(&#039;hello!&#039;)&lt;/script&gt;</code> as
+their name and you output that value unchanged, the application will display a
+JavaScript popup window.</p>
+<p>This is known as a <a href="https://en.wikipedia.org/wiki/Cross-site_scripting" class="reference external" rel="external noopener noreferrer" target="_blank">Cross-Site Scripting</a> (XSS) attack. And while the previous
+example seems harmless, the attacker could write more advanced JavaScript code
+to perform malicious actions.</p>
+<p>To prevent this attack, use <em>&quot;output escaping&quot;</em> to transform the characters
+which have special meaning (e.g. replace <code translate="no" class="notranslate">&lt;</code> by the <code translate="no" class="notranslate">&amp;lt;</code> HTML entity).
+Symfony applications are safe by default because they perform automatic output
+escaping:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Hello </span><span class="hljs-template-variable">{{ name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+</span><span class="hljs-comment">{# if 'name' is '&lt;script&gt;alert('hello!')&lt;/script&gt;', Twig will output this:
+   '&lt;p&gt;Hello &amp;lt;script&amp;gt;alert(&amp;#39;hello!&amp;#39;)&amp;lt;/script&amp;gt;&lt;/p&gt;' #}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you are rendering a variable that is trusted and contains HTML contents,
+use the <a href="https://twig.symfony.com/doc/3.x/filters/raw.html" class="reference external">Twig raw filter</a> to disable the output escaping for that variable:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span></span><span class="hljs-template-variable">{{ product.title|<span class="hljs-keyword">raw</span> }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+</span><span class="hljs-comment">{# if 'product.title' is 'Lorem &lt;strong&gt;Ipsum&lt;/strong&gt;', Twig will output
+   exactly that instead of 'Lorem &amp;lt;strong&amp;gt;Ipsum&amp;lt;/strong&amp;gt;' #}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Read the <a href="https://twig.symfony.com/doc/3.x/api.html#escaper-extension" class="reference external">Twig output escaping docs</a> to learn more about how to disable output
+escaping for a block or even an entire template.</p>
+<span id="templates-namespaces"></span>
+</div>
+<div class="section">
+<h2 id="template-namespaces">
+    Template Namespaces
+    <a class="headerlink" href="#template-namespaces" title="Permalink to this headline">¶</a>
+</h2>
+<p>Although most applications store their templates in the default <code translate="no" class="notranslate">templates/</code>
+directory, you may need to store some or all of them in different directories.
+Use the <code translate="no" class="notranslate">twig.paths</code> option to configure those extra directories. Each path is
+defined as a <code translate="no" class="notranslate">key: value</code> pair where the <code translate="no" class="notranslate">key</code> is the template directory and
+the <code translate="no" class="notranslate">value</code> is the Twig namespace, which is explained later:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-b4c1f7497fc1e8bb41c572056e7a1d01053290c1" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-701287070eac9c1d4aaea98e2a71397e603ddfcb" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-12f268e0b9c5a0ba064878eb50803636e761abc0" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-b4c1f7497fc1e8bb41c572056e7a1d01053290c1" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/twig.yaml</span>
+<span class="hljs-attr">twig:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">paths:</span>
+        <span class="hljs-comment"># directories are relative to the project root dir (but you</span>
+        <span class="hljs-comment"># can also use absolute directories)</span>
+        <span class="hljs-attr">'email/default/templates':</span> <span class="hljs-string">~</span>
+        <span class="hljs-attr">'backend/templates':</span> <span class="hljs-string">~</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-701287070eac9c1d4aaea98e2a71397e603ddfcb" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/twig.xml --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:twig</span>=<span class="hljs-string">"http://symfony.com/schema/dic/twig"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/twig https://symfony.com/schema/dic/twig/twig-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">twig:config</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+        <span class="hljs-comment">&lt;!-- directories are relative to the project root dir (but you
+             can also use absolute directories --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">twig:path</span>&gt;</span>email/default/templates<span class="hljs-tag">&lt;/<span class="hljs-name">twig:path</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">twig:path</span>&gt;</span>backend/templates<span class="hljs-tag">&lt;/<span class="hljs-name">twig:path</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">twig:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-12f268e0b9c5a0ba064878eb50803636e761abc0" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/twig.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">TwigConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(TwigConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-comment">// directories are relative to the project root dir (but you</span>
+    <span class="hljs-comment">// can also use absolute directories)</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span><span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'email/default/templates'</span>, <span class="hljs-keyword">null</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span><span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'backend/templates'</span>, <span class="hljs-keyword">null</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>When rendering a template, Symfony looks for it first in the <code translate="no" class="notranslate">twig.paths</code>
+directories that don't define a namespace and then falls back to the default
+template directory (usually, <code translate="no" class="notranslate">templates/</code>).</p>
+<p>Using the above configuration, if your application renders for example the
+<code translate="no" class="notranslate">layout.html.twig</code> template, Symfony will first look for
+<code translate="no" class="notranslate">email/default/templates/layout.html.twig</code> and <code translate="no" class="notranslate">backend/templates/layout.html.twig</code>.
+If any of those templates exists, Symfony will use it instead of using
+<code translate="no" class="notranslate">templates/layout.html.twig</code>, which is probably the template you wanted to use.</p>
+<p>Twig solves this problem with <strong>namespaces</strong>, which group several templates
+under a logic name unrelated to their actual location. Update the previous
+configuration to define a namespace for each template directory:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-69764708a58b28d60416576ffe3abb67bb896e43" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-dc47d1d913fa30ca50ed55ebe52892aad3dd61e1" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-2e92a455bb6f81d8490e6da1bebc2988c683a119" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-69764708a58b28d60416576ffe3abb67bb896e43" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/twig.yaml</span>
+<span class="hljs-attr">twig:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">paths:</span>
+        <span class="hljs-attr">'email/default/templates':</span> <span class="hljs-string">'email'</span>
+        <span class="hljs-attr">'backend/templates':</span> <span class="hljs-string">'admin'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-dc47d1d913fa30ca50ed55ebe52892aad3dd61e1" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/twig.xml --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:twig</span>=<span class="hljs-string">"http://symfony.com/schema/dic/twig"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/twig https://symfony.com/schema/dic/twig/twig-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">twig:config</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">twig:path</span> <span class="hljs-attr">namespace</span>=<span class="hljs-string">"email"</span>&gt;</span>email/default/templates<span class="hljs-tag">&lt;/<span class="hljs-name">twig:path</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">twig:path</span> <span class="hljs-attr">namespace</span>=<span class="hljs-string">"admin"</span>&gt;</span>backend/templates<span class="hljs-tag">&lt;/<span class="hljs-name">twig:path</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">twig:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-2e92a455bb6f81d8490e6da1bebc2988c683a119" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/twig.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">TwigConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(TwigConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span><span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'email/default/templates'</span>, <span class="hljs-string">'email'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span><span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'backend/templates'</span>, <span class="hljs-string">'admin'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Now, if you render the <code translate="no" class="notranslate">layout.html.twig</code> template, Symfony will render the
+<code translate="no" class="notranslate">templates/layout.html.twig</code> file. Use the special syntax <code translate="no" class="notranslate">@</code> + namespace to
+refer to the other namespaced templates (e.g. <code translate="no" class="notranslate">@email/layout.html.twig</code> and
+<code translate="no" class="notranslate">@admin/layout.html.twig</code>).</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>A single Twig namespace can be associated with more than one template
+directory. In that case, the order in which paths are added is important
+because Twig will start looking for templates from the first defined path.</p>
+</div>
+<div class="section">
+<h3 id="bundle-templates">
+    Bundle Templates
+    <a class="headerlink" href="#bundle-templates" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you <a href="setup.html#symfony-flex" class="reference internal">install packages/bundles</a> in your application, they
+may include their own Twig templates (in the <code translate="no" class="notranslate">Resources/views/</code> directory of
+each bundle). To avoid messing with your own templates, Symfony adds bundle
+templates under an automatic namespace created after the bundle name.</p>
+<p>For example, the templates of a bundle called <code translate="no" class="notranslate">AcmeFooBundle</code> are available
+under the <code translate="no" class="notranslate">AcmeFoo</code> namespace. If this bundle includes the template
+<code translate="no" class="notranslate">&lt;your-project&gt;/vendor/acmefoo-bundle/Resources/views/user/profile.html.twig</code>,
+you can refer to it as <code translate="no" class="notranslate">@AcmeFoo/user/profile.html.twig</code>.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can also <a href="bundles/override.html#override-templates" class="reference internal">override bundle templates</a> in case
+you want to change some parts of the original bundle templates.</p>
+</div>
+<span id="templates-twig-extension"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="writing-a-twig-extension">
+    Writing a Twig Extension
+    <a class="headerlink" href="#writing-a-twig-extension" title="Permalink to this headline">¶</a>
+</h2>
+<p><a href="https://twig.symfony.com/doc/3.x/advanced.html#creating-an-extension" class="reference external">Twig Extensions</a> allow the creation of custom functions, filters, and more to use
+in your Twig templates. Before writing your own Twig extension, check if
+the filter/function that you need is already implemented in:</p>
+<ul>
+    <li>The <a href="https://twig.symfony.com/doc/3.x/#reference" class="reference external">default Twig filters and functions</a>;</li>
+<li>The <a href="reference/twig_reference.html" class="reference internal">Twig filters and functions added by Symfony</a>;</li>
+<li>The <a href="https://github.com/twigphp?q=extra" class="reference external" rel="external noopener noreferrer" target="_blank">official Twig extensions</a> related to strings, HTML, Markdown, internationalization, etc.</li>
+</ul>
+<div class="section">
+<h3 id="create-the-extension-class">
+    Create the Extension Class
+    <a class="headerlink" href="#create-the-extension-class" title="Permalink to this headline">¶</a>
+</h3>
+<p>Suppose you want to create a new filter called <code translate="no" class="notranslate">price</code> that formats a number
+as currency:</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-template-variable">{{ product.price|price }}</span><span class="xml">
+
+</span><span class="hljs-comment">{# pass in the 3 optional arguments #}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ product.price|price(2, ',', '.') }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Create a class that extends <code translate="no" class="notranslate">AbstractExtension</code> and fill in the logic:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Twig/AppExtension.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Twig</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">AbstractExtension</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">TwigFilter</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractExtension</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getFilters</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-keyword">new</span> TwigFilter(<span class="hljs-string">'price'</span>, [<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>, <span class="hljs-string">'formatPrice'</span>]),
+        ];
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">formatPrice</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>number</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>decimals</span> = <span class="hljs-number">0</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>decPoint</span> = <span class="hljs-string">'.'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>thousandsSep</span> = <span class="hljs-string">','</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span> = number_format(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>number</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>decimals</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>decPoint</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>thousandsSep</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span> = <span class="hljs-string">'$'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span>;
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you want to create a function instead of a filter, define the
+<code translate="no" class="notranslate">getFunctions()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Twig/AppExtension.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Twig</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">AbstractExtension</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">TwigFunction</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractExtension</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getFunctions</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-keyword">new</span> TwigFunction(<span class="hljs-string">'area'</span>, [<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>, <span class="hljs-string">'calculateArea'</span>]),
+        ];
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">calculateArea</span><span class="hljs-params">(int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>width</span>, int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>length</span>)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>width</span> * <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>length</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Along with custom filters and functions, you can also register
+<a href="https://twig.symfony.com/doc/3.x/advanced.html#id1" class="reference external">global variables</a>.</p>
+</div>
+<div class="section">
+<h4 id="register-an-extension-as-a-service">
+    Register an Extension as a Service
+    <a class="headerlink" href="#register-an-extension-as-a-service" title="Permalink to this headline">¶</a>
+</h4>
+<p>Next, register your class as a service and tag it with <code translate="no" class="notranslate">twig.extension</code>. If you're
+using the <a href="service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>,
+you're done! Symfony will automatically know about your new service and add the tag.</p>
+<p>You can now start using your filter in any Twig template. Optionally, execute
+this command to confirm that your new filter was successfully registered:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># display all information about Twig</span>
+<span class="hljs-prompt">$ </span>php bin/console debug:twig
+
+<span class="hljs-comment"># display only the information about a specific filter</span>
+<span class="hljs-prompt">$ </span>php bin/console debug:twig --filter=price</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="lazy-loaded-twig-extensions"></span>
+</div>
+</div>
+<div class="section">
+<h3 id="creating-lazy-loaded-twig-extensions">
+    Creating Lazy-Loaded Twig Extensions
+    <a class="headerlink" href="#creating-lazy-loaded-twig-extensions" title="Permalink to this headline">¶</a>
+</h3>
+<p>Including the code of the custom filters/functions in the Twig extension class
+is the simplest way to create extensions. However, Twig must initialize all
+extensions before rendering any template, even if the template doesn't use an
+extension.</p>
+<p>If extensions don't define dependencies (i.e. if you don't inject services in
+them) performance is not affected. However, if extensions define lots of complex
+dependencies (e.g. those making database connections), the performance loss can
+be significant.</p>
+<p>That's why Twig allows decoupling the extension definition from its
+implementation. Following the same example as before, the first change would be
+to remove the <code translate="no" class="notranslate">formatPrice()</code> method from the extension and update the PHP
+callable defined in <code translate="no" class="notranslate">getFilters()</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Twig/AppExtension.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Twig</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Twig</span>\<span class="hljs-title">AppRuntime</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">AbstractExtension</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">TwigFilter</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractExtension</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getFilters</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-comment">// the logic of this filter is now implemented in a different class</span>
+            <span class="hljs-keyword">new</span> TwigFilter(<span class="hljs-string">'price'</span>, [AppRuntime<span class="hljs-operator">::</span>class, <span class="hljs-string">'formatPrice'</span>]),
+        ];
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, create the new <code translate="no" class="notranslate">AppRuntime</code> class (it's not required but these classes
+are suffixed with <code translate="no" class="notranslate">Runtime</code> by convention) and include the logic of the
+previous <code translate="no" class="notranslate">formatPrice()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Twig/AppRuntime.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Twig</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">RuntimeExtensionInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppRuntime</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RuntimeExtensionInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// this simple example doesn't define any dependency, but in your own</span>
+        <span class="hljs-comment">// extensions, you'll need to inject services using this constructor</span>
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">formatPrice</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>number</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>decimals</span> = <span class="hljs-number">0</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>decPoint</span> = <span class="hljs-string">'.'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>thousandsSep</span> = <span class="hljs-string">','</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span> = number_format(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>number</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>decimals</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>decPoint</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>thousandsSep</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span> = <span class="hljs-string">'$'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span>;
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you're using the default <code translate="no" class="notranslate">services.yaml</code> configuration, this will already
+work! Otherwise, <a href="service_container.html#service-container-creating-service" class="reference internal">create a service</a>
+for this class and <a href="service_container/tags.html" class="reference internal">tag your service</a> with <code translate="no" class="notranslate">twig.runtime</code>.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

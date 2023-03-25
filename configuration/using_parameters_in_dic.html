@@ -1,0 +1,422 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="using-parameters-within-a-dependency-injection-class">
+    Using Parameters within a Dependency Injection Class
+    <a class="headerlink" href="#using-parameters-within-a-dependency-injection-class" title="Permalink to this headline">¶</a>
+</h1>
+<p>You have seen how to use configuration parameters within
+<a href="../service_container.html#service-container-parameters" class="reference internal">Symfony service containers</a>.
+There are special cases such as when you want, for instance, to use the
+<code translate="no" class="notranslate">%kernel.debug%</code> parameter to make the services in your bundle enter
+debug mode. For this case there is more work to do in order
+to make the system understand the parameter value. By default,
+your parameter <code translate="no" class="notranslate">%kernel.debug%</code> will be treated as a string. Consider the
+following example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// inside Configuration class</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>rootNode</span>
+    <span class="hljs-operator">-&gt;</span>children()
+        <span class="hljs-operator">-&gt;</span>booleanNode(<span class="hljs-string">'logging'</span>)<span class="hljs-operator">-&gt;</span>defaultValue(<span class="hljs-string">'%kernel.debug%'</span>)<span class="hljs-operator">-&gt;</span>end()
+        <span class="hljs-comment">// ...</span>
+    <span class="hljs-operator">-&gt;</span>end()
+;
+
+<span class="hljs-comment">// inside the Extension class</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>processConfiguration(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configuration</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>);
+var_dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span>[<span class="hljs-string">'logging'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, examine the results to see this closely:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-90b30bb8d6323c822ded9288957e360b891d4058" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-45745ab81f2954454d1c8fe8a1e03932e879d9a6" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-eb13d32cb23c437d83cce8951f208b838563d057" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-90b30bb8d6323c822ded9288957e360b891d4058" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-attr">my_bundle:</span>
+    <span class="hljs-attr">logging:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-comment"># true, as expected</span>
+
+<span class="hljs-attr">my_bundle:</span>
+    <span class="hljs-attr">logging:</span> <span class="hljs-string">'%kernel.debug%'</span>
+    <span class="hljs-comment"># true/false (depends on 2nd argument of the Kernel class),</span>
+    <span class="hljs-comment"># as expected, because %kernel.debug% inside configuration</span>
+    <span class="hljs-comment"># gets evaluated before being passed to the extension</span>
+
+<span class="hljs-attr">my_bundle:</span> <span class="hljs-string">~</span>
+<span class="hljs-comment"># passes the string "%kernel.debug%".</span>
+<span class="hljs-comment"># Which is always considered as true.</span>
+<span class="hljs-comment"># The Configurator does not know anything about</span>
+<span class="hljs-comment"># "%kernel.debug%" being a parameter.</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-45745ab81f2954454d1c8fe8a1e03932e879d9a6" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:my-bundle</span>=<span class="hljs-string">"http://example.org/schema/dic/my_bundle"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://example.org/schema/dic/my_bundle
+        https://example.org/schema/dic/my_bundle/my_bundle-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">my-bundle:config</span> <span class="hljs-attr">logging</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+    <span class="hljs-comment">&lt;!-- true, as expected --&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">my-bundle:config</span> <span class="hljs-attr">logging</span>=<span class="hljs-string">"%kernel.debug%"</span>/&gt;</span>
+    <span class="hljs-comment">&lt;!-- true/false (depends on 2nd parameter of Kernel),
+         as expected, because %kernel.debug% inside configuration
+         gets evaluated before being passed to the extension --&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">my-bundle:config</span>/&gt;</span>
+    <span class="hljs-comment">&lt;!-- passes the string "%kernel.debug%".
+         Which is always considered as true.
+         The Configurator does not know anything about
+         "%kernel.debug%" being a parameter. --&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-eb13d32cb23c437d83cce8951f208b838563d057" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>loadFromExtension(<span class="hljs-string">'my_bundle'</span>, [
+        <span class="hljs-string">'logging'</span> =&gt; <span class="hljs-keyword">true</span>,
+        <span class="hljs-comment">// true, as expected</span>
+    ]
+);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>loadFromExtension(<span class="hljs-string">'my_bundle'</span>, [
+        <span class="hljs-string">'logging'</span> =&gt; <span class="hljs-string">"%kernel.debug%"</span>,
+        <span class="hljs-comment">// true/false (depends on 2nd parameter of Kernel),</span>
+        <span class="hljs-comment">// as expected, because %kernel.debug% inside configuration</span>
+        <span class="hljs-comment">// gets evaluated before being passed to the extension</span>
+    ]
+);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>loadFromExtension(<span class="hljs-string">'my_bundle'</span>);
+<span class="hljs-comment">// passes the string "%kernel.debug%".</span>
+<span class="hljs-comment">// Which is always considered as true.</span>
+<span class="hljs-comment">// The Configurator does not know anything about</span>
+<span class="hljs-comment">// "%kernel.debug%" being a parameter.</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>In order to support this use case, the <code translate="no" class="notranslate">Configuration</code> class has to
+be injected with this parameter via the extension as follows:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">DependencyInjection</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">Definition</span>\<span class="hljs-title">Builder</span>\<span class="hljs-title">TreeBuilder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">Definition</span>\<span class="hljs-title">ConfigurationInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Configuration</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ConfigurationInterface</span>
+</span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>debug</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>debug</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>debug = (bool) <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>debug</span>;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getConfigTreeBuilder</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>treeBuilder</span> = <span class="hljs-keyword">new</span> TreeBuilder(<span class="hljs-string">'my_bundle'</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>treeBuilder</span><span class="hljs-operator">-&gt;</span>getRootNode()
+            <span class="hljs-operator">-&gt;</span>children()
+                <span class="hljs-comment">// ...</span>
+                <span class="hljs-operator">-&gt;</span>booleanNode(<span class="hljs-string">'logging'</span>)<span class="hljs-operator">-&gt;</span>defaultValue(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>debug)<span class="hljs-operator">-&gt;</span>end()
+                <span class="hljs-comment">// ...</span>
+            <span class="hljs-operator">-&gt;</span>end()
+        ;
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>treeBuilder</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>And set it in the constructor of <code translate="no" class="notranslate">Configuration</code> via the <code translate="no" class="notranslate">Extension</code> class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">DependencyInjection</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Extension</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Extension</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getConfiguration</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span>, ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Configuration(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>getParameter(<span class="hljs-string">'kernel.debug'</span>));
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>There are some instances of <code translate="no" class="notranslate">%kernel.debug%</code> usage within a
+<code translate="no" class="notranslate">Configurator</code> class for example in TwigBundle. However, this is because
+the default parameter value is set by the Extension class.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

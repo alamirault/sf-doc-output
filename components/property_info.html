@@ -1,0 +1,1041 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-propertyinfo-component">
+    The PropertyInfo Component
+    <a class="headerlink" href="#the-propertyinfo-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The PropertyInfo component allows you to get information
+about class properties by using different sources of metadata.</p>
+</blockquote>
+<p>While the <a href="property_access.html" class="reference internal">PropertyAccess component</a>
+allows you to read and write values to/from objects and arrays, the PropertyInfo
+component works solely with class definitions to provide information about the
+data type and visibility - including via getter or setter methods - of the properties
+within that class.</p>
+<span id="components-property-information-installation"></span>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/property-info</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+<p>Additional dependencies may be required for some of the
+<a href="property_info.html#components-property-info-extractors" class="reference internal">extractors provided with this component</a>.</p>
+<span id="components-property-information-usage"></span>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>To use this component, create a new
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyInfoExtractor.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyInfoExtractor" rel="external noopener noreferrer" target="_blank">PropertyInfoExtractor</a> instance and
+provide it with a set of information extractors:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Example</span>\<span class="hljs-title">Namespace</span>\<span class="hljs-title">YourAwesomeCoolClass</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">PropertyInfo</span>\<span class="hljs-title">Extractor</span>\<span class="hljs-title">PhpDocExtractor</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">PropertyInfo</span>\<span class="hljs-title">Extractor</span>\<span class="hljs-title">ReflectionExtractor</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">PropertyInfo</span>\<span class="hljs-title">PropertyInfoExtractor</span>;
+
+<span class="hljs-comment">// a full list of extractors is shown further below</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>phpDocExtractor</span> = <span class="hljs-keyword">new</span> PhpDocExtractor();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span> = <span class="hljs-keyword">new</span> ReflectionExtractor();
+
+<span class="hljs-comment">// list of PropertyListExtractorInterface (any iterable)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>listExtractors</span> = [<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span>];
+
+<span class="hljs-comment">// list of PropertyTypeExtractorInterface (any iterable)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>typeExtractors</span> = [<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>phpDocExtractor</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span>];
+
+<span class="hljs-comment">// list of PropertyDescriptionExtractorInterface (any iterable)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>descriptionExtractors</span> = [<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>phpDocExtractor</span>];
+
+<span class="hljs-comment">// list of PropertyAccessExtractorInterface (any iterable)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>accessExtractors</span> = [<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span>];
+
+<span class="hljs-comment">// list of PropertyInitializableExtractorInterface (any iterable)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInitializableExtractors</span> = [<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span>];
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span> = <span class="hljs-keyword">new</span> PropertyInfoExtractor(
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>listExtractors</span>,
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>typeExtractors</span>,
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>descriptionExtractors</span>,
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>accessExtractors</span>,
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInitializableExtractors</span>
+);
+
+<span class="hljs-comment">// see below for more examples</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span> = YourAwesomeCoolClass<span class="hljs-operator">::</span>class;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>properties</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span><span class="hljs-operator">-&gt;</span>getProperties(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="extractor-ordering">
+    Extractor Ordering
+    <a class="headerlink" href="#extractor-ordering" title="Permalink to this headline">¶</a>
+</h3>
+<p>The order of extractor instances within an array matters: the first non-null
+result will be returned. That is why you must provide each category of extractors
+as a separate array, even if an extractor provides information for more than
+one category.</p>
+<p>For example, while the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Extractor/ReflectionExtractor.php" class="reference external" title="Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor" rel="external noopener noreferrer" target="_blank">ReflectionExtractor</a>
+and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Doctrine/PropertyInfo/DoctrineExtractor.php" class="reference external" title="Symfony\Bridge\Doctrine\PropertyInfo\DoctrineExtractor" rel="external noopener noreferrer" target="_blank">DoctrineExtractor</a>
+both provide list and type information it is probably better that:</p>
+<ul>
+    <li>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Extractor/ReflectionExtractor.php" class="reference external" title="Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor" rel="external noopener noreferrer" target="_blank">ReflectionExtractor</a>
+has priority for list information so that all properties in a class (not
+just mapped properties) are returned.</li>
+<li><p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Doctrine/PropertyInfo/DoctrineExtractor.php" class="reference external" title="Symfony\Bridge\Doctrine\PropertyInfo\DoctrineExtractor" rel="external noopener noreferrer" target="_blank">DoctrineExtractor</a>
+has priority for type information so that entity metadata is used instead
+of type-hinting to provide more accurate type information:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Doctrine</span>\<span class="hljs-title">PropertyInfo</span>\<span class="hljs-title">DoctrineExtractor</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">PropertyInfo</span>\<span class="hljs-title">Extractor</span>\<span class="hljs-title">ReflectionExtractor</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">PropertyInfo</span>\<span class="hljs-title">PropertyInfoExtractor</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span> = <span class="hljs-keyword">new</span> ReflectionExtractor();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>doctrineExtractor</span> = <span class="hljs-keyword">new</span> DoctrineExtractor(<span class="hljs-comment">/* ... */</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span> = <span class="hljs-keyword">new</span> PropertyInfoExtractor(
+    <span class="hljs-comment">// List extractors</span>
+    [
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span>,
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>doctrineExtractor</span>
+    ],
+    <span class="hljs-comment">// Type extractors</span>
+    [
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>doctrineExtractor</span>,
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span>
+    ]
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div></li>
+</ul>
+<span id="components-property-information-extractable-information"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="extractable-information">
+    Extractable Information
+    <a class="headerlink" href="#extractable-information" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyInfoExtractor.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyInfoExtractor" rel="external noopener noreferrer" target="_blank">PropertyInfoExtractor</a>
+class exposes public methods to extract several types of information:</p>
+<ul>
+    <li><a href="property_info.html#property-info-list" class="reference internal">List of properties</a>: <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyListExtractorInterface.php#method_getProperties" class="reference external" title="Symfony\Component\PropertyInfo\PropertyListExtractorInterface::getProperties()" rel="external noopener noreferrer" target="_blank">getProperties()</a></li>
+<li><a href="property_info.html#property-info-type" class="reference internal">Property type</a>: <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyTypeExtractorInterface.php#method_getTypes" class="reference external" title="Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface::getTypes()" rel="external noopener noreferrer" target="_blank">getTypes()</a>
+(including typed properties)</li>
+<li><a href="property_info.html#property-info-description" class="reference internal">Property description</a>: <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyDescriptionExtractorInterface.php#method_getShortDescription" class="reference external" title="Symfony\Component\PropertyInfo\PropertyDescriptionExtractorInterface::getShortDescription()" rel="external noopener noreferrer" target="_blank">getShortDescription()</a> and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyDescriptionExtractorInterface.php#method_getLongDescription" class="reference external" title="Symfony\Component\PropertyInfo\PropertyDescriptionExtractorInterface::getLongDescription()" rel="external noopener noreferrer" target="_blank">getLongDescription()</a></li>
+<li><a href="property_info.html#property-info-access" class="reference internal">Property access details</a>: <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyAccessExtractorInterface.php#method_isReadable" class="reference external" title="Symfony\Component\PropertyInfo\PropertyAccessExtractorInterface::isReadable()" rel="external noopener noreferrer" target="_blank">isReadable()</a> and  <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyAccessExtractorInterface.php#method_isWritable" class="reference external" title="Symfony\Component\PropertyInfo\PropertyAccessExtractorInterface::isWritable()" rel="external noopener noreferrer" target="_blank">isWritable()</a></li>
+<li><a href="property_info.html#property-info-initializable" class="reference internal">Property initializable through the constructor</a>:  <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyInitializableExtractorInterface.php#method_isInitializable" class="reference external" title="Symfony\Component\PropertyInfo\PropertyInitializableExtractorInterface::isInitializable()" rel="external noopener noreferrer" target="_blank">isInitializable()</a></li>
+</ul>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Be sure to pass a <em>class</em> name, not an object to the extractor methods:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// bad! It may work, but not with all extractors</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span><span class="hljs-operator">-&gt;</span>getProperties(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>awesomeObject</span>);
+
+<span class="hljs-comment">// Good!</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span><span class="hljs-operator">-&gt;</span>getProperties(get_class(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>awesomeObject</span>));
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span><span class="hljs-operator">-&gt;</span>getProperties(<span class="hljs-string">'Example\Namespace\YourAwesomeClass'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span><span class="hljs-operator">-&gt;</span>getProperties(YourAwesomeClass<span class="hljs-operator">::</span>class);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<span id="property-info-list"></span>
+<div class="section">
+<h3 id="list-information">
+    List Information
+    <a class="headerlink" href="#list-information" title="Permalink to this headline">¶</a>
+</h3>
+<p>Extractors that implement <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyListExtractorInterface.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyListExtractorInterface" rel="external noopener noreferrer" target="_blank">PropertyListExtractorInterface</a>
+provide the list of properties that are available on a class as an array
+containing each property name as a string:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>properties</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span><span class="hljs-operator">-&gt;</span>getProperties(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>);
+<span class="hljs-comment">/*
+    Example Result
+    --------------
+    array(3) {
+        [0] =&gt; string(8) "username"
+        [1] =&gt; string(8) "password"
+        [2] =&gt; string(6) "active"
+    }
+*/</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="property-info-type"></span>
+</div>
+<div class="section">
+<h3 id="type-information">
+    Type Information
+    <a class="headerlink" href="#type-information" title="Permalink to this headline">¶</a>
+</h3>
+<p>Extractors that implement <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyTypeExtractorInterface.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface" rel="external noopener noreferrer" target="_blank">PropertyTypeExtractorInterface</a>
+provide <a href="property_info.html#components-property-info-type" class="reference internal">extensive data type information</a>
+for a property:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>types</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span><span class="hljs-operator">-&gt;</span>getTypes(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);
+<span class="hljs-comment">/*
+    Example Result
+    --------------
+    array(1) {
+        [0] =&gt;
+            class Symfony\Component\PropertyInfo\Type (6) {
+            private $builtinType          =&gt; string(6) "string"
+            private $nullable             =&gt; bool(false)
+            private $class                =&gt; NULL
+            private $collection           =&gt; bool(false)
+            private $collectionKeyType    =&gt; NULL
+            private $collectionValueType  =&gt; NULL
+        }
+    }
+*/</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>See <a href="property_info.html#components-property-info-type" class="reference internal">The PropertyInfo Component</a> for info about the <code translate="no" class="notranslate">Type</code> class.</p>
+<span id="property-info-description"></span>
+</div>
+<div class="section">
+<h3 id="description-information">
+    Description Information
+    <a class="headerlink" href="#description-information" title="Permalink to this headline">¶</a>
+</h3>
+<p>Extractors that implement <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyDescriptionExtractorInterface.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyDescriptionExtractorInterface" rel="external noopener noreferrer" target="_blank">PropertyDescriptionExtractorInterface</a>
+provide long and short descriptions from a properties annotations as
+strings:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>title</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span><span class="hljs-operator">-&gt;</span>getShortDescription(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);
+<span class="hljs-comment">/*
+    Example Result
+    --------------
+    string(41) "This is the first line of the DocComment."
+*/</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>paragraph</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span><span class="hljs-operator">-&gt;</span>getLongDescription(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);
+<span class="hljs-comment">/*
+    Example Result
+    --------------
+    string(79):
+        This is the subsequent paragraph in the DocComment.
+        It can span multiple lines.
+*/</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="property-info-access"></span>
+</div>
+<div class="section">
+<h3 id="access-information">
+    Access Information
+    <a class="headerlink" href="#access-information" title="Permalink to this headline">¶</a>
+</h3>
+<p>Extractors that implement <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyAccessExtractorInterface.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyAccessExtractorInterface" rel="external noopener noreferrer" target="_blank">PropertyAccessExtractorInterface</a>
+provide whether properties are readable or writable as booleans:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span><span class="hljs-operator">-&gt;</span>isReadable(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);
+<span class="hljs-comment">// Example Result: bool(true)</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span><span class="hljs-operator">-&gt;</span>isWritable(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);
+<span class="hljs-comment">// Example Result: bool(false)</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Extractor/ReflectionExtractor.php" class="reference external" title="Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor" rel="external noopener noreferrer" target="_blank">ReflectionExtractor</a> looks
+for getter/isser/setter/hasser method in addition to whether or not a property is public
+to determine if it's accessible. This based on how the <a href="property_access.html" class="reference internal">PropertyAccess</a>
+works.</p>
+<span id="property-info-initializable"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="property-initializable-information">
+    Property Initializable Information
+    <a class="headerlink" href="#property-initializable-information" title="Permalink to this headline">¶</a>
+</h2>
+<p>Extractors that implement <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyInitializableExtractorInterface.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyInitializableExtractorInterface" rel="external noopener noreferrer" target="_blank">PropertyInitializableExtractorInterface</a>
+provide whether properties are initializable through the class's constructor as booleans:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyInfo</span><span class="hljs-operator">-&gt;</span>isInitializable(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);
+<span class="hljs-comment">// Example Result: bool(true)</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Extractor/ReflectionExtractor.php#method_isInitializable" class="reference external" title="Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor::isInitializable()" rel="external noopener noreferrer" target="_blank">isInitializable()</a>
+returns <code translate="no" class="notranslate">true</code> if a constructor's parameter of the given class matches the
+given property name.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The main <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyInfoExtractor.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyInfoExtractor" rel="external noopener noreferrer" target="_blank">PropertyInfoExtractor</a>
+class implements all interfaces, delegating the extraction of property
+information to the extractors that have been registered with it.</p>
+<p>This means that any method available on each of the extractors is also
+available on the main <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyInfoExtractor.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyInfoExtractor" rel="external noopener noreferrer" target="_blank">PropertyInfoExtractor</a>
+class.</p>
+</div>
+<span id="components-property-info-type"></span>
+</div>
+<div class="section">
+<h2 id="type-objects">
+    Type Objects
+    <a class="headerlink" href="#type-objects" title="Permalink to this headline">¶</a>
+</h2>
+<p>Compared to the other extractors, type information extractors provide much
+more information than can be represented as simple scalar values. Because
+of this, type extractors return an array of <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Type.php" class="reference external" title="Symfony\Component\PropertyInfo\Type" rel="external noopener noreferrer" target="_blank">Type</a>
+objects for each type that the property supports.</p>
+<p>For example, if a property supports both <code translate="no" class="notranslate">integer</code> and <code translate="no" class="notranslate">string</code> (via
+the <code translate="no" class="notranslate">@return int|string</code> annotation),
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyInfoExtractor.php#method_getTypes" class="reference external" title="Symfony\Component\PropertyInfo\PropertyInfoExtractor::getTypes()" rel="external noopener noreferrer" target="_blank">PropertyInfoExtractor::getTypes()</a>
+will return an array containing <strong>two</strong> instances of the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Type.php" class="reference external" title="Symfony\Component\PropertyInfo\Type" rel="external noopener noreferrer" target="_blank">Type</a>
+class.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Most extractors will return only one <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Type.php" class="reference external" title="Symfony\Component\PropertyInfo\Type" rel="external noopener noreferrer" target="_blank">Type</a>
+instance. The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Extractor/PhpDocExtractor.php" class="reference external" title="Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor" rel="external noopener noreferrer" target="_blank">PhpDocExtractor</a>
+is currently the only extractor that returns multiple instances in the array.</p>
+</div>
+<p>Each object will provide 6 attributes, available in the 6 methods:</p>
+<span id="components-property-info-type-builtin"></span>
+<div class="section">
+<h3 id="type-getbuiltintype">
+    <code translate="no" class="notranslate">Type::getBuiltInType()</code>
+    <a class="headerlink" href="#type-getbuiltintype" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Type.php#method_getBuiltinType" class="reference external" title="Symfony\Component\PropertyInfo\Type::getBuiltinType()" rel="external noopener noreferrer" target="_blank">Type::getBuiltinType()</a>
+method returns the built-in PHP data type, which can be one of these
+string values: <code translate="no" class="notranslate">array</code>, <code translate="no" class="notranslate">bool</code>, <code translate="no" class="notranslate">callable</code>, <code translate="no" class="notranslate">float</code>, <code translate="no" class="notranslate">int</code>,
+<code translate="no" class="notranslate">iterable</code>, <code translate="no" class="notranslate">null</code>, <code translate="no" class="notranslate">object</code>, <code translate="no" class="notranslate">resource</code> or <code translate="no" class="notranslate">string</code>.</p>
+<p>Constants inside the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Type.php" class="reference external" title="Symfony\Component\PropertyInfo\Type" rel="external noopener noreferrer" target="_blank">Type</a>
+class, in the form <code translate="no" class="notranslate">Type::BUILTIN_TYPE_*</code>, are provided for convenience.</p>
+</div>
+<div class="section">
+<h3 id="type-isnullable">
+    <code translate="no" class="notranslate">Type::isNullable()</code>
+    <a class="headerlink" href="#type-isnullable" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Type.php#method_isNullable" class="reference external" title="Symfony\Component\PropertyInfo\Type::isNullable()" rel="external noopener noreferrer" target="_blank">Type::isNullable()</a>
+method will return a boolean value indicating whether the property parameter
+can be set to <code translate="no" class="notranslate">null</code>.</p>
+</div>
+<div class="section">
+<h3 id="type-getclassname">
+    <code translate="no" class="notranslate">Type::getClassName()</code>
+    <a class="headerlink" href="#type-getclassname" title="Permalink to this headline">¶</a>
+</h3>
+<p>If the <a href="property_info.html#components-property-info-type-builtin" class="reference internal">built-in PHP data type</a>
+is <code translate="no" class="notranslate">object</code>, the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Type.php#method_getClassName" class="reference external" title="Symfony\Component\PropertyInfo\Type::getClassName()" rel="external noopener noreferrer" target="_blank">Type::getClassName()</a>
+method will return the fully-qualified class or interface name accepted.</p>
+</div>
+<div class="section">
+<h3 id="type-iscollection">
+    <code translate="no" class="notranslate">Type::isCollection()</code>
+    <a class="headerlink" href="#type-iscollection" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Type.php#method_isCollection" class="reference external" title="Symfony\Component\PropertyInfo\Type::isCollection()" rel="external noopener noreferrer" target="_blank">Type::isCollection()</a>
+method will return a boolean value indicating if the property parameter is
+a collection - a non-scalar value capable of containing other values. Currently
+this returns <code translate="no" class="notranslate">true</code> if:</p>
+<ul>
+    <li>The <a href="property_info.html#components-property-info-type-builtin" class="reference internal">built-in PHP data type</a>
+is <code translate="no" class="notranslate">array</code>;</li>
+<li>The mutator method the property is derived from has a prefix of <code translate="no" class="notranslate">add</code>
+or <code translate="no" class="notranslate">remove</code> (which are defined as the list of array mutator prefixes);</li>
+<li>The <a href="https://www.phpdoc.org/" class="reference external" rel="external noopener noreferrer" target="_blank">phpDocumentor</a> annotation is of type &quot;collection&quot; (e.g.
+<code translate="no" class="notranslate">@var SomeClass&lt;DateTime&gt;</code>, <code translate="no" class="notranslate">@var SomeClass&lt;integer,string&gt;</code>,
+<code translate="no" class="notranslate">@var Doctrine<wbr>\Common<wbr>\Collections<wbr>\Collection&lt;App<wbr>\Entity<wbr>\SomeEntity&gt;</code>, etc.)</li>
+</ul>
+</div>
+<div class="section">
+<h3 id="type-getcollectionkeytypes-type-getcollectionvaluetypes">
+    <code translate="no" class="notranslate">Type::getCollectionKeyTypes()</code> &amp; <code translate="no" class="notranslate">Type::getCollectionValueTypes()</code>
+    <a class="headerlink" href="#type-getcollectionkeytypes-type-getcollectionvaluetypes" title="Permalink to this headline">¶</a>
+</h3>
+<p>If the property is a collection, additional type objects may be returned
+for both the key and value types of the collection (if the information is
+available), via the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Type.php#method_getCollectionKeyTypes" class="reference external" title="Symfony\Component\PropertyInfo\Type::getCollectionKeyTypes()" rel="external noopener noreferrer" target="_blank">Type::getCollectionKeyTypes()</a>
+and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Type.php#method_getCollectionValueTypes" class="reference external" title="Symfony\Component\PropertyInfo\Type::getCollectionValueTypes()" rel="external noopener noreferrer" target="_blank">Type::getCollectionValueTypes()</a>
+methods.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The <code translate="no" class="notranslate">list</code> pseudo type is returned by the PropertyInfo component as an
+array with integer as the key type.</p>
+</div>
+<span id="components-property-info-extractors"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="extractors">
+    Extractors
+    <a class="headerlink" href="#extractors" title="Permalink to this headline">¶</a>
+</h2>
+<p>The extraction of property information is performed by <em>extractor classes</em>.
+An extraction class can provide one or more types of property information
+by implementing the correct interface(s).</p>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyInfoExtractor.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyInfoExtractor" rel="external noopener noreferrer" target="_blank">PropertyInfoExtractor</a> will
+iterate over the relevant extractor classes in the order they were set, call
+the appropriate method and return the first result that is not <code translate="no" class="notranslate">null</code>.</p>
+<span id="components-property-information-extractors-available"></span>
+<p>While you can create your own extractors, the following are already available
+to cover most use-cases:</p>
+<div class="section">
+<h3 id="reflectionextractor">
+    ReflectionExtractor
+    <a class="headerlink" href="#reflectionextractor" title="Permalink to this headline">¶</a>
+</h3>
+<p>Using PHP reflection, the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Extractor/ReflectionExtractor.php" class="reference external" title="Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor" rel="external noopener noreferrer" target="_blank">ReflectionExtractor</a>
+provides list, type and access information from setter and accessor methods.
+It can also give the type of a property (even extracting it from the constructor
+arguments), and if it is initializable through the constructor. It supports
+return and scalar types:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">PropertyInfo</span>\<span class="hljs-title">Extractor</span>\<span class="hljs-title">ReflectionExtractor</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span> = <span class="hljs-keyword">new</span> ReflectionExtractor();
+
+<span class="hljs-comment">// List information.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span><span class="hljs-operator">-&gt;</span>getProperties(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>);
+
+<span class="hljs-comment">// Type information.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span><span class="hljs-operator">-&gt;</span>getTypes(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);
+
+<span class="hljs-comment">// Access information.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span><span class="hljs-operator">-&gt;</span>isReadable(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span><span class="hljs-operator">-&gt;</span>isWritable(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);
+
+<span class="hljs-comment">// Initializable information</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>reflectionExtractor</span><span class="hljs-operator">-&gt;</span>isInitializable(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When using the Symfony framework, this service is automatically registered
+when the <code translate="no" class="notranslate">property_info</code> feature is enabled:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/framework.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">property_info:</span>
+        <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h3 id="phpdocextractor">
+    PhpDocExtractor
+    <a class="headerlink" href="#phpdocextractor" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>This extractor depends on the <a href="https://packagist.org/packages/phpdocumentor/reflection-docblock" class="reference external" rel="external noopener noreferrer" target="_blank">phpdocumentor/reflection-docblock</a> library.</p>
+</div>
+<p>Using <a href="https://github.com/phpDocumentor/ReflectionDocBlock" class="reference external" rel="external noopener noreferrer" target="_blank">phpDocumentor Reflection</a> to parse property and method annotations,
+the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Extractor/PhpDocExtractor.php" class="reference external" title="Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor" rel="external noopener noreferrer" target="_blank">PhpDocExtractor</a>
+provides type and description information. This extractor is automatically
+registered with the <code translate="no" class="notranslate">property_info</code> in the Symfony Framework <em>if</em> the dependent
+library is present:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">PropertyInfo</span>\<span class="hljs-title">Extractor</span>\<span class="hljs-title">PhpDocExtractor</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>phpDocExtractor</span> = <span class="hljs-keyword">new</span> PhpDocExtractor();
+
+<span class="hljs-comment">// Type information.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>phpDocExtractor</span><span class="hljs-operator">-&gt;</span>getTypes(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);
+<span class="hljs-comment">// Description information.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>phpDocExtractor</span><span class="hljs-operator">-&gt;</span>getShortDescription(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>phpDocExtractor</span><span class="hljs-operator">-&gt;</span>getLongDescription(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="phpstanextractor">
+    PhpStanExtractor
+    <a class="headerlink" href="#phpstanextractor" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>This extractor depends on the <a href="https://packagist.org/packages/phpstan/phpdoc-parser" class="reference external" rel="external noopener noreferrer" target="_blank">phpstan/phpdoc-parser</a> and
+<a href="https://packagist.org/packages/phpdocumentor/reflection-docblock" class="reference external" rel="external noopener noreferrer" target="_blank">phpdocumentor/reflection-docblock</a> libraries.</p>
+</div>
+<p>This extractor fetches information thanks to the PHPStan parser. It gathers
+information from annotations of properties and methods, such as <code translate="no" class="notranslate">@var</code>,
+<code translate="no" class="notranslate">@param</code> or <code translate="no" class="notranslate">@return</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Domain/Foo.php</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span>
+</span>{
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@param</span> string $bar
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bar</span>,
+    )</span> </span>{
+    }
+}
+
+<span class="hljs-comment">// Extraction.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">PropertyInfo</span>\<span class="hljs-title">Extractor</span>\<span class="hljs-title">PhpStanExtractor</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>phpStanExtractor</span> = <span class="hljs-keyword">new</span> PhpStanExtractor();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>phpStanExtractor</span><span class="hljs-operator">-&gt;</span>getTypesFromConstructor(Foo<span class="hljs-operator">::</span>class, <span class="hljs-string">'bar'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The <code translate="no" class="notranslate">PhpStanExtractor</code> was introduced in Symfony 6.1.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="serializerextractor">
+    SerializerExtractor
+    <a class="headerlink" href="#serializerextractor" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>This extractor depends on the <a href="https://packagist.org/packages/symfony/serializer" class="reference external" rel="external noopener noreferrer" target="_blank">symfony/serializer</a> library.</p>
+</div>
+<p>Using <a href="../serializer.html#serializer-using-serialization-groups-attributes" class="reference internal">groups metadata</a>
+from the <a href="serializer.html" class="reference internal">Serializer component</a>,
+the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/Extractor/SerializerExtractor.php" class="reference external" title="Symfony\Component\PropertyInfo\Extractor\SerializerExtractor" rel="external noopener noreferrer" target="_blank">SerializerExtractor</a>
+provides list information. This extractor is <em>not</em> registered automatically
+with the <code translate="no" class="notranslate">property_info</code> service in the Symfony Framework:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Common</span>\<span class="hljs-title">Annotations</span>\<span class="hljs-title">AnnotationReader</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">PropertyInfo</span>\<span class="hljs-title">Extractor</span>\<span class="hljs-title">SerializerExtractor</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Serializer</span>\<span class="hljs-title">Mapping</span>\<span class="hljs-title">Factory</span>\<span class="hljs-title">ClassMetadataFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Serializer</span>\<span class="hljs-title">Mapping</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">AnnotationLoader</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>serializerClassMetadataFactory</span> = <span class="hljs-keyword">new</span> ClassMetadataFactory(
+    <span class="hljs-keyword">new</span> AnnotationLoader(<span class="hljs-keyword">new</span> AnnotationReader)
+);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>serializerExtractor</span> = <span class="hljs-keyword">new</span> SerializerExtractor(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>serializerClassMetadataFactory</span>);
+
+<span class="hljs-comment">// the `serializer_groups` option must be configured (may be set to null)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>serializerExtractor</span><span class="hljs-operator">-&gt;</span>getProperties(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, [<span class="hljs-string">'serializer_groups'</span> =&gt; [<span class="hljs-string">'mygroup'</span>]]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If <code translate="no" class="notranslate">serializer_groups</code> is set to <code translate="no" class="notranslate">null</code>, serializer groups metadata won't be
+checked but you will get only the properties considered by the Serializer
+Component (notably the <code translate="no" class="notranslate">@Ignore</code> annotation is taken into account).</p>
+</div>
+<div class="section">
+<h3 id="doctrineextractor">
+    DoctrineExtractor
+    <a class="headerlink" href="#doctrineextractor" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>This extractor depends on the <a href="https://packagist.org/packages/symfony/doctrine-bridge" class="reference external" rel="external noopener noreferrer" target="_blank">symfony/doctrine-bridge</a> and <a href="https://packagist.org/packages/doctrine/orm" class="reference external" rel="external noopener noreferrer" target="_blank">doctrine/orm</a>
+libraries.</p>
+</div>
+<p>Using entity mapping data from <a href="https://www.doctrine-project.org/projects/orm.html" class="reference external" rel="external noopener noreferrer" target="_blank">Doctrine ORM</a>, the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Doctrine/PropertyInfo/DoctrineExtractor.php" class="reference external" title="Symfony\Bridge\Doctrine\PropertyInfo\DoctrineExtractor" rel="external noopener noreferrer" target="_blank">DoctrineExtractor</a>
+provides list and type information. This extractor is not registered automatically
+with the <code translate="no" class="notranslate">property_info</code> service in the Symfony Framework:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">EntityManager</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Tools</span>\<span class="hljs-title">Setup</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Doctrine</span>\<span class="hljs-title">PropertyInfo</span>\<span class="hljs-title">DoctrineExtractor</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span> = Setup<span class="hljs-operator">::</span>createAnnotationMetadataConfiguration([<span class="hljs-keyword">__DIR__</span>], <span class="hljs-keyword">true</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span> = EntityManager<span class="hljs-operator">::</span>create([
+    <span class="hljs-string">'driver'</span> =&gt; <span class="hljs-string">'pdo_sqlite'</span>,
+    <span class="hljs-comment">// ...</span>
+], <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>doctrineExtractor</span> = <span class="hljs-keyword">new</span> DoctrineExtractor(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span>);
+
+<span class="hljs-comment">// List information.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>doctrineExtractor</span><span class="hljs-operator">-&gt;</span>getProperties(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>);
+<span class="hljs-comment">// Type information.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>doctrineExtractor</span><span class="hljs-operator">-&gt;</span>getTypes(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>property</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="components-property-information-extractors-creation"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="creating-your-own-extractors">
+    Creating Your Own Extractors
+    <a class="headerlink" href="#creating-your-own-extractors" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can create your own property information extractors by creating a
+class that implements one or more of the following interfaces:
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyAccessExtractorInterface.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyAccessExtractorInterface" rel="external noopener noreferrer" target="_blank">PropertyAccessExtractorInterface</a>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyDescriptionExtractorInterface.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyDescriptionExtractorInterface" rel="external noopener noreferrer" target="_blank">PropertyDescriptionExtractorInterface</a>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyListExtractorInterface.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyListExtractorInterface" rel="external noopener noreferrer" target="_blank">PropertyListExtractorInterface</a>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyTypeExtractorInterface.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface" rel="external noopener noreferrer" target="_blank">PropertyTypeExtractorInterface</a> and
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/PropertyInfo/PropertyInitializableExtractorInterface.php" class="reference external" title="Symfony\Component\PropertyInfo\PropertyInitializableExtractorInterface" rel="external noopener noreferrer" target="_blank">PropertyInitializableExtractorInterface</a>.</p>
+<p>If you have enabled the PropertyInfo component with the FrameworkBundle,
+you can automatically register your extractor class with the <code translate="no" class="notranslate">property_info</code>
+service by defining it as a service with one or more of the following
+<a href="../service_container/tags.html" class="reference internal">tags</a>:</p>
+<ul>
+    <li><code translate="no" class="notranslate">property_info.list_extractor</code> if it provides list information.</li>
+<li><code translate="no" class="notranslate">property_info.type_extractor</code> if it provides type information.</li>
+<li><code translate="no" class="notranslate">property_info.description_extractor</code> if it provides description information.</li>
+<li><code translate="no" class="notranslate">property_info.access_extractor</code> if it provides access information.</li>
+<li><code translate="no" class="notranslate">property_info.initializable_extractor</code> if it provides initializable information
+(it checks if a property can be initialized through the constructor).</li>
+</ul>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

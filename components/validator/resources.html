@@ -1,0 +1,495 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="loading-resources">
+    Loading Resources
+    <a class="headerlink" href="#loading-resources" title="Permalink to this headline">¶</a>
+</h1>
+<p>The Validator component uses metadata to validate a value. This metadata defines
+how a class, array or any other value should be validated. When validating a
+class, the metadata is defined by the class itself. When validating simple values,
+the metadata must be passed to the validation methods.</p>
+<p>Class metadata can be defined in a configuration file or in the class itself.
+The Validator component collects that metadata using a set of loaders.</p>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>You'll learn how to define the metadata in <a href="metadata.html" class="reference internal">Metadata</a>.</p>
+</div>
+<div class="section">
+<h2 id="the-staticmethodloader">
+    The StaticMethodLoader
+    <a class="headerlink" href="#the-staticmethodloader" title="Permalink to this headline">¶</a>
+</h2>
+<p>The most basic loader is the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/Mapping/Loader/StaticMethodLoader.php" class="reference external" title="Symfony\Component\Validator\Mapping\Loader\StaticMethodLoader" rel="external noopener noreferrer" target="_blank">StaticMethodLoader</a>.
+This loader gets the metadata by calling a static method of the class. The name
+of the method is configured using the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/ValidatorBuilder.php#method_addMethodMapping" class="reference external" title="Symfony\Component\Validator\ValidatorBuilder::addMethodMapping()" rel="external noopener noreferrer" target="_blank">addMethodMapping()</a>
+method of the validator builder:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Validation</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span> = Validation<span class="hljs-operator">::</span>createValidatorBuilder()
+    <span class="hljs-operator">-&gt;</span>addMethodMapping(<span class="hljs-string">'loadValidatorMetadata'</span>)
+    <span class="hljs-operator">-&gt;</span>getValidator();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In this example, the validation metadata is retrieved executing the
+<code translate="no" class="notranslate">loadValidatorMetadata()</code> method of the class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Mapping</span>\<span class="hljs-title">ClassMetadata</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span>
+</span>{
+    <span class="hljs-keyword">protected</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadValidatorMetadata</span><span class="hljs-params">(ClassMetadata <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addPropertyConstraint(<span class="hljs-string">'name'</span>, <span class="hljs-keyword">new</span> Assert\NotBlank());
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addPropertyConstraint(<span class="hljs-string">'name'</span>, <span class="hljs-keyword">new</span> Assert\Length([
+            <span class="hljs-string">'min'</span> =&gt; <span class="hljs-number">5</span>,
+            <span class="hljs-string">'max'</span> =&gt; <span class="hljs-number">20</span>,
+        ]));
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Instead of calling <code translate="no" class="notranslate">addMethodMapping()</code> multiple times to add several
+method names, you can also use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/ValidatorBuilder.php#method_addMethodMappings" class="reference external" title="Symfony\Component\Validator\ValidatorBuilder::addMethodMappings()" rel="external noopener noreferrer" target="_blank">addMethodMappings()</a>
+to set an array of supported method names.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="the-file-loaders">
+    The File Loaders
+    <a class="headerlink" href="#the-file-loaders" title="Permalink to this headline">¶</a>
+</h2>
+<p>The component also provides two file loaders, one to load YAML files and one to
+load XML files. Use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/ValidatorBuilder.php#method_addYamlMapping" class="reference external" title="Symfony\Component\Validator\ValidatorBuilder::addYamlMapping()" rel="external noopener noreferrer" target="_blank">addYamlMapping()</a> or
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/ValidatorBuilder.php#method_addXmlMapping" class="reference external" title="Symfony\Component\Validator\ValidatorBuilder::addXmlMapping()" rel="external noopener noreferrer" target="_blank">addXmlMapping()</a> to
+configure the locations of these files:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Validation</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span> = Validation<span class="hljs-operator">::</span>createValidatorBuilder()
+    <span class="hljs-operator">-&gt;</span>addYamlMapping(<span class="hljs-string">'validator/validation.yaml'</span>)
+    <span class="hljs-operator">-&gt;</span>getValidator();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you want to load YAML mapping files, then you will also need to install
+<a href="../../components/yaml.html" class="reference internal">the Yaml component</a>.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Just like with the method mappings, you can also use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/ValidatorBuilder.php#method_addYamlMappings" class="reference external" title="Symfony\Component\Validator\ValidatorBuilder::addYamlMappings()" rel="external noopener noreferrer" target="_blank">addYamlMappings()</a> and
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/ValidatorBuilder.php#method_addXmlMappings" class="reference external" title="Symfony\Component\Validator\ValidatorBuilder::addXmlMappings()" rel="external noopener noreferrer" target="_blank">addXmlMappings()</a>
+to configure an array of file paths.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="the-annotationloader">
+    The AnnotationLoader
+    <a class="headerlink" href="#the-annotationloader" title="Permalink to this headline">¶</a>
+</h2>
+<p>At last, the component provides an
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/Mapping/Loader/AnnotationLoader.php" class="reference external" title="Symfony\Component\Validator\Mapping\Loader\AnnotationLoader" rel="external noopener noreferrer" target="_blank">AnnotationLoader</a> to get
+the metadata from the annotations of the class. Annotations are defined as <code translate="no" class="notranslate">@</code>
+prefixed classes included in doc block comments (<code translate="no" class="notranslate">/** ... */</code>). For example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span>
+</span>{
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@Assert</span>\NotBlank
+     */</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>To enable the annotation loader, call the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/ValidatorBuilder.php#method_enableAnnotationMapping" class="reference external" title="Symfony\Component\Validator\ValidatorBuilder::enableAnnotationMapping()" rel="external noopener noreferrer" target="_blank">enableAnnotationMapping()</a> method.
+If you use annotations instead of attributes, it's also required to call
+<code translate="no" class="notranslate">addDefaultDoctrineAnnotationReader()</code> to use Doctrine's annotation reader:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Validation</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span> = Validation<span class="hljs-operator">::</span>createValidatorBuilder()
+    <span class="hljs-operator">-&gt;</span>enableAnnotationMapping()
+    <span class="hljs-operator">-&gt;</span>addDefaultDoctrineAnnotationReader() <span class="hljs-comment">// add this only when using annotations</span>
+    <span class="hljs-operator">-&gt;</span>getValidator();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>To disable the annotation loader after it was enabled, call
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/ValidatorBuilder.php#method_disableAnnotationMapping" class="reference external" title="Symfony\Component\Validator\ValidatorBuilder::disableAnnotationMapping()" rel="external noopener noreferrer" target="_blank">disableAnnotationMapping()</a>.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>In order to use the annotation loader, you should have installed the
+<code translate="no" class="notranslate">doctrine/annotations</code> and <code translate="no" class="notranslate">doctrine/cache</code> packages with Composer.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Annotation classes aren't loaded automatically, so you must load them
+using a class loader like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Composer</span>\<span class="hljs-title">Autoload</span>\<span class="hljs-title">ClassLoader</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Common</span>\<span class="hljs-title">Annotations</span>\<span class="hljs-title">AnnotationRegistry</span>;
+
+<span class="hljs-comment">/** <span class="hljs-doctag">@var</span> ClassLoader $loader */</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span> = <span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../vendor/autoload.php'</span>;
+
+AnnotationRegistry<span class="hljs-operator">::</span>registerLoader([<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span>, <span class="hljs-string">'loadClass'</span>]);
+
+<span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span>;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="using-multiple-loaders">
+    Using Multiple Loaders
+    <a class="headerlink" href="#using-multiple-loaders" title="Permalink to this headline">¶</a>
+</h2>
+<p>The component provides a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/Mapping/Loader/LoaderChain.php" class="reference external" title="Symfony\Component\Validator\Mapping\Loader\LoaderChain" rel="external noopener noreferrer" target="_blank">LoaderChain</a> class to
+execute several loaders sequentially in the same order they were defined:</p>
+<p>The <code translate="no" class="notranslate">ValidatorBuilder</code> will already take care of this when you configure
+multiple mappings:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Validation</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span> = Validation<span class="hljs-operator">::</span>createValidatorBuilder()
+    <span class="hljs-operator">-&gt;</span>enableAnnotationMapping(<span class="hljs-keyword">true</span>)
+    <span class="hljs-operator">-&gt;</span>addDefaultDoctrineAnnotationReader()
+    <span class="hljs-operator">-&gt;</span>addMethodMapping(<span class="hljs-string">'loadValidatorMetadata'</span>)
+    <span class="hljs-operator">-&gt;</span>addXmlMapping(<span class="hljs-string">'validator/validation.xml'</span>)
+    <span class="hljs-operator">-&gt;</span>getValidator();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="caching">
+    Caching
+    <a class="headerlink" href="#caching" title="Permalink to this headline">¶</a>
+</h2>
+<p>Using many loaders to load metadata from different places is convenient, but it
+can slow down your application because each file needs to be parsed, validated
+and converted into a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/Mapping/ClassMetadata.php" class="reference external" title="Symfony\Component\Validator\Mapping\ClassMetadata" rel="external noopener noreferrer" target="_blank">ClassMetadata</a>
+instance.</p>
+<p>To solve this problem, call the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/ValidatorBuilder.php#method_setMappingCache" class="reference external" title="Symfony\Component\Validator\ValidatorBuilder::setMappingCache()" rel="external noopener noreferrer" target="_blank">setMappingCache()</a>
+method of the Validator builder and pass your own caching class (which must
+implement the PSR-6 interface <a href="https://github.com/symfony/symfony/blob/5.4/src/Psr/Cache/CacheItemPoolInterface.php" class="reference external" title="Psr\Cache\CacheItemPoolInterface" rel="external noopener noreferrer" target="_blank">CacheItemPoolInterface</a>):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Validation</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span> = Validation<span class="hljs-operator">::</span>createValidatorBuilder()
+    <span class="hljs-comment">// ... add loaders</span>
+    <span class="hljs-operator">-&gt;</span>setMappingCache(<span class="hljs-keyword">new</span> SomePsr6Cache())
+    <span class="hljs-operator">-&gt;</span>getValidator();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The loaders already use a singleton load mechanism. That means that the
+loaders will only load and parse a file once and put that in a property,
+which will then be used the next time it is asked for metadata. However,
+the Validator still needs to merge all metadata of one class from every
+loader when it is requested.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="using-a-custom-metadatafactory">
+    Using a Custom MetadataFactory
+    <a class="headerlink" href="#using-a-custom-metadatafactory" title="Permalink to this headline">¶</a>
+</h2>
+<p>All the loaders and the cache are passed to an instance of
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/Mapping/Factory/LazyLoadingMetadataFactory.php" class="reference external" title="Symfony\Component\Validator\Mapping\Factory\LazyLoadingMetadataFactory" rel="external noopener noreferrer" target="_blank">LazyLoadingMetadataFactory</a>.
+This class is responsible for creating a <code translate="no" class="notranslate">ClassMetadata</code> instance from all the
+configured resources.</p>
+<p>You can also use a custom metadata factory implementation by creating a class
+which implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/Mapping/Factory/MetadataFactoryInterface.php" class="reference external" title="Symfony\Component\Validator\Mapping\Factory\MetadataFactoryInterface" rel="external noopener noreferrer" target="_blank">MetadataFactoryInterface</a>.
+You can set this custom implementation using
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/ValidatorBuilder.php#method_setMetadataFactory" class="reference external" title="Symfony\Component\Validator\ValidatorBuilder::setMetadataFactory()" rel="external noopener noreferrer" target="_blank">setMetadataFactory()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Acme</span>\<span class="hljs-title">Validation</span>\<span class="hljs-title">CustomMetadataFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Validation</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span> = Validation<span class="hljs-operator">::</span>createValidatorBuilder()
+    <span class="hljs-operator">-&gt;</span>setMetadataFactory(<span class="hljs-keyword">new</span> CustomMetadataFactory(...))
+    <span class="hljs-operator">-&gt;</span>getValidator();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Since you are using a custom metadata factory, you can't configure loaders
+and caches using the <code translate="no" class="notranslate">add*Mapping()</code> methods anymore. You now have to
+inject them into your custom metadata factory yourself.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

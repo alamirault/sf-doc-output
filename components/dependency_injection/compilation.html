@@ -1,0 +1,1313 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="compiling-the-container">
+    Compiling the Container
+    <a class="headerlink" href="#compiling-the-container" title="Permalink to this headline">¶</a>
+</h1>
+<p>The service container can be compiled for various reasons. These reasons
+include checking for any potential issues such as circular references and
+making the container more efficient by resolving parameters and removing
+unused services. Also, certain features - like using
+<a href="../../service_container/parent_services.html" class="reference internal">parent services</a>
+- require the container to be compiled.</p>
+<p>It is compiled by running:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>compile();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The compile method uses <em>Compiler Passes</em> for the compilation. The DependencyInjection
+component comes with several passes which are automatically registered for
+compilation. For example the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Compiler/CheckDefinitionValidityPass.php" class="reference external" title="Symfony\Component\DependencyInjection\Compiler\CheckDefinitionValidityPass" rel="external noopener noreferrer" target="_blank">CheckDefinitionValidityPass</a>
+checks for various potential issues with the definitions that have been
+set in the container. After this and several other passes that check the
+container's validity, further compiler passes are used to optimize the
+configuration before it is cached. For example, private services and abstract
+services are removed and aliases are resolved.</p>
+<span id="components-dependency-injection-extension"></span>
+<div class="section">
+<h2 id="managing-configuration-with-extensions">
+    Managing Configuration with Extensions
+    <a class="headerlink" href="#managing-configuration-with-extensions" title="Permalink to this headline">¶</a>
+</h2>
+<p>As well as loading configuration directly into the container as shown in
+<a href="../../components/dependency_injection.html" class="reference internal">The DependencyInjection Component</a>, you can manage it
+by registering extensions with the container. The first step in the compilation
+process is to load configuration from any extension classes registered with
+the container. Unlike the configuration loaded directly, they are only processed
+when the container is compiled. If your application is modular then extensions
+allow each module to register and manage their own service configuration.</p>
+<p>The extensions must implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Extension/ExtensionInterface.php" class="reference external" title="Symfony\Component\DependencyInjection\Extension\ExtensionInterface" rel="external noopener noreferrer" target="_blank">ExtensionInterface</a>
+and can be registered with the container with:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>registerExtension(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>extension</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The main work of the extension is done in the <code translate="no" class="notranslate">load()</code> method. In the <code translate="no" class="notranslate">load()</code>
+method you can load configuration from one or more configuration files as
+well as manipulate the container definitions using the methods shown in
+<a href="../../service_container/definitions.html" class="reference internal">How to work with Service Definition Objects</a>.</p>
+<p>The <code translate="no" class="notranslate">load()</code> method is passed a fresh container to set up, which is then
+merged afterwards into the container it is registered with. This allows
+you to have several extensions managing container definitions independently.
+The extensions do not add to the containers configuration when they are
+added but are processed when the container's <code translate="no" class="notranslate">compile()</code> method is called.</p>
+<p>A very simple extension may just load configuration files into the container:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FileLocator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">ExtensionInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">XmlFileLoader</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AcmeDemoExtension</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ExtensionInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>, ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span> = <span class="hljs-keyword">new</span> XmlFileLoader(
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>,
+            <span class="hljs-keyword">new</span> FileLocator(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../Resources/config'</span>)
+        );
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span><span class="hljs-operator">-&gt;</span>load(<span class="hljs-string">'services.xml'</span>);
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This does not gain very much compared to loading the file directly into
+the overall container being built. It just allows the files to be split
+up among the modules/bundles. Being able to affect the configuration
+of a module from configuration files outside of the module/bundle is needed
+to make a complex application configurable. This can be done by specifying
+sections of config files loaded directly into the container as being for
+a particular extension. These sections on the config will not be processed
+directly by the container but by the relevant Extension.</p>
+<p>The Extension must specify a <code translate="no" class="notranslate">getAlias()</code> method to implement the interface:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AcmeDemoExtension</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ExtensionInterface</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getAlias</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'acme_demo'</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>For YAML configuration files specifying the alias for the extension as a
+key will mean that those values are passed to the Extension's <code translate="no" class="notranslate">load()</code> method:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># ...</span>
+<span class="hljs-attr">acme_demo:</span>
+    <span class="hljs-attr">foo:</span> <span class="hljs-string">fooValue</span>
+    <span class="hljs-attr">bar:</span> <span class="hljs-string">barValue</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If this file is loaded into the configuration then the values in it are
+only processed when the container is compiled at which point the Extensions
+are loaded:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FileLocator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">YamlFileLoader</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span> = <span class="hljs-keyword">new</span> ContainerBuilder();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>registerExtension(<span class="hljs-keyword">new</span> AcmeDemoExtension);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span> = <span class="hljs-keyword">new</span> YamlFileLoader(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>, <span class="hljs-keyword">new</span> FileLocator(<span class="hljs-keyword">__DIR__</span>));
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span><span class="hljs-operator">-&gt;</span>load(<span class="hljs-string">'config.yaml'</span>);
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>compile();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When loading a config file that uses an extension alias as a key, the
+extension must already have been registered with the container builder
+or an exception will be thrown.</p>
+</div>
+<p>The values from those sections of the config files are passed into the first
+argument of the <code translate="no" class="notranslate">load()</code> method of the extension:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>, ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>[<span class="hljs-number">0</span>][<span class="hljs-string">'foo'</span>]; <span class="hljs-comment">//fooValue</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bar</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>[<span class="hljs-number">0</span>][<span class="hljs-string">'bar'</span>]; <span class="hljs-comment">//barValue</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">$configs</code> argument is an array containing each different config file
+that was loaded into the container. You are only loading a single config
+file in the above example but it will still be within an array. The array
+will look like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">[
+    [
+        <span class="hljs-string">'foo'</span> =&gt; <span class="hljs-string">'fooValue'</span>,
+        <span class="hljs-string">'bar'</span> =&gt; <span class="hljs-string">'barValue'</span>,
+    ],
+]</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Whilst you can manually manage merging the different files, it is much better
+to use <a href="../../components/config.html" class="reference internal">the Config component</a> to
+merge and validate the config values. Using the configuration processing
+you could access the config value this way:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">Definition</span>\<span class="hljs-title">Processor</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>, ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configuration</span> = <span class="hljs-keyword">new</span> Configuration();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>processor</span> = <span class="hljs-keyword">new</span> Processor();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>processor</span><span class="hljs-operator">-&gt;</span>processConfiguration(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configuration</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span>[<span class="hljs-string">'foo'</span>]; <span class="hljs-comment">//fooValue</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bar</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span>[<span class="hljs-string">'bar'</span>]; <span class="hljs-comment">//barValue</span>
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>There are a further two methods you must implement. One to return the XML
+namespace so that the relevant parts of an XML config file are passed to
+the extension. The other to specify the base path to XSD files to validate
+the XML configuration:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getXsdValidationBasePath</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../Resources/config/'</span>;
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getNamespace</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">'http://www.example.com/symfony/schema/'</span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>XSD validation is optional, returning <code translate="no" class="notranslate">false</code> from the <code translate="no" class="notranslate">getXsdValidationBasePath()</code>
+method will disable it.</p>
+</div>
+<p>The XML version of the config would then look like this:</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:acme-demo</span>=<span class="hljs-string">"http://www.example.com/schema/dic/acme_demo"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://www.example.com/schema/dic/acme_demo
+        https://www.example.com/schema/dic/acme_demo/acme_demo-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">acme-demo:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">acme_demo:foo</span>&gt;</span>fooValue<span class="hljs-tag">&lt;/<span class="hljs-name">acme_demo:foo</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">acme_demo:bar</span>&gt;</span>barValue<span class="hljs-tag">&lt;/<span class="hljs-name">acme_demo:bar</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">acme-demo:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>In the Symfony full-stack Framework there is a base Extension class
+which implements these methods as well as a shortcut method for processing
+the configuration. See <a href="../../bundles/extension.html" class="reference internal">How to Load Service Configuration inside a Bundle</a> for more details.</p>
+</div>
+<p>The processed config value can now be added as container parameters as if
+it were listed in a <code translate="no" class="notranslate">parameters</code> section of the config file but with the
+additional benefit of merging multiple files and validation of the configuration:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>, ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configuration</span> = <span class="hljs-keyword">new</span> Configuration();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>processor</span> = <span class="hljs-keyword">new</span> Processor();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>processor</span><span class="hljs-operator">-&gt;</span>processConfiguration(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configuration</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>setParameter(<span class="hljs-string">'acme_demo.FOO'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span>[<span class="hljs-string">'foo'</span>]);
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>More complex configuration requirements can be catered for in the Extension
+classes. For example, you may choose to load a main service configuration
+file but also load a secondary one only if a certain parameter is set:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>, ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configuration</span> = <span class="hljs-keyword">new</span> Configuration();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>processor</span> = <span class="hljs-keyword">new</span> Processor();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>processor</span><span class="hljs-operator">-&gt;</span>processConfiguration(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configuration</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span> = <span class="hljs-keyword">new</span> XmlFileLoader(
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>,
+        <span class="hljs-keyword">new</span> FileLocator(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../Resources/config'</span>)
+    );
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span><span class="hljs-operator">-&gt;</span>load(<span class="hljs-string">'services.xml'</span>);
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span>[<span class="hljs-string">'advanced'</span>]) {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span><span class="hljs-operator">-&gt;</span>load(<span class="hljs-string">'advanced.xml'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also deprecate container parameters in your extension to warn users
+about not using them anymore. This helps with the migration across major versions
+of an extension.</p>
+<p>Deprecation is only possible when using PHP to configure the extension, not when
+using XML or YAML. Use the <code translate="no" class="notranslate">ContainerBuilder::deprecateParameter()</code> method to
+provide the deprecation details:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>, ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>setParameter(<span class="hljs-string">'acme_demo.database_user'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configs</span>[<span class="hljs-string">'db_user'</span>]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>deprecateParameter(
+        <span class="hljs-string">'acme_demo.database_user'</span>,
+        <span class="hljs-string">'acme/database-package'</span>,
+        <span class="hljs-string">'1.3'</span>,
+        <span class="hljs-comment">// optionally you can set a custom deprecation message</span>
+        <span class="hljs-string">'"acme_demo.database_user" is deprecated, you should configure database credentials with the "acme_demo.database_dsn" parameter instead.'</span>
+    );
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The parameter being deprecated must be set before being declared as deprecated.
+Otherwise a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Exception/ParameterNotFoundException.php" class="reference external" title="Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException" rel="external noopener noreferrer" target="_blank">ParameterNotFoundException</a>
+exception will be thrown.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The <code translate="no" class="notranslate">ContainerBuilder::deprecateParameter()</code> method was introduced in Symfony 6.3.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Just registering an extension with the container is not enough to get
+it included in the processed extensions when the container is compiled.
+Loading config which uses the extension's alias as a key as in the above
+examples will ensure it is loaded. The container builder can also be
+told to load it with its
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/ContainerBuilder.php#method_loadFromExtension" class="reference external" title="Symfony\Component\DependencyInjection\ContainerBuilder::loadFromExtension()" rel="external noopener noreferrer" target="_blank">loadFromExtension()</a>
+method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span> = <span class="hljs-keyword">new</span> ContainerBuilder();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>extension</span> = <span class="hljs-keyword">new</span> AcmeDemoExtension();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>registerExtension(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>extension</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>loadFromExtension(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>extension</span><span class="hljs-operator">-&gt;</span>getAlias());
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>compile();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you need to manipulate the configuration loaded by an extension then
+you cannot do it from another extension as it uses a fresh container.
+You should instead use a compiler pass which works with the full container
+after the extensions have been processed.</p>
+</div>
+<span id="components-dependency-injection-compiler-passes"></span>
+</div>
+<div class="section">
+<h2 id="prepending-configuration-passed-to-the-extension">
+    Prepending Configuration Passed to the Extension
+    <a class="headerlink" href="#prepending-configuration-passed-to-the-extension" title="Permalink to this headline">¶</a>
+</h2>
+<p>An Extension can prepend the configuration of any Bundle before the <code translate="no" class="notranslate">load()</code>
+method is called by implementing
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Extension/PrependExtensionInterface.php" class="reference external" title="Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface" rel="external noopener noreferrer" target="_blank">PrependExtensionInterface</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">PrependExtensionInterface</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AcmeDemoExtension</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ExtensionInterface</span>, <span class="hljs-title">PrependExtensionInterface</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">prepend</span><span class="hljs-params">(ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>prependExtensionConfig(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>config</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>For more details, see <a href="../../bundles/prepend_extension.html" class="reference internal">How to Simplify Configuration of Multiple Bundles</a>, which
+is specific to the Symfony Framework, but contains more details about this
+feature.</p>
+<span id="creating-a-compiler-pass"></span>
+<span id="components-di-compiler-pass"></span>
+</div>
+<div class="section">
+<h2 id="execute-code-during-compilation">
+    Execute Code During Compilation
+    <a class="headerlink" href="#execute-code-during-compilation" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can also execute custom code during compilation by writing your own
+compiler pass. By implementing
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Compiler/CompilerPassInterface.php" class="reference external" title="Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface" rel="external noopener noreferrer" target="_blank">CompilerPassInterface</a>
+in your extension, the added <code translate="no" class="notranslate">process()</code> method will be called during
+compilation:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Compiler</span>\<span class="hljs-title">CompilerPassInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AcmeDemoExtension</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ExtensionInterface</span>, <span class="hljs-title">CompilerPassInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">process</span><span class="hljs-params">(ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ... do something during the compilation</span>
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As <code translate="no" class="notranslate">process()</code> is called <em>after</em> all extensions are loaded, it allows you to
+edit service definitions of other extensions as well as retrieving information
+about service definitions.</p>
+<p>The container's parameters and definitions can be manipulated using the
+methods described in <a href="../../service_container/definitions.html" class="reference internal">How to work with Service Definition Objects</a>.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Please note that the <code translate="no" class="notranslate">process()</code> method in the extension class is
+called during the <code translate="no" class="notranslate">PassConfig::TYPE_BEFORE_OPTIMIZATION</code> step. You can read
+<a href="compilation.html#components-di-separate-compiler-passes" class="reference internal">the next section</a> if you
+need to edit the container during another step.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>As a rule, only work with services definition in a compiler pass and do not
+create service instances. In practice, this means using the methods
+<code translate="no" class="notranslate">has()</code>, <code translate="no" class="notranslate">findDefinition()</code>, <code translate="no" class="notranslate">getDefinition()</code>, <code translate="no" class="notranslate">setDefinition()</code>,
+etc. instead of <code translate="no" class="notranslate">get()</code>, <code translate="no" class="notranslate">set()</code>, etc.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Make sure your compiler pass does not require services to exist. Abort the
+method call if some required service is not available.</p>
+</div>
+<p>A common use-case of compiler passes is to search for all service definitions
+that have a certain tag, in order to dynamically plug each one into other services.
+See the section on <a href="../../service_container/tags.html#service-container-compiler-pass-tags" class="reference internal">service tags</a>
+for an example.</p>
+<span id="components-di-separate-compiler-passes"></span>
+<div class="section">
+<h3 id="creating-separate-compiler-passes">
+    Creating Separate Compiler Passes
+    <a class="headerlink" href="#creating-separate-compiler-passes" title="Permalink to this headline">¶</a>
+</h3>
+<p>Sometimes, you need to do more than one thing during compilation, want to use
+compiler passes without an extension or you need to execute some code at
+another step in the compilation process. In these cases, you can create a new
+class implementing the <code translate="no" class="notranslate">CompilerPassInterface</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Compiler</span>\<span class="hljs-title">CompilerPassInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CustomPass</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">CompilerPassInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">process</span><span class="hljs-params">(ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ... do something during the compilation</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You then need to register your custom pass with the container:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span> = <span class="hljs-keyword">new</span> ContainerBuilder();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>addCompilerPass(<span class="hljs-keyword">new</span> CustomPass());</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Compiler passes are registered differently if you are using the full-stack
+framework, see <a href="../../service_container/compiler_passes.html" class="reference internal">How to Work with Compiler Passes</a> for
+more details.</p>
+</div>
+<div class="section">
+<h4 id="controlling-the-pass-ordering">
+    Controlling the Pass Ordering
+    <a class="headerlink" href="#controlling-the-pass-ordering" title="Permalink to this headline">¶</a>
+</h4>
+<p>The default compiler passes are grouped into optimization passes and removal
+passes. The optimization passes run first and include tasks such as resolving
+references within the definitions. The removal passes perform tasks such
+as removing private aliases and unused services. When registering compiler
+passes using <code translate="no" class="notranslate">addCompilerPass()</code>, you can configure when your compiler pass
+is run. By default, they are run before the optimization passes.</p>
+<p>You can use the following constants to determine when your pass is executed:</p>
+<ul>
+    <li><code translate="no" class="notranslate">PassConfig::TYPE_BEFORE_OPTIMIZATION</code></li>
+<li><code translate="no" class="notranslate">PassConfig::TYPE_OPTIMIZE</code></li>
+<li><code translate="no" class="notranslate">PassConfig::TYPE_BEFORE_REMOVING</code></li>
+<li><code translate="no" class="notranslate">PassConfig::TYPE_REMOVE</code></li>
+<li><code translate="no" class="notranslate">PassConfig::TYPE_AFTER_REMOVING</code></li>
+</ul>
+<p>For example, to run your custom pass after the default removal passes have
+been run, use:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>addCompilerPass(
+    <span class="hljs-keyword">new</span> CustomPass(),
+    PassConfig<span class="hljs-operator">::</span>TYPE_AFTER_REMOVING
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also control the order in which compiler passes are run for each
+compilation phase. Use the optional third argument of <code translate="no" class="notranslate">addCompilerPass()</code> to
+set the priority as an integer number. The default priority is <code translate="no" class="notranslate">0</code> and the higher
+its value, the earlier it's executed:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-comment">// FirstPass is executed after SecondPass because its priority is lower</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>addCompilerPass(
+    <span class="hljs-keyword">new</span> FirstPass(), PassConfig<span class="hljs-operator">::</span>TYPE_AFTER_REMOVING, <span class="hljs-number">10</span>
+);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>addCompilerPass(
+    <span class="hljs-keyword">new</span> SecondPass(), PassConfig<span class="hljs-operator">::</span>TYPE_AFTER_REMOVING, <span class="hljs-number">30</span>
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="components-dependency-injection-dumping"></span>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="dumping-the-configuration-for-performance">
+    Dumping the Configuration for Performance
+    <a class="headerlink" href="#dumping-the-configuration-for-performance" title="Permalink to this headline">¶</a>
+</h2>
+<p>Using configuration files to manage the service container can be much easier
+to understand than using PHP once there are a lot of services. This ease
+comes at a price though when it comes to performance as the config files
+need to be parsed and the PHP configuration built from them. The compilation
+process makes the container more efficient but it takes time to run. You
+can have the best of both worlds though by using configuration files and
+then dumping and caching the resulting configuration. The <code translate="no" class="notranslate">PhpDumper</code>
+serves at dumping the compiled container:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">PhpDumper</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span> = <span class="hljs-keyword">__DIR__</span> .<span class="hljs-string">'/cache/container.php'</span>;
+
+<span class="hljs-keyword">if</span> (file_exists(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>)) {
+    <span class="hljs-keyword">require_once</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>;
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span> = <span class="hljs-keyword">new</span> ProjectServiceContainer();
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span> = <span class="hljs-keyword">new</span> ContainerBuilder();
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>compile();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> PhpDumper(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>);
+    file_put_contents(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump());
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The <code translate="no" class="notranslate">file_put_contents()</code> function is not atomic. That could cause issues
+in a production environment with multiple concurrent requests. Instead, use
+the <a href="../../components/filesystem.html#filesystem-dumpfile" class="reference internal">dumpFile() method</a> from Symfony Filesystem
+component or other methods provided by Symfony (e.g. <code translate="no" class="notranslate">$containerConfigCache-&gt;write()</code>)
+which are atomic.</p>
+</div>
+<p><code translate="no" class="notranslate">ProjectServiceContainer</code> is the default name given to the dumped container
+class. However, you can change this with the <code translate="no" class="notranslate">class</code> option when you
+dump it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span> = <span class="hljs-keyword">__DIR__</span> .<span class="hljs-string">'/cache/container.php'</span>;
+
+<span class="hljs-keyword">if</span> (file_exists(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>)) {
+    <span class="hljs-keyword">require_once</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>;
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span> = <span class="hljs-keyword">new</span> MyCachedContainer();
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span> = <span class="hljs-keyword">new</span> ContainerBuilder();
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>compile();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> PhpDumper(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>);
+    file_put_contents(
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>,
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump([<span class="hljs-string">'class'</span> =&gt; <span class="hljs-string">'MyCachedContainer'</span>])
+    );
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You will now get the speed of the PHP configured container with the ease
+of using configuration files. Additionally dumping the container in this
+way further optimizes how the services are created by the container.</p>
+<p>In the above example you will need to delete the cached container file whenever
+you make any changes. Adding a check for a variable that determines if you
+are in debug mode allows you to keep the speed of the cached container in
+production but getting an up to date configuration whilst developing your
+application:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// based on something in your project</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isDebug</span> = ...;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span> = <span class="hljs-keyword">__DIR__</span> .<span class="hljs-string">'/cache/container.php'</span>;
+
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isDebug</span> &amp;&amp; file_exists(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>)) {
+    <span class="hljs-keyword">require_once</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>;
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span> = <span class="hljs-keyword">new</span> MyCachedContainer();
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span> = <span class="hljs-keyword">new</span> ContainerBuilder();
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>compile();
+
+    <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isDebug</span>) {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> PhpDumper(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>);
+        file_put_contents(
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>,
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump([<span class="hljs-string">'class'</span> =&gt; <span class="hljs-string">'MyCachedContainer'</span>])
+        );
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This could be further improved by only recompiling the container in debug
+mode when changes have been made to its configuration rather than on every
+request. This can be done by caching the resource files used to configure
+the container in the way described in &quot;<a href="../../components/config/caching.html" class="reference internal">Caching based on Resources</a>&quot;
+in the config component documentation.</p>
+<p>You do not need to work out which files to cache as the container builder
+keeps track of all the resources used to configure it, not just the
+configuration files but the extension classes and compiler passes as well.
+This means that any changes to any of these files will invalidate the cache
+and trigger the container being rebuilt. You need to ask the container
+for these resources and use them as metadata for the cache:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// based on something in your project</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isDebug</span> = ...;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span> = <span class="hljs-keyword">__DIR__</span> .<span class="hljs-string">'/cache/container.php'</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigCache</span> = <span class="hljs-keyword">new</span> ConfigCache(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isDebug</span>);
+
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigCache</span><span class="hljs-operator">-&gt;</span>isFresh()) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span> = <span class="hljs-keyword">new</span> ContainerBuilder();
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>compile();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> PhpDumper(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigCache</span><span class="hljs-operator">-&gt;</span>write(
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump([<span class="hljs-string">'class'</span> =&gt; <span class="hljs-string">'MyCachedContainer'</span>]),
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>getResources()
+    );
+}
+
+<span class="hljs-keyword">require_once</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span> = <span class="hljs-keyword">new</span> MyCachedContainer();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now the cached dumped container is used regardless of whether debug mode
+is on or not. The difference is that the <code translate="no" class="notranslate">ConfigCache</code> is set to debug
+mode with its second constructor argument. When the cache is not in debug
+mode the cached container will always be used if it exists. In debug mode,
+an additional metadata file is written with all the involved resource
+files. These are then checked to see if their timestamps have changed, if they
+have the cache will be considered stale.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>In the full-stack framework the compilation and caching of the container
+is taken care of for you.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

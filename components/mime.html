@@ -1,0 +1,689 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-mime-component">
+    The Mime Component
+    <a class="headerlink" href="#the-mime-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The Mime component allows manipulating the MIME messages used to send emails
+and provides utilities related to MIME types.</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/mime</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="introduction">
+    Introduction
+    <a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a>
+</h2>
+<p><a href="https://en.wikipedia.org/wiki/MIME" class="reference external" rel="external noopener noreferrer" target="_blank">MIME</a> (Multipurpose Internet Mail Extensions) is an Internet standard that
+extends the original basic format of emails to support features like:</p>
+<ul>
+    <li>Headers and text contents using non-ASCII characters;</li>
+<li>Message bodies with multiple parts (e.g. HTML and plain text contents);</li>
+<li>Non-text attachments: audio, video, images, PDF, etc.</li>
+</ul>
+<p>The entire MIME standard is complex and huge, but Symfony abstracts all that
+complexity to provide two ways of creating MIME messages:</p>
+<ul>
+    <li>A high-level API based on the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Mime/Email.php" class="reference external" title="Symfony\Component\Mime\Email" rel="external noopener noreferrer" target="_blank">Email</a> class
+to quickly create email messages with all the common features;</li>
+<li>A low-level API based on the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Mime/Message.php" class="reference external" title="Symfony\Component\Mime\Message" rel="external noopener noreferrer" target="_blank">Message</a> class
+to have absolute control over every single part of the email message.</li>
+</ul>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>Use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Mime/Email.php" class="reference external" title="Symfony\Component\Mime\Email" rel="external noopener noreferrer" target="_blank">Email</a> class and their <em>chainable</em>
+methods to compose the entire email message:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mime</span>\<span class="hljs-title">Email</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span> = (<span class="hljs-keyword">new</span> Email())
+    <span class="hljs-operator">-&gt;</span>from(<span class="hljs-string">'fabien@symfony.com'</span>)
+    <span class="hljs-operator">-&gt;</span>to(<span class="hljs-string">'foo@example.com'</span>)
+    <span class="hljs-operator">-&gt;</span>cc(<span class="hljs-string">'bar@example.com'</span>)
+    <span class="hljs-operator">-&gt;</span>bcc(<span class="hljs-string">'baz@example.com'</span>)
+    <span class="hljs-operator">-&gt;</span>replyTo(<span class="hljs-string">'fabien@symfony.com'</span>)
+    <span class="hljs-operator">-&gt;</span>priority(Email<span class="hljs-operator">::</span>PRIORITY_HIGH)
+    <span class="hljs-operator">-&gt;</span>subject(<span class="hljs-string">'Important Notification'</span>)
+    <span class="hljs-operator">-&gt;</span>text(<span class="hljs-string">'Lorem ipsum...'</span>)
+    <span class="hljs-operator">-&gt;</span>html(<span class="hljs-string">'&lt;h1&gt;Lorem ipsum&lt;/h1&gt; &lt;p&gt;...&lt;/p&gt;'</span>)
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The only purpose of this component is to create the email messages. Use the
+<a href="../mailer.html" class="reference internal">Mailer component</a> to actually send them.</p>
+</div>
+<div class="section">
+<h2 id="twig-integration">
+    Twig Integration
+    <a class="headerlink" href="#twig-integration" title="Permalink to this headline">¶</a>
+</h2>
+<p>The Mime component comes with excellent integration with Twig, allowing you to
+create messages from Twig templates, embed images, inline CSS and more. Details
+on how to use those features can be found in the Mailer documentation:
+<a href="../mailer.html#mailer-twig" class="reference internal">Twig: HTML & CSS</a>.</p>
+<p>But if you're using the Mime component without the Symfony framework, you'll need
+to handle a few setup details.</p>
+<div class="section">
+<h3 id="twig-setup">
+    Twig Setup
+    <a class="headerlink" href="#twig-setup" title="Permalink to this headline">¶</a>
+</h3>
+<p>To integrate with Twig, use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Twig/Mime/BodyRenderer.php" class="reference external" title="Symfony\Bridge\Twig\Mime\BodyRenderer" rel="external noopener noreferrer" target="_blank">BodyRenderer</a>
+class to render the template and update the email message contents with the results:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Twig</span>\<span class="hljs-title">Mime</span>\<span class="hljs-title">BodyRenderer</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">Environment</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">FilesystemLoader</span>;
+
+<span class="hljs-comment">// when using the Mime component inside a full-stack Symfony application, you</span>
+<span class="hljs-comment">// don't need to do this Twig setup. You only have to inject the 'twig' service</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span> = <span class="hljs-keyword">new</span> FilesystemLoader(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/templates'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span> = <span class="hljs-keyword">new</span> Environment(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>renderer</span> = <span class="hljs-keyword">new</span> BodyRenderer(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span>);
+<span class="hljs-comment">// this updates the $email object contents with the result of rendering</span>
+<span class="hljs-comment">// the template defined earlier with the given context</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>renderer</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="inlining-css-styles-and-other-extensions">
+    Inlining CSS Styles (and other Extensions)
+    <a class="headerlink" href="#inlining-css-styles-and-other-extensions" title="Permalink to this headline">¶</a>
+</h3>
+<p>To use the <a href="../mailer.html#mailer-inline-css" class="reference internal">inline_css</a> filter, first install the Twig
+extension:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require twig/cssinliner-extra</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, enable the extension:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Twig</span>\<span class="hljs-title">Extra</span>\<span class="hljs-title">CssInliner</span>\<span class="hljs-title">CssInlinerExtension</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span> = <span class="hljs-keyword">new</span> FilesystemLoader(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/templates'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span> = <span class="hljs-keyword">new</span> Environment(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loader</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span><span class="hljs-operator">-&gt;</span>addExtension(<span class="hljs-keyword">new</span> CssInlinerExtension());</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The same process should be used for enabling other extensions, like the
+<a href="../mailer.html#mailer-markdown" class="reference internal">MarkdownExtension</a> and <a href="../mailer.html#mailer-inky" class="reference internal">InkyExtension</a>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="creating-raw-email-messages">
+    Creating Raw Email Messages
+    <a class="headerlink" href="#creating-raw-email-messages" title="Permalink to this headline">¶</a>
+</h2>
+<p>This is useful for advanced applications that need absolute control over every
+email part. It's not recommended for applications with regular email
+requirements because it adds complexity for no real gain.</p>
+<p>Before continuing, it's important to have a look at the low level structure of
+an email message. Consider a message which includes some content as both text
+and HTML, a single PNG image embedded in those contents and a PDF file attached
+to it. The MIME standard allows structuring this message in different ways, but
+the following tree is the one that works on most email clients:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">multipart/mixed
+├── multipart/related
+│   ├── multipart/alternative
+│   │   ├── text/plain
+│   │   └── text/html
+│   └── image/png
+└── application/pdf</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This is the purpose of each MIME message part:</p>
+<ul>
+    <li><code translate="no" class="notranslate">multipart/alternative</code>: used when two or more parts are alternatives of the
+same (or very similar) content. The preferred format must be added last.</li>
+<li><code translate="no" class="notranslate">multipart/mixed</code>: used to send different content types in the same message,
+such as when attaching files.</li>
+<li><code translate="no" class="notranslate">multipart/related</code>: used to indicate that each message part is a component
+of an aggregate whole. The most common usage is to display images embedded
+in the message contents.</li>
+</ul>
+<p>When using the low-level <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Mime/Message.php" class="reference external" title="Symfony\Component\Mime\Message" rel="external noopener noreferrer" target="_blank">Message</a> class to
+create the email message, you must keep all the above in mind to define the
+different parts of the email by hand:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mime</span>\<span class="hljs-title">Header</span>\<span class="hljs-title">Headers</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mime</span>\<span class="hljs-title">Message</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mime</span>\<span class="hljs-title">Part</span>\<span class="hljs-title">Multipart</span>\<span class="hljs-title">AlternativePart</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mime</span>\<span class="hljs-title">Part</span>\<span class="hljs-title">TextPart</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>headers</span> = (<span class="hljs-keyword">new</span> Headers())
+    <span class="hljs-operator">-&gt;</span>addMailboxListHeader(<span class="hljs-string">'From'</span>, [<span class="hljs-string">'fabien@symfony.com'</span>])
+    <span class="hljs-operator">-&gt;</span>addMailboxListHeader(<span class="hljs-string">'To'</span>, [<span class="hljs-string">'foo@example.com'</span>])
+    <span class="hljs-operator">-&gt;</span>addTextHeader(<span class="hljs-string">'Subject'</span>, <span class="hljs-string">'Important Notification'</span>)
+;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>textContent</span> = <span class="hljs-keyword">new</span> TextPart(<span class="hljs-string">'Lorem ipsum...'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>htmlContent</span> = <span class="hljs-keyword">new</span> TextPart(<span class="hljs-string">'&lt;h1&gt;Lorem ipsum&lt;/h1&gt; &lt;p&gt;...&lt;/p&gt;'</span>, <span class="hljs-keyword">null</span>, <span class="hljs-string">'html'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>body</span> = <span class="hljs-keyword">new</span> AlternativePart(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>textContent</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>htmlContent</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span> = <span class="hljs-keyword">new</span> Message(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>headers</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>body</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Embedding images and attaching files is possible by creating the appropriate
+email multiparts:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mime</span>\<span class="hljs-title">Part</span>\<span class="hljs-title">DataPart</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mime</span>\<span class="hljs-title">Part</span>\<span class="hljs-title">Multipart</span>\<span class="hljs-title">MixedPart</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mime</span>\<span class="hljs-title">Part</span>\<span class="hljs-title">Multipart</span>\<span class="hljs-title">RelatedPart</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>embeddedImage</span> = <span class="hljs-keyword">new</span> DataPart(fopen(<span class="hljs-string">'/path/to/images/logo.png'</span>, <span class="hljs-string">'r'</span>), <span class="hljs-keyword">null</span>, <span class="hljs-string">'image/png'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>imageCid</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>embeddedImage</span><span class="hljs-operator">-&gt;</span>getContentId();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>attachedFile</span> = <span class="hljs-keyword">new</span> DataPart(fopen(<span class="hljs-string">'/path/to/documents/terms-of-use.pdf'</span>, <span class="hljs-string">'r'</span>), <span class="hljs-keyword">null</span>, <span class="hljs-string">'application/pdf'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>textContent</span> = <span class="hljs-keyword">new</span> TextPart(<span class="hljs-string">'Lorem ipsum...'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>htmlContent</span> = <span class="hljs-keyword">new</span> TextPart(sprintf(
+    <span class="hljs-string">'&lt;img src="cid:%s"/&gt; &lt;h1&gt;Lorem ipsum&lt;/h1&gt; &lt;p&gt;...&lt;/p&gt;'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>imageCid</span>
+), <span class="hljs-keyword">null</span>, <span class="hljs-string">'html'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bodyContent</span> = <span class="hljs-keyword">new</span> AlternativePart(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>textContent</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>htmlContent</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>body</span> = <span class="hljs-keyword">new</span> RelatedPart(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bodyContent</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>embeddedImage</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>messageParts</span> = <span class="hljs-keyword">new</span> MixedPart(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>body</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>attachedFile</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span> = <span class="hljs-keyword">new</span> Message(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>headers</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>messageParts</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="serializing-email-messages">
+    Serializing Email Messages
+    <a class="headerlink" href="#serializing-email-messages" title="Permalink to this headline">¶</a>
+</h2>
+<p>Email messages created with either the <code translate="no" class="notranslate">Email</code> or <code translate="no" class="notranslate">Message</code> classes can be
+serialized because they are simple data objects:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span> = (<span class="hljs-keyword">new</span> Email())
+    <span class="hljs-operator">-&gt;</span>from(<span class="hljs-string">'fabien@symfony.com'</span>)
+    <span class="hljs-comment">// ...</span>
+;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>serializedEmail</span> = serialize(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>A common use case is to store serialized email messages, include them in a
+message sent with the <a href="messenger.html" class="reference internal">Messenger component</a> and
+recreate them later when sending them. Use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Mime/RawMessage.php" class="reference external" title="Symfony\Component\Mime\RawMessage" rel="external noopener noreferrer" target="_blank">RawMessage</a> class to recreate email messages
+from their serialized contents:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mime</span>\<span class="hljs-title">RawMessage</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>serializedEmail</span> = serialize(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>email</span>);
+
+<span class="hljs-comment">// later, recreate the original message to actually send it</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span> = <span class="hljs-keyword">new</span> RawMessage(unserialize(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>serializedEmail</span>));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="mime-types-utilities">
+    MIME Types Utilities
+    <a class="headerlink" href="#mime-types-utilities" title="Permalink to this headline">¶</a>
+</h2>
+<p>Although MIME was designed mainly for creating emails, the content types (also
+known as <a href="https://en.wikipedia.org/wiki/Media_type" class="reference external" rel="external noopener noreferrer" target="_blank">MIME types</a> and &quot;media types&quot;) defined by MIME standards are also of
+importance in communication protocols outside of email, such as HTTP. That's
+why this component also provides utilities to work with MIME types.</p>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Mime/MimeTypes.php" class="reference external" title="Symfony\Component\Mime\MimeTypes" rel="external noopener noreferrer" target="_blank">MimeTypes</a> class transforms between
+MIME types and file name extensions:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mime</span>\<span class="hljs-title">MimeTypes</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mimeTypes</span> = <span class="hljs-keyword">new</span> MimeTypes();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exts</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mimeTypes</span><span class="hljs-operator">-&gt;</span>getExtensions(<span class="hljs-string">'application/javascript'</span>);
+<span class="hljs-comment">// $exts = ['js', 'jsm', 'mjs']</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exts</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mimeTypes</span><span class="hljs-operator">-&gt;</span>getExtensions(<span class="hljs-string">'image/jpeg'</span>);
+<span class="hljs-comment">// $exts = ['jpeg', 'jpg', 'jpe']</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>types</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mimeTypes</span><span class="hljs-operator">-&gt;</span>getMimeTypes(<span class="hljs-string">'js'</span>);
+<span class="hljs-comment">// $types = ['application/javascript', 'application/x-javascript', 'text/javascript']</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>types</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mimeTypes</span><span class="hljs-operator">-&gt;</span>getMimeTypes(<span class="hljs-string">'apk'</span>);
+<span class="hljs-comment">// $types = ['application/vnd.android.package-archive']</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>These methods return arrays with one or more elements. The element position
+indicates its priority, so the first returned extension is the preferred one.</p>
+<span id="components-mime-type-guess"></span>
+<div class="section">
+<h3 id="guessing-the-mime-type">
+    Guessing the MIME Type
+    <a class="headerlink" href="#guessing-the-mime-type" title="Permalink to this headline">¶</a>
+</h3>
+<p>Another useful utility allows to guess the MIME type of any given file:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mime</span>\<span class="hljs-title">MimeTypes</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mimeTypes</span> = <span class="hljs-keyword">new</span> MimeTypes();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mimeType</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>mimeTypes</span><span class="hljs-operator">-&gt;</span>guessMimeType(<span class="hljs-string">'/some/path/to/image.gif'</span>);
+<span class="hljs-comment">// Guessing is not based on the file name, so $mimeType will be 'image/gif'</span>
+<span class="hljs-comment">// only if the given file is truly a GIF image</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Guessing the MIME type is a time-consuming process that requires inspecting
+part of the file contents. Symfony applies multiple guessing mechanisms, one
+of them based on the PHP <a href="https://www.php.net/fileinfo" class="reference external" rel="external noopener noreferrer" target="_blank">fileinfo extension</a>. It's recommended to install
+that extension to improve the guessing performance.</p>
+<div class="section">
+<h4 id="adding-a-mime-type-guesser">
+    Adding a MIME Type Guesser
+    <a class="headerlink" href="#adding-a-mime-type-guesser" title="Permalink to this headline">¶</a>
+</h4>
+<p>You can add your own MIME type guesser by creating a class that implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Mime/MimeTypeGuesserInterface.php" class="reference external" title="Symfony\Component\Mime\MimeTypeGuesserInterface" rel="external noopener noreferrer" target="_blank">MimeTypeGuesserInterface</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mime</span>\<span class="hljs-title">MimeTypeGuesserInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SomeMimeTypeGuesser</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">MimeTypeGuesserInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isGuesserSupported</span><span class="hljs-params">()</span>: <span class="hljs-title">bool</span>
+    </span>{
+        <span class="hljs-comment">// return true when the guesser is supported (might depend on the OS for instance)</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">guessMimeType</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>)</span>: ?<span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-comment">// inspect the contents of the file stored in $path to guess its</span>
+        <span class="hljs-comment">// type and return a valid MIME type ... or null if unknown</span>
+
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'...'</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>MIME type guessers must be <a href="../service_container.html#service-container-creating-service" class="reference internal">registered as services</a>
+and <a href="../service_container/tags.html" class="reference internal">tagged</a> with the <code translate="no" class="notranslate">mime.mime_type_guesser</code> tag.
+If you're using the
+<a href="../service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>,
+this is already done for you, thanks to <a href="../service_container.html#services-autoconfigure" class="reference internal">autoconfiguration</a>.</p>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>
