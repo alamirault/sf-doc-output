@@ -1,0 +1,1065 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="progress-bar">
+    Progress Bar
+    <a class="headerlink" href="#progress-bar" title="Permalink to this headline">¶</a>
+</h1>
+<p>When executing longer-running commands, it may be helpful to show progress
+information, which updates as your command runs:</p>
+<img src="_images/progressbar.gif" />
+<p>To display progress details, use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/ProgressBar.php" class="reference external" title="Symfony\Component\Console\Helper\ProgressBar" rel="external noopener noreferrer" target="_blank">ProgressBar</a>, pass it a total
+number of units, and advance the progress as the command executes:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">ProgressBar</span>;
+
+<span class="hljs-comment">// creates a new progress bar (50 units)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span> = <span class="hljs-keyword">new</span> ProgressBar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>, <span class="hljs-number">50</span>);
+
+<span class="hljs-comment">// starts and displays the progress bar</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>start();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>i</span> = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">while</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>i</span>++ &lt; <span class="hljs-number">50</span>) {
+    <span class="hljs-comment">// ... do some work</span>
+
+    <span class="hljs-comment">// advances the progress bar 1 unit</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>advance();
+
+    <span class="hljs-comment">// you can also advance the progress bar by more than 1 unit</span>
+    <span class="hljs-comment">// $progressBar-&gt;advance(3);</span>
+}
+
+<span class="hljs-comment">// ensures that the progress bar is at 100%</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>finish();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can also regress the progress bar (i.e. step backwards) by calling
+<code translate="no" class="notranslate">$progress-&gt;advance()</code> with a negative value. For example, if you call
+<code translate="no" class="notranslate">$progress-&gt;advance(-2)</code> then it will regress the progress bar 2 steps.</p>
+</div>
+<p>Instead of advancing the bar by a number of steps (with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/ProgressBar.php#method_advance" class="reference external" title="Symfony\Component\Console\Helper\ProgressBar::advance()" rel="external noopener noreferrer" target="_blank">advance()</a> method),
+you can also set the current progress by calling the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/ProgressBar.php#method_setProgress" class="reference external" title="Symfony\Component\Console\Helper\ProgressBar::setProgress()" rel="external noopener noreferrer" target="_blank">setProgress()</a> method.</p>
+<p>If you are resuming long-standing tasks, it's useful to start drawing the progress
+bar at a certain point. Use the second optional argument of <code translate="no" class="notranslate">start()</code> to set
+that starting point:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">ProgressBar</span>;
+
+<span class="hljs-comment">// creates a new progress bar (100 units)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span> = <span class="hljs-keyword">new</span> ProgressBar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>, <span class="hljs-number">100</span>);
+
+<span class="hljs-comment">// displays the progress bar starting at 25 completed units</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>start(<span class="hljs-keyword">null</span>, <span class="hljs-number">25</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The option to start a progress bar at a certain point was introduced in Symfony 6.2.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If your platform doesn't support ANSI codes, updates to the progress
+bar are added as new lines. To prevent the output from being flooded,
+use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/ProgressBar.php#method_minSecondsBetweenRedraws" class="reference external" title="Symfony\Component\Console\Helper\ProgressBar::minSecondsBetweenRedraws()" rel="external noopener noreferrer" target="_blank">minSecondsBetweenRedraws()</a>
+method to limit the number of redraws and the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/ProgressBar.php#method_setRedrawFrequency" class="reference external" title="Symfony\Component\Console\Helper\ProgressBar::setRedrawFrequency()" rel="external noopener noreferrer" target="_blank">setRedrawFrequency()</a> method
+to redraw every N iterations. By default, redraw frequency is
+<strong>100ms</strong> or <strong>10%</strong> of your <code translate="no" class="notranslate">max</code>.</p>
+</div>
+<p>If you don't know the exact number of steps in advance, set it to a reasonable
+value and then call the <code translate="no" class="notranslate">setMaxSteps()</code> method to update it as needed:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// start with a 50 units progressbar</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span> = <span class="hljs-keyword">new</span> ProgressBar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>, <span class="hljs-number">50</span>);
+
+<span class="hljs-comment">// a complex task has just been created: increase the progressbar to 200 units</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setMaxSteps(<span class="hljs-number">200</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Another solution is to omit the steps argument when creating the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/ProgressBar.php" class="reference external" title="Symfony\Component\Console\Helper\ProgressBar" rel="external noopener noreferrer" target="_blank">ProgressBar</a> instance:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span> = <span class="hljs-keyword">new</span> ProgressBar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The progress will then be displayed as a throbber:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text"># no max steps (displays it like a throbber)
+    0 [&gt;---------------------------]
+    5 [-----&gt;----------------------]
+    5 [============================]
+
+# max steps defined
+ 0/3 [&gt;---------------------------]   0%
+ 1/3 [=========&gt;------------------]  33%
+ 3/3 [============================] 100%</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Whenever your task is finished, don't forget to call
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/ProgressBar.php#method_finish" class="reference external" title="Symfony\Component\Console\Helper\ProgressBar::finish()" rel="external noopener noreferrer" target="_blank">finish()</a> to ensure
+that the progress bar display is refreshed with a 100% completion.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you want to output something while the progress bar is running,
+call <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/ProgressBar.php#method_clear" class="reference external" title="Symfony\Component\Console\Helper\ProgressBar::clear()" rel="external noopener noreferrer" target="_blank">clear()</a> first.
+After you're done, call
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/ProgressBar.php#method_display" class="reference external" title="Symfony\Component\Console\Helper\ProgressBar::display()" rel="external noopener noreferrer" target="_blank">display()</a>
+to show the progress bar again.</p>
+</div>
+<p>If the progress information is stored in an iterable variable (such as an array
+or a PHP generator) you can use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/ProgressBar.php#method_iterate" class="reference external" title="Symfony\Component\Console\Helper\ProgressBar::iterate()" rel="external noopener noreferrer" target="_blank">iterate()</a> method,
+which starts, advances and finishes the progress bar automatically:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">ProgressBar</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span> = <span class="hljs-keyword">new</span> ProgressBar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+
+<span class="hljs-comment">// $iterable can be array</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>iterable</span> = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>];
+<span class="hljs-keyword">foreach</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>iterate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>iterable</span>) <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>) {
+    <span class="hljs-comment">// ... do some work</span>
+}
+
+<span class="hljs-comment">// or a generator</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">iterable</span><span class="hljs-params">()</span> </span>{ <span class="hljs-keyword">yield</span> <span class="hljs-number">1</span>; <span class="hljs-keyword">yield</span> <span class="hljs-number">2</span>; ... };
+<span class="hljs-keyword">foreach</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>iterate(iterable()) <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>) {
+    <span class="hljs-comment">// ... do some work</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The previous code will output:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">0/2 [&gt;---------------------------]   0%
+1/2 [==============&gt;-------------]  50%
+2/2 [============================] 100%</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h2 id="customizing-the-progress-bar">
+    Customizing the Progress Bar
+    <a class="headerlink" href="#customizing-the-progress-bar" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="built-in-formats">
+    Built-in Formats
+    <a class="headerlink" href="#built-in-formats" title="Permalink to this headline">¶</a>
+</h3>
+<p>By default, the information rendered on a progress bar depends on the current
+level of verbosity of the <code translate="no" class="notranslate">OutputInterface</code> instance:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text"># OutputInterface::VERBOSITY_NORMAL (CLI with no verbosity flag)
+ 0/3 [&gt;---------------------------]   0%
+ 1/3 [=========&gt;------------------]  33%
+ 3/3 [============================] 100%
+
+# OutputInterface::VERBOSITY_VERBOSE (-v)
+ 0/3 [&gt;---------------------------]   0%  1 sec
+ 1/3 [=========&gt;------------------]  33%  1 sec
+ 3/3 [============================] 100%  1 sec
+
+# OutputInterface::VERBOSITY_VERY_VERBOSE (-vv)
+ 0/3 [&gt;---------------------------]   0%  1 sec/1 sec
+ 1/3 [=========&gt;------------------]  33%  1 sec/1 sec
+ 3/3 [============================] 100%  1 sec/1 sec
+
+# OutputInterface::VERBOSITY_DEBUG (-vvv)
+ 0/3 [&gt;---------------------------]   0%  1 sec/1 sec  1.0 MB
+ 1/3 [=========&gt;------------------]  33%  1 sec/1 sec  1.0 MB
+ 3/3 [============================] 100%  1 sec/1 sec  1.0 MB</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you call a command with the quiet flag (<code translate="no" class="notranslate">-q</code>), the progress bar won't
+be displayed.</p>
+</div>
+<p>Instead of relying on the verbosity mode of the current command, you can also
+force a format via <code translate="no" class="notranslate">setFormat()</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setFormat(<span class="hljs-string">'verbose'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The built-in formats are the following:</p>
+<ul>
+    <li><code translate="no" class="notranslate">normal</code></li>
+<li><code translate="no" class="notranslate">verbose</code></li>
+<li><code translate="no" class="notranslate">very_verbose</code></li>
+<li><code translate="no" class="notranslate">debug</code></li>
+</ul>
+<p>If you don't set the number of steps for your progress bar, use the <code translate="no" class="notranslate">_nomax</code>
+variants:</p>
+<ul>
+    <li><code translate="no" class="notranslate">normal_nomax</code></li>
+<li><code translate="no" class="notranslate">verbose_nomax</code></li>
+<li><code translate="no" class="notranslate">very_verbose_nomax</code></li>
+<li><code translate="no" class="notranslate">debug_nomax</code></li>
+</ul>
+</div>
+<div class="section">
+<h3 id="custom-formats">
+    Custom Formats
+    <a class="headerlink" href="#custom-formats" title="Permalink to this headline">¶</a>
+</h3>
+<p>Instead of using the built-in formats, you can also set your own:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setFormat(<span class="hljs-string">'%bar%'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This sets the format to only display the progress bar itself:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">&gt;---------------------------
+=========&gt;------------------
+============================</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>A progress bar format is a string that contains specific placeholders (a name
+enclosed with the <code translate="no" class="notranslate">%</code> character); the placeholders are replaced based on the
+current progress of the bar. Here is a list of the built-in placeholders:</p>
+<ul>
+    <li><code translate="no" class="notranslate">current</code>: The current step;</li>
+<li><code translate="no" class="notranslate">max</code>: The maximum number of steps (or 0 if no max is defined);</li>
+<li><code translate="no" class="notranslate">bar</code>: The bar itself;</li>
+<li><code translate="no" class="notranslate">percent</code>: The percentage of completion (not available if no max is defined);</li>
+<li><code translate="no" class="notranslate">elapsed</code>: The time elapsed since the start of the progress bar;</li>
+<li><code translate="no" class="notranslate">remaining</code>: The remaining time to complete the task (not available if no max is defined);</li>
+<li><code translate="no" class="notranslate">estimated</code>: The estimated time to complete the task (not available if no max is defined);</li>
+<li><code translate="no" class="notranslate">memory</code>: The current memory usage;</li>
+<li><code translate="no" class="notranslate">message</code>: used to display arbitrary messages in the progress bar (as explained later).</li>
+</ul>
+<p>For instance, here is how you could set the format to be the same as the
+<code translate="no" class="notranslate">debug</code> one:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setFormat(<span class="hljs-string">' %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s%'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Notice the <code translate="no" class="notranslate">:6s</code> part added to some placeholders? That's how you can tweak
+the appearance of the bar (formatting and alignment). The part after the colon
+(<code translate="no" class="notranslate">:</code>) is used to set the <code translate="no" class="notranslate">sprintf</code> format of the string.</p>
+<p>Instead of setting the format for a given instance of a progress bar, you can
+also define global formats:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">ProgressBar<span class="hljs-operator">::</span>setFormatDefinition(<span class="hljs-string">'minimal'</span>, <span class="hljs-string">'Progress: %percent%%'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span> = <span class="hljs-keyword">new</span> ProgressBar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>, <span class="hljs-number">3</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setFormat(<span class="hljs-string">'minimal'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This code defines a new <code translate="no" class="notranslate">minimal</code> format that you can then use for your
+progress bars:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">Progress: 0%
+Progress: 33%
+Progress: 100%</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>It is almost always better to redefine built-in formats instead of creating
+new ones as that allows the display to automatically vary based on the
+verbosity flag of the command.</p>
+</div>
+<p>When defining a new style that contains placeholders that are only available
+when the maximum number of steps is known, you should create a <code translate="no" class="notranslate">_nomax</code>
+variant:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">ProgressBar<span class="hljs-operator">::</span>setFormatDefinition(<span class="hljs-string">'minimal'</span>, <span class="hljs-string">'%percent%% %remaining%'</span>);
+ProgressBar<span class="hljs-operator">::</span>setFormatDefinition(<span class="hljs-string">'minimal_nomax'</span>, <span class="hljs-string">'%percent%%'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span> = <span class="hljs-keyword">new</span> ProgressBar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setFormat(<span class="hljs-string">'minimal'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When displaying the progress bar, the format will automatically be set to
+<code translate="no" class="notranslate">minimal_nomax</code> if the bar does not have a maximum number of steps like in
+the example above.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>A format can contain any valid ANSI codes and can also use the
+Symfony-specific way to set colors:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">ProgressBar<span class="hljs-operator">::</span>setFormatDefinition(
+    <span class="hljs-string">'minimal'</span>,
+    <span class="hljs-string">'&lt;info&gt;%percent%&lt;/info&gt;\033[32m%\033[0m &lt;fg=white;bg=blue&gt;%remaining%&lt;/&gt;'</span>
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>A format can span more than one line; that's very useful when you want to
+display more contextual information alongside the progress bar (see the
+example at the beginning of this article).</p>
+</div>
+</div>
+<div class="section">
+<h3 id="bar-settings">
+    Bar Settings
+    <a class="headerlink" href="#bar-settings" title="Permalink to this headline">¶</a>
+</h3>
+<p>Among the placeholders, <code translate="no" class="notranslate">bar</code> is a bit special as all the characters used
+to display it can be customized:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// the finished part of the bar</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setBarCharacter(<span class="hljs-string">'&lt;comment&gt;=&lt;/comment&gt;'</span>);
+
+<span class="hljs-comment">// the unfinished part of the bar</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setEmptyBarCharacter(<span class="hljs-string">' '</span>);
+
+<span class="hljs-comment">// the progress character</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setProgressCharacter(<span class="hljs-string">'|'</span>);
+
+<span class="hljs-comment">// the bar width</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setBarWidth(<span class="hljs-number">50</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>For performance reasons, Symfony redraws the screen once every 100ms. If this is too
+fast or too slow for your application, use the methods
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/ProgressBar.php#method_minSecondsBetweenRedraws" class="reference external" title="Symfony\Component\Console\Helper\ProgressBar::minSecondsBetweenRedraws()" rel="external noopener noreferrer" target="_blank">minSecondsBetweenRedraws()</a> and
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/ProgressBar.php#method_maxSecondsBetweenRedraws" class="reference external" title="Symfony\Component\Console\Helper\ProgressBar::maxSecondsBetweenRedraws()" rel="external noopener noreferrer" target="_blank">maxSecondsBetweenRedraws()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span> = <span class="hljs-keyword">new</span> ProgressBar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>, <span class="hljs-number">50000</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>start();
+
+<span class="hljs-comment">// this redraws the screen every 100 iterations, but sets additional limits:</span>
+<span class="hljs-comment">// don't redraw slower than 200ms (0.2) or faster than 100ms (0.1)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setRedrawFrequency(<span class="hljs-number">100</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>maxSecondsBetweenRedraws(<span class="hljs-number">0.2</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>minSecondsBetweenRedraws(<span class="hljs-number">0.1</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>i</span> = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">while</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>i</span>++ &lt; <span class="hljs-number">50000</span>) {
+    <span class="hljs-comment">// ... do some work</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>advance();
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h3 id="custom-placeholders">
+    Custom Placeholders
+    <a class="headerlink" href="#custom-placeholders" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you want to display some information that depends on the progress bar
+display that are not available in the list of built-in placeholders, you can
+create your own. Let's see how you can create a <code translate="no" class="notranslate">remaining_steps</code> placeholder
+that displays the number of remaining steps:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// This definition is globally registered for all ProgressBar instances</span>
+ProgressBar<span class="hljs-operator">::</span>setPlaceholderFormatterDefinition(
+    <span class="hljs-string">'remaining_steps'</span>,
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ProgressBar <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>getMaxSteps() - <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>getProgress();
+    }
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>It is also possible to set a placeholder formatter per ProgressBar instance
+with the <code translate="no" class="notranslate">setPlaceholderFormatter</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span> = <span class="hljs-keyword">new</span> ProgressBar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>, <span class="hljs-number">3</span>, <span class="hljs-number">0</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setFormat(<span class="hljs-string">'%countdown% [%bar%]'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setPlaceholderFormatter(<span class="hljs-string">'countdown'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ProgressBar <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span>)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>getMaxSteps() - <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>getProgress();
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The <code translate="no" class="notranslate">setPlaceholderFormatter()</code> method was introduced in Symfony 6.3.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="custom-messages">
+    Custom Messages
+    <a class="headerlink" href="#custom-messages" title="Permalink to this headline">¶</a>
+</h3>
+<p>Progress bars define a placeholder called <code translate="no" class="notranslate">message</code> to display arbitrary
+messages. However, none of the built-in formats include that placeholder, so
+before displaying these messages, you must define your own custom format:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">ProgressBar<span class="hljs-operator">::</span>setFormatDefinition(<span class="hljs-string">'custom'</span>, <span class="hljs-string">' %current%/%max% -- %message%'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span> = <span class="hljs-keyword">new</span> ProgressBar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>, <span class="hljs-number">100</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setFormat(<span class="hljs-string">'custom'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, use the <code translate="no" class="notranslate">setMessage()</code> method to set the value of the <code translate="no" class="notranslate">%message%</code>
+placeholder before displaying the progress bar:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setMessage(<span class="hljs-string">'Start'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>start();
+<span class="hljs-comment">// 0/100 -- Start</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setMessage(<span class="hljs-string">'Task is in progress...'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>advance();
+<span class="hljs-comment">// 1/100 -- Task is in progress...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Messages can be combined with custom placeholders too. In this example, the
+progress bar uses the <code translate="no" class="notranslate">%message%</code> and <code translate="no" class="notranslate">%filename%</code> placeholders:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">ProgressBar<span class="hljs-operator">::</span>setFormatDefinition(<span class="hljs-string">'custom'</span>, <span class="hljs-string">' %current%/%max% -- %message% (%filename%)'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span> = <span class="hljs-keyword">new</span> ProgressBar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>, <span class="hljs-number">100</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setFormat(<span class="hljs-string">'custom'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">setMessage()</code> method accepts a second optional argument to set the value
+of the custom placeholders:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-comment">// $files = ['client-001/invoices.xml', '...'];</span>
+<span class="hljs-keyword">foreach</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>files</span> <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filename</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setMessage(<span class="hljs-string">'Importing invoices...'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>setMessage(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filename</span>, <span class="hljs-string">'filename'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progressBar</span><span class="hljs-operator">-&gt;</span>advance();
+    <span class="hljs-comment">// 2/100 -- Importing invoices... (client-001/invoices.xml)</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="console-multiple-progress-bars"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="displaying-multiple-progress-bars">
+    Displaying Multiple Progress Bars
+    <a class="headerlink" href="#displaying-multiple-progress-bars" title="Permalink to this headline">¶</a>
+</h2>
+<p>When using <a href="../../../console.html#console-output-sections" class="reference internal">Console output sections</a> it's
+possible to display multiple progress bars at the same time and change their
+progress independently:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section1</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>section();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section2</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>section();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progress1</span> = <span class="hljs-keyword">new</span> ProgressBar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section1</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progress2</span> = <span class="hljs-keyword">new</span> ProgressBar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section2</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progress1</span><span class="hljs-operator">-&gt;</span>start(<span class="hljs-number">100</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progress2</span><span class="hljs-operator">-&gt;</span>start(<span class="hljs-number">100</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>i</span> = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">while</span> (++<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>i</span> &lt; <span class="hljs-number">100</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progress1</span><span class="hljs-operator">-&gt;</span>advance();
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>i</span> % <span class="hljs-number">2</span> === <span class="hljs-number">0</span>) {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>progress2</span><span class="hljs-operator">-&gt;</span>advance(<span class="hljs-number">4</span>);
+    }
+
+    usleep(<span class="hljs-number">50000</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>After a couple of iterations, the output in the terminal will look like this:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">34/100 [=========&gt;------------------]  34%
+68/100 [===================&gt;--------]  68%</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

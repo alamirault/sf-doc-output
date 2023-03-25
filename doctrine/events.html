@@ -1,0 +1,1320 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="doctrine-events">
+    Doctrine Events
+    <a class="headerlink" href="#doctrine-events" title="Permalink to this headline">¶</a>
+</h1>
+<p><a href="https://www.doctrine-project.org/" class="reference external" rel="external noopener noreferrer" target="_blank">Doctrine</a>, the set of PHP libraries used by Symfony to work with databases,
+provides a lightweight event system to update entities during the application
+execution. These events, called <a href="https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/events.html#lifecycle-events" class="reference external" rel="external noopener noreferrer" target="_blank">lifecycle events</a>, allow to perform tasks such
+as <em>&quot;update the createdAt property automatically right before persisting entities
+of this type&quot;</em>.</p>
+<p>Doctrine triggers events before/after performing the most common entity
+operations (e.g. <code translate="no" class="notranslate">prePersist/postPersist</code>, <code translate="no" class="notranslate">preUpdate/postUpdate</code>) and also
+on other common tasks (e.g. <code translate="no" class="notranslate">loadClassMetadata</code>, <code translate="no" class="notranslate">onClear</code>).</p>
+<p>There are different ways to listen to these Doctrine events:</p>
+<ul>
+    <li><strong>Lifecycle callbacks</strong>, they are defined as public methods on the entity classes and
+they are called when the events are triggered;</li>
+<li><strong>Lifecycle listeners and subscribers</strong>, they are classes with callback
+methods for one or more events and they are called for all entities;</li>
+<li><strong>Entity listeners</strong>, they are similar to lifecycle listeners, but they are
+called only for the entities of a certain class.</li>
+</ul>
+<p>These are the <strong>drawbacks and advantages</strong> of each one:</p>
+<ul>
+    <li>Callbacks have better performance because they only apply to a single entity
+class, but you can't reuse the logic for different entities and they don't
+have access to <a href="../service_container.html" class="reference internal">Symfony services</a>;</li>
+<li>Lifecycle listeners and subscribers can reuse logic among different entities
+and can access Symfony services but their performance is worse because they
+are called for all entities;</li>
+<li>Entity listeners have the same advantages of lifecycle listeners and they have
+better performance because they only apply to a single entity class.</li>
+</ul>
+<p>This article only explains the basics about Doctrine events when using them
+inside a Symfony application. Read the <a href="https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/events.html" class="reference external" rel="external noopener noreferrer" target="_blank">official docs about Doctrine events</a>
+to learn everything about them.</p>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>This article covers listeners and subscribers for Doctrine ORM. If you are
+using ODM for MongoDB, read the <a href="https://symfony.com/doc/current/bundles/DoctrineMongoDBBundle/index.html" class="reference external">DoctrineMongoDBBundle documentation</a>.</p>
+</div>
+<div class="section">
+<h2 id="doctrine-lifecycle-callbacks">
+    Doctrine Lifecycle Callbacks
+    <a class="headerlink" href="#doctrine-lifecycle-callbacks" title="Permalink to this headline">¶</a>
+</h2>
+<p>Lifecycle callbacks are defined as public methods inside the entity you want to modify.
+For example, suppose you want to set a <code translate="no" class="notranslate">createdAt</code> date column to the current
+date, but only when the entity is first persisted (i.e. inserted). To do so,
+define a callback for the <code translate="no" class="notranslate">prePersist</code> Doctrine event:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-2a662dc3331930e2fdf2a5508090b50cd4fa4b2c" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-c1bbb6d3557e0c25833c2ed84ba80aa8241e42bb" aria-selected="false"
+                 tabindex="-1">
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-efb3ff2859f11ac3982fcf0dd0c54f1e43ac66b5" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-2a662dc3331930e2fdf2a5508090b50cd4fa4b2c" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Entity/Product.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Mapping</span> <span class="hljs-title">as</span> <span class="hljs-title">ORM</span>;
+
+<span class="hljs-comment">// When using attributes, don't forget to add #[ORM\HasLifecycleCallbacks]</span>
+<span class="hljs-comment">// to the class of the entity where you define the callback</span>
+
+<span class="hljs-comment">#[ORM\Entity]</span>
+<span class="hljs-comment">#[ORM\HasLifecycleCallbacks]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Product</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-comment">#[ORM\PrePersist]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setCreatedAtValue</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createdAt = <span class="hljs-keyword">new</span> \DateTimeImmutable();
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-c1bbb6d3557e0c25833c2ed84ba80aa8241e42bb" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="display: none">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/doctrine/Product.orm.yml</span>
+<span class="hljs-string">App\Entity\Product:</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">entity</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">lifecycleCallbacks:</span>
+        <span class="hljs-attr">prePersist:</span> <span class="hljs-string">['setCreatedAtValue']</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-efb3ff2859f11ac3982fcf0dd0c54f1e43ac66b5" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/doctrine/Product.orm.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">doctrine-mapping</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://doctrine-project.org/schemas/orm/doctrine-mapping"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://doctrine-project.org/schemas/orm/doctrine-mapping
+        https://doctrine-project.org/schemas/orm/doctrine-mapping.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">entity</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"App\Entity\Product"</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">lifecycle-callbacks</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">lifecycle-callback</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"prePersist"</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"setCreatedAtValue"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">lifecycle-callbacks</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">entity</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">doctrine-mapping</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Some lifecycle callbacks receive an argument that provides access to
+useful information such as the current entity manager (e.g. the <code translate="no" class="notranslate">preUpdate</code>
+callback receives a <code translate="no" class="notranslate">PreUpdateEventArgs $event</code> argument).</p>
+</div>
+<span id="doctrine-lifecycle-listener"></span>
+</div>
+<div class="section">
+<h2 id="doctrine-lifecycle-listeners">
+    Doctrine Lifecycle Listeners
+    <a class="headerlink" href="#doctrine-lifecycle-listeners" title="Permalink to this headline">¶</a>
+</h2>
+<p>Lifecycle listeners are defined as PHP classes that listen to a single Doctrine
+event on all the application entities. For example, suppose that you want to
+update some search index whenever a new entity is persisted in the database. To
+do so, define a listener for the <code translate="no" class="notranslate">postPersist</code> Doctrine event:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/EventListener/SearchIndexer.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Persistence</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">LifecycleEventArgs</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SearchIndexer</span>
+</span>{
+    <span class="hljs-comment">// the listener methods receive an argument which gives you access to</span>
+    <span class="hljs-comment">// both the entity object of the event and the entity manager itself</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">postPersist</span><span class="hljs-params">(LifecycleEventArgs <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>args</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entity</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>args</span><span class="hljs-operator">-&gt;</span>getObject();
+
+        <span class="hljs-comment">// if this listener only applies to certain entity types,</span>
+        <span class="hljs-comment">// add some code to check the entity type as early as possible</span>
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entity</span> <span class="hljs-keyword">instanceof</span> Product) {
+            <span class="hljs-keyword">return</span>;
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>args</span><span class="hljs-operator">-&gt;</span>getObjectManager();
+        <span class="hljs-comment">// ... do something with the Product entity</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, add the <code translate="no" class="notranslate">#[AsDoctrineListener]</code> attribute to the class to enable it as
+a Doctrine listener in your application:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/EventListener/SearchIndexer.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">DoctrineBundle</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsDoctrineListener</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Events</span>;
+
+<span class="hljs-comment">#[AsDoctrineListener(event: Events::postPersist, priority: 500, connection: 'default')]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SearchIndexer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Alternatively, if you prefer to not use PHP attributes, you must enable the
+listener in the Symfony application by creating a new service for it and
+<a href="../service_container/tags.html" class="reference internal">tagging it</a> with the <code translate="no" class="notranslate">doctrine.event_listener</code> tag:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-4">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-8523f0ac4e23b23cfb593478ff183268d3024182" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-6105ae31a96cc7ca7a7c65b7786e6765e8f20f9b" aria-selected="false"
+                 tabindex="-1">
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-847b476e01b00550589da9d717c494c15cf0df6c" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-a95a6a89b9ab2c43963531dd2b8dcee809194e1e" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-8523f0ac4e23b23cfb593478ff183268d3024182" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/App/EventListener/SearchIndexer.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">DoctrineBundle</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsDoctrineListener</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">LifecycleEventArgs</span>;
+
+<span class="hljs-comment">#[AsDoctrineListener('postPersist'/*, 500, 'default'*/)]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SearchIndexer</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">postPersist</span><span class="hljs-params">(LifecycleEventArgs <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-6105ae31a96cc7ca7a7c65b7786e6765e8f20f9b" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="display: none">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-string">App\EventListener\SearchIndexer:</span>
+        <span class="hljs-attr">tags:</span>
+            <span class="hljs-bullet">-</span>
+                <span class="hljs-attr">name:</span> <span class="hljs-string">'doctrine.event_listener'</span>
+                <span class="hljs-comment"># this is the only required option for the lifecycle listener tag</span>
+                <span class="hljs-attr">event:</span> <span class="hljs-string">'postPersist'</span>
+
+                <span class="hljs-comment"># listeners can define their priority in case multiple subscribers or listeners are associated</span>
+                <span class="hljs-comment"># to the same event (default priority = 0; higher numbers = listener is run earlier)</span>
+                <span class="hljs-attr">priority:</span> <span class="hljs-number">500</span>
+
+                <span class="hljs-comment"># you can also restrict listeners to a specific Doctrine connection</span>
+                <span class="hljs-attr">connection:</span> <span class="hljs-string">'default'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-847b476e01b00550589da9d717c494c15cf0df6c" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:doctrine</span>=<span class="hljs-string">"http://symfony.com/schema/dic/doctrine"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+        <span class="hljs-comment">&lt;!--
+            * 'event' is the only required option that defines the lifecycle listener
+            * 'priority': used when multiple subscribers or listeners are associated to the same event
+            *             (default priority = 0; higher numbers = listener is run earlier)
+            * 'connection': restricts the listener to a specific Doctrine connection
+        --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\EventListener\SearchIndexer"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"doctrine.event_listener"</span>
+                <span class="hljs-attr">event</span>=<span class="hljs-string">"postPersist"</span>
+                <span class="hljs-attr">priority</span>=<span class="hljs-string">"500"</span>
+                <span class="hljs-attr">connection</span>=<span class="hljs-string">"default"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-a95a6a89b9ab2c43963531dd2b8dcee809194e1e" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>\<span class="hljs-title">SearchIndexer</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-comment">// listeners are applied by default to all Doctrine connections</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(SearchIndexer<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>tag(<span class="hljs-string">'doctrine.event_listener'</span>, [
+            <span class="hljs-comment">// this is the only required option for the lifecycle listener tag</span>
+            <span class="hljs-string">'event'</span> =&gt; <span class="hljs-string">'postPersist'</span>,
+
+            <span class="hljs-comment">// listeners can define their priority in case multiple subscribers or listeners are associated</span>
+            <span class="hljs-comment">// to the same event (default priority = 0; higher numbers = listener is run earlier)</span>
+            <span class="hljs-string">'priority'</span> =&gt; <span class="hljs-number">500</span>,
+
+            <span class="hljs-comment"># you can also restrict listeners to a specific Doctrine connection</span>
+            <span class="hljs-string">'connection'</span> =&gt; <span class="hljs-string">'default'</span>,
+        ])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>2.7.2</span>
+    </p><p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Doctrine/Bundle/DoctrineBundle/Attribute/AsDoctrineListener.php" class="reference external" title="Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener" rel="external noopener noreferrer" target="_blank">AsDoctrineListener</a>
+attribute was introduced in DoctrineBundle 2.7.2.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Symfony loads (and instantiates) Doctrine listeners only when the related
+Doctrine event is actually fired; whereas Doctrine subscribers are always
+loaded (and instantiated) by Symfony, making them less performant.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The value of the <code translate="no" class="notranslate">connection</code> option can also be a
+<a href="../configuration.html#configuration-parameters" class="reference internal">configuration parameter</a>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="doctrine-entity-listeners">
+    Doctrine Entity Listeners
+    <a class="headerlink" href="#doctrine-entity-listeners" title="Permalink to this headline">¶</a>
+</h2>
+<p>Entity listeners are defined as PHP classes that listen to a single Doctrine
+event on a single entity class. For example, suppose that you want to send some
+notifications whenever a <code translate="no" class="notranslate">User</code> entity is modified in the database.</p>
+<p>First, define a PHP class that handles the <code translate="no" class="notranslate">postUpdate</code> Doctrine event:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/EventListener/UserChangedNotifier.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">User</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Persistence</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">LifecycleEventArgs</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserChangedNotifier</span>
+</span>{
+    <span class="hljs-comment">// the entity listener methods receive two arguments:</span>
+    <span class="hljs-comment">// the entity instance and the lifecycle event</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">postUpdate</span><span class="hljs-params">(User <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>, LifecycleEventArgs <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// ... do something to notify the changes</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, add the <code translate="no" class="notranslate">#[AsEntityListener]</code> attribute to the class to enable it as
+a Doctrine entity listener in your application:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/EventListener/UserChangedNotifier.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">User</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">DoctrineBundle</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsEntityListener</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Events</span>;
+
+<span class="hljs-comment">#[AsEntityListener(event: Events::postUpdate, method: 'postUpdate', entity: User::class)]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserChangedNotifier</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Alternatively, if you prefer to not use PHP attributes, you must
+configure a service for the entity listener and <a href="../service_container/tags.html" class="reference internal">tag it</a>
+with the <code translate="no" class="notranslate">doctrine.orm.entity_listener</code> tag as follows:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-086d9085d2655ab6fdbcde0c861209a7ccb4817d" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-be4f041059a0c619fef34765799de9884bd1d468" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-7b99632e02920358cff9ab883c4c3c99d6b06586" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-086d9085d2655ab6fdbcde0c861209a7ccb4817d" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-string">App\EventListener\UserChangedNotifier:</span>
+        <span class="hljs-attr">tags:</span>
+            <span class="hljs-bullet">-</span>
+                <span class="hljs-comment"># these are the options required to define the entity listener</span>
+                <span class="hljs-attr">name:</span> <span class="hljs-string">'doctrine.orm.entity_listener'</span>
+                <span class="hljs-attr">event:</span> <span class="hljs-string">'postUpdate'</span>
+                <span class="hljs-attr">entity:</span> <span class="hljs-string">'App\Entity\User'</span>
+
+                <span class="hljs-comment"># these are other options that you may define if needed</span>
+
+                <span class="hljs-comment"># set the 'lazy' option to TRUE to only instantiate listeners when they are used</span>
+                <span class="hljs-comment"># lazy: true</span>
+
+                <span class="hljs-comment"># set the 'entity_manager' option if the listener is not associated to the default manager</span>
+                <span class="hljs-comment"># entity_manager: 'custom'</span>
+
+                <span class="hljs-comment"># by default, Symfony looks for a method called after the event (e.g. postUpdate())</span>
+                <span class="hljs-comment"># if it doesn't exist, it tries to execute the '__invoke()' method, but you can</span>
+                <span class="hljs-comment"># configure a custom method name with the 'method' option</span>
+                <span class="hljs-comment"># method: 'checkUserChanges'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-be4f041059a0c619fef34765799de9884bd1d468" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:doctrine</span>=<span class="hljs-string">"http://symfony.com/schema/dic/doctrine"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\EventListener\UserChangedNotifier"</span>&gt;</span>
+            <span class="hljs-comment">&lt;!--
+                * These are the options required to define the entity listener:
+                *   * name
+                *   * event
+                *   * entity
+                *
+                * These are other options that you may define if needed:
+                *   * lazy: if TRUE, listeners are only instantiated when they are used
+                *   * entity_manager: define it if the listener is not associated to the default manager
+                *   * method: by default, Symfony looks for a method called after the event (e.g. postUpdate())
+                *           if it doesn't exist, it tries to execute the '__invoke()' method, but
+                *           you can configure a custom method name with the 'method' option
+            --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"doctrine.orm.entity_listener"</span>
+                <span class="hljs-attr">event</span>=<span class="hljs-string">"postUpdate"</span>
+                <span class="hljs-attr">entity</span>=<span class="hljs-string">"App\Entity\User"</span>
+                <span class="hljs-attr">lazy</span>=<span class="hljs-string">"true"</span>
+                <span class="hljs-attr">entity_manager</span>=<span class="hljs-string">"custom"</span>
+                <span class="hljs-attr">method</span>=<span class="hljs-string">"checkUserChanges"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-7b99632e02920358cff9ab883c4c3c99d6b06586" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">User</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>\<span class="hljs-title">UserChangedNotifier</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(UserChangedNotifier<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>tag(<span class="hljs-string">'doctrine.orm.entity_listener'</span>, [
+            <span class="hljs-comment">// These are the options required to define the entity listener:</span>
+            <span class="hljs-string">'event'</span> =&gt; <span class="hljs-string">'postUpdate'</span>,
+            <span class="hljs-string">'entity'</span> =&gt; User<span class="hljs-operator">::</span>class,
+
+            <span class="hljs-comment">// These are other options that you may define if needed:</span>
+
+            <span class="hljs-comment">// set the 'lazy' option to TRUE to only instantiate listeners when they are used</span>
+            <span class="hljs-comment">// 'lazy' =&gt; true,</span>
+
+            <span class="hljs-comment">// set the 'entity_manager' option if the listener is not associated to the default manager</span>
+            <span class="hljs-comment">// 'entity_manager' =&gt; 'custom',</span>
+
+            <span class="hljs-comment">// by default, Symfony looks for a method called after the event (e.g. postUpdate())</span>
+            <span class="hljs-comment">// if it doesn't exist, it tries to execute the '__invoke()' method, but you can</span>
+            <span class="hljs-comment">// configure a custom method name with the 'method' option</span>
+            <span class="hljs-comment">// 'method' =&gt; 'checkUserChanges',</span>
+        ])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h2 id="doctrine-lifecycle-subscribers">
+    Doctrine Lifecycle Subscribers
+    <a class="headerlink" href="#doctrine-lifecycle-subscribers" title="Permalink to this headline">¶</a>
+</h2>
+<p>Lifecycle subscribers are defined as PHP classes that implement the
+<code translate="no" class="notranslate">Doctrine\Common\EventSubscriber</code> interface and which listen to one or more
+Doctrine events on all the application entities. For example, suppose that you
+want to log all the database activity. To do so, define a subscriber for the
+<code translate="no" class="notranslate">postPersist</code>, <code translate="no" class="notranslate">postRemove</code> and <code translate="no" class="notranslate">postUpdate</code> Doctrine events:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/EventListener/DatabaseActivitySubscriber.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">DoctrineBundle</span>\<span class="hljs-title">EventSubscriber</span>\<span class="hljs-title">EventSubscriberInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Events</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Persistence</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">LifecycleEventArgs</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DatabaseActivitySubscriber</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">EventSubscriberInterface</span>
+</span>{
+    <span class="hljs-comment">// this method can only return the event names; you cannot define a</span>
+    <span class="hljs-comment">// custom method name to execute when each event triggers</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubscribedEvents</span><span class="hljs-params">()</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            Events<span class="hljs-operator">::</span>postPersist,
+            Events<span class="hljs-operator">::</span>postRemove,
+            Events<span class="hljs-operator">::</span>postUpdate,
+        ];
+    }
+
+    <span class="hljs-comment">// callback methods must be called exactly like the events they listen to;</span>
+    <span class="hljs-comment">// they receive an argument of type LifecycleEventArgs, which gives you access</span>
+    <span class="hljs-comment">// to both the entity object of the event and the entity manager itself</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">postPersist</span><span class="hljs-params">(LifecycleEventArgs <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>args</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>logActivity(<span class="hljs-string">'persist'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>args</span>);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">postRemove</span><span class="hljs-params">(LifecycleEventArgs <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>args</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>logActivity(<span class="hljs-string">'remove'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>args</span>);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">postUpdate</span><span class="hljs-params">(LifecycleEventArgs <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>args</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>logActivity(<span class="hljs-string">'update'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>args</span>);
+    }
+
+    <span class="hljs-keyword">private</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">logActivity</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>action</span>, LifecycleEventArgs <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>args</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entity</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>args</span><span class="hljs-operator">-&gt;</span>getObject();
+
+        <span class="hljs-comment">// if this subscriber only applies to certain entity types,</span>
+        <span class="hljs-comment">// add some code to check the entity type as early as possible</span>
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entity</span> <span class="hljs-keyword">instanceof</span> Product) {
+            <span class="hljs-keyword">return</span>;
+        }
+
+        <span class="hljs-comment">// ... get the entity information and log it somehow</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you're using the <a href="../service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>
+and DoctrineBundle 2.1 (released May 25, 2020) or newer, this example will already
+work! Otherwise, <a href="../service_container.html#service-container-creating-service" class="reference internal">create a service</a> for this
+subscriber and <a href="../service_container/tags.html" class="reference internal">tag it</a> with <code translate="no" class="notranslate">doctrine.event_subscriber</code>.</p>
+<p>If you need to configure some option of the subscriber (e.g. its priority or
+Doctrine connection to use) you must do that in the manual service configuration:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-7ee45577bd4c7766bf13170c11fdbb3b1536cc81" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-218a26c7d5c22e517662a023dfd2c1c7ccbd77b2" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-ad043204b12f6c713230a42eab7eae585cc0ea1b" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-7ee45577bd4c7766bf13170c11fdbb3b1536cc81" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-string">App\EventListener\DatabaseActivitySubscriber:</span>
+        <span class="hljs-attr">tags:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">'doctrine.event_subscriber'</span>
+
+              <span class="hljs-comment"># subscribers can define their priority in case multiple subscribers or listeners are associated</span>
+              <span class="hljs-comment"># to the same event (default priority = 0; higher numbers = listener is run earlier)</span>
+              <span class="hljs-attr">priority:</span> <span class="hljs-number">500</span>
+
+              <span class="hljs-comment"># you can also restrict listeners to a specific Doctrine connection</span>
+              <span class="hljs-attr">connection:</span> <span class="hljs-string">'default'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-218a26c7d5c22e517662a023dfd2c1c7ccbd77b2" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:doctrine</span>=<span class="hljs-string">"http://symfony.com/schema/dic/doctrine"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+        <span class="hljs-comment">&lt;!--
+            * 'priority': used when multiple subscribers or listeners are associated to the same event
+            *             (default priority = 0; higher numbers = listener is run earlier)
+            * 'connection': restricts the listener to a specific Doctrine connection
+        --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\EventListener\DatabaseActivitySubscriber"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"doctrine.event_subscriber"</span> <span class="hljs-attr">priority</span>=<span class="hljs-string">"500"</span> <span class="hljs-attr">connection</span>=<span class="hljs-string">"default"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-ad043204b12f6c713230a42eab7eae585cc0ea1b" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>\<span class="hljs-title">DatabaseActivitySubscriber</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(DatabaseActivitySubscriber<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>tag(<span class="hljs-string">'doctrine.event_subscriber'</span>[
+            <span class="hljs-comment">// subscribers can define their priority in case multiple subscribers or listeners are associated</span>
+            <span class="hljs-comment">// to the same event (default priority = 0; higher numbers = listener is run earlier)</span>
+            <span class="hljs-string">'priority'</span> =&gt; <span class="hljs-number">500</span>,
+
+            <span class="hljs-comment">// you can also restrict listeners to a specific Doctrine connection</span>
+            <span class="hljs-string">'connection'</span> =&gt; <span class="hljs-string">'default'</span>,
+        ])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Symfony loads (and instantiates) Doctrine subscribers whenever the
+application executes; whereas Doctrine listeners are only loaded when the
+related event is actually fired, making them more performant.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

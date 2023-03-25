@@ -1,0 +1,187 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="creating-a-bug-reproducer">
+    Creating a Bug Reproducer
+    <a class="headerlink" href="#creating-a-bug-reproducer" title="Permalink to this headline">¶</a>
+</h1>
+<p>The main Symfony code repository receives thousands of issues reports per year.
+Some of those issues are easy to understand and the Symfony Core developers can
+fix them without any other information. However, other issues are much harder to
+understand because developers can't reproduce them in their computers. That's
+when we'll ask you to create a &quot;bug reproducer&quot;, which is the minimum amount of
+code needed to make the bug appear when executed.</p>
+<div class="section">
+<h2 id="reproducing-simple-bugs">
+    Reproducing Simple Bugs
+    <a class="headerlink" href="#reproducing-simple-bugs" title="Permalink to this headline">¶</a>
+</h2>
+<p>If you are reporting a bug related to some Symfony component used outside the
+Symfony framework, it's enough to share a small PHP script that when executed
+shows the bug:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// First, run "composer require symfony/validator"</span>
+<span class="hljs-comment">// Then, execute this file:</span>
+<span class="hljs-meta">&lt;?php</span>
+<span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>wrongUrl</span> = <span class="hljs-string">'http://example.com/exploit.html?&lt;script&gt;alert(1);&lt;/script&gt;'</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlValidator</span> = <span class="hljs-keyword">new</span> Constraints\UrlValidator();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlConstraint</span> = <span class="hljs-keyword">new</span> Constraints\Url();
+
+<span class="hljs-comment">// The URL is wrong, so var_dump() should display an error, but it displays</span>
+<span class="hljs-comment">// "null" instead because there is no context to build a validator violation</span>
+var_dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlValidator</span><span class="hljs-operator">-&gt;</span>validate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>wrongUrl</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlConstraint</span>));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="reproducing-complex-bugs">
+    Reproducing Complex Bugs
+    <a class="headerlink" href="#reproducing-complex-bugs" title="Permalink to this headline">¶</a>
+</h2>
+<p>If the bug is related to the Symfony Framework or if it's too complex to create
+a PHP script, it's better to reproduce the bug by creating a new project. To do so:</p>
+<ol class="arabic">
+    <li>Create a new project:</li>
+</ol>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer create-project symfony/skeleton bug_app</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<ol class="arabic">
+    <li>Add and commit the changes generated by Symfony.</li>
+<li>Now you must add the minimum amount of code to reproduce the bug. This is the
+trickiest part and it's explained a bit more later.</li>
+<li>Add and commit your changes.</li>
+<li>Create a <a href="https://github.com/new" class="reference external" rel="external noopener noreferrer" target="_blank">new repository</a> on GitHub (give it any name).</li>
+<li>Follow the instructions on GitHub to add the <code translate="no" class="notranslate">origin</code> remote to your local project
+and push it.</li>
+<li>Add a comment in your original issue report to share the URL of your forked
+project (e.g. <code translate="no" class="notranslate">https://github.com/YOUR-GITHUB-USERNAME/symfony_issue_23567</code>)
+and, if necessary, explain the steps to reproduce (e.g. &quot;browse this URL&quot;,
+&quot;fill in this data in the form and submit it&quot;, etc.)</li>
+</ol>
+<div class="section">
+<h3 id="adding-the-minimum-amount-of-code-possible">
+    Adding the Minimum Amount of Code Possible
+    <a class="headerlink" href="#adding-the-minimum-amount-of-code-possible" title="Permalink to this headline">¶</a>
+</h3>
+<p>The key to create a bug reproducer is to solely focus on the feature that you
+suspect is failing. For example, imagine that you suspect that the bug is related
+to a route definition. Then, after creating your project:</p>
+<ol class="arabic">
+    <li>Don't edit any of the default Symfony configuration options.</li>
+<li>Don't copy your original application code and don't use the same structure
+of controllers, actions, etc. as in your original application.</li>
+<li>Create a small controller and add your routing definition that shows the bug.</li>
+<li>Don't create or modify any other file.</li>
+<li>Install the <a href="../../setup/symfony_server.html" class="reference internal">local web server</a> provided by Symfony
+and use the <code translate="no" class="notranslate">symfony server:start</code> command to browse to the new route and
+see if the bug appears or not.</li>
+<li>If you can see the bug, you're done and you can already share the code with us.</li>
+<li>If you can't see the bug, you must keep making small changes. For example, if
+your original route was defined using XML, forget about the previous route
+and define the route using XML instead. Or maybe your application
+registers some event listeners and that's where the real bug is. In that case,
+add an event listener that's similar to your real app to see if you can find
+the bug.</li>
+</ol>
+<p>In short, the idea is to keep adding small and incremental changes to a new project
+until you can reproduce the bug.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

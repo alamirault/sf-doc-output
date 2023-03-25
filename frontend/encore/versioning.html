@@ -1,0 +1,222 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="asset-versioning">
+    Asset Versioning
+    <a class="headerlink" href="#asset-versioning" title="Permalink to this headline">¶</a>
+</h1>
+<span id="encore-long-term-caching"></span>
+<p>Tired of deploying and having browser's cache the old version of your assets?
+By calling <code translate="no" class="notranslate">enableVersioning()</code>, each filename will now include a hash that
+changes whenever the <em>contents</em> of that file change (e.g. <code translate="no" class="notranslate">app.123abc.js</code>
+instead of <code translate="no" class="notranslate">app.js</code>). This allows you to use aggressive caching strategies
+(e.g. a far future <code translate="no" class="notranslate">Expires</code>) because, whenever a file changes, its hash will change,
+ignoring any existing cache:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">// webpack.config.js
+
+  // ...
+  Encore
+      .setOutputPath('public/build/')
+      // ...
+<span class="hljs-addition">+     .enableVersioning()</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>To link to these assets, Encore creates two files <code translate="no" class="notranslate">entrypoints.json</code> and
+<code translate="no" class="notranslate">manifest.json</code>.</p>
+<span id="load-manifest-files"></span>
+<div class="section">
+<h2 id="loading-assets-from-entrypoints-json-manifest-json">
+    Loading Assets from <code translate="no" class="notranslate">entrypoints.json</code> &amp; <code translate="no" class="notranslate">manifest.json</code>
+    <a class="headerlink" href="#loading-assets-from-entrypoints-json-manifest-json" title="Permalink to this headline">¶</a>
+</h2>
+<p>Whenever you run Encore, two configuration files are generated in your
+output folder (default location: <code translate="no" class="notranslate">public/build/</code>): <code translate="no" class="notranslate">entrypoints.json</code>
+and <code translate="no" class="notranslate">manifest.json</code>. Each file is similar, and contains a map to the final, versioned
+filenames.</p>
+<p>The first file – <code translate="no" class="notranslate">entrypoints.json</code> – is used by the <code translate="no" class="notranslate">encore_entry_script_tags()</code>
+and <code translate="no" class="notranslate">encore_entry_link_tags()</code> Twig helpers. If you're using these, then your
+CSS and JavaScript files will render with the new, versioned filename. If you're
+not using Symfony, your app will need to read this file in a similar way.</p>
+<p>The <code translate="no" class="notranslate">manifest.json</code> file is only needed to get the versioned filename of <em>other</em>
+files, like font files or image files (though it also contains information about
+the CSS and JavaScript files):</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"build/app.js"</span>: <span class="hljs-string">"/build/app.123abc.js"</span>,
+    <span class="hljs-attr">"build/dashboard.css"</span>: <span class="hljs-string">"/build/dashboard.a4bf2d.css"</span>,
+    <span class="hljs-attr">"build/images/logo.png"</span>: <span class="hljs-string">"/build/images/logo.3eed42.png"</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In your app, you need to read this file if you want to be able to link (e.g. via
+an <code translate="no" class="notranslate">img</code> tag) to certain assets. If you're using Symfony, just activate the
+<code translate="no" class="notranslate">json_manifest_file</code> versioning strategy:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># this file is added automatically when installing Encore with Symfony Flex</span>
+<span class="hljs-comment"># config/packages/assets.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">assets:</span>
+        <span class="hljs-attr">json_manifest_path:</span> <span class="hljs-string">'%kernel.project_dir%/public/build/manifest.json'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! Be sure to wrap each path in the Twig <code translate="no" class="notranslate">asset()</code> function
+like normal:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ asset('build/images/logo.png') }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">"ACME logo"</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="troubleshooting">
+    Troubleshooting
+    <a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="asset-versioning-and-deployment">
+    Asset Versioning and Deployment
+    <a class="headerlink" href="#asset-versioning-and-deployment" title="Permalink to this headline">¶</a>
+</h3>
+<p>When deploying a new version of your application, versioned assets will include
+a new hash, making the previous assets no longer available. This is usually not
+a problem when deploying applications using a rolling update, blue/green or
+symlink strategies.</p>
+<p>However, even when applying those techniques, there could be a lapse of time
+when some publicly/privately cached response requests the previous version of
+the assets. If your application can't afford to serve any broken asset, the best
+solution is to use a CDN (or custom made service) that keeps all the old assets
+cached for some time.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="learn-more">
+    Learn more
+    <a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a>
+</h2>
+<ul>
+    <li><a href="../../components/asset.html" class="reference internal">The Asset Component</a></li>
+</ul>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

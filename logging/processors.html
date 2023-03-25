@@ -1,0 +1,842 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-add-extra-data-to-log-messages-via-a-processor">
+    How to Add extra Data to Log Messages via a Processor
+    <a class="headerlink" href="#how-to-add-extra-data-to-log-messages-via-a-processor" title="Permalink to this headline">¶</a>
+</h1>
+<p><a href="https://github.com/Seldaek/monolog" class="reference external" rel="external noopener noreferrer" target="_blank">Monolog</a> allows you to process every record before logging it by adding some
+extra data. This is the role of a processor, which can be applied for the whole
+handler stack or only for a specific handler or channel.</p>
+<p>A processor is a callable receiving the record as its first argument.
+Processors are configured using the <code translate="no" class="notranslate">monolog.processor</code> DIC tag. See the
+<a href="../reference/dic_tags.html#dic_tags-monolog-processor" class="reference internal">reference about it</a>.</p>
+<div class="section">
+<h2 id="adding-a-session-request-token">
+    Adding a Session/Request Token
+    <a class="headerlink" href="#adding-a-session-request-token" title="Permalink to this headline">¶</a>
+</h2>
+<p>Sometimes it is hard to tell which entries in the log belong to which session
+and/or request. The following example will add a unique token for each request
+using a processor:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Logger/SessionRequestProcessor.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Logger</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Monolog</span>\<span class="hljs-title">LogRecord</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">SessionNotFoundException</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">RequestStack</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SessionRequestProcessor</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private RequestStack <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requestStack</span>
+    )</span> </span>{
+    }
+
+    <span class="hljs-comment">// this method is called for each log record; optimize it to not hurt performance</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__invoke</span><span class="hljs-params">(LogRecord <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>record</span>)</span>: <span class="hljs-title">LogRecord</span>
+    </span>{
+        <span class="hljs-keyword">try</span> {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>session</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>requestStack<span class="hljs-operator">-&gt;</span>getSession();
+        } <span class="hljs-keyword">catch</span> (SessionNotFoundException <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>e</span>) {
+            <span class="hljs-keyword">return</span>;
+        }
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>session</span><span class="hljs-operator">-&gt;</span>isStarted()) {
+            <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>record</span>;
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>sessionId</span> = substr(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>session</span><span class="hljs-operator">-&gt;</span>getId(), <span class="hljs-number">0</span>, <span class="hljs-number">8</span>) ?: <span class="hljs-string">'????????'</span>;
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>record</span><span class="hljs-operator">-&gt;</span>extra[<span class="hljs-string">'token'</span>] = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>sessionId</span>.<span class="hljs-string">'-'</span>.substr(uniqid(<span class="hljs-string">''</span>, <span class="hljs-keyword">true</span>), <span class="hljs-number">-8</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>record</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Next, register your class as a service, as well as a formatter that uses the extra
+information:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-287ef008658403b1a852d16c36fc531ce81a62bb" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-6661b75fdd1fa5945111738bc8d7c6284bfbe259" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-a5bac90b17b8d123bedc67ba750d31b7c34e1224" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-287ef008658403b1a852d16c36fc531ce81a62bb" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-attr">monolog.formatter.session_request:</span>
+        <span class="hljs-attr">class:</span> <span class="hljs-string">Monolog\Formatter\LineFormatter</span>
+        <span class="hljs-attr">arguments:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">"[%%datetime%%] [%%extra.token%%] %%channel%%.%%level_name%%: %%message%% %%context%% %%extra%%\n"</span>
+
+    <span class="hljs-string">App\Logger\SessionRequestProcessor:</span>
+        <span class="hljs-attr">tags:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">name:</span> <span class="hljs-string">monolog.processor</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-6661b75fdd1fa5945111738bc8d7c6284bfbe259" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:monolog</span>=<span class="hljs-string">"http://symfony.com/schema/dic/monolog"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/monolog
+        https://symfony.com/schema/dic/monolog/monolog-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"monolog.formatter.session_request"</span>
+            <span class="hljs-attr">class</span>=<span class="hljs-string">"Monolog\Formatter\LineFormatter"</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">argument</span>&gt;</span>[%%datetime%%] [%%extra.token%%] %%channel%%.%%level_name%%: %%message%% %%context%% %%extra%%<span class="hljs-symbol">&amp;#xA;</span><span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Logger\SessionRequestProcessor"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"monolog.processor"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-a5bac90b17b8d123bedc67ba750d31b7c34e1224" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Logger</span>\<span class="hljs-title">SessionRequestProcessor</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Monolog</span>\<span class="hljs-title">Formatter</span>\<span class="hljs-title">LineFormatter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span>
+    <span class="hljs-operator">-&gt;</span>register(<span class="hljs-string">'monolog.formatter.session_request'</span>, LineFormatter<span class="hljs-operator">::</span>class)
+    <span class="hljs-operator">-&gt;</span>addArgument(<span class="hljs-string">'[%%datetime%%] [%%extra.token%%] %%channel%%.%%level_name%%: %%message%% %%context%% %%extra%%\n'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span>
+    <span class="hljs-operator">-&gt;</span>register(SessionRequestProcessor<span class="hljs-operator">::</span>class)
+    <span class="hljs-operator">-&gt;</span>addTag(<span class="hljs-string">'monolog.processor'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Finally, set the formatter to be used on whatever handler you want:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-ff39343cbd713a330259e355d86f2e74734df814" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-f8e5be822eefecdb5f8e1adbaaa1ea5ef248cf0c" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-8a34890e52362c72c68c47ab93755f8c00a62032" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-ff39343cbd713a330259e355d86f2e74734df814" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/prod/monolog.yaml</span>
+<span class="hljs-attr">monolog:</span>
+    <span class="hljs-attr">handlers:</span>
+        <span class="hljs-attr">main:</span>
+            <span class="hljs-attr">type:</span> <span class="hljs-string">stream</span>
+            <span class="hljs-attr">path:</span> <span class="hljs-string">'%kernel.logs_dir%/%kernel.environment%.log'</span>
+            <span class="hljs-attr">level:</span> <span class="hljs-string">debug</span>
+            <span class="hljs-attr">formatter:</span> <span class="hljs-string">monolog.formatter.session_request</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-f8e5be822eefecdb5f8e1adbaaa1ea5ef248cf0c" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/prod/monolog.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:monolog</span>=<span class="hljs-string">"http://symfony.com/schema/dic/monolog"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/monolog
+        https://symfony.com/schema/dic/monolog/monolog-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">monolog:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">monolog:handler</span>
+            <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span>
+            <span class="hljs-attr">type</span>=<span class="hljs-string">"stream"</span>
+            <span class="hljs-attr">path</span>=<span class="hljs-string">"%kernel.logs_dir%/%kernel.environment%.log"</span>
+            <span class="hljs-attr">level</span>=<span class="hljs-string">"debug"</span>
+            <span class="hljs-attr">formatter</span>=<span class="hljs-string">"monolog.formatter.session_request"</span>
+        /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">monolog:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-8a34890e52362c72c68c47ab93755f8c00a62032" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/prod/monolog.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">MonologConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(MonologConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monolog</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monolog</span><span class="hljs-operator">-&gt;</span>handler(<span class="hljs-string">'main'</span>)
+        <span class="hljs-operator">-&gt;</span>type(<span class="hljs-string">'stream'</span>)
+        <span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'%kernel.logs_dir%/%kernel.environment%.log'</span>)
+        <span class="hljs-operator">-&gt;</span>level(<span class="hljs-string">'debug'</span>)
+        <span class="hljs-operator">-&gt;</span>formatter(<span class="hljs-string">'monolog.formatter.session_request'</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>If you use several handlers, you can also register a processor at the
+handler level or at the channel level instead of registering it globally
+(see the following sections).</p>
+<p>When registering a new processor, instead of adding the tag manually in your
+configuration files, you can use the <code translate="no" class="notranslate">#[AsMonologProcessor]</code> attribute to
+apply it on the processor class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Logger/SessionRequestProcessor.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Logger</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Monolog</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsMonologProcessor</span>;
+
+<span class="hljs-comment">#[AsMonologProcessor]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SessionRequestProcessor</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">#[AsMonologProcessor]</code> attribute takes these optional arguments:</p>
+<ul>
+    <li><code translate="no" class="notranslate">channel</code>: the logging channel the processor should be pushed to;</li>
+<li><code translate="no" class="notranslate">handler</code>: the handler the processor should be pushed to;</li>
+<li><code translate="no" class="notranslate">method</code>: the method that processes the records (useful when applying
+the attribute to the entire class instead of a single method).</li>
+</ul>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>3.8</span>
+    </p><p>The <code translate="no" class="notranslate">#[AsMonologProcessor]</code> attribute was introduced in MonologBundle 3.8.</p>
+</div>
+<p>Symfony's MonologBridge provides processors that can be registered inside your application.</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Monolog/Processor/DebugProcessor.php" class="reference external" title="Symfony\Bridge\Monolog\Processor\DebugProcessor" rel="external noopener noreferrer" target="_blank">DebugProcessor</a></dt>
+        
+        <dd>
+                            Adds additional information useful for debugging like a timestamp or an
+error message to the record.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Monolog/Processor/TokenProcessor.php" class="reference external" title="Symfony\Bridge\Monolog\Processor\TokenProcessor" rel="external noopener noreferrer" target="_blank">TokenProcessor</a></dt>
+        
+        <dd>
+                            Adds information from the current user's token to the record namely
+username, roles and whether the user is authenticated.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Monolog/Processor/SwitchUserTokenProcessor.php" class="reference external" title="Symfony\Bridge\Monolog\Processor\SwitchUserTokenProcessor" rel="external noopener noreferrer" target="_blank">SwitchUserTokenProcessor</a></dt>
+        
+        <dd>
+                            Adds information about the user who is impersonating the logged in user,
+namely username, roles and whether the user is authenticated.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Monolog/Processor/WebProcessor.php" class="reference external" title="Symfony\Bridge\Monolog\Processor\WebProcessor" rel="external noopener noreferrer" target="_blank">WebProcessor</a></dt>
+        
+        <dd>
+                            Overrides data from the request using the data inside Symfony's request
+object.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Monolog/Processor/RouteProcessor.php" class="reference external" title="Symfony\Bridge\Monolog\Processor\RouteProcessor" rel="external noopener noreferrer" target="_blank">RouteProcessor</a></dt>
+        
+        <dd>
+                            Adds information about current route (controller, action, route parameters).
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Monolog/Processor/ConsoleCommandProcessor.php" class="reference external" title="Symfony\Bridge\Monolog\Processor\ConsoleCommandProcessor" rel="external noopener noreferrer" target="_blank">ConsoleCommandProcessor</a></dt>
+        
+        <dd>
+                            Adds information about the current console command.
+                    </dd>
+    </dl>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Check out the <a href="https://github.com/Seldaek/monolog/tree/main/src/Monolog/Processor" class="reference external" rel="external noopener noreferrer" target="_blank">built-in Monolog processors</a> to learn more about how to
+create these processors.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="registering-processors-per-handler">
+    Registering Processors per Handler
+    <a class="headerlink" href="#registering-processors-per-handler" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can register a processor per handler using the <code translate="no" class="notranslate">handler</code> option of
+the <code translate="no" class="notranslate">monolog.processor</code> tag:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-eecdea0e7c4bd8b783707d1e9c8a766db75dc24e" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-ff34f27383c7b681e68bf4dc2ce1d1aa9d38178e" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-3d784dbf762afc4f5ec1b8fc894d46f9bcccfe34" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-eecdea0e7c4bd8b783707d1e9c8a766db75dc24e" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">App\Logger\SessionRequestProcessor:</span>
+        <span class="hljs-attr">tags:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">name:</span> <span class="hljs-string">monolog.processor,</span> <span class="hljs-attr">handler:</span> <span class="hljs-string">main</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-ff34f27383c7b681e68bf4dc2ce1d1aa9d38178e" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:monolog</span>=<span class="hljs-string">"http://symfony.com/schema/dic/monolog"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/monolog
+        https://symfony.com/schema/dic/monolog/monolog-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Logger\SessionRequestProcessor"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"monolog.processor"</span> <span class="hljs-attr">handler</span>=<span class="hljs-string">"main"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-3d784dbf762afc4f5ec1b8fc894d46f9bcccfe34" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span>
+    <span class="hljs-operator">-&gt;</span>register(SessionRequestProcessor<span class="hljs-operator">::</span>class)
+    <span class="hljs-operator">-&gt;</span>addTag(<span class="hljs-string">'monolog.processor'</span>, [<span class="hljs-string">'handler'</span> =&gt; <span class="hljs-string">'main'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h2 id="registering-processors-per-channel">
+    Registering Processors per Channel
+    <a class="headerlink" href="#registering-processors-per-channel" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can register a processor per channel using the <code translate="no" class="notranslate">channel</code> option of
+the <code translate="no" class="notranslate">monolog.processor</code> tag:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-f0c77a654cf3df08a7bf7ecf41e5b808ee98a372" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-9374434b6eef4c10aefed235f2bbf8a980cf508a" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-8de0e3dfaaf8d03fc87395058301957aa963419b" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-f0c77a654cf3df08a7bf7ecf41e5b808ee98a372" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">App\Logger\SessionRequestProcessor:</span>
+        <span class="hljs-attr">tags:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">name:</span> <span class="hljs-string">monolog.processor,</span> <span class="hljs-attr">channel:</span> <span class="hljs-string">main</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-9374434b6eef4c10aefed235f2bbf8a980cf508a" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:monolog</span>=<span class="hljs-string">"http://symfony.com/schema/dic/monolog"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/monolog
+        https://symfony.com/schema/dic/monolog/monolog-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Logger\SessionRequestProcessor"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"monolog.processor"</span> <span class="hljs-attr">channel</span>=<span class="hljs-string">"main"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-8de0e3dfaaf8d03fc87395058301957aa963419b" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span>
+    <span class="hljs-operator">-&gt;</span>register(SessionRequestProcessor<span class="hljs-operator">::</span>class)
+    <span class="hljs-operator">-&gt;</span>addTag(<span class="hljs-string">'monolog.processor'</span>, [<span class="hljs-string">'channel'</span> =&gt; <span class="hljs-string">'main'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

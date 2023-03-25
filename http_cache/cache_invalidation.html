@@ -1,0 +1,413 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <span id="http-cache-invalidation"></span>
+<div class="section">
+<h1 id="cache-invalidation">
+    Cache Invalidation
+    <a class="headerlink" href="#cache-invalidation" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>&quot;There are only two hard things in Computer Science: cache invalidation
+and naming things.&quot; -- Phil Karlton</p>
+</blockquote>
+<p>Once a URL is cached by a gateway cache, the cache will not ask the
+application for that content anymore. This allows the cache to provide fast
+responses and reduces the load on your application. However, you risk
+delivering outdated content. A way out of this dilemma is to use long
+cache lifetimes, but to actively notify the gateway cache when content
+changes. Reverse proxies usually provide a channel to receive such
+notifications, typically through special HTTP requests.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>While cache invalidation is powerful, avoid it when possible. If you fail
+to invalidate something, outdated caches will be served for a potentially
+long time. Instead, use short cache lifetimes or use the validation model,
+and adjust your controllers to perform efficient validation checks as
+explained in <a href="validation.html#optimizing-cache-validation" class="reference internal">HTTP Cache Validation</a>.</p>
+<p>Furthermore, since invalidation is a topic specific to each type of reverse
+proxy, using this concept will tie you to a specific reverse proxy or need
+additional efforts to support different proxies.</p>
+</div>
+<p>Sometimes, however, you need that extra performance you can get when
+explicitly invalidating. For invalidation, your application needs to detect
+when content changes and tell the cache to remove the URLs which contain
+that data from its cache.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you want to use cache invalidation, have a look at the
+<a href="https://foshttpcachebundle.readthedocs.org/" class="reference external" rel="external noopener noreferrer" target="_blank">FOSHttpCacheBundle</a>. This bundle provides services to help with various
+cache invalidation concepts and also documents the configuration for a
+couple of common caching proxies.</p>
+</div>
+<p>If one content corresponds to one URL, the <code translate="no" class="notranslate">PURGE</code> model works well.
+You send a request to the cache proxy with the HTTP method <code translate="no" class="notranslate">PURGE</code> (using
+the word &quot;PURGE&quot; is a convention, technically this can be any string) instead
+of <code translate="no" class="notranslate">GET</code> and make the cache proxy detect this and remove the data from the
+cache instead of going to the application to get a response.</p>
+<p>Here is how you can configure the <a href="../http_cache.html#symfony-gateway-cache" class="reference internal">Symfony reverse proxy</a>
+to support the <code translate="no" class="notranslate">PURGE</code> HTTP method. First create a caching kernel that overrides the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/HttpCache/HttpCache.php#method_invalidate" class="reference external" title="Symfony\Component\HttpKernel\HttpCache\HttpCache::invalidate()" rel="external noopener noreferrer" target="_blank">invalidate()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/CacheKernel.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">HttpCache</span>\<span class="hljs-title">HttpCache</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CacheKernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">HttpCache</span>
+</span>{
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">invalidate</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, bool <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>catch</span> = false)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-string">'PURGE'</span> !== <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getMethod()) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>invalidate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>catch</span>);
+        }
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-string">'127.0.0.1'</span> !== <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getClientIp()) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(
+                <span class="hljs-string">'Invalid HTTP method'</span>,
+                Response<span class="hljs-operator">::</span>HTTP_BAD_REQUEST
+            );
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response();
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getStore()<span class="hljs-operator">-&gt;</span>purge(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getUri())) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setStatusCode(Response<span class="hljs-operator">::</span>HTTP_OK, <span class="hljs-string">'Purged'</span>);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setStatusCode(Response<span class="hljs-operator">::</span>HTTP_NOT_FOUND, <span class="hljs-string">'Not found'</span>);
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, register the class as a service that <a href="../service_container/service_decoration.html" class="reference internal">decorates</a>
+<code translate="no" class="notranslate">http_cache</code>:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-4">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-1f96c34d2983f57738104125f1580a03e4306e1b" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-eacb4ea2a525e48427dde6773b81b22a9b927c73" aria-selected="false"
+                 tabindex="-1">
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-6344f7a49e6c19849149f573c84a764e4080d09c" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-91a006bb0dfcd08f551528ce7e7c8fa081dca5a9" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-1f96c34d2983f57738104125f1580a03e4306e1b" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/CacheKernel.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsDecorator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">Autoconfigure</span>;
+
+<span class="hljs-comment">#[Autoconfigure(bind: ['$surrogate' =&gt; '@?esi'])]</span>
+<span class="hljs-comment">#[AsDecorator(decorates: 'http_cache')]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CacheKernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">HttpCache</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-eacb4ea2a525e48427dde6773b81b22a9b927c73" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="display: none">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">App\CacheKernel:</span>
+        <span class="hljs-attr">decorates:</span> <span class="hljs-string">http_cache</span>
+        <span class="hljs-attr">arguments:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">'@kernel'</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">'@http_cache.store'</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">'@?esi'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-6344f7a49e6c19849149f573c84a764e4080d09c" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\CacheKernel"</span> <span class="hljs-attr">decorates</span>=<span class="hljs-string">"http_cache"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">argument</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"service"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"kernel"</span>/&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">argument</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"service"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"http_cache.store"</span>/&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">argument</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"service"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"esi"</span> <span class="hljs-attr">on-invalid</span>=<span class="hljs-string">"null"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-91a006bb0dfcd08f551528ce7e7c8fa081dca5a9" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">CacheKernel</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(CacheKernel<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>decorate(<span class="hljs-string">'http_cache'</span>)
+        <span class="hljs-operator">-&gt;</span>args([
+            service(<span class="hljs-string">'kernel'</span>),
+            service(<span class="hljs-string">'http_cache.store'</span>),
+            service(<span class="hljs-string">'esi'</span>)<span class="hljs-operator">-&gt;</span>nullOnInvalid(),
+        ])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>You must protect the <code translate="no" class="notranslate">PURGE</code> HTTP method somehow to avoid random people
+purging your cached data.</p>
+</div>
+<p><strong>Purge</strong> instructs the cache to drop a resource in <em>all its variants</em>
+(according to the <code translate="no" class="notranslate">Vary</code> header, see <a href="cache_vary.html" class="reference internal">Varying the Response for HTTP Cache</a>). An alternative to purging is
+<strong>refreshing</strong> the content. Refreshing means that the caching proxy is
+instructed to discard its local cache and fetch the content again. This way,
+the new content is already available in the cache. The drawback of refreshing
+is that variants are not invalidated.</p>
+<p>In many applications, the same content bit is used on various pages with
+different URLs. More flexible concepts exist for those cases:</p>
+<ul>
+    <li><strong>Banning</strong> invalidates responses matching regular expressions on the
+URL or other criteria;</li>
+<li><strong>Cache tagging</strong> lets you add a tag for each content used in a response
+so that you can invalidate all URLs containing a certain content.</li>
+</ul>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

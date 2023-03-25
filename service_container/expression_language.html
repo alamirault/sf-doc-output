@@ -1,0 +1,393 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-inject-values-based-on-complex-expressions">
+    How to Inject Values Based on Complex Expressions
+    <a class="headerlink" href="#how-to-inject-values-based-on-complex-expressions" title="Permalink to this headline">¶</a>
+</h1>
+<p>The service container also supports an &quot;expression&quot; that allows you to inject
+very specific values into a service.</p>
+<p>For example, suppose you have a service (not shown here), called <code translate="no" class="notranslate">App\Mail\MailerConfiguration</code>,
+which has a <code translate="no" class="notranslate">getMailerMethod()</code> method on it. This returns a string - like <code translate="no" class="notranslate">sendmail</code>
+based on some configuration.</p>
+<p>Suppose that you want to pass the result of this method as a constructor argument
+to another service: <code translate="no" class="notranslate">App\Mailer</code>. One way to do this is with an expression:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-69b264fa5703dc9049173eaea8a4851986ded955" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-64641ba21eb17d707ce4353fe2deb159c9dcf847" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-7ea053f6e02f9696215a44473ba6e04136fe2368" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-69b264fa5703dc9049173eaea8a4851986ded955" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-string">App\Mail\MailerConfiguration:</span> <span class="hljs-string">~</span>
+
+    <span class="hljs-string">App\Mailer:</span>
+        <span class="hljs-comment"># the '@=' prefix is required when using expressions for arguments in YAML files</span>
+        <span class="hljs-attr">arguments:</span> <span class="hljs-string">['@=service("App\\Mail\\MailerConfiguration").getMailerMethod()']</span>
+        <span class="hljs-comment"># when using double-quoted strings, the backslash needs to be escaped twice (see https://yaml.org/spec/1.2/spec.html#id2787109)</span>
+        <span class="hljs-comment"># arguments: ["@=service('App\\\\Mail\\\\MailerConfiguration').getMailerMethod()"]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-64641ba21eb17d707ce4353fe2deb159c9dcf847" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Mail\MailerConfiguration"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Mailer"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">argument</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"expression"</span>&gt;</span>service('App\\Mail\\MailerConfiguration').getMailerMethod()<span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-7ea053f6e02f9696215a44473ba6e04136fe2368" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Mail</span>\<span class="hljs-title">MailerConfiguration</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Mailer</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(MailerConfiguration<span class="hljs-operator">::</span>class);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(Mailer<span class="hljs-operator">::</span>class)
+        <span class="hljs-comment">// because of the escaping applied by PHP, you must add 4 backslashes for each original backslash</span>
+        <span class="hljs-operator">-&gt;</span>args([expr(<span class="hljs-string">"service('App\\\\Mail\\\\MailerConfiguration').getMailerMethod()"</span>)]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Learn more about the <a href="../reference/formats/expression_language.html" class="reference internal">expression language syntax</a>.</p>
+<p>In this context, you have access to 3 functions:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">service</code></dt>
+        
+        <dd>
+                            Returns a given service (see the example above).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">parameter</code></dt>
+        
+        <dd>
+                            Returns a specific parameter value (syntax is like <code translate="no" class="notranslate">service</code>).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">env</code></dt>
+        
+        <dd>
+                            Returns the value of an env variable.
+                    </dd>
+    </dl>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The <code translate="no" class="notranslate">env()</code> function was introduced in Symfony 6.1.</p>
+</div>
+<p>You also have access to the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Container.php" class="reference external" title="Symfony\Component\DependencyInjection\Container" rel="external noopener noreferrer" target="_blank">Container</a>
+via a <code translate="no" class="notranslate">container</code> variable. Here's another example:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-2e39c9feb9302846e52a29a0f7aca9f5bf93ef39" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-1c436b9e8d9f989e2a1390ebf03d66dae8e5100e" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-cf6ed8486ca3843ea5ce88b5c600101e9a82d8d2" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-2e39c9feb9302846e52a29a0f7aca9f5bf93ef39" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">App\Mailer:</span>
+        <span class="hljs-comment"># the '@=' prefix is required when using expressions for arguments in YAML files</span>
+        <span class="hljs-attr">arguments:</span> <span class="hljs-string">["@=container.hasParameter('some_param')</span> <span class="hljs-string">?</span> <span class="hljs-string">parameter('some_param')</span> <span class="hljs-string">:</span> <span class="hljs-string">'default_value'</span><span class="hljs-string">"]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-1c436b9e8d9f989e2a1390ebf03d66dae8e5100e" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Mailer"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">argument</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"expression"</span>&gt;</span>container.hasParameter('some_param') ? parameter('some_param') : 'default_value'<span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-cf6ed8486ca3843ea5ce88b5c600101e9a82d8d2" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Mailer</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(Mailer<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>args([expr(<span class="hljs-string">"container.hasParameter('some_param') ? parameter('some_param') : 'default_value'"</span>)]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Expressions can be used in <code translate="no" class="notranslate">arguments</code>, <code translate="no" class="notranslate">properties</code>, as arguments with
+<code translate="no" class="notranslate">configurator</code>, as arguments to <code translate="no" class="notranslate">calls</code> (method calls) and in
+<code translate="no" class="notranslate">factories</code> (<a href="factories.html" class="reference internal">service factories</a>).</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>Using expressions in <code translate="no" class="notranslate">factories</code> was introduced in Symfony 6.1.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

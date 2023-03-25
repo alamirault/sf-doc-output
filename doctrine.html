@@ -1,0 +1,2175 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="databases-and-the-doctrine-orm">
+    Databases and the Doctrine ORM
+    <a class="headerlink" href="#databases-and-the-doctrine-orm" title="Permalink to this headline">¶</a>
+</h1>
+<div class="admonition admonition-screencast screencast">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                <span>Screencast</span>
+    </p><p>Do you prefer video tutorials? Check out the <a href="https://symfonycasts.com/screencast/symfony-doctrine" class="reference external" rel="external noopener noreferrer" target="_blank">Doctrine screencast series</a>.</p>
+</div>
+<p>Symfony provides all the tools you need to use databases in your applications
+thanks to <a href="https://www.doctrine-project.org/" class="reference external" rel="external noopener noreferrer" target="_blank">Doctrine</a>, the best set of PHP libraries to work with databases.
+These tools support relational databases like MySQL and PostgreSQL and also
+NoSQL databases like MongoDB.</p>
+<p>Databases are a broad topic, so the documentation is divided in three articles:</p>
+<ul>
+    <li>This article explains the recommended way to work with <strong>relational databases</strong>
+in Symfony applications;</li>
+<li>Read <a href="doctrine/dbal.html" class="reference internal">this other article</a> if you need <strong>low-level access</strong>
+to perform raw SQL queries to relational databases (similar to PHP's <a href="https://www.php.net/pdo" class="reference external" rel="external noopener noreferrer" target="_blank">PDO</a>);</li>
+<li>Read <a href="https://symfony.com/doc/current/bundles/DoctrineMongoDBBundle/index.html" class="reference external">DoctrineMongoDBBundle docs</a> if you are working with <strong>MongoDB databases</strong>.</li>
+</ul>
+<div class="section">
+<h2 id="installing-doctrine">
+    Installing Doctrine
+    <a class="headerlink" href="#installing-doctrine" title="Permalink to this headline">¶</a>
+</h2>
+<p>First, install Doctrine support via the <code translate="no" class="notranslate">orm</code> <a href="setup.html#symfony-packs" class="reference internal">Symfony pack</a>,
+as well as the MakerBundle, which will help generate some code:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/orm-pack
+<span class="hljs-prompt">$ </span>composer require --dev symfony/maker-bundle</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="configuring-the-database">
+    Configuring the Database
+    <a class="headerlink" href="#configuring-the-database" title="Permalink to this headline">¶</a>
+</h3>
+<p>The database connection information is stored as an environment variable called
+<code translate="no" class="notranslate">DATABASE_URL</code>. For development, you can find and customize this inside <code translate="no" class="notranslate">.env</code>:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text"># .env (or override DATABASE_URL in .env.local to avoid committing your changes)
+
+# customize this line!
+DATABASE_URL=&quot;mysql://db_user:db_password@127.0.0.1:3306/db_name?serverVersion=5.7&quot;
+
+# to use mariadb:
+DATABASE_URL=&quot;mysql://db_user:db_password@127.0.0.1:3306/db_name?serverVersion=mariadb-10.5.8&quot;
+
+# to use sqlite:
+# DATABASE_URL=&quot;sqlite:///%kernel.project_dir%/var/app.db&quot;
+
+# to use postgresql:
+# DATABASE_URL=&quot;postgresql://db_user:db_password@127.0.0.1:5432/db_name?serverVersion=11&amp;charset=utf8&quot;
+
+# to use oracle:
+# DATABASE_URL=&quot;oci8://db_user:db_password@127.0.0.1:1521/db_name&quot;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>If the username, password, host or database name contain any character considered
+special in a URI (such as <code translate="no" class="notranslate">+</code>, <code translate="no" class="notranslate">@</code>, <code translate="no" class="notranslate">$</code>, <code translate="no" class="notranslate">#</code>, <code translate="no" class="notranslate">/</code>, <code translate="no" class="notranslate">:</code>, <code translate="no" class="notranslate">*</code>, <code translate="no" class="notranslate">!</code>, <code translate="no" class="notranslate">%</code>),
+you must encode them. See <a href="https://www.ietf.org/rfc/rfc3986.txt" class="reference external" rel="external noopener noreferrer" target="_blank">RFC 3986</a> for the full list of reserved characters or
+use the <a href="https://secure.php.net/manual/en/function.urlencode.php" class="reference external" title="urlencode" rel="external noopener noreferrer" target="_blank">urlencode</a> function to encode them. In this case you need to
+remove the <code translate="no" class="notranslate">resolve:</code> prefix in <code translate="no" class="notranslate">config/packages/doctrine.yaml</code> to avoid errors:
+<code translate="no" class="notranslate">url: &#039;%env(DATABASE_URL)%&#039;</code></p>
+</div>
+<p>Now that your connection parameters are setup, Doctrine can create the <code translate="no" class="notranslate">db_name</code>
+database for you:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console doctrine:database:create</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>There are more options in <code translate="no" class="notranslate">config/packages/doctrine.yaml</code> that you can configure,
+including your <code translate="no" class="notranslate">server_version</code> (e.g. 5.7 if you're using MySQL 5.7), which may
+affect how Doctrine functions.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>There are many other Doctrine commands. Run <code translate="no" class="notranslate">php bin/console list doctrine</code>
+to see a full list.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="creating-an-entity-class">
+    Creating an Entity Class
+    <a class="headerlink" href="#creating-an-entity-class" title="Permalink to this headline">¶</a>
+</h2>
+<p>Suppose you're building an application where products need to be displayed.
+Without even thinking about Doctrine or databases, you already know that
+you need a <code translate="no" class="notranslate">Product</code> object to represent those products.</p>
+<span id="doctrine-adding-mapping"></span>
+<p>You can use the <code translate="no" class="notranslate">make:entity</code> command to create this class and any fields you
+need. The command will ask you some questions - answer them like done below:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash">$ php bin/console make:entity
+
+Class name of the entity to create or update:
+&gt; Product
+
+New property name (press &lt;<span class="hljs-built_in">return</span>&gt; to stop adding fields):
+&gt; name
+
+Field <span class="hljs-built_in">type</span> (enter ? to see all types) [string]:
+&gt; string
+
+Field length [255]:
+&gt; 255
+
+Can this field be null <span class="hljs-keyword">in</span> the database (nullable) (yes/no) [no]:
+&gt; no
+
+New property name (press &lt;<span class="hljs-built_in">return</span>&gt; to stop adding fields):
+&gt; price
+
+Field <span class="hljs-built_in">type</span> (enter ? to see all types) [string]:
+&gt; <span class="hljs-built_in">integer</span>
+
+Can this field be null <span class="hljs-keyword">in</span> the database (nullable) (yes/no) [no]:
+&gt; no
+
+New property name (press &lt;<span class="hljs-built_in">return</span>&gt; to stop adding fields):
+&gt;
+(press enter again to finish)</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Whoa! You now have a new <code translate="no" class="notranslate">src/Entity/Product.php</code> file:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Entity/Product.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repository</span>\<span class="hljs-title">ProductRepository</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Mapping</span> <span class="hljs-title">as</span> <span class="hljs-title">ORM</span>;
+
+<span class="hljs-comment">#[ORM\Entity(repositoryClass: ProductRepository::class)]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Product</span>
+</span>{
+    <span class="hljs-comment">#[ORM\Id]</span>
+    <span class="hljs-comment">#[ORM\GeneratedValue]</span>
+    <span class="hljs-comment">#[ORM\Column]</span>
+    <span class="hljs-keyword">private</span> ?int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span> = <span class="hljs-keyword">null</span>;
+
+    <span class="hljs-comment">#[ORM\Column(length: 255)]</span>
+    <span class="hljs-keyword">private</span> ?string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span> = <span class="hljs-keyword">null</span>;
+
+    <span class="hljs-comment">#[ORM\Column]</span>
+    <span class="hljs-keyword">private</span> ?int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span> = <span class="hljs-keyword">null</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getId</span><span class="hljs-params">()</span>: ?<span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>id;
+    }
+
+    <span class="hljs-comment">// ... getter and setter methods</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Starting in v1.44.0 - MakerBundle only supports entities using PHP attributes.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Confused why the price is an integer? Don't worry: this is just an example.
+But, storing prices as integers (e.g. 100 = $1 USD) can avoid rounding issues.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you are using an SQLite database, you'll see the following error:
+<em>PDOException: SQLSTATE[HY000]: General error: 1 Cannot add a NOT NULL
+column with default value NULL</em>. Add a <code translate="no" class="notranslate">nullable=true</code> option to the
+<code translate="no" class="notranslate">description</code> property to fix the problem.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>There is a <a href="https://dev.mysql.com/doc/refman/5.6/en/innodb-limits.html" class="reference external" rel="external noopener noreferrer" target="_blank">limit of 767 bytes for the index key prefix</a> when using
+InnoDB tables in MySQL 5.6 and earlier versions. String columns with 255
+character length and <code translate="no" class="notranslate">utf8mb4</code> encoding surpass that limit. This means
+that any column of type <code translate="no" class="notranslate">string</code> and <code translate="no" class="notranslate">unique=true</code> must set its
+maximum <code translate="no" class="notranslate">length</code> to <code translate="no" class="notranslate">190</code>. Otherwise, you'll see this error:
+<em>&quot;[PDOException] SQLSTATE[42000]: Syntax error or access violation:
+1071 Specified key was too long; max key length is 767 bytes&quot;</em>.</p>
+</div>
+<p>This class is called an &quot;entity&quot;. And soon, you'll be able to save and query Product
+objects to a <code translate="no" class="notranslate">product</code> table in your database. Each property in the <code translate="no" class="notranslate">Product</code>
+entity can be mapped to a column in that table. This is usually done with attributes:
+the <code translate="no" class="notranslate">#[ORM\Column(...)]</code> comments that you see above each property:</p>
+<img src="_images/mapping_single_entity.png" align="center" />
+<p>The <code translate="no" class="notranslate">make:entity</code> command is a tool to make life easier. But this is <em>your</em> code:
+add/remove fields, add/remove methods or update configuration.</p>
+<p>Doctrine supports a wide variety of field types, each with their own options.
+To see a full list, check out <a href="https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/basic-mapping.html" class="reference external" rel="external noopener noreferrer" target="_blank">Doctrine's Mapping Types documentation</a>.
+If you want to use XML instead of annotations, add <code translate="no" class="notranslate">type: xml</code> and
+<code translate="no" class="notranslate">dir: &#039;%kernel.project_dir%/config/doctrine&#039;</code> to the entity mappings in your
+<code translate="no" class="notranslate">config/packages/doctrine.yaml</code> file.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Be careful not to use reserved SQL keywords as your table or column names
+(e.g. <code translate="no" class="notranslate">GROUP</code> or <code translate="no" class="notranslate">USER</code>). See Doctrine's <a href="https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/basic-mapping.html#quoting-reserved-words" class="reference external" rel="external noopener noreferrer" target="_blank">Reserved SQL keywords documentation</a>
+for details on how to escape these. Or, change the table name with
+<code translate="no" class="notranslate">#[ORM\Table(name: &#039;groups&#039;)]</code> above the class or configure the column name with
+the <code translate="no" class="notranslate">name: &#039;group_name&#039;</code> option.</p>
+</div>
+<span id="doctrine-creating-the-database-tables-schema"></span>
+</div>
+<div class="section">
+<h2 id="migrations-creating-the-database-tables-schema">
+    Migrations: Creating the Database Tables/Schema
+    <a class="headerlink" href="#migrations-creating-the-database-tables-schema" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <code translate="no" class="notranslate">Product</code> class is fully-configured and ready to save to a <code translate="no" class="notranslate">product</code> table.
+If you just defined this class, your database doesn't actually have the <code translate="no" class="notranslate">product</code>
+table yet. To add it, you can leverage the <a href="https://github.com/doctrine/DoctrineMigrationsBundle" class="reference external" rel="external noopener noreferrer" target="_blank">DoctrineMigrationsBundle</a>, which is
+already installed:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console make:migration</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If everything worked, you should see something like this:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">SUCCESS!
+
+Next: Review the new migration &quot;migrations/Version20211116204726.php&quot;
+Then: Run the migration with php bin/console doctrine:migrations:migrate</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you open this file, it contains the SQL needed to update your database! To run
+that SQL, execute your migrations:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console doctrine:migrations:migrate</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This command executes all migration files that have not already been run against
+your database. You should run this command on production when you deploy to keep
+your production database up-to-date.</p>
+<span id="doctrine-add-more-fields"></span>
+</div>
+<div class="section">
+<h2 id="migrations-adding-more-fields">
+    Migrations &amp; Adding more Fields
+    <a class="headerlink" href="#migrations-adding-more-fields" title="Permalink to this headline">¶</a>
+</h2>
+<p>But what if you need to add a new field property to <code translate="no" class="notranslate">Product</code>, like a
+<code translate="no" class="notranslate">description</code>? You can edit the class to add the new property. But, you can
+also use <code translate="no" class="notranslate">make:entity</code> again:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash">$ php bin/console make:entity
+
+Class name of the entity to create or update
+&gt; Product
+
+New property name (press &lt;<span class="hljs-built_in">return</span>&gt; to stop adding fields):
+&gt; description
+
+Field <span class="hljs-built_in">type</span> (enter ? to see all types) [string]:
+&gt; text
+
+Can this field be null <span class="hljs-keyword">in</span> the database (nullable) (yes/no) [no]:
+&gt; no
+
+New property name (press &lt;<span class="hljs-built_in">return</span>&gt; to stop adding fields):
+&gt;
+(press enter again to finish)</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This adds the new <code translate="no" class="notranslate">description</code> property and <code translate="no" class="notranslate">getDescription()</code> and <code translate="no" class="notranslate">setDescription()</code>
+methods:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">// src/Entity/Product.php
+  // ...
+<span class="hljs-addition">+  use Doctrine\DBAL\Types\Types;</span>
+
+  class Product
+  {
+      // ...
+
+<span class="hljs-addition">+     #[ORM\Column(type: Types::TEXT)]</span>
+<span class="hljs-addition">+     private $description;</span>
+
+      // getDescription() &amp; setDescription() were also added
+  }</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The new property is mapped, but it doesn't exist yet in the <code translate="no" class="notranslate">product</code> table. No
+problem! Generate a new migration:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console make:migration</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This time, the SQL in the generated file will look like this:</p>
+<div translate="no" class="highlight-sql notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs sql"><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> product <span class="hljs-keyword">ADD</span> description LONGTEXT <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The migration system is <em>smart</em>. It compares all of your entities with the current
+state of the database and generates the SQL needed to synchronize them! Like
+before, execute your migrations:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console doctrine:migrations:migrate</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This will only execute the <em>one</em> new migration file, because DoctrineMigrationsBundle
+knows that the first migration was already executed earlier. Behind the scenes, it
+manages a <code translate="no" class="notranslate">migration_versions</code> table to track this.</p>
+<p>Each time you make a change to your schema, run these two commands to generate the
+migration and then execute it. Be sure to commit the migration files and execute
+them when you deploy.</p>
+<span id="doctrine-generating-getters-and-setters"></span>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you prefer to add new properties manually, the <code translate="no" class="notranslate">make:entity</code> command can
+generate the getter &amp; setter methods for you:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console make:entity --regenerate</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you make some changes and want to regenerate <em>all</em> getter/setter methods,
+also pass <code translate="no" class="notranslate">--overwrite</code>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="persisting-objects-to-the-database">
+    Persisting Objects to the Database
+    <a class="headerlink" href="#persisting-objects-to-the-database" title="Permalink to this headline">¶</a>
+</h2>
+<p>It's time to save a <code translate="no" class="notranslate">Product</code> object to the database! Let's create a new controller
+to experiment:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console make:controller ProductController</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Inside the controller, you can create a new <code translate="no" class="notranslate">Product</code> object, set data on it,
+and save it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ProductController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">EntityManagerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/product', name: 'create_product')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createProduct</span><span class="hljs-params">(EntityManagerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span> = <span class="hljs-keyword">new</span> Product();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>setName(<span class="hljs-string">'Keyboard'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>setPrice(<span class="hljs-number">1999</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>setDescription(<span class="hljs-string">'Ergonomic and stylish!'</span>);
+
+        <span class="hljs-comment">// tell Doctrine you want to (eventually) save the Product (no queries yet)</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span><span class="hljs-operator">-&gt;</span>persist(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>);
+
+        <span class="hljs-comment">// actually executes the queries (i.e. the INSERT query)</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span><span class="hljs-operator">-&gt;</span>flush();
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Saved new product with id '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>getId());
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Try it out!</p>
+<blockquote><p><a href="http://localhost:8000/product" class="reference external" rel="external noopener noreferrer" target="_blank">http://localhost:8000/product</a></p>
+</blockquote>
+<p>Congratulations! You just created your first row in the <code translate="no" class="notranslate">product</code> table. To prove it,
+you can query the database directly:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console dbal:run-sql <span class="hljs-string">'SELECT * FROM product'</span>
+
+<span class="hljs-comment"># on Windows systems not using Powershell, run this command instead:</span>
+<span class="hljs-comment"># php bin/console dbal:run-sql "SELECT * FROM product"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Take a look at the previous example in more detail:</p>
+<span id="doctrine-entity-manager"></span>
+<ul>
+    <li><strong>line 13</strong> The <code translate="no" class="notranslate">EntityManagerInterface $entityManager</code> argument tells Symfony<br />to <a href="service_container.html#services-constructor-injection" class="reference internal">inject the Entity Manager service</a> into<br />the controller method. This object is responsible for saving objects to, and
+fetching objects from, the database.</li>
+<li><strong>lines 17-20</strong> In this section, you instantiate and work with the <code translate="no" class="notranslate">$product</code>
+object like any other normal PHP object.</li>
+<li><strong>line 23</strong> The <code translate="no" class="notranslate">persist($product)</code> call tells Doctrine to &quot;manage&quot; the
+<code translate="no" class="notranslate">$product</code> object. This does <strong>not</strong> cause a query to be made to the database.</li>
+<li><strong>line 26</strong> When the <code translate="no" class="notranslate">flush()</code> method is called, Doctrine looks through
+all of the objects that it's managing to see if they need to be persisted
+to the database. In this example, the <code translate="no" class="notranslate">$product</code> object's data doesn't
+exist in the database, so the entity manager executes an <code translate="no" class="notranslate">INSERT</code> query,
+creating a new row in the <code translate="no" class="notranslate">product</code> table.</li>
+</ul>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If the <code translate="no" class="notranslate">flush()</code> call fails, a <code translate="no" class="notranslate">Doctrine\ORM\ORMException</code> exception
+is thrown. See <a href="https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/transactions-and-concurrency.html" class="reference external" rel="external noopener noreferrer" target="_blank">Transactions and Concurrency</a>.</p>
+</div>
+<p>Whether you're creating or updating objects, the workflow is always the same: Doctrine
+is smart enough to know if it should INSERT or UPDATE your entity.</p>
+<span id="automatic_object_validation"></span>
+</div>
+<div class="section">
+<h2 id="validating-objects">
+    Validating Objects
+    <a class="headerlink" href="#validating-objects" title="Permalink to this headline">¶</a>
+</h2>
+<p><a href="validation.html" class="reference internal">The Symfony validator</a> reuses Doctrine metadata to perform
+some basic validation tasks:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ProductController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">ValidatorInterface</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/product', name: 'create_product')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createProduct</span><span class="hljs-params">(ValidatorInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span> = <span class="hljs-keyword">new</span> Product();
+        <span class="hljs-comment">// This will trigger an error: the column isn't nullable in the database</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>setName(<span class="hljs-keyword">null</span>);
+        <span class="hljs-comment">// This will trigger a type mismatch error: an integer is expected</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>setPrice(<span class="hljs-string">'1999'</span>);
+
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>errors</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span><span class="hljs-operator">-&gt;</span>validate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>);
+        <span class="hljs-keyword">if</span> (count(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>errors</span>) &gt; <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response((string) <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>errors</span>, <span class="hljs-number">400</span>);
+        }
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Although the <code translate="no" class="notranslate">Product</code> entity doesn't define any explicit
+<a href="validation.html" class="reference internal">validation configuration</a>, Symfony introspects the Doctrine
+mapping configuration to infer some validation rules. For example, given that
+the <code translate="no" class="notranslate">name</code> property can't be <code translate="no" class="notranslate">null</code> in the database, a
+<a href="reference/constraints/NotNull.html" class="reference internal">NotNull constraint</a> is added automatically
+to the property (if it doesn't contain that constraint already).</p>
+<p>The following table summarizes the mapping between Doctrine metadata and
+the corresponding validation constraints added automatically by Symfony:</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Doctrine attribute</th>
+                                            <th>Validation constraint</th>
+                                            <th>Notes</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">nullable=false</code></td>
+                                    <td><a href="reference/constraints/NotNull.html" class="reference internal">NotNull</a></td>
+                                    <td>Requires installing the <a href="components/property_info.html" class="reference internal">PropertyInfo component</a></td>
+                            </tr>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">type</code></td>
+                                    <td><a href="reference/constraints/Type.html" class="reference internal">Type</a></td>
+                                    <td>Requires installing the <a href="components/property_info.html" class="reference internal">PropertyInfo component</a></td>
+                            </tr>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">unique=true</code></td>
+                                    <td><a href="reference/constraints/UniqueEntity.html" class="reference internal">UniqueEntity</a></td>
+                                    <td>&nbsp;</td>
+                            </tr>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">length</code></td>
+                                    <td><a href="reference/constraints/Length.html" class="reference internal">Length</a></td>
+                                    <td>&nbsp;</td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<p>Because <a href="forms.html" class="reference internal">the Form component</a> as well as <a href="https://api-platform.com/docs/core/validation/" class="reference external" rel="external noopener noreferrer" target="_blank">API Platform</a> internally
+use the Validator component, all your forms and web APIs will also automatically
+benefit from these automatic validation constraints.</p>
+<p>This automatic validation is a nice feature to improve your productivity, but it
+doesn't replace the validation configuration entirely. You still need to add
+some <a href="reference/constraints.html" class="reference internal">validation constraints</a> to ensure that data
+provided by the user is correct.</p>
+</div>
+<div class="section">
+<h2 id="fetching-objects-from-the-database">
+    Fetching Objects from the Database
+    <a class="headerlink" href="#fetching-objects-from-the-database" title="Permalink to this headline">¶</a>
+</h2>
+<p>Fetching an object back out of the database is even easier. Suppose you want to
+be able to go to <code translate="no" class="notranslate">/product/1</code> to see your new product:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ProductController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">EntityManagerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/product/{id}', name: 'product_show')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(EntityManagerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span>, int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span><span class="hljs-operator">-&gt;</span>getRepository(Product<span class="hljs-operator">::</span>class)<span class="hljs-operator">-&gt;</span>find(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>);
+
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createNotFoundException(
+                <span class="hljs-string">'No product found for id '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>
+            );
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Check out this great product: '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>getName());
+
+        <span class="hljs-comment">// or render a template</span>
+        <span class="hljs-comment">// in the template, print things with {{ product.name }}</span>
+        <span class="hljs-comment">// return $this-&gt;render('product/show.html.twig', ['product' =&gt; $product]);</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Another possibility is to use the <code translate="no" class="notranslate">ProductRepository</code> using Symfony's autowiring
+and injected by the dependency injection container:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ProductController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repository</span>\<span class="hljs-title">ProductRepository</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/product/{id}', name: 'product_show')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>, ProductRepository <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>productRepository</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>productRepository</span>
+            <span class="hljs-operator">-&gt;</span>find(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Try it out!</p>
+<blockquote><p><a href="http://localhost:8000/product/1" class="reference external" rel="external noopener noreferrer" target="_blank">http://localhost:8000/product/1</a></p>
+</blockquote>
+<p>When you query for a particular type of object, you always use what's known
+as its &quot;repository&quot;. You can think of a repository as a PHP class whose only
+job is to help you fetch entities of a certain class.</p>
+<p>Once you have a repository object, you have many helper methods:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>repository</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span><span class="hljs-operator">-&gt;</span>getRepository(Product<span class="hljs-operator">::</span>class);
+
+<span class="hljs-comment">// look for a single Product by its primary key (usually "id")</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>repository</span><span class="hljs-operator">-&gt;</span>find(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>);
+
+<span class="hljs-comment">// look for a single Product by name</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>repository</span><span class="hljs-operator">-&gt;</span>findOneBy([<span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Keyboard'</span>]);
+<span class="hljs-comment">// or find by name and price</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>repository</span><span class="hljs-operator">-&gt;</span>findOneBy([
+    <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Keyboard'</span>,
+    <span class="hljs-string">'price'</span> =&gt; <span class="hljs-number">1999</span>,
+]);
+
+<span class="hljs-comment">// look for multiple Product objects matching the name, ordered by price</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>products</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>repository</span><span class="hljs-operator">-&gt;</span>findBy(
+    [<span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Keyboard'</span>],
+    [<span class="hljs-string">'price'</span> =&gt; <span class="hljs-string">'ASC'</span>]
+);
+
+<span class="hljs-comment">// look for *all* Product objects</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>products</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>repository</span><span class="hljs-operator">-&gt;</span>findAll();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also add <em>custom</em> methods for more complex queries! More on that later in
+the <a href="doctrine.html#doctrine-queries" class="reference internal">Databases and the Doctrine ORM</a> section.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>When rendering an HTML page, the web debug toolbar at the bottom of the page
+will display the number of queries and the time it took to execute them:</p>
+<div class="with-browser"><img src="_images/doctrine_web_debug_toolbar.png" align="center" class="with-browser" />
+</div>
+<p>If the number of database queries is too high, the icon will turn yellow to
+indicate that something may not be correct. Click on the icon to open the
+Symfony Profiler and see the exact queries that were executed. If you don't
+see the web debug toolbar, install the <code translate="no" class="notranslate">profiler</code> <a href="setup.html#symfony-packs" class="reference internal">Symfony pack</a>
+by running this command: <code translate="no" class="notranslate">composer require --dev symfony/profiler-pack</code>.</p>
+</div>
+<span id="doctrine-entity-value-resolver"></span>
+</div>
+<div class="section">
+<h2 id="automatically-fetching-objects-entityvalueresolver">
+    Automatically Fetching Objects (EntityValueResolver)
+    <a class="headerlink" href="#automatically-fetching-objects-entityvalueresolver" title="Permalink to this headline">¶</a>
+</h2>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>Entity Value Resolver was introduced in Symfony 6.2.</p>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>2.7.1</span>
+    </p><p>Autowiring of the <code translate="no" class="notranslate">EntityValueResolver</code> was introduced in DoctrineBundle 2.7.1.</p>
+</div>
+<p>In many cases, you can use the <code translate="no" class="notranslate">EntityValueResolver</code> to do the query for you
+automatically! You can simplify the controller to:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ProductController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repository</span>\<span class="hljs-title">ProductRepository</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/product/{id}')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(Product <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// use the Product!</span>
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! The bundle uses the <code translate="no" class="notranslate">{id}</code> from the route to query for the <code translate="no" class="notranslate">Product</code>
+by the <code translate="no" class="notranslate">id</code> column. If it's not found, a 404 page is generated.</p>
+<p>This behavior is enabled by default on all your controllers. You can
+disable it by setting the <code translate="no" class="notranslate">doctrine.orm.controller_resolver.auto_mapping</code>
+config option to <code translate="no" class="notranslate">false</code>.</p>
+<p>When disabled, you can enable it individually on the desired controllers by
+using the <code translate="no" class="notranslate">MapEntity</code> attribute:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ProductController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Doctrine</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">MapEntity</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/product/{id}')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(
+        #[MapEntity]
+        Product <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>
+    )</span>: <span class="hljs-title">Response</span> </span>{
+        <span class="hljs-comment">// use the Product!</span>
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>When enabled globally, it's possible to disable the behavior on a specific
+controller, by using the <code translate="no" class="notranslate">MapEntity</code> set to <code translate="no" class="notranslate">disabled</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(
+    #[CurrentUser]
+    #[MapEntity<span class="hljs-params">(disabled: true)</span>]
+    User <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span>
+)</span>: <span class="hljs-title">Response</span> </span>{
+    <span class="hljs-comment">// User is not resolved by the EntityValueResolver</span>
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="fetch-automatically">
+    Fetch Automatically
+    <a class="headerlink" href="#fetch-automatically" title="Permalink to this headline">¶</a>
+</h3>
+<p>If your route wildcards match properties on your entity, then the resolver
+will automatically fetch them:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">/**
+ * Fetch via primary key because {id} is in the route.
+ */</span>
+<span class="hljs-comment">#[Route('/product/{id}')]</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">showByPk</span><span class="hljs-params">(Post <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>)</span>: <span class="hljs-title">Response</span>
+</span>{
+}
+
+<span class="hljs-comment">/**
+ * Perform a findOneBy() where the slug property matches {slug}.
+ */</span>
+<span class="hljs-comment">#[Route('/product/{slug}')]</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">showBySlug</span><span class="hljs-params">(Post <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>post</span>)</span>: <span class="hljs-title">Response</span>
+</span>{
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Automatic fetching works in these situations:</p>
+<ul>
+    <li>If <code translate="no" class="notranslate">{id}</code> is in your route, then this is used to fetch by
+primary key via the <code translate="no" class="notranslate">find()</code> method.</li>
+<li>The resolver will attempt to do a <code translate="no" class="notranslate">findOneBy()</code> fetch by using
+<em>all</em> of the wildcards in your route that are actually properties
+on your entity (non-properties are ignored).</li>
+</ul>
+<p>You can control this behavior by actually <em>adding</em> the <code translate="no" class="notranslate">MapEntity</code>
+attribute and using the <a href="doctrine.html#mapentity-options" class="reference internal">MapEntity options</a>.</p>
+</div>
+<div class="section">
+<h3 id="fetch-via-an-expression">
+    Fetch via an Expression
+    <a class="headerlink" href="#fetch-via-an-expression" title="Permalink to this headline">¶</a>
+</h3>
+<p>If automatic fetching doesn't work, you can write an expression using the
+<a href="components/expression_language.html" class="reference internal">ExpressionLanguage component</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">#[Route('/product/{product_id}')]</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(
+    #[MapEntity<span class="hljs-params">(expr: <span class="hljs-string">'repository.find(product_id)'</span>)</span>]
+    Product <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>
+)</span>: <span class="hljs-title">Response</span> </span>{
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In the expression, the <code translate="no" class="notranslate">repository</code> variable will be your entity's
+Repository class and any route wildcards - like <code translate="no" class="notranslate">{product_id}</code> are
+available as variables.</p>
+<p>This can also be used to help resolve multiple arguments:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">#[Route('/product/{id}/comments/{comment_id}')]</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(
+    Product <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>,
+    #[MapEntity<span class="hljs-params">(expr: <span class="hljs-string">'repository.find(comment_id)'</span>)</span>]
+    Comment <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>comment</span>
+)</span>: <span class="hljs-title">Response</span> </span>{
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In the example above, the <code translate="no" class="notranslate">$product</code> argument is handled automatically,
+but <code translate="no" class="notranslate">$comment</code> is configured with the attribute since they cannot both follow
+the default convention.</p>
+</div>
+<div class="section">
+<h3 id="mapentity-options">
+    MapEntity Options
+    <a class="headerlink" href="#mapentity-options" title="Permalink to this headline">¶</a>
+</h3>
+<p>A number of options are available on the <code translate="no" class="notranslate">MapEntity</code> annotation to
+control behavior:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">id</code></dt>
+        
+        <dd>
+                            <p class="first">If an <code translate="no" class="notranslate">id</code> option is configured and matches a route parameter, then
+the resolver will find by the primary key:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">#[Route('/product/{product_id}')]</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(
+    #[MapEntity<span class="hljs-params">(id: <span class="hljs-string">'product_id'</span>)</span>]
+    Product <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>
+)</span>: <span class="hljs-title">Response</span> </span>{
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">mapping</code></dt>
+        
+        <dd>
+                            <p class="first">Configures the properties and values to use with the <code translate="no" class="notranslate">findOneBy()</code>
+method: the key is the route placeholder name and the value is the Doctrine
+property name:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">#[Route('/product/{category}/{slug}/comments/{comment_slug}')]</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(
+    #[MapEntity<span class="hljs-params">(mapping: [<span class="hljs-string">'category'</span> =&gt; <span class="hljs-string">'category'</span>, <span class="hljs-string">'slug'</span> =&gt; <span class="hljs-string">'slug'</span>])</span>]
+    Product <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>,
+    #[MapEntity<span class="hljs-params">(mapping: [<span class="hljs-string">'comment_slug'</span> =&gt; <span class="hljs-string">'slug'</span>])</span>]
+    Comment <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>comment</span>
+)</span>: <span class="hljs-title">Response</span> </span>{
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">exclude</code></dt>
+        
+        <dd>
+                            <p class="first">Configures the properties that should be used in the <code translate="no" class="notranslate">findOneBy()</code>
+method by <em>excluding</em> one or more properties so that not <em>all</em> are used:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">#[Route('/product/{slug}/{date}')]</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(
+    #[MapEntity<span class="hljs-params">(exclude: [<span class="hljs-string">'date'</span>])</span>]
+    Product <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>,
+    \DateTime <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>date</span>
+)</span>: <span class="hljs-title">Response</span> </span>{
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">stripNull</code></dt>
+        
+        <dd>
+                            If true, then when <code translate="no" class="notranslate">findOneBy()</code> is used, any values that are
+<code translate="no" class="notranslate">null</code> will not be used for the query.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">entityManager</code></dt>
+        
+        <dd>
+                            <p class="first">By default, the <code translate="no" class="notranslate">EntityValueResolver</code> uses the <em>default</em>
+entity manager, but you can configure this:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">#[Route('/product/{id}')]</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(
+    #[MapEntity<span class="hljs-params">(entityManager: [<span class="hljs-string">'foo'</span>])</span>]
+    Product <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>
+)</span>: <span class="hljs-title">Response</span> </span>{
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">evictCache</code></dt>
+        
+        <dd>
+                            If true, forces Doctrine to always fetch the entity from the database
+instead of cache.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">disabled</code></dt>
+        
+        <dd>
+                            If true, the <code translate="no" class="notranslate">EntityValueResolver</code> will not try to replace the argument.
+                    </dd>
+    </dl>
+</div>
+</div>
+<div class="section">
+<h2 id="updating-an-object">
+    Updating an Object
+    <a class="headerlink" href="#updating-an-object" title="Permalink to this headline">¶</a>
+</h2>
+<p>Once you've fetched an object from Doctrine, you interact with it the same as
+with any PHP model:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ProductController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repository</span>\<span class="hljs-title">ProductRepository</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/product/edit/{id}', name: 'product_edit')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update</span><span class="hljs-params">(EntityManagerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span>, int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span><span class="hljs-operator">-&gt;</span>getRepository(Product<span class="hljs-operator">::</span>class)<span class="hljs-operator">-&gt;</span>find(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>);
+
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createNotFoundException(
+                <span class="hljs-string">'No product found for id '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>
+            );
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>setName(<span class="hljs-string">'New product name!'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span><span class="hljs-operator">-&gt;</span>flush();
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>redirectToRoute(<span class="hljs-string">'product_show'</span>, [
+            <span class="hljs-string">'id'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>getId()
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Using Doctrine to edit an existing product consists of three steps:</p>
+<ol class="arabic">
+    <li>fetching the object from Doctrine;</li>
+<li>modifying the object;</li>
+<li>calling <code translate="no" class="notranslate">flush()</code> on the entity manager.</li>
+</ol>
+<p>You <em>can</em> call <code translate="no" class="notranslate">$entityManager-&gt;persist($product)</code>, but it isn't necessary:
+Doctrine is already &quot;watching&quot; your object for changes.</p>
+</div>
+<div class="section">
+<h2 id="deleting-an-object">
+    Deleting an Object
+    <a class="headerlink" href="#deleting-an-object" title="Permalink to this headline">¶</a>
+</h2>
+<p>Deleting an object is very similar, but requires a call to the <code translate="no" class="notranslate">remove()</code>
+method of the entity manager:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span><span class="hljs-operator">-&gt;</span>remove(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span><span class="hljs-operator">-&gt;</span>flush();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As you might expect, the <code translate="no" class="notranslate">remove()</code> method notifies Doctrine that you'd
+like to remove the given object from the database. The <code translate="no" class="notranslate">DELETE</code> query isn't
+actually executed until the <code translate="no" class="notranslate">flush()</code> method is called.</p>
+<span id="doctrine-queries"></span>
+</div>
+<div class="section">
+<h2 id="querying-for-objects-the-repository">
+    Querying for Objects: The Repository
+    <a class="headerlink" href="#querying-for-objects-the-repository" title="Permalink to this headline">¶</a>
+</h2>
+<p>You've already seen how the repository object allows you to run basic queries
+without any work:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// from inside a controller</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>repository</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span><span class="hljs-operator">-&gt;</span>getRepository(Product<span class="hljs-operator">::</span>class);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>repository</span><span class="hljs-operator">-&gt;</span>find(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>But what if you need a more complex query? When you generated your entity with
+<code translate="no" class="notranslate">make:entity</code>, the command <em>also</em> generated a <code translate="no" class="notranslate">ProductRepository</code> class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Repository/ProductRepository.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repository</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">DoctrineBundle</span>\<span class="hljs-title">Repository</span>\<span class="hljs-title">ServiceEntityRepository</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Persistence</span>\<span class="hljs-title">ManagerRegistry</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductRepository</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceEntityRepository</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(ManagerRegistry <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>registry</span>)</span>
+    </span>{
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>__construct(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>registry</span>, Product<span class="hljs-operator">::</span>class);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When you fetch your repository (i.e. <code translate="no" class="notranslate">-&gt;getRepository(Product::class)</code>), it is
+<em>actually</em> an instance of <em>this</em> object! This is because of the <code translate="no" class="notranslate">repositoryClass</code>
+config that was generated at the top of your <code translate="no" class="notranslate">Product</code> entity class.</p>
+<p>Suppose you want to query for all Product objects greater than a certain price. Add
+a new method for this to your repository:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Repository/ProductRepository.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductRepository</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceEntityRepository</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(ManagerRegistry <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>registry</span>)</span>
+    </span>{
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>__construct(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>registry</span>, Product<span class="hljs-operator">::</span>class);
+    }
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@return</span> Product[]
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">findAllGreaterThanPrice</span><span class="hljs-params">(int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span>)</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getEntityManager();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>query</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span><span class="hljs-operator">-&gt;</span>createQuery(
+            <span class="hljs-string">'SELECT p
+            FROM App\Entity\Product p
+            WHERE p.price &gt; :price
+            ORDER BY p.price ASC'</span>
+        )<span class="hljs-operator">-&gt;</span>setParameter(<span class="hljs-string">'price'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span>);
+
+        <span class="hljs-comment">// returns an array of Product objects</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>query</span><span class="hljs-operator">-&gt;</span>getResult();
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The string passed to <code translate="no" class="notranslate">createQuery()</code> might look like SQL, but it is
+<a href="https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/dql-doctrine-query-language.html" class="reference external" rel="external noopener noreferrer" target="_blank">Doctrine Query Language</a>. This allows you to type queries using commonly
+known query language, but referencing PHP objects instead (i.e. in the <code translate="no" class="notranslate">FROM</code>
+statement).</p>
+<p>Now, you can call this method on the repository:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// from inside a controller</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>minPrice</span> = <span class="hljs-number">1000</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>products</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span><span class="hljs-operator">-&gt;</span>getRepository(Product<span class="hljs-operator">::</span>class)<span class="hljs-operator">-&gt;</span>findAllGreaterThanPrice(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>minPrice</span>);
+
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>See <a href="service_container.html#services-constructor-injection" class="reference internal">Service Container</a> for how to inject the repository into
+any service.</p>
+<div class="section">
+<h3 id="querying-with-the-query-builder">
+    Querying with the Query Builder
+    <a class="headerlink" href="#querying-with-the-query-builder" title="Permalink to this headline">¶</a>
+</h3>
+<p>Doctrine also provides a <a href="https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/query-builder.html" class="reference external" rel="external noopener noreferrer" target="_blank">Query Builder</a>, an object-oriented way to write
+queries. It is recommended to use this when queries are built dynamically (i.e.
+based on PHP conditions):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Repository/ProductRepository.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductRepository</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceEntityRepository</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">findAllGreaterThanPrice</span><span class="hljs-params">(int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span>, bool <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>includeUnavailableProducts</span> = false)</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-comment">// automatically knows to select Products</span>
+        <span class="hljs-comment">// the "p" is an alias you'll use in the rest of the query</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>qb</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createQueryBuilder(<span class="hljs-string">'p'</span>)
+            <span class="hljs-operator">-&gt;</span>where(<span class="hljs-string">'p.price &gt; :price'</span>)
+            <span class="hljs-operator">-&gt;</span>setParameter(<span class="hljs-string">'price'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span>)
+            <span class="hljs-operator">-&gt;</span>orderBy(<span class="hljs-string">'p.price'</span>, <span class="hljs-string">'ASC'</span>);
+
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>includeUnavailableProducts</span>) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>qb</span><span class="hljs-operator">-&gt;</span>andWhere(<span class="hljs-string">'p.available = TRUE'</span>);
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>query</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>qb</span><span class="hljs-operator">-&gt;</span>getQuery();
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>query</span><span class="hljs-operator">-&gt;</span>execute();
+
+        <span class="hljs-comment">// to get just one result:</span>
+        <span class="hljs-comment">// $product = $query-&gt;setMaxResults(1)-&gt;getOneOrNullResult();</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="querying-with-sql">
+    Querying with SQL
+    <a class="headerlink" href="#querying-with-sql" title="Permalink to this headline">¶</a>
+</h3>
+<p>In addition, you can query directly with SQL if you need to:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Repository/ProductRepository.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductRepository</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceEntityRepository</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">findAllGreaterThanPrice</span><span class="hljs-params">(int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span>)</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>conn</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getEntityManager()<span class="hljs-operator">-&gt;</span>getConnection();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>sql</span> = <span class="hljs-string">'
+            SELECT * FROM product p
+            WHERE p.price &gt; :price
+            ORDER BY p.price ASC
+            '</span>;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stmt</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>conn</span><span class="hljs-operator">-&gt;</span>prepare(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>sql</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resultSet</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stmt</span><span class="hljs-operator">-&gt;</span>executeQuery([<span class="hljs-string">'price'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span>]);
+
+        <span class="hljs-comment">// returns an array of arrays (i.e. a raw data set)</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resultSet</span><span class="hljs-operator">-&gt;</span>fetchAllAssociative();
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>With SQL, you will get back raw data, not objects (unless you use the <a href="https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/native-sql.html" class="reference external" rel="external noopener noreferrer" target="_blank">NativeQuery</a>
+functionality).</p>
+</div>
+</div>
+<div class="section">
+<h2 id="configuration">
+    Configuration
+    <a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a>
+</h2>
+<p>See the <a href="reference/configuration/doctrine.html" class="reference internal">Doctrine config reference</a>.</p>
+</div>
+<div class="section">
+<h2 id="relationships-and-associations">
+    Relationships and Associations
+    <a class="headerlink" href="#relationships-and-associations" title="Permalink to this headline">¶</a>
+</h2>
+<p>Doctrine provides all the functionality you need to manage database relationships
+(also known as associations), including ManyToOne, OneToMany, OneToOne and ManyToMany
+relationships.</p>
+<p>For info, see <a href="doctrine/associations.html" class="reference internal">How to Work with Doctrine Associations / Relations</a>.</p>
+</div>
+<div class="section">
+<h2 id="database-testing">
+    Database Testing
+    <a class="headerlink" href="#database-testing" title="Permalink to this headline">¶</a>
+</h2>
+<p>Read the article about <a href="testing/database.html" class="reference internal">testing code that interacts with the database</a>.</p>
+</div>
+<div class="section">
+<h2 id="doctrine-extensions-timestampable-translatable-etc">
+    Doctrine Extensions (Timestampable, Translatable, etc.)
+    <a class="headerlink" href="#doctrine-extensions-timestampable-translatable-etc" title="Permalink to this headline">¶</a>
+</h2>
+<p>Doctrine community has created some extensions to implement common needs such as
+<em>&quot;set the value of the createdAt property automatically when creating an entity&quot;</em>.
+Read more about the <a href="https://github.com/doctrine-extensions/DoctrineExtensions" class="reference external" rel="external noopener noreferrer" target="_blank">available Doctrine extensions</a> and use the
+<a href="https://github.com/stof/StofDoctrineExtensionsBundle" class="reference external" rel="external noopener noreferrer" target="_blank">StofDoctrineExtensionsBundle</a> to integrate them in your application.</p>
+</div>
+<div class="section">
+<h2 id="learn-more">
+    Learn more
+    <a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a>
+</h2>
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-9"><li><a href="doctrine/associations.html">How to Work with Doctrine Associations / Relations</a></li><li><a href="doctrine/events.html">Doctrine Events</a></li><li><a href="doctrine/registration_form.html">How to Implement a Registration Form</a></li><li><a href="doctrine/custom_dql_functions.html">How to Register custom DQL Functions</a></li><li><a href="doctrine/dbal.html">How to Use Doctrine DBAL</a></li><li><a href="doctrine/multiple_entity_managers.html">How to Work with Multiple Entity Managers and Connections</a></li><li><a href="doctrine/resolve_target_entity.html">How to Define Relationships with Abstract Classes and Interfaces</a></li><li><a href="doctrine/reverse_engineering.html">How to Generate Entities from an Existing Database</a></li><li><a href="testing/database.html">How to Test A Doctrine Repository</a></li></ul></div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

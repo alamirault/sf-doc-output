@@ -1,0 +1,177 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <span id="component-cache-filesystem-adapter"></span>
+<div class="section">
+<h1 id="filesystem-cache-adapter">
+    Filesystem Cache Adapter
+    <a class="headerlink" href="#filesystem-cache-adapter" title="Permalink to this headline">¶</a>
+</h1>
+<p>This adapter offers improved application performance for those who cannot install
+tools like <a href="apcu_adapter.html#apcu-adapter" class="reference internal">APCu</a> or <a href="redis_adapter.html#redis-adapter" class="reference internal">Redis</a> in their
+environment. It stores the cache item expiration and content as regular files in
+a collection of directories on a locally mounted filesystem.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The performance of this adapter can be greatly increased by utilizing a
+temporary, in-memory filesystem, such as <a href="https://wiki.archlinux.org/index.php/tmpfs" class="reference external" rel="external noopener noreferrer" target="_blank">tmpfs</a> on Linux, or one of the
+many other <a href="https://en.wikipedia.org/wiki/List_of_RAM_drive_software" class="reference external" rel="external noopener noreferrer" target="_blank">RAM disk solutions</a> available.</p>
+</div>
+<p>The FilesystemAdapter can optionally be provided a namespace, default cache lifetime,
+and cache root path as constructor parameters:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">FilesystemAdapter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span> = <span class="hljs-keyword">new</span> FilesystemAdapter(
+
+    <span class="hljs-comment">// a string used as the subdirectory of the root cache directory, where cache</span>
+    <span class="hljs-comment">// items will be stored</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>namespace</span> = <span class="hljs-string">''</span>,
+
+    <span class="hljs-comment">// the default lifetime (in seconds) for cache items that do not define their</span>
+    <span class="hljs-comment">// own lifetime, with a value 0 causing items to be stored indefinitely (i.e.</span>
+    <span class="hljs-comment">// until the files are deleted)</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaultLifetime</span> = <span class="hljs-number">0</span>,
+
+    <span class="hljs-comment">// the main cache directory (the application needs read-write permissions on it)</span>
+    <span class="hljs-comment">// if none is specified, a directory is created inside the system temporary directory</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>directory</span> = <span class="hljs-keyword">null</span>
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>The overhead of filesystem IO often makes this adapter one of the <em>slower</em>
+choices. If throughput is paramount, the in-memory adapters
+(<a href="apcu_adapter.html#apcu-adapter" class="reference internal">Apcu</a>, <a href="memcached_adapter.html#memcached-adapter" class="reference internal">Memcached</a>, and
+<a href="redis_adapter.html#redis-adapter" class="reference internal">Redis</a>) or the database adapters
+(<a href="pdo_doctrine_dbal_adapter.html#pdo-doctrine-adapter" class="reference internal">PDO</a>) are recommended.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>This adapter implements <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/PruneableInterface.php" class="reference external" title="Symfony\Component\Cache\PruneableInterface" rel="external noopener noreferrer" target="_blank">PruneableInterface</a>,
+enabling manual <a href="../../../components/cache/cache_pools.html#component-cache-cache-pool-prune" class="reference internal">pruning of expired cache items</a>
+by calling its <code translate="no" class="notranslate">prune()</code> method.</p>
+</div>
+<span id="filesystem-tag-aware-adapter"></span>
+<div class="section">
+<h2 id="working-with-tags">
+    Working with Tags
+    <a class="headerlink" href="#working-with-tags" title="Permalink to this headline">¶</a>
+</h2>
+<p>In order to use tag-based invalidation, you can wrap your adapter in
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/TagAwareAdapter.php" class="reference external" title="Symfony\Component\Cache\Adapter\TagAwareAdapter" rel="external noopener noreferrer" target="_blank">TagAwareAdapter</a>, but it's often
+more interesting to use the dedicated <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/FilesystemTagAwareAdapter.php" class="reference external" title="Symfony\Component\Cache\Adapter\FilesystemTagAwareAdapter" rel="external noopener noreferrer" target="_blank">FilesystemTagAwareAdapter</a>.
+Since tag invalidation logic is implemented using links on filesystem, this
+adapter offers better read performance when using tag-based invalidation:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">FilesystemTagAwareAdapter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span> = <span class="hljs-keyword">new</span> FilesystemTagAwareAdapter();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

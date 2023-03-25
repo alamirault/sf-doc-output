@@ -1,0 +1,369 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-work-with-service-definition-objects">
+    How to work with Service Definition Objects
+    <a class="headerlink" href="#how-to-work-with-service-definition-objects" title="Permalink to this headline">¶</a>
+</h1>
+<p>Service definitions are the instructions describing how the container should
+build a service. They are not the actual services used by your applications.
+The container will create the actual class instances based on the configuration
+in the definition.</p>
+<p>Normally, you would use YAML, XML or PHP to describe the service definitions.
+But if you're doing advanced things with the service container, like working
+with a <a href="compiler_passes.html" class="reference internal">Compiler Pass</a> or creating a
+<a href="../bundles/extension.html" class="reference internal">Dependency Injection Extension</a>, you may need to
+work directly with the <code translate="no" class="notranslate">Definition</code> objects that define how a service will be
+instantiated.</p>
+<div class="section">
+<h2 id="getting-and-setting-service-definitions">
+    Getting and Setting Service Definitions
+    <a class="headerlink" href="#getting-and-setting-service-definitions" title="Permalink to this headline">¶</a>
+</h2>
+<p>There are some helpful methods for working with the service definitions:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Definition</span>;
+
+<span class="hljs-comment">// finds out if there is an "app.mailer" definition</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>hasDefinition(<span class="hljs-string">'app.mailer'</span>);
+<span class="hljs-comment">// finds out if there is an "app.mailer" definition or alias</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>has(<span class="hljs-string">'app.mailer'</span>);
+
+<span class="hljs-comment">// gets the "app.user_config_manager" definition</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>getDefinition(<span class="hljs-string">'app.user_config_manager'</span>);
+<span class="hljs-comment">// gets the definition with the "app.user_config_manager" ID or alias</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>findDefinition(<span class="hljs-string">'app.user_config_manager'</span>);
+
+<span class="hljs-comment">// adds a new "app.number_generator" definition</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span> = <span class="hljs-keyword">new</span> Definition(\App\NumberGenerator<span class="hljs-operator">::</span>class);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>setDefinition(<span class="hljs-string">'app.number_generator'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span>);
+
+<span class="hljs-comment">// shortcut for the previous method</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>register(<span class="hljs-string">'app.number_generator'</span>, \App\NumberGenerator<span class="hljs-operator">::</span>class);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="working-with-a-definition">
+    Working with a Definition
+    <a class="headerlink" href="#working-with-a-definition" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="creating-a-new-definition">
+    Creating a New Definition
+    <a class="headerlink" href="#creating-a-new-definition" title="Permalink to this headline">¶</a>
+</h3>
+<p>In addition to manipulating and retrieving existing definitions, you can also
+define new service definitions with the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Definition.php" class="reference external" title="Symfony\Component\DependencyInjection\Definition" rel="external noopener noreferrer" target="_blank">Definition</a>
+class.</p>
+</div>
+<div class="section">
+<h3 id="class">
+    Class
+    <a class="headerlink" href="#class" title="Permalink to this headline">¶</a>
+</h3>
+<p>The first optional argument of the <code translate="no" class="notranslate">Definition</code> class is the fully qualified
+class name of the object returned when the service is fetched from the container:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">CustomConfigManager</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">UserConfigManager</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Definition</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span> = <span class="hljs-keyword">new</span> Definition(UserConfigManager<span class="hljs-operator">::</span>class);
+
+<span class="hljs-comment">// override the class</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>setClass(CustomConfigManager<span class="hljs-operator">::</span>class);
+
+<span class="hljs-comment">// get the class configured for this definition</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>class</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>getClass();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="constructor-arguments">
+    Constructor Arguments
+    <a class="headerlink" href="#constructor-arguments" title="Permalink to this headline">¶</a>
+</h3>
+<p>The second optional argument of the <code translate="no" class="notranslate">Definition</code> class is an array with the
+arguments passed to the constructor of the object returned when the service is
+fetched from the container:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">DoctrineConfigManager</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Definition</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Reference</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span> = <span class="hljs-keyword">new</span> Definition(DoctrineConfigManager<span class="hljs-operator">::</span>class, [
+    <span class="hljs-keyword">new</span> Reference(<span class="hljs-string">'doctrine'</span>), <span class="hljs-comment">// a reference to another service</span>
+    <span class="hljs-string">'%app.config_table_name%'</span>,  <span class="hljs-comment">// will be resolved to the value of a container parameter</span>
+]);
+
+<span class="hljs-comment">// gets all arguments configured for this definition</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>constructorArguments</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>getArguments();
+
+<span class="hljs-comment">// gets a specific argument</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>firstArgument</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>getArgument(<span class="hljs-number">0</span>);
+
+<span class="hljs-comment">// adds a new named argument</span>
+<span class="hljs-comment">// '$argumentName' = the name of the argument in the constructor, including the '$' symbol</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>setArgument(<span class="hljs-string">'$argumentName'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentValue</span>);
+
+<span class="hljs-comment">// adds a new argument</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>addArgument(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentValue</span>);
+
+<span class="hljs-comment">// replaces argument on a specific index (0 = first argument)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>replaceArgument(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>index</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argument</span>);
+
+<span class="hljs-comment">// replaces all previously configured arguments with the passed array</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>setArguments(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>arguments</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Don't use <code translate="no" class="notranslate">get()</code> to get a service that you want to inject as constructor
+argument, the service is not yet available. Instead, use a
+<code translate="no" class="notranslate">Reference</code> instance as shown above.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="method-calls">
+    Method Calls
+    <a class="headerlink" href="#method-calls" title="Permalink to this headline">¶</a>
+</h3>
+<p>If the service you are working with uses setter injection then you can manipulate
+any method calls in the definitions as well:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// gets all configured method calls</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>methodCalls</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>getMethodCalls();
+
+<span class="hljs-comment">// configures a new method call</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>addMethodCall(<span class="hljs-string">'setLogger'</span>, [<span class="hljs-keyword">new</span> Reference(<span class="hljs-string">'logger'</span>)]);
+
+<span class="hljs-comment">// configures an immutable-setter</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>addMethodCall(<span class="hljs-string">'withLogger'</span>, [<span class="hljs-keyword">new</span> Reference(<span class="hljs-string">'logger'</span>)], <span class="hljs-keyword">true</span>);
+
+<span class="hljs-comment">// replaces all previously configured method calls with the passed array</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>setMethodCalls(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>methodCalls</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>There are more examples of specific ways of working with definitions
+in the PHP code blocks of the Service Container articles such as
+<a href="factories.html" class="reference internal">Using a Factory to Create Services</a> and <a href="parent_services.html" class="reference internal">How to Manage Common Dependencies with Parent Services</a>.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The methods here that change service definitions can only be used before
+the container is compiled. Once the container is compiled you cannot
+manipulate service definitions further. To learn more about compiling
+the container, see <a href="../components/dependency_injection/compilation.html" class="reference internal">Compiling the Container</a>.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="requiring-files">
+    Requiring Files
+    <a class="headerlink" href="#requiring-files" title="Permalink to this headline">¶</a>
+</h3>
+<p>There might be use cases when you need to include another file just before
+the service itself gets loaded. To do so, you can use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/Definition.php#method_setFile" class="reference external" title="Symfony\Component\DependencyInjection\Definition::setFile()" rel="external noopener noreferrer" target="_blank">setFile()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span><span class="hljs-operator">-&gt;</span>setFile(<span class="hljs-string">'/src/path/to/file/foo.php'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Notice that Symfony will internally call the PHP statement <code translate="no" class="notranslate">require_once</code>,
+which means that your file will be included only once per request.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

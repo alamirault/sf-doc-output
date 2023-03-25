@@ -1,0 +1,134 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-forward-requests-to-another-controller">
+    How to Forward Requests to another Controller
+    <a class="headerlink" href="#how-to-forward-requests-to-another-controller" title="Permalink to this headline">¶</a>
+</h1>
+<p>Though not very common, you can also forward to another controller internally
+with the <code translate="no" class="notranslate">forward()</code> method provided by the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Controller/AbstractController.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Controller\AbstractController" rel="external noopener noreferrer" target="_blank">AbstractController</a>
+class.</p>
+<p>Instead of redirecting the user's browser, this makes an &quot;internal&quot; sub-request
+and calls the defined controller. The <code translate="no" class="notranslate">forward()</code> method returns the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Response.php" class="reference external" title="Symfony\Component\HttpFoundation\Response" rel="external noopener noreferrer" target="_blank">Response</a> object that is returned
+from <em>that</em> controller:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>)</span>: <span class="hljs-title">Response</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>forward(<span class="hljs-string">'App\Controller\OtherController::fancy'</span>, [
+        <span class="hljs-string">'name'</span>  =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>,
+        <span class="hljs-string">'color'</span> =&gt; <span class="hljs-string">'green'</span>,
+    ]);
+
+    <span class="hljs-comment">// ... further modify the response or return it directly</span>
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The array passed to the method becomes the arguments for the resulting controller.
+The target controller method might look something like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fancy</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>, string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>color</span>)</span>: <span class="hljs-title">Response</span>
+</span>{
+    <span class="hljs-comment">// ... create and return a Response object</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Like when creating a controller for a route, the order of the arguments of the
+<code translate="no" class="notranslate">fancy()</code> method doesn't matter: the matching is done by name.</p>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

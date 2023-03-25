@@ -1,0 +1,1559 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-string-component">
+    The String Component
+    <a class="headerlink" href="#the-string-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The String component provides a single object-oriented API to work with
+three &quot;unit systems&quot; of strings: bytes, code points and grapheme clusters.</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/string</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="what-is-a-string">
+    What is a String?
+    <a class="headerlink" href="#what-is-a-string" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can skip this section if you already know what a <em>&quot;code point&quot;</em> or a
+<em>&quot;grapheme cluster&quot;</em> are in the context of handling strings. Otherwise, read
+this section to learn about the terminology used by this component.</p>
+<p>Languages like English require a very limited set of characters and symbols to
+display any content. Each string is a series of characters (letters or symbols)
+and they can be encoded even with the most limited standards (e.g. <a href="https://en.wikipedia.org/wiki/ASCII" class="reference external" rel="external noopener noreferrer" target="_blank">ASCII</a>).</p>
+<p>However, other languages require thousands of symbols to display their contents.
+They need complex encoding standards such as <a href="https://en.wikipedia.org/wiki/Unicode" class="reference external" rel="external noopener noreferrer" target="_blank">Unicode</a> and concepts like
+&quot;character&quot; no longer make sense. Instead, you have to deal with these terms:</p>
+<ul>
+    <li><a href="https://en.wikipedia.org/wiki/Code_point" class="reference external" rel="external noopener noreferrer" target="_blank">Code points</a>: they are the atomic units of information. A string is a series
+of code points. Each code point is a number whose meaning is given by the
+<a href="https://en.wikipedia.org/wiki/Unicode" class="reference external" rel="external noopener noreferrer" target="_blank">Unicode</a> standard. For example, the English letter <code translate="no" class="notranslate">A</code> is the <code translate="no" class="notranslate">U+0041</code>
+code point and the Japanese <em>kana</em> <code translate="no" class="notranslate">の</code> is the <code translate="no" class="notranslate">U+306E</code> code point.</li>
+<li><a href="https://en.wikipedia.org/wiki/Grapheme" class="reference external" rel="external noopener noreferrer" target="_blank">Grapheme clusters</a>: they are a sequence of one or more code points which are
+displayed as a single graphical unit. For example, the Spanish letter <code translate="no" class="notranslate">ñ</code> is
+a grapheme cluster that contains two code points: <code translate="no" class="notranslate">U+006E</code> = <code translate="no" class="notranslate">n</code> (<em>&quot;latin
+small letter N&quot;</em>) + <code translate="no" class="notranslate">U+0303</code> = <code translate="no" class="notranslate">◌̃</code> (<em>&quot;combining tilde&quot;</em>).</li>
+<li>Bytes: they are the actual information stored for the string contents. Each
+code point can require one or more bytes of storage depending on the standard
+being used (UTF-8, UTF-16, etc.).</li>
+</ul>
+<p>The following image displays the bytes, code points and grapheme clusters for
+the same word written in English (<code translate="no" class="notranslate">hello</code>) and Hindi (<code translate="no" class="notranslate">नमस्ते</code>):</p>
+<img src="_images/bytes-points-graphemes.png" align="center" />
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>Create a new object of type <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/String/ByteString.php" class="reference external" title="Symfony\Component\String\ByteString" rel="external noopener noreferrer" target="_blank">ByteString</a>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/String/CodePointString.php" class="reference external" title="Symfony\Component\String\CodePointString" rel="external noopener noreferrer" target="_blank">CodePointString</a> or
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/String/UnicodeString.php" class="reference external" title="Symfony\Component\String\UnicodeString" rel="external noopener noreferrer" target="_blank">UnicodeString</a>, pass the string contents as
+their arguments and then use the object-oriented API to work with those strings:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">UnicodeString</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>text</span> = (<span class="hljs-keyword">new</span> UnicodeString(<span class="hljs-string">'This is a déjà-vu situation.'</span>))
+    <span class="hljs-operator">-&gt;</span>trimEnd(<span class="hljs-string">'.'</span>)
+    <span class="hljs-operator">-&gt;</span>replace(<span class="hljs-string">'déjà-vu'</span>, <span class="hljs-string">'jamais-vu'</span>)
+    <span class="hljs-operator">-&gt;</span>append(<span class="hljs-string">'!'</span>);
+<span class="hljs-comment">// $text = 'This is a jamais-vu situation!'</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>content</span> = <span class="hljs-keyword">new</span> UnicodeString(<span class="hljs-string">'नमस्ते दुनिया'</span>);
+<span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>content</span><span class="hljs-operator">-&gt;</span>ignoreCase()<span class="hljs-operator">-&gt;</span>startsWith(<span class="hljs-string">'नमस्ते'</span>)) {
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="method-reference">
+    Method Reference
+    <a class="headerlink" href="#method-reference" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="methods-to-create-string-objects">
+    Methods to Create String Objects
+    <a class="headerlink" href="#methods-to-create-string-objects" title="Permalink to this headline">¶</a>
+</h3>
+<p>First, you can create objects prepared to store strings as bytes, code points
+and grapheme clusters with the following classes:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">ByteString</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">CodePointString</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">UnicodeString</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = <span class="hljs-keyword">new</span> ByteString(<span class="hljs-string">'hello'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bar</span> = <span class="hljs-keyword">new</span> CodePointString(<span class="hljs-string">'hello'</span>);
+<span class="hljs-comment">// UnicodeString is the most commonly used class</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>baz</span> = <span class="hljs-keyword">new</span> UnicodeString(<span class="hljs-string">'hello'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Use the <code translate="no" class="notranslate">wrap()</code> static method to instantiate more than one string object:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>contents</span> = ByteString<span class="hljs-operator">::</span>wrap([<span class="hljs-string">'hello'</span>, <span class="hljs-string">'world'</span>]);        <span class="hljs-comment">// $contents = ByteString[]</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>contents</span> = UnicodeString<span class="hljs-operator">::</span>wrap([<span class="hljs-string">'I'</span>, <span class="hljs-string">'❤️'</span>, <span class="hljs-string">'Symfony'</span>]); <span class="hljs-comment">// $contents = UnicodeString[]</span>
+
+<span class="hljs-comment">// use the unwrap method to make the inverse conversion</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>contents</span> = UnicodeString<span class="hljs-operator">::</span>unwrap([
+    <span class="hljs-keyword">new</span> UnicodeString(<span class="hljs-string">'hello'</span>), <span class="hljs-keyword">new</span> UnicodeString(<span class="hljs-string">'world'</span>),
+]); <span class="hljs-comment">// $contents = ['hello', 'world']</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you work with lots of String objects, consider using the shortcut functions
+to make your code more concise:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// the b() function creates byte strings</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">function</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">b</span>;
+
+<span class="hljs-comment">// both lines are equivalent</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = <span class="hljs-keyword">new</span> ByteString(<span class="hljs-string">'hello'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = b(<span class="hljs-string">'hello'</span>);
+
+<span class="hljs-comment">// the u() function creates Unicode strings</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">function</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">u</span>;
+
+<span class="hljs-comment">// both lines are equivalent</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = <span class="hljs-keyword">new</span> UnicodeString(<span class="hljs-string">'hello'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = u(<span class="hljs-string">'hello'</span>);
+
+<span class="hljs-comment">// the s() function creates a byte string or Unicode string</span>
+<span class="hljs-comment">// depending on the given contents</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">function</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">s</span>;
+
+<span class="hljs-comment">// creates a ByteString object</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = s(<span class="hljs-string">"\xfe\xff"</span>);
+<span class="hljs-comment">// creates a UnicodeString object</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = s(<span class="hljs-string">'अनुच्छेद'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>There are also some specialized constructors:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ByteString can create a random string of the given length</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = ByteString<span class="hljs-operator">::</span>fromRandom(<span class="hljs-number">12</span>);
+<span class="hljs-comment">// by default, random strings use A-Za-z0-9 characters; you can restrict</span>
+<span class="hljs-comment">// the characters to use with the second optional argument</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = ByteString<span class="hljs-operator">::</span>fromRandom(<span class="hljs-number">6</span>, <span class="hljs-string">'AEIOU0123456789'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = ByteString<span class="hljs-operator">::</span>fromRandom(<span class="hljs-number">10</span>, <span class="hljs-string">'qwertyuiop'</span>);
+
+<span class="hljs-comment">// CodePointString and UnicodeString can create a string from code points</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = UnicodeString<span class="hljs-operator">::</span>fromCodePoints(<span class="hljs-number">0x928</span>, <span class="hljs-number">0x92E</span>, <span class="hljs-number">0x938</span>, <span class="hljs-number">0x94D</span>, <span class="hljs-number">0x924</span>, <span class="hljs-number">0x947</span>);
+<span class="hljs-comment">// equivalent to: $foo = new UnicodeString('नमस्ते');</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="methods-to-transform-string-objects">
+    Methods to Transform String Objects
+    <a class="headerlink" href="#methods-to-transform-string-objects" title="Permalink to this headline">¶</a>
+</h3>
+<p>Each string object can be transformed into the other two types of objects:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = ByteString<span class="hljs-operator">::</span>fromRandom(<span class="hljs-number">12</span>)<span class="hljs-operator">-&gt;</span>toCodePointString();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = (<span class="hljs-keyword">new</span> CodePointString(<span class="hljs-string">'hello'</span>))<span class="hljs-operator">-&gt;</span>toUnicodeString();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = UnicodeString<span class="hljs-operator">::</span>fromCodePoints(<span class="hljs-number">0x68</span>, <span class="hljs-number">0x65</span>, <span class="hljs-number">0x6C</span>, <span class="hljs-number">0x6C</span>, <span class="hljs-number">0x6F</span>)<span class="hljs-operator">-&gt;</span>toByteString();
+
+<span class="hljs-comment">// the optional $toEncoding argument defines the encoding of the target string</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = (<span class="hljs-keyword">new</span> CodePointString(<span class="hljs-string">'hello'</span>))<span class="hljs-operator">-&gt;</span>toByteString(<span class="hljs-string">'Windows-1252'</span>);
+<span class="hljs-comment">// the optional $fromEncoding argument defines the encoding of the original string</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span> = (<span class="hljs-keyword">new</span> ByteString(<span class="hljs-string">'さよなら'</span>))<span class="hljs-operator">-&gt;</span>toCodePointString(<span class="hljs-string">'ISO-2022-JP'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If the conversion is not possible for any reason, you'll get an
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/String/Exception/InvalidArgumentException.php" class="reference external" title="Symfony\Component\String\Exception\InvalidArgumentException" rel="external noopener noreferrer" target="_blank">InvalidArgumentException</a>.</p>
+<p>There is also a method to get the bytes stored at some position:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ('नमस्ते' bytes = [224, 164, 168, 224, 164, 174, 224, 164, 184,</span>
+<span class="hljs-comment">//                  224, 165, 141, 224, 164, 164, 224, 165, 135])</span>
+b(<span class="hljs-string">'नमस्ते'</span>)<span class="hljs-operator">-&gt;</span>bytesAt(<span class="hljs-number">0</span>);   <span class="hljs-comment">// [224]</span>
+u(<span class="hljs-string">'नमस्ते'</span>)<span class="hljs-operator">-&gt;</span>bytesAt(<span class="hljs-number">0</span>);   <span class="hljs-comment">// [224, 164, 168]</span>
+
+b(<span class="hljs-string">'नमस्ते'</span>)<span class="hljs-operator">-&gt;</span>bytesAt(<span class="hljs-number">1</span>);   <span class="hljs-comment">// [164]</span>
+u(<span class="hljs-string">'नमस्ते'</span>)<span class="hljs-operator">-&gt;</span>bytesAt(<span class="hljs-number">1</span>);   <span class="hljs-comment">// [224, 164, 174]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="methods-related-to-length-and-white-spaces"></span>
+</div>
+<div class="section">
+<h3 id="methods-related-to-length-and-whitespace-characters">
+    Methods Related to Length and Whitespace Characters
+    <a class="headerlink" href="#methods-related-to-length-and-whitespace-characters" title="Permalink to this headline">¶</a>
+</h3>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// returns the number of graphemes, code points or bytes of the given string</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>word</span> = <span class="hljs-string">'नमस्ते'</span>;
+(<span class="hljs-keyword">new</span> ByteString(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>word</span>))<span class="hljs-operator">-&gt;</span>length();      <span class="hljs-comment">// 18 (bytes)</span>
+(<span class="hljs-keyword">new</span> CodePointString(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>word</span>))<span class="hljs-operator">-&gt;</span>length(); <span class="hljs-comment">// 6 (code points)</span>
+(<span class="hljs-keyword">new</span> UnicodeString(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>word</span>))<span class="hljs-operator">-&gt;</span>length();   <span class="hljs-comment">// 4 (graphemes)</span>
+
+<span class="hljs-comment">// some symbols require double the width of others to represent them when using</span>
+<span class="hljs-comment">// a monospaced font (e.g. in a console). This method returns the total width</span>
+<span class="hljs-comment">// needed to represent the entire word</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>word</span> = <span class="hljs-string">'नमस्ते'</span>;
+(<span class="hljs-keyword">new</span> ByteString(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>word</span>))<span class="hljs-operator">-&gt;</span>width();      <span class="hljs-comment">// 18</span>
+(<span class="hljs-keyword">new</span> CodePointString(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>word</span>))<span class="hljs-operator">-&gt;</span>width(); <span class="hljs-comment">// 4</span>
+(<span class="hljs-keyword">new</span> UnicodeString(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>word</span>))<span class="hljs-operator">-&gt;</span>width();   <span class="hljs-comment">// 4</span>
+<span class="hljs-comment">// if the text contains multiple lines, it returns the max width of all lines</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>text</span> = <span class="hljs-string">"&lt;&lt;&lt;END
+This is a
+multiline text
+END"</span>;
+u(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>text</span>)<span class="hljs-operator">-&gt;</span>width(); <span class="hljs-comment">// 14</span>
+
+<span class="hljs-comment">// only returns TRUE if the string is exactly an empty string (not even whitespace)</span>
+u(<span class="hljs-string">'hello world'</span>)<span class="hljs-operator">-&gt;</span>isEmpty();  <span class="hljs-comment">// false</span>
+u(<span class="hljs-string">'     '</span>)<span class="hljs-operator">-&gt;</span>isEmpty();        <span class="hljs-comment">// false</span>
+u(<span class="hljs-string">''</span>)<span class="hljs-operator">-&gt;</span>isEmpty();             <span class="hljs-comment">// true</span>
+
+<span class="hljs-comment">// removes all whitespace (' \n\r\t\x0C') from the start and end of the string and</span>
+<span class="hljs-comment">// replaces two or more consecutive whitespace characters with a single space (' ') character</span>
+u(<span class="hljs-string">"  \n\n   hello \t   \n\r   world \n    \n"</span>)<span class="hljs-operator">-&gt;</span>collapseWhitespace(); <span class="hljs-comment">// 'hello world'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="methods-to-change-case">
+    Methods to Change Case
+    <a class="headerlink" href="#methods-to-change-case" title="Permalink to this headline">¶</a>
+</h3>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// changes all graphemes/code points to lower case</span>
+u(<span class="hljs-string">'FOO Bar'</span>)<span class="hljs-operator">-&gt;</span>lower();  <span class="hljs-comment">// 'foo bar'</span>
+
+<span class="hljs-comment">// when dealing with different languages, uppercase/lowercase is not enough</span>
+<span class="hljs-comment">// there are three cases (lower, upper, title), some characters have no case,</span>
+<span class="hljs-comment">// case is context-sensitive and locale-sensitive, etc.</span>
+<span class="hljs-comment">// this method returns a string that you can use in case-insensitive comparisons</span>
+u(<span class="hljs-string">'FOO Bar'</span>)<span class="hljs-operator">-&gt;</span>folded();             <span class="hljs-comment">// 'foo bar'</span>
+u(<span class="hljs-string">'Die O\'Brian Straße'</span>)<span class="hljs-operator">-&gt;</span>folded(); <span class="hljs-comment">// "die o'brian strasse"</span>
+
+<span class="hljs-comment">// changes all graphemes/code points to upper case</span>
+u(<span class="hljs-string">'foo BAR'</span>)<span class="hljs-operator">-&gt;</span>upper(); <span class="hljs-comment">// 'FOO BAR'</span>
+
+<span class="hljs-comment">// changes all graphemes/code points to "title case"</span>
+u(<span class="hljs-string">'foo bar'</span>)<span class="hljs-operator">-&gt;</span>title();     <span class="hljs-comment">// 'Foo bar'</span>
+u(<span class="hljs-string">'foo bar'</span>)<span class="hljs-operator">-&gt;</span>title(<span class="hljs-keyword">true</span>); <span class="hljs-comment">// 'Foo Bar'</span>
+
+<span class="hljs-comment">// changes all graphemes/code points to camelCase</span>
+u(<span class="hljs-string">'Foo: Bar-baz.'</span>)<span class="hljs-operator">-&gt;</span>camel(); <span class="hljs-comment">// 'fooBarBaz'</span>
+<span class="hljs-comment">// changes all graphemes/code points to snake_case</span>
+u(<span class="hljs-string">'Foo: Bar-baz.'</span>)<span class="hljs-operator">-&gt;</span>snake(); <span class="hljs-comment">// 'foo_bar_baz'</span>
+<span class="hljs-comment">// other cases can be achieved by chaining methods. E.g. PascalCase:</span>
+u(<span class="hljs-string">'Foo: Bar-baz.'</span>)<span class="hljs-operator">-&gt;</span>camel()<span class="hljs-operator">-&gt;</span>title(); <span class="hljs-comment">// 'FooBarBaz'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The methods of all string classes are case-sensitive by default. You can perform
+case-insensitive operations with the <code translate="no" class="notranslate">ignoreCase()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">u(<span class="hljs-string">'abc'</span>)<span class="hljs-operator">-&gt;</span>indexOf(<span class="hljs-string">'B'</span>);               <span class="hljs-comment">// null</span>
+u(<span class="hljs-string">'abc'</span>)<span class="hljs-operator">-&gt;</span>ignoreCase()<span class="hljs-operator">-&gt;</span>indexOf(<span class="hljs-string">'B'</span>); <span class="hljs-comment">// 1</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="methods-to-append-and-prepend">
+    Methods to Append and Prepend
+    <a class="headerlink" href="#methods-to-append-and-prepend" title="Permalink to this headline">¶</a>
+</h3>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// adds the given content (one or more strings) at the beginning/end of the string</span>
+u(<span class="hljs-string">'world'</span>)<span class="hljs-operator">-&gt;</span>prepend(<span class="hljs-string">'hello'</span>);      <span class="hljs-comment">// 'helloworld'</span>
+u(<span class="hljs-string">'world'</span>)<span class="hljs-operator">-&gt;</span>prepend(<span class="hljs-string">'hello'</span>, <span class="hljs-string">' '</span>); <span class="hljs-comment">// 'hello world'</span>
+
+u(<span class="hljs-string">'hello'</span>)<span class="hljs-operator">-&gt;</span>append(<span class="hljs-string">'world'</span>);      <span class="hljs-comment">// 'helloworld'</span>
+u(<span class="hljs-string">'hello'</span>)<span class="hljs-operator">-&gt;</span>append(<span class="hljs-string">' '</span>, <span class="hljs-string">'world'</span>); <span class="hljs-comment">// 'hello world'</span>
+
+<span class="hljs-comment">// adds the given content at the beginning of the string (or removes it) to</span>
+<span class="hljs-comment">// make sure that the content starts exactly with that content</span>
+u(<span class="hljs-string">'Name'</span>)<span class="hljs-operator">-&gt;</span>ensureStart(<span class="hljs-string">'get'</span>);       <span class="hljs-comment">// 'getName'</span>
+u(<span class="hljs-string">'getName'</span>)<span class="hljs-operator">-&gt;</span>ensureStart(<span class="hljs-string">'get'</span>);    <span class="hljs-comment">// 'getName'</span>
+u(<span class="hljs-string">'getgetName'</span>)<span class="hljs-operator">-&gt;</span>ensureStart(<span class="hljs-string">'get'</span>); <span class="hljs-comment">// 'getName'</span>
+<span class="hljs-comment">// this method is similar, but works on the end of the content instead of on the beginning</span>
+u(<span class="hljs-string">'User'</span>)<span class="hljs-operator">-&gt;</span>ensureEnd(<span class="hljs-string">'Controller'</span>);           <span class="hljs-comment">// 'UserController'</span>
+u(<span class="hljs-string">'UserController'</span>)<span class="hljs-operator">-&gt;</span>ensureEnd(<span class="hljs-string">'Controller'</span>); <span class="hljs-comment">// 'UserController'</span>
+u(<span class="hljs-string">'UserControllerController'</span>)<span class="hljs-operator">-&gt;</span>ensureEnd(<span class="hljs-string">'Controller'</span>); <span class="hljs-comment">// 'UserController'</span>
+
+<span class="hljs-comment">// returns the contents found before/after the first occurrence of the given string</span>
+u(<span class="hljs-string">'hello world'</span>)<span class="hljs-operator">-&gt;</span>before(<span class="hljs-string">'world'</span>);   <span class="hljs-comment">// 'hello '</span>
+u(<span class="hljs-string">'hello world'</span>)<span class="hljs-operator">-&gt;</span>before(<span class="hljs-string">'o'</span>);       <span class="hljs-comment">// 'hell'</span>
+u(<span class="hljs-string">'hello world'</span>)<span class="hljs-operator">-&gt;</span>before(<span class="hljs-string">'o'</span>, <span class="hljs-keyword">true</span>); <span class="hljs-comment">// 'hello'</span>
+
+u(<span class="hljs-string">'hello world'</span>)<span class="hljs-operator">-&gt;</span>after(<span class="hljs-string">'hello'</span>);   <span class="hljs-comment">// ' world'</span>
+u(<span class="hljs-string">'hello world'</span>)<span class="hljs-operator">-&gt;</span>after(<span class="hljs-string">'o'</span>);       <span class="hljs-comment">// ' world'</span>
+u(<span class="hljs-string">'hello world'</span>)<span class="hljs-operator">-&gt;</span>after(<span class="hljs-string">'o'</span>, <span class="hljs-keyword">true</span>); <span class="hljs-comment">// 'o world'</span>
+
+<span class="hljs-comment">// returns the contents found before/after the last occurrence of the given string</span>
+u(<span class="hljs-string">'hello world'</span>)<span class="hljs-operator">-&gt;</span>beforeLast(<span class="hljs-string">'o'</span>);       <span class="hljs-comment">// 'hello w'</span>
+u(<span class="hljs-string">'hello world'</span>)<span class="hljs-operator">-&gt;</span>beforeLast(<span class="hljs-string">'o'</span>, <span class="hljs-keyword">true</span>); <span class="hljs-comment">// 'hello wo'</span>
+
+u(<span class="hljs-string">'hello world'</span>)<span class="hljs-operator">-&gt;</span>afterLast(<span class="hljs-string">'o'</span>);       <span class="hljs-comment">// 'rld'</span>
+u(<span class="hljs-string">'hello world'</span>)<span class="hljs-operator">-&gt;</span>afterLast(<span class="hljs-string">'o'</span>, <span class="hljs-keyword">true</span>); <span class="hljs-comment">// 'orld'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="methods-to-pad-and-trim">
+    Methods to Pad and Trim
+    <a class="headerlink" href="#methods-to-pad-and-trim" title="Permalink to this headline">¶</a>
+</h3>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// makes a string as long as the first argument by adding the given</span>
+<span class="hljs-comment">// string at the beginning, end or both sides of the string</span>
+u(<span class="hljs-string">' Lorem Ipsum '</span>)<span class="hljs-operator">-&gt;</span>padBoth(<span class="hljs-number">20</span>, <span class="hljs-string">'-'</span>); <span class="hljs-comment">// '--- Lorem Ipsum ----'</span>
+u(<span class="hljs-string">' Lorem Ipsum'</span>)<span class="hljs-operator">-&gt;</span>padStart(<span class="hljs-number">20</span>, <span class="hljs-string">'-'</span>); <span class="hljs-comment">// '-------- Lorem Ipsum'</span>
+u(<span class="hljs-string">'Lorem Ipsum '</span>)<span class="hljs-operator">-&gt;</span>padEnd(<span class="hljs-number">20</span>, <span class="hljs-string">'-'</span>);   <span class="hljs-comment">// 'Lorem Ipsum --------'</span>
+
+<span class="hljs-comment">// repeats the given string the number of times passed as argument</span>
+u(<span class="hljs-string">'_.'</span>)<span class="hljs-operator">-&gt;</span>repeat(<span class="hljs-number">10</span>); <span class="hljs-comment">// '_._._._._._._._._._.'</span>
+
+<span class="hljs-comment">// removes the given characters (default: whitespace characters) from the beginning and end of a string</span>
+u(<span class="hljs-string">'   Lorem Ipsum   '</span>)<span class="hljs-operator">-&gt;</span>trim(); <span class="hljs-comment">// 'Lorem Ipsum'</span>
+u(<span class="hljs-string">'Lorem Ipsum   '</span>)<span class="hljs-operator">-&gt;</span>trim(<span class="hljs-string">'m'</span>); <span class="hljs-comment">// 'Lorem Ipsum   '</span>
+u(<span class="hljs-string">'Lorem Ipsum'</span>)<span class="hljs-operator">-&gt;</span>trim(<span class="hljs-string">'m'</span>);    <span class="hljs-comment">// 'Lorem Ipsu'</span>
+
+u(<span class="hljs-string">'   Lorem Ipsum   '</span>)<span class="hljs-operator">-&gt;</span>trimStart(); <span class="hljs-comment">// 'Lorem Ipsum   '</span>
+u(<span class="hljs-string">'   Lorem Ipsum   '</span>)<span class="hljs-operator">-&gt;</span>trimEnd();   <span class="hljs-comment">// '   Lorem Ipsum'</span>
+
+<span class="hljs-comment">// removes the given content from the start/end of the string</span>
+u(<span class="hljs-string">'file-image-0001.png'</span>)<span class="hljs-operator">-&gt;</span>trimPrefix(<span class="hljs-string">'file-'</span>);           <span class="hljs-comment">// 'image-0001.png'</span>
+u(<span class="hljs-string">'file-image-0001.png'</span>)<span class="hljs-operator">-&gt;</span>trimPrefix(<span class="hljs-string">'image-'</span>);          <span class="hljs-comment">// 'file-image-0001.png'</span>
+u(<span class="hljs-string">'file-image-0001.png'</span>)<span class="hljs-operator">-&gt;</span>trimPrefix(<span class="hljs-string">'file-image-'</span>);     <span class="hljs-comment">// '0001.png'</span>
+u(<span class="hljs-string">'template.html.twig'</span>)<span class="hljs-operator">-&gt;</span>trimSuffix(<span class="hljs-string">'.html'</span>);            <span class="hljs-comment">// 'template.html.twig'</span>
+u(<span class="hljs-string">'template.html.twig'</span>)<span class="hljs-operator">-&gt;</span>trimSuffix(<span class="hljs-string">'.twig'</span>);            <span class="hljs-comment">// 'template.html'</span>
+u(<span class="hljs-string">'template.html.twig'</span>)<span class="hljs-operator">-&gt;</span>trimSuffix(<span class="hljs-string">'.html.twig'</span>);       <span class="hljs-comment">// 'template'</span>
+<span class="hljs-comment">// when passing an array of prefix/suffix, only the first one found is trimmed</span>
+u(<span class="hljs-string">'file-image-0001.png'</span>)<span class="hljs-operator">-&gt;</span>trimPrefix([<span class="hljs-string">'file-'</span>, <span class="hljs-string">'image-'</span>]); <span class="hljs-comment">// 'image-0001.png'</span>
+u(<span class="hljs-string">'template.html.twig'</span>)<span class="hljs-operator">-&gt;</span>trimSuffix([<span class="hljs-string">'.twig'</span>, <span class="hljs-string">'.html'</span>]);   <span class="hljs-comment">// 'template.html'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="methods-to-search-and-replace">
+    Methods to Search and Replace
+    <a class="headerlink" href="#methods-to-search-and-replace" title="Permalink to this headline">¶</a>
+</h3>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// checks if the string starts/ends with the given string</span>
+u(<span class="hljs-string">'https://symfony.com'</span>)<span class="hljs-operator">-&gt;</span>startsWith(<span class="hljs-string">'https'</span>); <span class="hljs-comment">// true</span>
+u(<span class="hljs-string">'report-1234.pdf'</span>)<span class="hljs-operator">-&gt;</span>endsWith(<span class="hljs-string">'.pdf'</span>);        <span class="hljs-comment">// true</span>
+
+<span class="hljs-comment">// checks if the string contents are exactly the same as the given contents</span>
+u(<span class="hljs-string">'foo'</span>)<span class="hljs-operator">-&gt;</span>equalsTo(<span class="hljs-string">'foo'</span>); <span class="hljs-comment">// true</span>
+
+<span class="hljs-comment">// checks if the string content match the given regular expression.</span>
+u(<span class="hljs-string">'avatar-73647.png'</span>)<span class="hljs-operator">-&gt;</span>match(<span class="hljs-string">'/avatar-(\d+)\.png/'</span>);
+<span class="hljs-comment">// result = ['avatar-73647.png', '73647', null]</span>
+
+<span class="hljs-comment">// You can pass flags for preg_match() as second argument. If PREG_PATTERN_ORDER</span>
+<span class="hljs-comment">// or PREG_SET_ORDER are passed, preg_match_all() will be used.</span>
+u(<span class="hljs-string">'206-555-0100 and 800-555-1212'</span>)<span class="hljs-operator">-&gt;</span>match(<span class="hljs-string">'/\d{3}-\d{3}-\d{4}/'</span>, \PREG_PATTERN_ORDER);
+<span class="hljs-comment">// result = [['206-555-0100', '800-555-1212']]</span>
+
+<span class="hljs-comment">// checks if the string contains any of the other given strings</span>
+u(<span class="hljs-string">'aeiou'</span>)<span class="hljs-operator">-&gt;</span>containsAny(<span class="hljs-string">'a'</span>);                 <span class="hljs-comment">// true</span>
+u(<span class="hljs-string">'aeiou'</span>)<span class="hljs-operator">-&gt;</span>containsAny([<span class="hljs-string">'ab'</span>, <span class="hljs-string">'efg'</span>]);       <span class="hljs-comment">// false</span>
+u(<span class="hljs-string">'aeiou'</span>)<span class="hljs-operator">-&gt;</span>containsAny([<span class="hljs-string">'eio'</span>, <span class="hljs-string">'foo'</span>, <span class="hljs-string">'z'</span>]); <span class="hljs-comment">// true</span>
+
+<span class="hljs-comment">// finds the position of the first occurrence of the given string</span>
+<span class="hljs-comment">// (the second argument is the position where the search starts and negative</span>
+<span class="hljs-comment">// values have the same meaning as in PHP functions)</span>
+u(<span class="hljs-string">'abcdeabcde'</span>)<span class="hljs-operator">-&gt;</span>indexOf(<span class="hljs-string">'c'</span>);     <span class="hljs-comment">// 2</span>
+u(<span class="hljs-string">'abcdeabcde'</span>)<span class="hljs-operator">-&gt;</span>indexOf(<span class="hljs-string">'c'</span>, <span class="hljs-number">2</span>);  <span class="hljs-comment">// 2</span>
+u(<span class="hljs-string">'abcdeabcde'</span>)<span class="hljs-operator">-&gt;</span>indexOf(<span class="hljs-string">'c'</span>, <span class="hljs-number">-4</span>); <span class="hljs-comment">// 7</span>
+u(<span class="hljs-string">'abcdeabcde'</span>)<span class="hljs-operator">-&gt;</span>indexOf(<span class="hljs-string">'eab'</span>);   <span class="hljs-comment">// 4</span>
+u(<span class="hljs-string">'abcdeabcde'</span>)<span class="hljs-operator">-&gt;</span>indexOf(<span class="hljs-string">'k'</span>);     <span class="hljs-comment">// null</span>
+
+<span class="hljs-comment">// finds the position of the last occurrence of the given string</span>
+<span class="hljs-comment">// (the second argument is the position where the search starts and negative</span>
+<span class="hljs-comment">// values have the same meaning as in PHP functions)</span>
+u(<span class="hljs-string">'abcdeabcde'</span>)<span class="hljs-operator">-&gt;</span>indexOfLast(<span class="hljs-string">'c'</span>);     <span class="hljs-comment">// 7</span>
+u(<span class="hljs-string">'abcdeabcde'</span>)<span class="hljs-operator">-&gt;</span>indexOfLast(<span class="hljs-string">'c'</span>, <span class="hljs-number">2</span>);  <span class="hljs-comment">// 7</span>
+u(<span class="hljs-string">'abcdeabcde'</span>)<span class="hljs-operator">-&gt;</span>indexOfLast(<span class="hljs-string">'c'</span>, <span class="hljs-number">-4</span>); <span class="hljs-comment">// 2</span>
+u(<span class="hljs-string">'abcdeabcde'</span>)<span class="hljs-operator">-&gt;</span>indexOfLast(<span class="hljs-string">'eab'</span>);   <span class="hljs-comment">// 4</span>
+u(<span class="hljs-string">'abcdeabcde'</span>)<span class="hljs-operator">-&gt;</span>indexOfLast(<span class="hljs-string">'k'</span>);     <span class="hljs-comment">// null</span>
+
+<span class="hljs-comment">// replaces all occurrences of the given string</span>
+u(<span class="hljs-string">'http://symfony.com'</span>)<span class="hljs-operator">-&gt;</span>replace(<span class="hljs-string">'http://'</span>, <span class="hljs-string">'https://'</span>); <span class="hljs-comment">// 'https://symfony.com'</span>
+<span class="hljs-comment">// replaces all occurrences of the given regular expression</span>
+u(<span class="hljs-string">'(+1) 206-555-0100'</span>)<span class="hljs-operator">-&gt;</span>replaceMatches(<span class="hljs-string">'/[^A-Za-z0-9]++/'</span>, <span class="hljs-string">''</span>); <span class="hljs-comment">// '12065550100'</span>
+<span class="hljs-comment">// you can pass a callable as the second argument to perform advanced replacements</span>
+u(<span class="hljs-string">'123'</span>)<span class="hljs-operator">-&gt;</span>replaceMatches(<span class="hljs-string">'/\d/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>match</span>)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">'['</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>match</span>[<span class="hljs-number">0</span>].<span class="hljs-string">']'</span>;
+}); <span class="hljs-comment">// result = '[1][2][3]'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="methods-to-join-split-truncate-and-reverse">
+    Methods to Join, Split, Truncate and Reverse
+    <a class="headerlink" href="#methods-to-join-split-truncate-and-reverse" title="Permalink to this headline">¶</a>
+</h3>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// uses the string as the "glue" to merge all the given strings</span>
+u(<span class="hljs-string">', '</span>)<span class="hljs-operator">-&gt;</span>join([<span class="hljs-string">'foo'</span>, <span class="hljs-string">'bar'</span>]); <span class="hljs-comment">// 'foo, bar'</span>
+
+<span class="hljs-comment">// breaks the string into pieces using the given delimiter</span>
+u(<span class="hljs-string">'template_name.html.twig'</span>)<span class="hljs-operator">-&gt;</span>split(<span class="hljs-string">'.'</span>);    <span class="hljs-comment">// ['template_name', 'html', 'twig']</span>
+<span class="hljs-comment">// you can set the maximum number of pieces as the second argument</span>
+u(<span class="hljs-string">'template_name.html.twig'</span>)<span class="hljs-operator">-&gt;</span>split(<span class="hljs-string">'.'</span>, <span class="hljs-number">2</span>); <span class="hljs-comment">// ['template_name', 'html.twig']</span>
+
+<span class="hljs-comment">// returns a substring which starts at the first argument and has the length of the</span>
+<span class="hljs-comment">// second optional argument (negative values have the same meaning as in PHP functions)</span>
+u(<span class="hljs-string">'Symfony is great'</span>)<span class="hljs-operator">-&gt;</span>slice(<span class="hljs-number">0</span>, <span class="hljs-number">7</span>);  <span class="hljs-comment">// 'Symfony'</span>
+u(<span class="hljs-string">'Symfony is great'</span>)<span class="hljs-operator">-&gt;</span>slice(<span class="hljs-number">0</span>, <span class="hljs-number">-6</span>); <span class="hljs-comment">// 'Symfony is'</span>
+u(<span class="hljs-string">'Symfony is great'</span>)<span class="hljs-operator">-&gt;</span>slice(<span class="hljs-number">11</span>);    <span class="hljs-comment">// 'great'</span>
+u(<span class="hljs-string">'Symfony is great'</span>)<span class="hljs-operator">-&gt;</span>slice(<span class="hljs-number">-5</span>);    <span class="hljs-comment">// 'great'</span>
+
+<span class="hljs-comment">// reduces the string to the length given as argument (if it's longer)</span>
+u(<span class="hljs-string">'Lorem Ipsum'</span>)<span class="hljs-operator">-&gt;</span>truncate(<span class="hljs-number">3</span>);             <span class="hljs-comment">// 'Lor'</span>
+u(<span class="hljs-string">'Lorem Ipsum'</span>)<span class="hljs-operator">-&gt;</span>truncate(<span class="hljs-number">80</span>);            <span class="hljs-comment">// 'Lorem Ipsum'</span>
+<span class="hljs-comment">// the second argument is the character(s) added when a string is cut</span>
+<span class="hljs-comment">// (the total length includes the length of this character(s))</span>
+u(<span class="hljs-string">'Lorem Ipsum'</span>)<span class="hljs-operator">-&gt;</span>truncate(<span class="hljs-number">8</span>, <span class="hljs-string">'…'</span>);        <span class="hljs-comment">// 'Lorem I…'</span>
+<span class="hljs-comment">// if the third argument is false, the last word before the cut is kept</span>
+<span class="hljs-comment">// even if that generates a string longer than the desired length</span>
+u(<span class="hljs-string">'Lorem Ipsum'</span>)<span class="hljs-operator">-&gt;</span>truncate(<span class="hljs-number">8</span>, <span class="hljs-string">'…'</span>, <span class="hljs-keyword">false</span>); <span class="hljs-comment">// 'Lorem Ipsum'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// breaks the string into lines of the given length</span>
+u(<span class="hljs-string">'Lorem Ipsum'</span>)<span class="hljs-operator">-&gt;</span>wordwrap(<span class="hljs-number">4</span>);             <span class="hljs-comment">// 'Lorem\nIpsum'</span>
+<span class="hljs-comment">// by default it breaks by white space; pass TRUE to break unconditionally</span>
+u(<span class="hljs-string">'Lorem Ipsum'</span>)<span class="hljs-operator">-&gt;</span>wordwrap(<span class="hljs-number">4</span>, <span class="hljs-string">"\n"</span>, <span class="hljs-keyword">true</span>); <span class="hljs-comment">// 'Lore\nm\nIpsu\nm'</span>
+
+<span class="hljs-comment">// replaces a portion of the string with the given contents:</span>
+<span class="hljs-comment">// the second argument is the position where the replacement starts;</span>
+<span class="hljs-comment">// the third argument is the number of graphemes/code points removed from the string</span>
+u(<span class="hljs-string">'0123456789'</span>)<span class="hljs-operator">-&gt;</span>splice(<span class="hljs-string">'xxx'</span>);       <span class="hljs-comment">// 'xxx'</span>
+u(<span class="hljs-string">'0123456789'</span>)<span class="hljs-operator">-&gt;</span>splice(<span class="hljs-string">'xxx'</span>, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>); <span class="hljs-comment">// 'xxx23456789'</span>
+u(<span class="hljs-string">'0123456789'</span>)<span class="hljs-operator">-&gt;</span>splice(<span class="hljs-string">'xxx'</span>, <span class="hljs-number">0</span>, <span class="hljs-number">6</span>); <span class="hljs-comment">// 'xxx6789'</span>
+u(<span class="hljs-string">'0123456789'</span>)<span class="hljs-operator">-&gt;</span>splice(<span class="hljs-string">'xxx'</span>, <span class="hljs-number">6</span>);    <span class="hljs-comment">// '012345xxx'</span>
+
+<span class="hljs-comment">// breaks the string into pieces of the length given as argument</span>
+u(<span class="hljs-string">'0123456789'</span>)<span class="hljs-operator">-&gt;</span>chunk(<span class="hljs-number">3</span>);  <span class="hljs-comment">// ['012', '345', '678', '9']</span>
+
+<span class="hljs-comment">// reverses the order of the string contents</span>
+u(<span class="hljs-string">'foo bar'</span>)<span class="hljs-operator">-&gt;</span>reverse(); <span class="hljs-comment">// 'rab oof'</span>
+u(<span class="hljs-string">'さよなら'</span>)<span class="hljs-operator">-&gt;</span>reverse(); <span class="hljs-comment">// 'らなよさ'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="methods-added-by-bytestring">
+    Methods Added by ByteString
+    <a class="headerlink" href="#methods-added-by-bytestring" title="Permalink to this headline">¶</a>
+</h3>
+<p>These methods are only available for <code translate="no" class="notranslate">ByteString</code> objects:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// returns TRUE if the string contents are valid UTF-8 contents</span>
+b(<span class="hljs-string">'Lorem Ipsum'</span>)<span class="hljs-operator">-&gt;</span>isUtf8(); <span class="hljs-comment">// true</span>
+b(<span class="hljs-string">"\xc3\x28"</span>)<span class="hljs-operator">-&gt;</span>isUtf8();    <span class="hljs-comment">// false</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="methods-added-by-codepointstring-and-unicodestring">
+    Methods Added by CodePointString and UnicodeString
+    <a class="headerlink" href="#methods-added-by-codepointstring-and-unicodestring" title="Permalink to this headline">¶</a>
+</h3>
+<p>These methods are only available for <code translate="no" class="notranslate">CodePointString</code> and <code translate="no" class="notranslate">UnicodeString</code>
+objects:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// transliterates any string into the latin alphabet defined by the ASCII encoding</span>
+<span class="hljs-comment">// (don't use this method to build a slugger because this component already provides</span>
+<span class="hljs-comment">// a slugger, as explained later in this article)</span>
+u(<span class="hljs-string">'नमस्ते'</span>)<span class="hljs-operator">-&gt;</span>ascii();    <span class="hljs-comment">// 'namaste'</span>
+u(<span class="hljs-string">'さよなら'</span>)<span class="hljs-operator">-&gt;</span>ascii(); <span class="hljs-comment">// 'sayonara'</span>
+u(<span class="hljs-string">'спасибо'</span>)<span class="hljs-operator">-&gt;</span>ascii(); <span class="hljs-comment">// 'spasibo'</span>
+
+<span class="hljs-comment">// returns an array with the code point or points stored at the given position</span>
+<span class="hljs-comment">// (code points of 'नमस्ते' graphemes = [2344, 2350, 2360, 2340]</span>
+u(<span class="hljs-string">'नमस्ते'</span>)<span class="hljs-operator">-&gt;</span>codePointsAt(<span class="hljs-number">0</span>); <span class="hljs-comment">// [2344]</span>
+u(<span class="hljs-string">'नमस्ते'</span>)<span class="hljs-operator">-&gt;</span>codePointsAt(<span class="hljs-number">2</span>); <span class="hljs-comment">// [2360]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p><a href="https://en.wikipedia.org/wiki/Unicode_equivalence" class="reference external" rel="external noopener noreferrer" target="_blank">Unicode equivalence</a> is the specification by the Unicode standard that
+different sequences of code points represent the same character. For example,
+the Swedish letter <code translate="no" class="notranslate">å</code> can be a single code point (<code translate="no" class="notranslate">U+00E5</code> = <em>&quot;latin small
+letter A with ring above&quot;</em>) or a sequence of two code points (<code translate="no" class="notranslate">U+0061</code> =
+<em>&quot;latin small letter A&quot;</em> + <code translate="no" class="notranslate">U+030A</code> = <em>&quot;combining ring above&quot;</em>). The
+<code translate="no" class="notranslate">normalize()</code> method allows to pick the normalization mode:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// these encode the letter as a single code point: U+00E5</span>
+u(<span class="hljs-string">'å'</span>)<span class="hljs-operator">-&gt;</span>normalize(UnicodeString<span class="hljs-operator">::</span>NFC);
+u(<span class="hljs-string">'å'</span>)<span class="hljs-operator">-&gt;</span>normalize(UnicodeString<span class="hljs-operator">::</span>NFKC);
+<span class="hljs-comment">// these encode the letter as two code points: U+0061 + U+030A</span>
+u(<span class="hljs-string">'å'</span>)<span class="hljs-operator">-&gt;</span>normalize(UnicodeString<span class="hljs-operator">::</span>NFD);
+u(<span class="hljs-string">'å'</span>)<span class="hljs-operator">-&gt;</span>normalize(UnicodeString<span class="hljs-operator">::</span>NFKD);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="lazy-loaded-strings">
+    Lazy-loaded Strings
+    <a class="headerlink" href="#lazy-loaded-strings" title="Permalink to this headline">¶</a>
+</h2>
+<p>Sometimes, creating a string with the methods presented in the previous sections
+is not optimal. For example, consider a hash value that requires certain
+computation to obtain and which you might end up not using it.</p>
+<p>In those cases, it's better to use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/String/LazyString.php" class="reference external" title="Symfony\Component\String\LazyString" rel="external noopener noreferrer" target="_blank">LazyString</a>
+class that allows to store a string whose value is only generated when you need it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">LazyString</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lazyString</span> = LazyString<span class="hljs-operator">::</span>fromCallable(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">// Compute the string value...</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span> = ...;
+
+    <span class="hljs-comment">// Then return the final value</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>;
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The callback will only be executed when the value of the lazy string is
+requested during the program execution. You can also create lazy strings from a
+<code translate="no" class="notranslate">Stringable</code> object:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Hash</span> <span class="hljs-keyword">implements</span> \<span class="hljs-title">Stringable</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__toString</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>computeHash();
+    }
+
+    <span class="hljs-keyword">private</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">computeHash</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-comment">// Compute hash value with potentially heavy processing</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hash</span> = ...;
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>hash</span>;
+    }
+}
+
+<span class="hljs-comment">// Then create a lazy string from this hash, which will trigger</span>
+<span class="hljs-comment">// hash computation only if it's needed</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>lazyHash</span> = LazyString<span class="hljs-operator">::</span>fromStringable(<span class="hljs-keyword">new</span> Hash());</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="slugger">
+    Slugger
+    <a class="headerlink" href="#slugger" title="Permalink to this headline">¶</a>
+</h2>
+<p>In some contexts, such as URLs and file/directory names, it's not safe to use
+any Unicode character. A <em>slugger</em> transforms a given string into another string
+that only includes safe ASCII characters:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">Slugger</span>\<span class="hljs-title">AsciiSlugger</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span> = <span class="hljs-keyword">new</span> AsciiSlugger();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slug</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span><span class="hljs-operator">-&gt;</span>slug(<span class="hljs-string">'Wôrķšƥáçè ~~sèťtïñğš~~'</span>);
+<span class="hljs-comment">// $slug = 'Workspace-settings'</span>
+
+<span class="hljs-comment">// you can also pass an array with additional character substitutions</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span> = <span class="hljs-keyword">new</span> AsciiSlugger(<span class="hljs-string">'en'</span>, [<span class="hljs-string">'en'</span> =&gt; [<span class="hljs-string">'%'</span> =&gt; <span class="hljs-string">'percent'</span>, <span class="hljs-string">'€'</span> =&gt; <span class="hljs-string">'euro'</span>]]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slug</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span><span class="hljs-operator">-&gt;</span>slug(<span class="hljs-string">'10% or 5€'</span>);
+<span class="hljs-comment">// $slug = '10-percent-or-5-euro'</span>
+
+<span class="hljs-comment">// if there is no symbols map for your locale (e.g. 'en_GB') then the parent locale's symbols map</span>
+<span class="hljs-comment">// will be used instead (i.e. 'en')</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span> = <span class="hljs-keyword">new</span> AsciiSlugger(<span class="hljs-string">'en_GB'</span>, [<span class="hljs-string">'en'</span> =&gt; [<span class="hljs-string">'%'</span> =&gt; <span class="hljs-string">'percent'</span>, <span class="hljs-string">'€'</span> =&gt; <span class="hljs-string">'euro'</span>]]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slug</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span><span class="hljs-operator">-&gt;</span>slug(<span class="hljs-string">'10% or 5€'</span>);
+<span class="hljs-comment">// $slug = '10-percent-or-5-euro'</span>
+
+<span class="hljs-comment">// for more dynamic substitutions, pass a PHP closure instead of an array</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span> = <span class="hljs-keyword">new</span> AsciiSlugger(<span class="hljs-string">'en'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>string</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>locale</span>)</span> </span>{
+    <span class="hljs-keyword">return</span> str_replace(<span class="hljs-string">'❤️'</span>, <span class="hljs-string">'love'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>string</span>);
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The separator between words is a dash (<code translate="no" class="notranslate">-</code>) by default, but you can define
+another separator as the second argument:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slug</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span><span class="hljs-operator">-&gt;</span>slug(<span class="hljs-string">'Wôrķšƥáçè ~~sèťtïñğš~~'</span>, <span class="hljs-string">'/'</span>);
+<span class="hljs-comment">// $slug = 'Workspace/settings'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The slugger transliterates the original string into the Latin script before
+applying the other transformations. The locale of the original string is
+detected automatically, but you can define it explicitly:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// this tells the slugger to transliterate from Korean ('ko') language</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span> = <span class="hljs-keyword">new</span> AsciiSlugger(<span class="hljs-string">'ko'</span>);
+
+<span class="hljs-comment">// you can override the locale as the third optional parameter of slug()</span>
+<span class="hljs-comment">// e.g. this slugger transliterates from Persian ('fa') language</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slug</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span><span class="hljs-operator">-&gt;</span>slug(<span class="hljs-string">'...'</span>, <span class="hljs-string">'-'</span>, <span class="hljs-string">'fa'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In a Symfony application, you don't need to create the slugger yourself. Thanks
+to <a href="../service_container/autowiring.html" class="reference internal">service autowiring</a>, you can inject a
+slugger by type-hinting a service constructor argument with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/String/Slugger/SluggerInterface.php" class="reference external" title="Symfony\Component\String\Slugger\SluggerInterface" rel="external noopener noreferrer" target="_blank">SluggerInterface</a>. The locale of
+the injected slugger is the same as the request locale:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">Slugger</span>\<span class="hljs-title">SluggerInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyService</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private SluggerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">someMethod</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slug</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>slugger<span class="hljs-operator">-&gt;</span>slug(<span class="hljs-string">'...'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="string-slugger-emoji"></span>
+<div class="section">
+<h3 id="slug-emojis">
+    Slug Emojis
+    <a class="headerlink" href="#slug-emojis" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The Emoji transliteration feature was introduced in Symfony 6.2.</p>
+</div>
+<p>You can transform any emojis into their textual representation:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">Slugger</span>\<span class="hljs-title">AsciiSlugger</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span> = <span class="hljs-keyword">new</span> AsciiSlugger();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span><span class="hljs-operator">-&gt;</span>withEmoji();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slug</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span><span class="hljs-operator">-&gt;</span>slug(<span class="hljs-string">'a 😺, 🐈‍⬛, and a 🦁 go to 🏞️'</span>, <span class="hljs-string">'-'</span>, <span class="hljs-string">'en'</span>);
+<span class="hljs-comment">// $slug = 'a-grinning-cat-black-cat-and-a-lion-go-to-national-park';</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slug</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span><span class="hljs-operator">-&gt;</span>slug(<span class="hljs-string">'un 😺, 🐈‍⬛, et un 🦁 vont au 🏞️'</span>, <span class="hljs-string">'-'</span>, <span class="hljs-string">'fr'</span>);
+<span class="hljs-comment">// $slug = 'un-chat-qui-sourit-chat-noir-et-un-tete-de-lion-vont-au-parc-national';</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you want to use a specific locale for the emoji, or to use the short codes
+from GitHub or Slack, use the first argument of <code translate="no" class="notranslate">withEmoji()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">Slugger</span>\<span class="hljs-title">AsciiSlugger</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span> = <span class="hljs-keyword">new</span> AsciiSlugger();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span><span class="hljs-operator">-&gt;</span>withEmoji(<span class="hljs-string">'github'</span>); <span class="hljs-comment">// or "en", or "fr", etc.</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slug</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span><span class="hljs-operator">-&gt;</span>slug(<span class="hljs-string">'a 😺, 🐈‍⬛, and a 🦁'</span>);
+<span class="hljs-comment">// $slug = 'a-smiley-cat-black-cat-and-a-lion';</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you want to strip emojis from slugs, use the special <code translate="no" class="notranslate">strip</code> locale:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">Slugger</span>\<span class="hljs-title">AsciiSlugger</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span> = <span class="hljs-keyword">new</span> AsciiSlugger();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span><span class="hljs-operator">-&gt;</span>withEmoji(<span class="hljs-string">'strip'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slug</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span><span class="hljs-operator">-&gt;</span>slug(<span class="hljs-string">'a 😺, 🐈‍⬛, and a 🦁'</span>);
+<span class="hljs-comment">// $slug = 'a-and-a';</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The option to strip emojis from slugs was introduced in Symfony 6.3.</p>
+</div>
+<span id="string-inflector"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="inflector">
+    Inflector
+    <a class="headerlink" href="#inflector" title="Permalink to this headline">¶</a>
+</h2>
+<p>In some scenarios such as code generation and code introspection, you need to
+convert words from/to singular/plural. For example, to know the property
+associated with an <em>adder</em> method, you must convert from plural
+(<code translate="no" class="notranslate">addStories()</code> method) to singular (<code translate="no" class="notranslate">$story</code> property).</p>
+<p>Most human languages have simple pluralization rules, but at the same time they
+define lots of exceptions. For example, the general rule in English is to add an
+<code translate="no" class="notranslate">s</code> at the end of the word (<code translate="no" class="notranslate">book</code> -&gt; <code translate="no" class="notranslate">books</code>) but there are lots of
+exceptions even for common words (<code translate="no" class="notranslate">woman</code> -&gt; <code translate="no" class="notranslate">women</code>, <code translate="no" class="notranslate">life</code> -&gt; <code translate="no" class="notranslate">lives</code>,
+<code translate="no" class="notranslate">news</code> -&gt; <code translate="no" class="notranslate">news</code>, <code translate="no" class="notranslate">radius</code> -&gt; <code translate="no" class="notranslate">radii</code>, etc.)</p>
+<p>This component provides an <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/String/Inflector/EnglishInflector.php" class="reference external" title="Symfony\Component\String\Inflector\EnglishInflector" rel="external noopener noreferrer" target="_blank">EnglishInflector</a>
+class to convert English words from/to singular/plural with confidence:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">Inflector</span>\<span class="hljs-title">EnglishInflector</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>inflector</span> = <span class="hljs-keyword">new</span> EnglishInflector();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>result</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>inflector</span><span class="hljs-operator">-&gt;</span>singularize(<span class="hljs-string">'teeth'</span>);   <span class="hljs-comment">// ['tooth']</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>result</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>inflector</span><span class="hljs-operator">-&gt;</span>singularize(<span class="hljs-string">'radii'</span>);   <span class="hljs-comment">// ['radius']</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>result</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>inflector</span><span class="hljs-operator">-&gt;</span>singularize(<span class="hljs-string">'leaves'</span>);  <span class="hljs-comment">// ['leaf', 'leave', 'leaff']</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>result</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>inflector</span><span class="hljs-operator">-&gt;</span>pluralize(<span class="hljs-string">'bacterium'</span>); <span class="hljs-comment">// ['bacteria']</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>result</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>inflector</span><span class="hljs-operator">-&gt;</span>pluralize(<span class="hljs-string">'news'</span>);      <span class="hljs-comment">// ['news']</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>result</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>inflector</span><span class="hljs-operator">-&gt;</span>pluralize(<span class="hljs-string">'person'</span>);    <span class="hljs-comment">// ['persons', 'people']</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The value returned by both methods is always an array because sometimes it's not
+possible to determine a unique singular/plural form for the given word.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Symfony also provides a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/String/Inflector/FrenchInflector.php" class="reference external" title="Symfony\Component\String\Inflector\FrenchInflector" rel="external noopener noreferrer" target="_blank">FrenchInflector</a>
+and an <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/String/Inflector/InflectorInterface.php" class="reference external" title="Symfony\Component\String\Inflector\InflectorInterface" rel="external noopener noreferrer" target="_blank">InflectorInterface</a> if
+you need to implement your own inflector.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

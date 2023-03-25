@@ -1,0 +1,245 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="telegram-notifier">
+    Telegram Notifier
+    <a class="headerlink" href="#telegram-notifier" title="Permalink to this headline">¶</a>
+</h1>
+<p>The Telegram Notifier package allows to use Telegram via the Symfony Notifier
+component. Read the <a href="../notifier.html" class="reference internal">main Notifier docs</a> to learn about installing
+and configuring that component.</p>
+<div class="section">
+<h2 id="adding-interactions-to-a-message">
+    Adding Interactions to a Message
+    <a class="headerlink" href="#adding-interactions-to-a-message" title="Permalink to this headline">¶</a>
+</h2>
+<p>With a Telegram message, you can use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Bridge/Telegram/TelegramOptions.php" class="reference external" title="Symfony\Component\Notifier\Bridge\Telegram\TelegramOptions" rel="external noopener noreferrer" target="_blank">TelegramOptions</a> class
+to add <a href="https://core.telegram.org/bots/api" class="reference external" rel="external noopener noreferrer" target="_blank">message options</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Telegram</span>\<span class="hljs-title">Reply</span>\<span class="hljs-title">Markup</span>\<span class="hljs-title">Button</span>\<span class="hljs-title">InlineKeyboardButton</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Telegram</span>\<span class="hljs-title">Reply</span>\<span class="hljs-title">Markup</span>\<span class="hljs-title">InlineKeyboardMarkup</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Telegram</span>\<span class="hljs-title">TelegramOptions</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">ChatMessage</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatMessage</span> = <span class="hljs-keyword">new</span> ChatMessage(<span class="hljs-string">''</span>);
+
+<span class="hljs-comment">// Create Telegram options</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>telegramOptions</span> = (<span class="hljs-keyword">new</span> TelegramOptions())
+    <span class="hljs-operator">-&gt;</span>chatId(<span class="hljs-string">'@symfonynotifierdev'</span>)
+    <span class="hljs-operator">-&gt;</span>parseMode(<span class="hljs-string">'MarkdownV2'</span>)
+    <span class="hljs-operator">-&gt;</span>disableWebPagePreview(<span class="hljs-keyword">true</span>)
+    <span class="hljs-operator">-&gt;</span>disableNotification(<span class="hljs-keyword">true</span>)
+    <span class="hljs-operator">-&gt;</span>replyMarkup((<span class="hljs-keyword">new</span> InlineKeyboardMarkup())
+        <span class="hljs-operator">-&gt;</span>inlineKeyboard([
+            (<span class="hljs-keyword">new</span> InlineKeyboardButton(<span class="hljs-string">'Visit symfony.com'</span>))
+                <span class="hljs-operator">-&gt;</span>url(<span class="hljs-string">'https://symfony.com/'</span>),
+        ])
+    );
+
+<span class="hljs-comment">// Add the custom options to the chat message and send the message</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatMessage</span><span class="hljs-operator">-&gt;</span>options(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>telegramOptions</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatter</span><span class="hljs-operator">-&gt;</span>send(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatMessage</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="updating-messages">
+    Updating Messages
+    <a class="headerlink" href="#updating-messages" title="Permalink to this headline">¶</a>
+</h2>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">TelegramOptions::edit()</code> method was introduced in Symfony 6.2.</p>
+</div>
+<p>When working with interactive callback buttons, you can use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Bridge/Telegram/TelegramOptions.php" class="reference external" title="Symfony\Component\Notifier\Bridge\Telegram\TelegramOptions" rel="external noopener noreferrer" target="_blank">TelegramOptions</a> to reference
+a previous message to edit:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Telegram</span>\<span class="hljs-title">Reply</span>\<span class="hljs-title">Markup</span>\<span class="hljs-title">Button</span>\<span class="hljs-title">InlineKeyboardButton</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Telegram</span>\<span class="hljs-title">Reply</span>\<span class="hljs-title">Markup</span>\<span class="hljs-title">InlineKeyboardMarkup</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Telegram</span>\<span class="hljs-title">TelegramOptions</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">ChatMessage</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatMessage</span> = <span class="hljs-keyword">new</span> ChatMessage(<span class="hljs-string">'Are you really sure?'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>telegramOptions</span> = (<span class="hljs-keyword">new</span> TelegramOptions())
+    <span class="hljs-operator">-&gt;</span>chatId(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatId</span>)
+    <span class="hljs-operator">-&gt;</span>edit(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>messageId</span>) <span class="hljs-comment">// extracted from callback payload or SentMessage</span>
+    <span class="hljs-operator">-&gt;</span>replyMarkup((<span class="hljs-keyword">new</span> InlineKeyboardMarkup())
+        <span class="hljs-operator">-&gt;</span>inlineKeyboard([
+            (<span class="hljs-keyword">new</span> InlineKeyboardButton(<span class="hljs-string">'Absolutely'</span>))<span class="hljs-operator">-&gt;</span>callbackData(<span class="hljs-string">'yes'</span>),
+        ])
+    );</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="answering-callback-queries">
+    Answering Callback Queries
+    <a class="headerlink" href="#answering-callback-queries" title="Permalink to this headline">¶</a>
+</h2>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The <code translate="no" class="notranslate">TelegramOptions::answerCallbackQuery()</code> method was introduced in Symfony 6.3.</p>
+</div>
+<p>When sending message with inline keyboard buttons with callback data, you can use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Bridge/Telegram/TelegramOptions.php" class="reference external" title="Symfony\Component\Notifier\Bridge\Telegram\TelegramOptions" rel="external noopener noreferrer" target="_blank">TelegramOptions</a> to <a href="https://core.telegram.org/bots/api#answercallbackquery" class="reference external" rel="external noopener noreferrer" target="_blank">answer callback queries</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Telegram</span>\<span class="hljs-title">TelegramOptions</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">ChatMessage</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatMessage</span> = <span class="hljs-keyword">new</span> ChatMessage(<span class="hljs-string">'Thank you!'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>telegramOptions</span> = (<span class="hljs-keyword">new</span> TelegramOptions())
+    <span class="hljs-operator">-&gt;</span>chatId(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatId</span>)
+    <span class="hljs-operator">-&gt;</span>answerCallbackQuery(
+        callbackQueryId: <span class="hljs-string">'12345'</span>, <span class="hljs-comment">// extracted from callback</span>
+        showAlert: <span class="hljs-keyword">true</span>,
+        cacheTime: <span class="hljs-number">1</span>,
+    );</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

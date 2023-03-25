@@ -1,0 +1,483 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-create-symfony-applications-with-multiple-kernels">
+    How To Create Symfony Applications with Multiple Kernels
+    <a class="headerlink" href="#how-to-create-symfony-applications-with-multiple-kernels" title="Permalink to this headline">¶</a>
+</h1>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Creating applications with multiple kernels is no longer recommended by
+Symfony. Consider creating multiple small applications instead.</p>
+</div>
+<p>In most Symfony applications, incoming requests are processed by the
+<code translate="no" class="notranslate">public/index.php</code> front controller, which instantiates the <code translate="no" class="notranslate">src/Kernel.php</code>
+class to create the application kernel that loads the bundles and handles the
+request to generate the response.</p>
+<p>This single kernel approach is a convenient default, but Symfony applications
+can define any number of kernels. Whereas
+<a href="../configuration.html#configuration-environments" class="reference internal">environments</a> run the same application with
+different configurations, kernels can run different parts of the same
+application.</p>
+<p>These are some of the common use cases for creating multiple kernels:</p>
+<ul>
+    <li>An application that defines an API could define two kernels for performance
+reasons. The first kernel would serve the regular application and the second
+one would only respond to the API requests, loading less bundles and enabling
+less features;</li>
+<li>A highly sensitive application could define two kernels. The first one would
+only load the routes that match the parts of the application exposed publicly.
+The second kernel would load the rest of the application and its access would
+be protected by the web server;</li>
+<li>A micro-services oriented application could define several kernels to
+enable/disable services selectively turning a traditional monolith application
+into several micro-applications.</li>
+</ul>
+<div class="section">
+<h2 id="adding-a-new-kernel-to-the-application">
+    Adding a new Kernel to the Application
+    <a class="headerlink" href="#adding-a-new-kernel-to-the-application" title="Permalink to this headline">¶</a>
+</h2>
+<p>Creating a new kernel in a Symfony application is a three-step process:</p>
+<ol class="arabic">
+    <li>Create a new front controller to load the new kernel;</li>
+<li>Create the new kernel class;</li>
+<li>Define the configuration loaded by the new kernel.</li>
+</ol>
+<p>The following example shows how to create a new kernel for the API of a given
+Symfony application.</p>
+<div class="section">
+<h3 id="step-1-create-a-new-front-controller">
+    Step 1) Create a new Front Controller
+    <a class="headerlink" href="#step-1-create-a-new-front-controller" title="Permalink to this headline">¶</a>
+</h3>
+<p>Instead of creating the new front controller from scratch, it's easier to
+duplicate the existing one. For example, create <code translate="no" class="notranslate">public/api.php</code> from
+<code translate="no" class="notranslate">public/index.php</code>.</p>
+<p>Then, update the code of the new front controller to instantiate the new kernel
+class instead of the usual <code translate="no" class="notranslate">Kernel</code> class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// public/api.php</span>
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span> = <span class="hljs-keyword">new</span> ApiKernel(
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'APP_ENV'</span>] ?? <span class="hljs-string">'dev'</span>,
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'APP_DEBUG'</span>] ?? (<span class="hljs-string">'prod'</span> !== (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'APP_ENV'</span>] ?? <span class="hljs-string">'dev'</span>))
+);
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Another approach is to keep the existing <code translate="no" class="notranslate">index.php</code> front controller, but
+add an <code translate="no" class="notranslate">if</code> statement to load the different kernel based on the URL (e.g.
+if the URL starts with <code translate="no" class="notranslate">/api</code>, use the <code translate="no" class="notranslate">ApiKernel</code>).</p>
+</div>
+</div>
+<div class="section">
+<h3 id="step-2-create-the-new-kernel-class">
+    Step 2) Create the new Kernel Class
+    <a class="headerlink" href="#step-2-create-the-new-kernel-class" title="Permalink to this headline">¶</a>
+</h3>
+<p>Now you need to define the <code translate="no" class="notranslate">ApiKernel</code> class used by the new front controller.
+The easiest way to do this is by duplicating the existing  <code translate="no" class="notranslate">src/Kernel.php</code>
+file and make the needed changes.</p>
+<p>In this example, the <code translate="no" class="notranslate">ApiKernel</code> will load fewer bundles than the default
+Kernel. Be sure to also change the location of the cache, logs and configuration
+files so they don't collide with the files from <code translate="no" class="notranslate">src/Kernel.php</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/ApiKernel.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Kernel</span>\<span class="hljs-title">MicroKernelTrait</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">ContainerConfigurator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Kernel</span> <span class="hljs-title">as</span> <span class="hljs-title">BaseKernel</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">RoutingConfigurator</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ApiKernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Kernel</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">MicroKernelTrait</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getProjectDir</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> \dirname(<span class="hljs-keyword">__DIR__</span>);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getCacheDir</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getProjectDir().<span class="hljs-string">'/var/cache/api/'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>environment;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getLogDir</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getProjectDir().<span class="hljs-string">'/var/log/api'</span>;
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureContainer</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'../config/api/{packages}/*.yaml'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'../config/api/{packages}/'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>environment.<span class="hljs-string">'/*.yaml'</span>);
+
+        <span class="hljs-keyword">if</span> (is_file(\dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/config/api/services.yaml'</span>)) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'../config/api/services.yaml'</span>);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'../config/api/{services}_'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>environment.<span class="hljs-string">'.yaml'</span>);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'../config/api/{services}.php'</span>);
+        }
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureRoutes</span><span class="hljs-params">(RoutingConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'../config/api/{routes}/'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>environment.<span class="hljs-string">'/*.yaml'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'../config/api/{routes}/*.yaml'</span>);
+        <span class="hljs-comment">// ... load only the config routes strictly needed for the API</span>
+    }
+
+    <span class="hljs-comment">// If you need to run some logic to decide which bundles to load,</span>
+    <span class="hljs-comment">// you might prefer to use the registerBundles() method instead</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getBundlesPath</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-comment">// load only the bundles strictly needed for the API</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getProjectDir().<span class="hljs-string">'/config/api_bundles.php'</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="step-3-define-the-kernel-configuration">
+    Step 3) Define the Kernel Configuration
+    <a class="headerlink" href="#step-3-define-the-kernel-configuration" title="Permalink to this headline">¶</a>
+</h3>
+<p>Finally, define the configuration files that the new <code translate="no" class="notranslate">ApiKernel</code> will load.
+According to the above code, this config will live in one or multiple files
+stored in <code translate="no" class="notranslate">config/api/</code> and <code translate="no" class="notranslate">config/api/ENVIRONMENT_NAME/</code> directories.</p>
+<p>The new configuration files can be created from scratch when you load only a few
+bundles, because it will be small. Otherwise, duplicate the existing
+config files in <code translate="no" class="notranslate">config/packages/</code> or better, import them and override the
+needed options.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="executing-commands-with-a-different-kernel">
+    Executing Commands with a Different Kernel
+    <a class="headerlink" href="#executing-commands-with-a-different-kernel" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <code translate="no" class="notranslate">bin/console</code> script used to run Symfony commands always uses the default
+<code translate="no" class="notranslate">Kernel</code> class to build the application and load the commands. If you need
+to run console commands using the new kernel, duplicate the <code translate="no" class="notranslate">bin/console</code>
+script and rename it (e.g. <code translate="no" class="notranslate">bin/api</code>).</p>
+<p>Then, replace the <code translate="no" class="notranslate">Kernel</code> instance by your own kernel instance
+(e.g. <code translate="no" class="notranslate">ApiKernel</code>). Now you can run commands using the new kernel
+(e.g. <code translate="no" class="notranslate">php bin/api cache:clear</code>).</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The commands available for each console script (e.g. <code translate="no" class="notranslate">bin/console</code> and
+<code translate="no" class="notranslate">bin/api</code>) can differ because they depend on the bundles enabled for each
+kernel, which could be different.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="rendering-templates-defined-in-a-different-kernel">
+    Rendering Templates Defined in a Different Kernel
+    <a class="headerlink" href="#rendering-templates-defined-in-a-different-kernel" title="Permalink to this headline">¶</a>
+</h2>
+<p>If you follow the Symfony Best Practices, the templates of the default kernel
+will be stored in <code translate="no" class="notranslate">templates/</code>. Trying to render those templates in a
+different kernel will result in a <em>There are no registered paths for namespace
+&quot;__main__&quot;</em> error.</p>
+<p>In order to solve this issue, add the following configuration to your kernel:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/api/twig.yaml</span>
+<span class="hljs-attr">twig:</span>
+    <span class="hljs-attr">paths:</span>
+        <span class="hljs-comment"># allows to use api/templates/ dir in the ApiKernel</span>
+        <span class="hljs-string">"%kernel.project_dir%/api/templates"</span><span class="hljs-string">:</span> <span class="hljs-string">~</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="running-tests-using-a-different-kernel">
+    Running Tests Using a Different Kernel
+    <a class="headerlink" href="#running-tests-using-a-different-kernel" title="Permalink to this headline">¶</a>
+</h2>
+<p>In Symfony applications, functional tests extend by default from the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Test/WebTestCase.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Test\WebTestCase" rel="external noopener noreferrer" target="_blank">WebTestCase</a> class. Inside that
+class, a method called <code translate="no" class="notranslate">getKernelClass()</code> tries to find the class of the kernel
+to use to run the application during tests. The logic of this method does not
+support multiple kernel applications, so your tests won't use the right kernel.</p>
+<p>The solution is to create a custom base class for functional tests extending
+from <code translate="no" class="notranslate">WebTestCase</code> class and overriding the <code translate="no" class="notranslate">getKernelClass()</code> method to
+return the fully qualified class name of the kernel to use:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Test</span>\<span class="hljs-title">WebTestCase</span>;
+
+<span class="hljs-comment">// tests needing the ApiKernel to work, now must extend this</span>
+<span class="hljs-comment">// ApiTestCase class instead of the default WebTestCase class</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ApiTestCase</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">WebTestCase</span>
+</span>{
+    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getKernelClass</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'App\ApiKernel'</span>;
+    }
+
+    <span class="hljs-comment">// this is needed because the KernelTestCase class keeps a reference to</span>
+    <span class="hljs-comment">// the previously created kernel in its static $kernel property. Thus,</span>
+    <span class="hljs-comment">// if your functional tests do not run in isolated processes, a later run</span>
+    <span class="hljs-comment">// test for a different kernel will reuse the previously created instance,</span>
+    <span class="hljs-comment">// which points to a different kernel</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">tearDown</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>tearDown();
+
+        <span class="hljs-keyword">static</span><span class="hljs-operator">::$</span>class = <span class="hljs-keyword">null</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="adding-more-kernels-to-the-application">
+    Adding more Kernels to the Application
+    <a class="headerlink" href="#adding-more-kernels-to-the-application" title="Permalink to this headline">¶</a>
+</h2>
+<p>If your application is very complex and you create several kernels, it's better
+to store them in their own directories instead of messing with lots of files in
+the default <code translate="no" class="notranslate">src/</code> directory:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">project/
+├─ src/
+│  ├─ ...
+│  └─ Kernel.php
+├─ api/
+│  ├─ ...
+│  └─ ApiKernel.php
+├─ ...
+└─ public/
+    ├─ ...
+    ├─ api.php
+    └─ index.php</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,1356 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-process-component">
+    The Process Component
+    <a class="headerlink" href="#the-process-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The Process component executes commands in sub-processes.</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/process</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php" class="reference external" title="Symfony\Component\Process\Process" rel="external noopener noreferrer" target="_blank">Process</a> class executes a command in a
+sub-process, taking care of the differences between operating system and
+escaping arguments to prevent security issues. It replaces PHP functions like
+<a href="https://secure.php.net/manual/en/function.exec.php" class="reference external" title="exec" rel="external noopener noreferrer" target="_blank">exec</a>, <a href="https://secure.php.net/manual/en/function.passthru.php" class="reference external" title="passthru" rel="external noopener noreferrer" target="_blank">passthru</a>, <a href="https://secure.php.net/manual/en/function.shell-exec.php" class="reference external" title="shell_exec" rel="external noopener noreferrer" target="_blank">shell_exec</a> and
+<a href="https://secure.php.net/manual/en/function.system.php" class="reference external" title="system" rel="external noopener noreferrer" target="_blank">system</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">ProcessFailedException</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">Process</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'ls'</span>, <span class="hljs-string">'-lsa'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>run();
+
+<span class="hljs-comment">// executes after the command finishes</span>
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>isSuccessful()) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ProcessFailedException(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span>);
+}
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>getOutput();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">getOutput()</code> method always returns the whole content of the standard
+output of the command and <code translate="no" class="notranslate">getErrorOutput()</code> the content of the error
+output. Alternatively, the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_getIncrementalOutput" class="reference external" title="Symfony\Component\Process\Process::getIncrementalOutput()" rel="external noopener noreferrer" target="_blank">getIncrementalOutput()</a>
+and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_getIncrementalErrorOutput" class="reference external" title="Symfony\Component\Process\Process::getIncrementalErrorOutput()" rel="external noopener noreferrer" target="_blank">getIncrementalErrorOutput()</a>
+methods return the new output since the last call.</p>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_clearOutput" class="reference external" title="Symfony\Component\Process\Process::clearOutput()" rel="external noopener noreferrer" target="_blank">clearOutput()</a> method clears
+the contents of the output and
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_clearErrorOutput" class="reference external" title="Symfony\Component\Process\Process::clearErrorOutput()" rel="external noopener noreferrer" target="_blank">clearErrorOutput()</a> clears
+the contents of the error output.</p>
+<p>You can also use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php" class="reference external" title="Symfony\Component\Process\Process" rel="external noopener noreferrer" target="_blank">Process</a> class with the
+for each construct to get the output while it is generated. By default, the loop waits
+for new output before going to the next iteration:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'ls'</span>, <span class="hljs-string">'-lsa'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>start();
+
+<span class="hljs-keyword">foreach</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>data</span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">::</span>OUT === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span>) {
+        <span class="hljs-keyword">echo</span> <span class="hljs-string">"\nRead from stdout: "</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>data</span>;
+    } <span class="hljs-keyword">else</span> { <span class="hljs-comment">// $process::ERR === $type</span>
+        <span class="hljs-keyword">echo</span> <span class="hljs-string">"\nRead from stderr: "</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>data</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The Process component internally uses a PHP iterator to get the output while
+it is generated. That iterator is exposed via the <code translate="no" class="notranslate">getIterator()</code> method
+to allow customizing its behavior:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'ls'</span>, <span class="hljs-string">'-lsa'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>start();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>iterator</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>getIterator(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">::</span>ITER_SKIP_ERR | <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">::</span>ITER_KEEP_OUTPUT);
+<span class="hljs-keyword">foreach</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>iterator</span> <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>data</span>) {
+    <span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>data</span>.<span class="hljs-string">"\n"</span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<p>The <code translate="no" class="notranslate">mustRun()</code> method is identical to <code translate="no" class="notranslate">run()</code>, except that it will throw
+a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Exception/ProcessFailedException.php" class="reference external" title="Symfony\Component\Process\Exception\ProcessFailedException" rel="external noopener noreferrer" target="_blank">ProcessFailedException</a>
+if the process couldn't be executed successfully (i.e. the process exited
+with a non-zero code):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">ProcessFailedException</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">Process</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'ls'</span>, <span class="hljs-string">'-lsa'</span>]);
+
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>mustRun();
+
+    <span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>getOutput();
+} <span class="hljs-keyword">catch</span> (ProcessFailedException <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>) {
+    <span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span><span class="hljs-operator">-&gt;</span>getMessage();
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can get the last output time in seconds by using the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_getLastOutputTime" class="reference external" title="Symfony\Component\Process\Process::getLastOutputTime()" rel="external noopener noreferrer" target="_blank">getLastOutputTime()</a> method.
+This method returns <code translate="no" class="notranslate">null</code> if the process wasn't started!</p>
+</div>
+</div>
+<div class="section">
+<h2 id="configuring-process-options">
+    Configuring Process Options
+    <a class="headerlink" href="#configuring-process-options" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony uses the PHP <a href="https://secure.php.net/manual/en/function.proc-open.php" class="reference external" title="proc_open" rel="external noopener noreferrer" target="_blank">proc_open</a> function to run the processes.
+You can configure the options passed to the <code translate="no" class="notranslate">other_options</code> argument of
+<code translate="no" class="notranslate">proc_open()</code> using the <code translate="no" class="notranslate">setOptions()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'...'</span>, <span class="hljs-string">'...'</span>, <span class="hljs-string">'...'</span>]);
+<span class="hljs-comment">// this option allows a subprocess to continue running after the main script exited</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>setOptions([<span class="hljs-string">'create_new_console'</span> =&gt; <span class="hljs-keyword">true</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="using-features-from-the-os-shell">
+    Using Features From the OS Shell
+    <a class="headerlink" href="#using-features-from-the-os-shell" title="Permalink to this headline">¶</a>
+</h2>
+<p>Using an array of arguments is the recommended way to define commands. This
+saves you from any escaping and allows sending signals seamlessly
+(e.g. to stop processes while they run):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'/path/command'</span>, <span class="hljs-string">'--option'</span>, <span class="hljs-string">'argument'</span>, <span class="hljs-string">'etc.'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'/path/to/php'</span>, <span class="hljs-string">'--define'</span>, <span class="hljs-string">'memory_limit=1024M'</span>, <span class="hljs-string">'/path/to/script.php'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you need to use stream redirections, conditional execution, or any other
+feature provided by the shell of your operating system, you can also define
+commands as strings using the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_fromShellCommandline" class="reference external" title="Symfony\Component\Process\Process::fromShellCommandline()" rel="external noopener noreferrer" target="_blank">fromShellCommandline()</a> static
+factory.</p>
+<p>Each operating system provides a different syntax for their command-lines,
+so it becomes your responsibility to deal with escaping and portability.</p>
+<p>When using strings to define commands, variable arguments are passed as
+environment variables using the second argument of the <code translate="no" class="notranslate">run()</code>,
+<code translate="no" class="notranslate">mustRun()</code> or <code translate="no" class="notranslate">start()</code> methods. Referencing them is also OS-dependent:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// On Unix-like OSes (Linux, macOS)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = Process<span class="hljs-operator">::</span>fromShellCommandline(<span class="hljs-string">'echo "$MESSAGE"'</span>);
+
+<span class="hljs-comment">// On Windows</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = Process<span class="hljs-operator">::</span>fromShellCommandline(<span class="hljs-string">'echo "!MESSAGE!"'</span>);
+
+<span class="hljs-comment">// On both Unix-like and Windows</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>run(<span class="hljs-keyword">null</span>, [<span class="hljs-string">'MESSAGE'</span> =&gt; <span class="hljs-string">'Something to output'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you prefer to create portable commands that are independent from the
+operating system, you can write the above command as follows:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// works the same on Windows , Linux and macOS</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = Process<span class="hljs-operator">::</span>fromShellCommandline(<span class="hljs-string">'echo "${:MESSAGE}"'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Portable commands require using a syntax that is specific to the component: when
+enclosing a variable name into <code translate="no" class="notranslate">&quot;${:</code> and <code translate="no" class="notranslate">}&quot;</code> exactly, the process object
+will replace it with its escaped value, or will fail if the variable is not
+found in the list of environment variables attached to the command.</p>
+</div>
+<div class="section">
+<h2 id="setting-environment-variables-for-processes">
+    Setting Environment Variables for Processes
+    <a class="headerlink" href="#setting-environment-variables-for-processes" title="Permalink to this headline">¶</a>
+</h2>
+<p>The constructor of the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php" class="reference external" title="Symfony\Component\Process\Process" rel="external noopener noreferrer" target="_blank">Process</a> class and
+all of its methods related to executing processes (<code translate="no" class="notranslate">run()</code>, <code translate="no" class="notranslate">mustRun()</code>,
+<code translate="no" class="notranslate">start()</code>, etc.) allow passing an array of environment variables to set while
+running the process:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'...'</span>], <span class="hljs-keyword">null</span>, [<span class="hljs-string">'ENV_VAR_NAME'</span> =&gt; <span class="hljs-string">'value'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = Process<span class="hljs-operator">::</span>fromShellCommandline(<span class="hljs-string">'...'</span>, <span class="hljs-keyword">null</span>, [<span class="hljs-string">'ENV_VAR_NAME'</span> =&gt; <span class="hljs-string">'value'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>run(<span class="hljs-keyword">null</span>, [<span class="hljs-string">'ENV_VAR_NAME'</span> =&gt; <span class="hljs-string">'value'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In addition to the env vars passed explicitly, processes inherit all the env
+vars defined in your system. You can prevent this by setting to <code translate="no" class="notranslate">false</code> the
+env vars you want to remove:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'...'</span>], <span class="hljs-keyword">null</span>, [
+    <span class="hljs-string">'APP_ENV'</span> =&gt; <span class="hljs-keyword">false</span>,
+    <span class="hljs-string">'SYMFONY_DOTENV_VARS'</span> =&gt; <span class="hljs-keyword">false</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="getting-real-time-process-output">
+    Getting real-time Process Output
+    <a class="headerlink" href="#getting-real-time-process-output" title="Permalink to this headline">¶</a>
+</h2>
+<p>When executing a long running command (like <code translate="no" class="notranslate">rsync</code> to a remote
+server), you can give feedback to the end user in real-time by passing an
+anonymous function to the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_run" class="reference external" title="Symfony\Component\Process\Process::run()" rel="external noopener noreferrer" target="_blank">run()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">Process</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'ls'</span>, <span class="hljs-string">'-lsa'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>run(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>buffer</span>)</span> </span>{
+    <span class="hljs-keyword">if</span> (Process<span class="hljs-operator">::</span>ERR === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span>) {
+        <span class="hljs-keyword">echo</span> <span class="hljs-string">'ERR &gt; '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>buffer</span>;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">echo</span> <span class="hljs-string">'OUT &gt; '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>buffer</span>;
+    }
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>This feature won't work as expected in servers using PHP output buffering.
+In those cases, either disable the <a href="https://www.php.net/manual/en/outcontrol.configuration.php" class="reference external" rel="external noopener noreferrer" target="_blank">output_buffering</a> PHP option or use the
+<a href="https://secure.php.net/manual/en/function.ob-flush.php" class="reference external" title="ob_flush" rel="external noopener noreferrer" target="_blank">ob_flush</a> PHP function to force sending the output buffer.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="running-processes-asynchronously">
+    Running Processes Asynchronously
+    <a class="headerlink" href="#running-processes-asynchronously" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can also start the subprocess and then let it run asynchronously, retrieving
+output and the status in your main process whenever you need it. Use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_start" class="reference external" title="Symfony\Component\Process\Process::start()" rel="external noopener noreferrer" target="_blank">start()</a> method to start an asynchronous
+process, the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_isRunning" class="reference external" title="Symfony\Component\Process\Process::isRunning()" rel="external noopener noreferrer" target="_blank">isRunning()</a> method
+to check if the process is done and the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_getOutput" class="reference external" title="Symfony\Component\Process\Process::getOutput()" rel="external noopener noreferrer" target="_blank">getOutput()</a> method to get the output:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'ls'</span>, <span class="hljs-string">'-lsa'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>start();
+
+<span class="hljs-keyword">while</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>isRunning()) {
+    <span class="hljs-comment">// waiting for process to finish</span>
+}
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>getOutput();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also wait for a process to end if you started it asynchronously and
+are done doing other stuff:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'ls'</span>, <span class="hljs-string">'-lsa'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>start();
+
+<span class="hljs-comment">// ... do other things</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>wait();
+
+<span class="hljs-comment">// ... do things after the process has finished</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_wait" class="reference external" title="Symfony\Component\Process\Process::wait()" rel="external noopener noreferrer" target="_blank">wait()</a> method is blocking,
+which means that your code will halt at this line until the external
+process is completed.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If a <code translate="no" class="notranslate">Response</code> is sent <strong>before</strong> a child process had a chance to complete,
+the server process will be killed (depending on your OS). It means that
+your task will be stopped right away. Running an asynchronous process
+is not the same as running a process that survives its parent process.</p>
+<p>If you want your process to survive the request/response cycle, you can
+take advantage of the <code translate="no" class="notranslate">kernel.terminate</code> event, and run your command
+<strong>synchronously</strong> inside this event. Be aware that <code translate="no" class="notranslate">kernel.terminate</code>
+is called only if you use PHP-FPM.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Beware also that if you do that, the said PHP-FPM process will not be
+available to serve any new request until the subprocess is finished. This
+means you can quickly block your FPM pool if you're not careful enough.
+That is why it's generally way better not to do any fancy things even
+after the request is sent, but to use a job queue instead.</p>
+</div>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_wait" class="reference external" title="Symfony\Component\Process\Process::wait()" rel="external noopener noreferrer" target="_blank">wait()</a> takes one optional argument:
+a callback that is called repeatedly whilst the process is still running, passing
+in the output and its type:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'ls'</span>, <span class="hljs-string">'-lsa'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>start();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>wait(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>buffer</span>)</span> </span>{
+    <span class="hljs-keyword">if</span> (Process<span class="hljs-operator">::</span>ERR === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span>) {
+        <span class="hljs-keyword">echo</span> <span class="hljs-string">'ERR &gt; '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>buffer</span>;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">echo</span> <span class="hljs-string">'OUT &gt; '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>buffer</span>;
+    }
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Instead of waiting until the process has finished, you can use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_waitUntil" class="reference external" title="Symfony\Component\Process\Process::waitUntil()" rel="external noopener noreferrer" target="_blank">waitUntil()</a> method to keep or stop
+waiting based on some PHP logic. The following example starts a long running
+process and checks its output to wait until its fully initialized:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'/usr/bin/php'</span>, <span class="hljs-string">'slow-starting-server.php'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>start();
+
+<span class="hljs-comment">// ... do other things</span>
+
+<span class="hljs-comment">// waits until the given anonymous function returns true</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>waitUntil(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> === <span class="hljs-string">'Ready. Waiting for commands...'</span>;
+});
+
+<span class="hljs-comment">// ... do things after the process is ready</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="streaming-to-the-standard-input-of-a-process">
+    Streaming to the Standard Input of a Process
+    <a class="headerlink" href="#streaming-to-the-standard-input-of-a-process" title="Permalink to this headline">¶</a>
+</h2>
+<p>Before a process is started, you can specify its standard input using either the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_setInput" class="reference external" title="Symfony\Component\Process\Process::setInput()" rel="external noopener noreferrer" target="_blank">setInput()</a> method or the 4th argument
+of the constructor. The provided input can be a string, a stream resource or a
+<code translate="no" class="notranslate">Traversable</code> object:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'cat'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>setInput(<span class="hljs-string">'foobar'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>run();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When this input is fully written to the subprocess standard input, the corresponding
+pipe is closed.</p>
+<p>In order to write to a subprocess standard input while it is running, the component
+provides the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/InputStream.php" class="reference external" title="Symfony\Component\Process\InputStream" rel="external noopener noreferrer" target="_blank">InputStream</a> class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span> = <span class="hljs-keyword">new</span> InputStream();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span><span class="hljs-operator">-&gt;</span>write(<span class="hljs-string">'foo'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'cat'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>setInput(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>start();
+
+<span class="hljs-comment">// ... read process output or do other things</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span><span class="hljs-operator">-&gt;</span>write(<span class="hljs-string">'bar'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span><span class="hljs-operator">-&gt;</span>close();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>wait();
+
+<span class="hljs-comment">// will echo: foobar</span>
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>getOutput();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/InputStream.php#method_write" class="reference external" title="Symfony\Component\Process\InputStream::write()" rel="external noopener noreferrer" target="_blank">write()</a> method accepts scalars,
+stream resources or <code translate="no" class="notranslate">Traversable</code> objects as arguments. As shown in the above example,
+you need to explicitly call the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/InputStream.php#method_close" class="reference external" title="Symfony\Component\Process\InputStream::close()" rel="external noopener noreferrer" target="_blank">close()</a>
+method when you are done writing to the standard input of the subprocess.</p>
+<div class="section">
+<h3 id="using-php-streams-as-the-standard-input-of-a-process">
+    Using PHP Streams as the Standard Input of a Process
+    <a class="headerlink" href="#using-php-streams-as-the-standard-input-of-a-process" title="Permalink to this headline">¶</a>
+</h3>
+<p>The input of a process can also be defined using <a href="https://www.php.net/manual/en/book.stream.php" class="reference external" rel="external noopener noreferrer" target="_blank">PHP streams</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stream</span> = fopen(<span class="hljs-string">'php://temporary'</span>, <span class="hljs-string">'w+'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'cat'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>setInput(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stream</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>start();
+
+fwrite(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stream</span>, <span class="hljs-string">'foo'</span>);
+
+<span class="hljs-comment">// ... read process output or do other things</span>
+
+fwrite(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stream</span>, <span class="hljs-string">'bar'</span>);
+fclose(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stream</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>wait();
+
+<span class="hljs-comment">// will echo: 'foobar'</span>
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>getOutput();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="using-tty-and-pty-modes">
+    Using TTY and PTY Modes
+    <a class="headerlink" href="#using-tty-and-pty-modes" title="Permalink to this headline">¶</a>
+</h2>
+<p>All examples above show that your program has control over the input of a
+process (using <code translate="no" class="notranslate">setInput()</code>) and the output from that process (using
+<code translate="no" class="notranslate">getOutput()</code>). The Process component has two special modes that tweak
+the relationship between your program and the process: teletype (tty) and
+pseudo-teletype (pty).</p>
+<p>In TTY mode, you connect the input and output of the process to the input
+and output of your program. This allows for instance to open an editor like
+Vim or Nano as a process. You enable TTY mode by calling
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_setTty" class="reference external" title="Symfony\Component\Process\Process::setTty()" rel="external noopener noreferrer" target="_blank">setTty()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'vim'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>setTty(<span class="hljs-keyword">true</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>run();
+
+<span class="hljs-comment">// As the output is connected to the terminal, it is no longer possible</span>
+<span class="hljs-comment">// to read or modify the output from the process!</span>
+dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>getOutput()); <span class="hljs-comment">// null</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In PTY mode, your program behaves as a terminal for the process instead of
+a plain input and output. Some programs behave differently when
+interacting with a real terminal instead of another program. For instance,
+some programs prompt for a password when talking with a terminal. Use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_setPty" class="reference external" title="Symfony\Component\Process\Process::setPty()" rel="external noopener noreferrer" target="_blank">setPty()</a> to enable this
+mode.</p>
+</div>
+<div class="section">
+<h2 id="stopping-a-process">
+    Stopping a Process
+    <a class="headerlink" href="#stopping-a-process" title="Permalink to this headline">¶</a>
+</h2>
+<p>Any asynchronous process can be stopped at any time with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_stop" class="reference external" title="Symfony\Component\Process\Process::stop()" rel="external noopener noreferrer" target="_blank">stop()</a> method. This method takes
+two arguments: a timeout and a signal. Once the timeout is reached, the signal
+is sent to the running process. The default signal sent to a process is <code translate="no" class="notranslate">SIGKILL</code>.
+Please read the <a href="process.html#reference-process-signal" class="reference internal">signal documentation below</a>
+to find out more about signal handling in the Process component:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'ls'</span>, <span class="hljs-string">'-lsa'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>start();
+
+<span class="hljs-comment">// ... do other things</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>stop(<span class="hljs-number">3</span>, SIGINT);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="executing-php-code-in-isolation">
+    Executing PHP Code in Isolation
+    <a class="headerlink" href="#executing-php-code-in-isolation" title="Permalink to this headline">¶</a>
+</h2>
+<p>If you want to execute some PHP code in isolation, use the <code translate="no" class="notranslate">PhpProcess</code>
+instead:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">PhpProcess</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> PhpProcess(<span class="hljs-string">&lt;&lt;&lt;EOF
+    &lt;?= 'Hello World' ?&gt;
+EOF</span>
+);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>run();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="process-timeout">
+    Process Timeout
+    <a class="headerlink" href="#process-timeout" title="Permalink to this headline">¶</a>
+</h2>
+<p>By default processes have a timeout of 60 seconds, but you can change it passing
+a different timeout (in seconds) to the <code translate="no" class="notranslate">setTimeout()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">Process</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'ls'</span>, <span class="hljs-string">'-lsa'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>setTimeout(<span class="hljs-number">3600</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>run();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If the timeout is reached, a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Exception/ProcessTimedOutException.php" class="reference external" title="Symfony\Component\Process\Exception\ProcessTimedOutException" rel="external noopener noreferrer" target="_blank">ProcessTimedOutException</a> is thrown.</p>
+<p>For long running commands, it is your responsibility to perform the timeout
+check regularly:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>setTimeout(<span class="hljs-number">3600</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>start();
+
+<span class="hljs-keyword">while</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>condition</span>) {
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-comment">// check if the timeout is reached</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>checkTimeout();
+
+    usleep(<span class="hljs-number">200000</span>);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can get the process start time using the <code translate="no" class="notranslate">getStartTime()</code> method.</p>
+</div>
+<span id="reference-process-signal"></span>
+</div>
+<div class="section">
+<h2 id="process-idle-timeout">
+    Process Idle Timeout
+    <a class="headerlink" href="#process-idle-timeout" title="Permalink to this headline">¶</a>
+</h2>
+<p>In contrast to the timeout of the previous paragraph, the idle timeout only
+considers the time since the last output was produced by the process:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">Process</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'something-with-variable-runtime'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>setTimeout(<span class="hljs-number">3600</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>setIdleTimeout(<span class="hljs-number">60</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>run();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In the case above, a process is considered timed out, when either the total runtime
+exceeds 3600 seconds, or the process does not produce any output for 60 seconds.</p>
+</div>
+<div class="section">
+<h2 id="process-signals">
+    Process Signals
+    <a class="headerlink" href="#process-signals" title="Permalink to this headline">¶</a>
+</h2>
+<p>When running a program asynchronously, you can send it POSIX signals with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_signal" class="reference external" title="Symfony\Component\Process\Process::signal()" rel="external noopener noreferrer" target="_blank">signal()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">Process</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'find'</span>, <span class="hljs-string">'/'</span>, <span class="hljs-string">'-name'</span>, <span class="hljs-string">'rabbit'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>start();
+
+<span class="hljs-comment">// will send a SIGKILL to the process</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>signal(SIGKILL);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="process-pid">
+    Process Pid
+    <a class="headerlink" href="#process-pid" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can access the <a href="https://en.wikipedia.org/wiki/Process_identifier" class="reference external" rel="external noopener noreferrer" target="_blank">pid</a> of a running process with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_getPid" class="reference external" title="Symfony\Component\Process\Process::getPid()" rel="external noopener noreferrer" target="_blank">getPid()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">Process</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'/usr/bin/php'</span>, <span class="hljs-string">'worker.php'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>start();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pid</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>getPid();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="disabling-output">
+    Disabling Output
+    <a class="headerlink" href="#disabling-output" title="Permalink to this headline">¶</a>
+</h2>
+<p>As standard output and error output are always fetched from the underlying process,
+it might be convenient to disable output in some cases to save memory.
+Use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_disableOutput" class="reference external" title="Symfony\Component\Process\Process::disableOutput()" rel="external noopener noreferrer" target="_blank">disableOutput()</a> and
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_enableOutput" class="reference external" title="Symfony\Component\Process\Process::enableOutput()" rel="external noopener noreferrer" target="_blank">enableOutput()</a> to toggle this feature:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">Process</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = <span class="hljs-keyword">new</span> Process([<span class="hljs-string">'/usr/bin/php'</span>, <span class="hljs-string">'worker.php'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>disableOutput();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span><span class="hljs-operator">-&gt;</span>run();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>You cannot enable or disable the output while the process is running.</p>
+<p>If you disable the output, you cannot access <code translate="no" class="notranslate">getOutput()</code>,
+<code translate="no" class="notranslate">getIncrementalOutput()</code>, <code translate="no" class="notranslate">getErrorOutput()</code>, <code translate="no" class="notranslate">getIncrementalErrorOutput()</code> or
+<code translate="no" class="notranslate">setIdleTimeout()</code>.</p>
+<p>However, it is possible to pass a callback to the <code translate="no" class="notranslate">start</code>, <code translate="no" class="notranslate">run</code> or <code translate="no" class="notranslate">mustRun</code>
+methods to handle process output in a streaming fashion.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="finding-an-executable">
+    Finding an Executable
+    <a class="headerlink" href="#finding-an-executable" title="Permalink to this headline">¶</a>
+</h2>
+<p>The Process component provides a utility class called
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/ExecutableFinder.php" class="reference external" title="Symfony\Component\Process\ExecutableFinder" rel="external noopener noreferrer" target="_blank">ExecutableFinder</a> which finds
+and returns the absolute path of an executable:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">ExecutableFinder</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>executableFinder</span> = <span class="hljs-keyword">new</span> ExecutableFinder();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chromedriverPath</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>executableFinder</span><span class="hljs-operator">-&gt;</span>find(<span class="hljs-string">'chromedriver'</span>);
+<span class="hljs-comment">// $chromedriverPath = '/usr/local/bin/chromedriver' (the result will be different on your computer)</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/ExecutableFinder.php#method_find" class="reference external" title="Symfony\Component\Process\ExecutableFinder::find()" rel="external noopener noreferrer" target="_blank">find()</a> method also takes extra parameters to specify a default value
+to return and extra directories where to look for the executable:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">ExecutableFinder</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>executableFinder</span> = <span class="hljs-keyword">new</span> ExecutableFinder();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chromedriverPath</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>executableFinder</span><span class="hljs-operator">-&gt;</span>find(<span class="hljs-string">'chromedriver'</span>, <span class="hljs-string">'/path/to/chromedriver'</span>, [<span class="hljs-string">'local-bin/'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="finding-the-executable-php-binary">
+    Finding the Executable PHP Binary
+    <a class="headerlink" href="#finding-the-executable-php-binary" title="Permalink to this headline">¶</a>
+</h2>
+<p>This component also provides a special utility class called
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/PhpExecutableFinder.php" class="reference external" title="Symfony\Component\Process\PhpExecutableFinder" rel="external noopener noreferrer" target="_blank">PhpExecutableFinder</a> which returns the
+absolute path of the executable PHP binary available on your server:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">PhpExecutableFinder</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>phpBinaryFinder</span> = <span class="hljs-keyword">new</span> PhpExecutableFinder();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>phpBinaryPath</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>phpBinaryFinder</span><span class="hljs-operator">-&gt;</span>find();
+<span class="hljs-comment">// $phpBinaryPath = '/usr/local/bin/php' (the result will be different on your computer)</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="checking-for-tty-support">
+    Checking for TTY Support
+    <a class="headerlink" href="#checking-for-tty-support" title="Permalink to this headline">¶</a>
+</h2>
+<p>Another utility provided by this component is a method called
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Process/Process.php#method_isTtySupported" class="reference external" title="Symfony\Component\Process\Process::isTtySupported()" rel="external noopener noreferrer" target="_blank">isTtySupported()</a> which returns
+whether <a href="https://en.wikipedia.org/wiki/Tty_(unix)" class="reference external" rel="external noopener noreferrer" target="_blank">TTY</a> is supported on the current operating system:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">Process</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>process</span> = (<span class="hljs-keyword">new</span> Process())<span class="hljs-operator">-&gt;</span>setTty(Process<span class="hljs-operator">::</span>isTtySupported());</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

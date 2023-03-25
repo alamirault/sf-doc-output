@@ -1,0 +1,449 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <span id="server-side-includes"></span>
+<div class="section">
+<h1 id="working-with-server-side-includes">
+    Working with Server Side Includes
+    <a class="headerlink" href="#working-with-server-side-includes" title="Permalink to this headline">¶</a>
+</h1>
+<p>In a similar way as <a href="esi.html" class="reference internal">ESI (Edge Side Includes)</a>,
+SSI can be used to control HTTP caching on fragments of a response.
+The most important difference that is SSI is known directly by most
+web servers like <a href="https://httpd.apache.org/docs/current/en/howto/ssi.html" class="reference external" rel="external noopener noreferrer" target="_blank">Apache</a>, <a href="https://nginx.org/en/docs/http/ngx_http_ssi_module.html" class="reference external" rel="external noopener noreferrer" target="_blank">Nginx</a> etc.</p>
+<p>The SSI instructions are done via HTML comments:</p>
+<div translate="no" class="highlight-html notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... some content --&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- Embed the content of another page here --&gt;</span>
+        <span class="hljs-comment">&lt;!--#include virtual="/..." --&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- ... more content --&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>There are some other <a href="https://en.wikipedia.org/wiki/Server_Side_Includes#Directives" class="reference external" rel="external noopener noreferrer" target="_blank">available directives</a> but
+Symfony manages only the <code translate="no" class="notranslate">#include virtual</code> one.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Be careful with SSI, your website may fall victim to injections.
+Please read this <a href="https://www.owasp.org/index.php/Server-Side_Includes_(SSI)_Injection" class="reference external" rel="external noopener noreferrer" target="_blank">OWASP article</a> first!</p>
+</div>
+<p>When the web server reads an SSI directive, it requests the given URI or gives
+directly from its cache. It repeats this process until there is no more
+SSI directives to handle. Then, it merges all responses into one and sends
+it to the client.</p>
+<span id="using-ssi-in-symfony"></span>
+<div class="section">
+<h2 id="using-ssi-in-symfony">
+    Using SSI in Symfony
+    <a class="headerlink" href="#using-ssi-in-symfony" title="Permalink to this headline">¶</a>
+</h2>
+<p>First, to use SSI, be sure to enable it in your application configuration:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-129ee90ad71326fe88b7c7d3dabb958479580e17" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-d9025a663c4756c3541c1ba380405ba20e25625a" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-00eb0228ae3f0152b5c2af585ca73a18489ef2d3" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-129ee90ad71326fe88b7c7d3dabb958479580e17" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/framework.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">ssi:</span> <span class="hljs-string">{</span> <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-d9025a663c4756c3541c1ba380405ba20e25625a" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/framework.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:ssi</span> <span class="hljs-attr">enabled</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-00eb0228ae3f0152b5c2af585ca73a18489ef2d3" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/framework.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>ssi()
+        <span class="hljs-operator">-&gt;</span>enabled(<span class="hljs-keyword">true</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Suppose you have a page with private content like a Profile page and you want
+to cache a static GDPR content block. With SSI, you can add some expiration
+on this block and keep the page private:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-2">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-1345e91b286a73eea3a65fcc0484d60a881b8981" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-b2a587c82d608da65f34fa4d00f3f46102260297" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-1345e91b286a73eea3a65fcc0484d60a881b8981" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Controller/ProfileController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">Cache</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProfileController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// by default, responses are private</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'profile/index.html.twig'</span>);
+    }
+
+    <span class="hljs-comment">#[Cache(smaxage: 600)]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">gdpr</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'profile/gdpr.html.twig'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-b2a587c82d608da65f34fa4d00f3f46102260297" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ProfileController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProfileController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// by default, responses are private</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'profile/index.html.twig'</span>);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">gdpr</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'profile/gdpr.html.twig'</span>);
+
+        <span class="hljs-comment">// sets to public and adds some expiration</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setSharedMaxAge(<span class="hljs-number">600</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>The profile index page has not public caching, but the GDPR block has
+10 minutes of expiration. Let's include this block into the main one:</p>
+<div translate="no" class="highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs twig"><span class="hljs-comment">{# templates/profile/index.html.twig #}</span><span class="xml">
+
+</span><span class="hljs-comment">{# you can use a controller reference #}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ render_ssi(controller('App\\Controller\\ProfileController::gdpr')) }}</span><span class="xml">
+
+</span><span class="hljs-comment">{# ... or a path (in server's SSI configuration is common to use relative paths instead of absolute URLs) #}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ render_ssi(path('profile_gdpr')) }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">render_ssi</code> twig helper will generate something like:</p>
+<div translate="no" class="highlight-html notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html"><span class="hljs-comment">&lt;!--#include virtual="/_fragment?_hash=abcdef1234&amp;_path=_controller=App\Controller\ProfileController::gdpr" --&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p><code translate="no" class="notranslate">render_ssi</code> ensures that SSI directive is generated only if the request
+has the header requirement like <code translate="no" class="notranslate">Surrogate-Capability: device=&quot;SSI/1.0&quot;</code>
+(normally given by the web server).
+Otherwise it will embed directly the sub-response.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>For more information about Symfony cache fragments, take a tour on
+the <a href="esi.html#http_cache-fragments" class="reference internal">ESI documentation</a>.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

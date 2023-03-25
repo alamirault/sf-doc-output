@@ -1,0 +1,488 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <span id="how-to-deploy-a-symfony2-application"></span>
+<div class="section">
+<h1 id="how-to-deploy-a-symfony-application">
+    How to Deploy a Symfony Application
+    <a class="headerlink" href="#how-to-deploy-a-symfony-application" title="Permalink to this headline">¶</a>
+</h1>
+<p>Deploying a Symfony application can be a complex and varied task depending on
+the setup and the requirements of your application. This article is not a
+step-by-step guide, but is a general list of the most common requirements and
+ideas for deployment.</p>
+<span id="symfony2-deployment-basics"></span>
+<div class="section">
+<h2 id="symfony-deployment-basics">
+    Symfony Deployment Basics
+    <a class="headerlink" href="#symfony-deployment-basics" title="Permalink to this headline">¶</a>
+</h2>
+<p>The typical steps taken while deploying a Symfony application include:</p>
+<ol class="arabic">
+    <li>Upload your code to the production server;</li>
+<li>Install your vendor dependencies (typically done via Composer and may be done
+before uploading);</li>
+<li>Running database migrations or similar tasks to update any changed data structures;</li>
+<li>Clearing (and optionally, warming up) your cache.</li>
+</ol>
+<p>A deployment may also include other tasks, such as:</p>
+<ul>
+    <li>Tagging a particular version of your code as a release in your source control
+repository;</li>
+<li>Creating a temporary staging area to build your updated setup &quot;offline&quot;;</li>
+<li>Running any tests available to ensure code and/or server stability;</li>
+<li>Removal of any unnecessary files from the <code translate="no" class="notranslate">public/</code> directory to keep your
+production environment clean;</li>
+<li>Clearing of external cache systems (like <a href="http://memcached.org/" class="reference external" rel="external noopener noreferrer" target="_blank">Memcached</a> or <a href="https://redis.io/" class="reference external" rel="external noopener noreferrer" target="_blank">Redis</a>).</li>
+</ul>
+</div>
+<div class="section">
+<h2 id="how-to-deploy-a-symfony-application">
+    How to Deploy a Symfony Application
+    <a class="headerlink" href="#how-to-deploy-a-symfony-application" title="Permalink to this headline">¶</a>
+</h2>
+<p>There are several ways you can deploy a Symfony application. Start with a few
+basic deployment strategies and build up from there.</p>
+<div class="section">
+<h3 id="basic-file-transfer">
+    Basic File Transfer
+    <a class="headerlink" href="#basic-file-transfer" title="Permalink to this headline">¶</a>
+</h3>
+<p>The most basic way of deploying an application is copying the files manually
+via FTP/SCP (or similar method). This has its disadvantages as you lack control
+over the system as the upgrade progresses. This method also requires you
+to take some manual steps after transferring the files (see <a href="deployment.html#common-deployment-tasks" class="reference internal">Common Deployment Tasks</a>).</p>
+</div>
+<div class="section">
+<h3 id="using-source-control">
+    Using Source Control
+    <a class="headerlink" href="#using-source-control" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you're using source control (e.g. Git or SVN), you can simplify by having
+your live installation also be a copy of your repository. When you're ready to
+upgrade, fetch the latest updates from your source control
+system. When using Git, a common approach is to create a tag for each release
+and check out the appropriate tag on deployment (see <a href="https://git-scm.com/book/en/v2/Git-Basics-Tagging" class="reference external" rel="external noopener noreferrer" target="_blank">Git Tagging</a>).</p>
+<p>This makes updating your files <em>easier</em>, but you still need to worry about
+manually taking other steps (see <a href="deployment.html#common-deployment-tasks" class="reference internal">Common Deployment Tasks</a>).</p>
+</div>
+<div class="section">
+<h3 id="using-platforms-as-a-service">
+    Using Platforms as a Service
+    <a class="headerlink" href="#using-platforms-as-a-service" title="Permalink to this headline">¶</a>
+</h3>
+<p>Using a Platform as a Service (PaaS) can be a great way to deploy your Symfony
+app quickly. There are many PaaS, but we recommend <a href="https://symfony.com/cloud" class="reference external">Platform.sh</a> as it
+provides a dedicated Symfony integration and helps fund the Symfony development.</p>
+</div>
+<div class="section">
+<h3 id="using-build-scripts-and-other-tools">
+    Using Build Scripts and other Tools
+    <a class="headerlink" href="#using-build-scripts-and-other-tools" title="Permalink to this headline">¶</a>
+</h3>
+<p>There are also tools to help ease the pain of deployment. Some of them have been
+specifically tailored to the requirements of Symfony.</p>
+<dl>
+                        <dt><a href="https://deployer.org/" class="reference external" rel="external noopener noreferrer" target="_blank">Deployer</a></dt>
+        
+        <dd>
+                            This is another native PHP rewrite of Capistrano, with some ready recipes for
+Symfony.
+                    </dd>
+                        <dt><a href="https://ansistrano.com/" class="reference external" rel="external noopener noreferrer" target="_blank">Ansistrano</a></dt>
+        
+        <dd>
+                            An Ansible role that allows you to configure a powerful deploy via YAML files.
+                    </dd>
+                        <dt><a href="https://github.com/andres-montanez/Magallanes" class="reference external" rel="external noopener noreferrer" target="_blank">Magallanes</a></dt>
+        
+        <dd>
+                            This Capistrano-like deployment tool is built in PHP, and may be easier
+for PHP developers to extend for their needs.
+                    </dd>
+                        <dt><a href="http://www.fabfile.org/" class="reference external" rel="external noopener noreferrer" target="_blank">Fabric</a></dt>
+        
+        <dd>
+                            This Python-based library provides a basic suite of operations for executing
+local or remote shell commands and uploading/downloading files.
+                    </dd>
+                        <dt><a href="https://capistranorb.com/" class="reference external" rel="external noopener noreferrer" target="_blank">Capistrano</a> with <a href="https://github.com/capistrano/symfony/" class="reference external" rel="external noopener noreferrer" target="_blank">Symfony plugin</a></dt>
+        
+        <dd>
+                            <a href="https://capistranorb.com/" class="reference external" rel="external noopener noreferrer" target="_blank">Capistrano</a> is a remote server automation and deployment tool written in Ruby.
+<a href="https://github.com/capistrano/symfony/" class="reference external" rel="external noopener noreferrer" target="_blank">Symfony plugin</a> is a plugin to ease Symfony related tasks, inspired by <a href="https://github.com/everzet/capifony" class="reference external" rel="external noopener noreferrer" target="_blank">Capifony</a>
+(which works only with Capistrano 2).
+                    </dd>
+    </dl>
+<span id="common-post-deployment-tasks"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="common-deployment-tasks">
+    Common Deployment Tasks
+    <a class="headerlink" href="#common-deployment-tasks" title="Permalink to this headline">¶</a>
+</h2>
+<p>Before and after deploying your actual source code, there are a number of common
+things you'll need to do:</p>
+<div class="section">
+<h3 id="a-check-requirements">
+    A) Check Requirements
+    <a class="headerlink" href="#a-check-requirements" title="Permalink to this headline">¶</a>
+</h3>
+<p>There are some <a href="setup.html#symfony-tech-requirements" class="reference internal">technical requirements for running Symfony applications</a>.
+In your development machine, the recommended way to check these requirements is
+to use <a href="https://symfony.com/download" class="reference external">Symfony CLI</a>. However, in your production server you might prefer to
+not install the Symfony CLI tool. In those cases, install this other package in
+your application:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/requirements-checker</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, make sure that the checker is included in your Composer scripts:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"..."</span>: <span class="hljs-string">"..."</span>,
+
+    <span class="hljs-attr">"scripts"</span>: {
+        <span class="hljs-attr">"auto-scripts"</span>: {
+            <span class="hljs-attr">"vendor/bin/requirements-checker"</span>: <span class="hljs-string">"php-script"</span>,
+            <span class="hljs-attr">"..."</span>: <span class="hljs-string">"..."</span>
+        },
+
+        <span class="hljs-attr">"..."</span>: <span class="hljs-string">"..."</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="b-configure-your-app-config-parameters-yml-file"></span>
+</div>
+<div class="section">
+<h3 id="b-configure-your-environment-variables">
+    B) Configure your Environment Variables
+    <a class="headerlink" href="#b-configure-your-environment-variables" title="Permalink to this headline">¶</a>
+</h3>
+<p>Most Symfony applications read their configuration from environment variables.
+While developing locally, you'll usually store these in <code translate="no" class="notranslate">.env</code> and <code translate="no" class="notranslate">.env.local</code>
+(for local overrides). On production, you have two options:</p>
+<ol class="arabic">
+    <li>Create &quot;real&quot; environment variables. How you set environment variables, depends
+on your setup: they can be set at the command line, in your Nginx configuration,
+or via other methods provided by your hosting service;</li>
+<li>Or, create a <code translate="no" class="notranslate">.env.local</code> file like your local development.</li>
+</ol>
+<p>There is no significant advantage to either of the two options: use whatever is
+most natural in your hosting environment.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You might not want your application to process the <code translate="no" class="notranslate">.env.*</code> files on
+every request. You can generate an optimized <code translate="no" class="notranslate">.env.local.php</code> which
+overrides all other configuration files:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer dump-env prod</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The generated file will contain all the configuration stored in <code translate="no" class="notranslate">.env</code>. If you
+want to rely only on environment variables, generate one without any values using:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer dump-env prod --empty</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If <code translate="no" class="notranslate">composer</code> is not installed on your server, you can generate this optimized
+file with a command provided by Symfony itself, which you must register in
+your application before using it:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">Symfony\Component\Dotenv\Command\DotenvDumpCommand:</span> <span class="hljs-string">~</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>APP_ENV=prod APP_DEBUG=0 php bin/console dotenv:dump</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h3 id="c-install-update-your-vendors">
+    C) Install/Update your Vendors
+    <a class="headerlink" href="#c-install-update-your-vendors" title="Permalink to this headline">¶</a>
+</h3>
+<p>Your vendors can be updated before transferring your source code (i.e.
+update the <code translate="no" class="notranslate">vendor/</code> directory, then transfer that with your source
+code) or afterwards on the server. Either way, update your vendors
+as you normally do:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer install --no-dev --optimize-autoloader</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The <code translate="no" class="notranslate">--optimize-autoloader</code> flag improves Composer's autoloader performance
+significantly by building a &quot;class map&quot;. The <code translate="no" class="notranslate">--no-dev</code> flag ensures that
+development packages are not installed in the production environment.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>If you get a &quot;class not found&quot; error during this step, you may need to
+run <code translate="no" class="notranslate">export APP_ENV=prod</code> (or <code translate="no" class="notranslate">export SYMFONY_ENV=prod</code> if you're not
+using <a href="setup.html#symfony-flex" class="reference internal">Symfony Flex</a>) before running this command so
+that the <code translate="no" class="notranslate">post-install-cmd</code> scripts run in the <code translate="no" class="notranslate">prod</code> environment.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="d-clear-your-symfony-cache">
+    D) Clear your Symfony Cache
+    <a class="headerlink" href="#d-clear-your-symfony-cache" title="Permalink to this headline">¶</a>
+</h3>
+<p>Make sure you clear and warm-up your Symfony cache:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="e-other-things">
+    E) Other Things!
+    <a class="headerlink" href="#e-other-things" title="Permalink to this headline">¶</a>
+</h3>
+<p>There may be lots of other things that you need to do, depending on your
+setup:</p>
+<ul>
+    <li>Running any database migrations</li>
+<li>Clearing your APCu cache</li>
+<li>Add/edit CRON jobs</li>
+<li>Restarting your workers</li>
+<li><a href="frontend/encore/faq.html#how-do-i-deploy-my-encore-assets" class="reference internal">Building and minifying your assets</a> with Webpack Encore</li>
+<li>Pushing assets to a CDN</li>
+<li>On a shared hosting platform using the Apache web server, you may need to
+install the <a href="setup/web_server_configuration.html#web-server-apache-mod-php" class="reference internal">symfony/apache-pack package</a></li>
+<li>etc.</li>
+</ul>
+</div>
+</div>
+<div class="section">
+<h2 id="application-lifecycle-continuous-integration-qa-etc">
+    Application Lifecycle: Continuous Integration, QA, etc.
+    <a class="headerlink" href="#application-lifecycle-continuous-integration-qa-etc" title="Permalink to this headline">¶</a>
+</h2>
+<p>While this article covers the technical details of deploying, the full lifecycle
+of taking code from development up to production may have more steps:
+deploying to staging, QA (Quality Assurance), running tests, etc.</p>
+<p>The use of staging, testing, QA, continuous integration, database migrations
+and the capability to roll back in case of failure are all strongly advised. There
+are simple and more complex tools and one can make the deployment as easy
+(or sophisticated) as your environment requires.</p>
+<p>Don't forget that deploying your application also involves updating any dependency
+(typically via Composer), migrating your database, clearing your cache and
+other potential things like pushing assets to a CDN (see <a href="deployment.html#common-deployment-tasks" class="reference internal">Common Deployment Tasks</a>).</p>
+</div>
+<div class="section">
+<h2 id="troubleshooting">
+    Troubleshooting
+    <a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="deployments-not-using-the-composer-json-file">
+    Deployments not Using the <code translate="no" class="notranslate">composer.json</code> File
+    <a class="headerlink" href="#deployments-not-using-the-composer-json-file" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <a href="reference/configuration/kernel.html#configuration-kernel-project-directory" class="reference internal">project root directory</a>
+(whose value is used via the <code translate="no" class="notranslate">kernel.project_dir</code> parameter and the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php#method_getProjectDir" class="reference external" title="Symfony\Component\HttpKernel\Kernel::getProjectDir()" rel="external noopener noreferrer" target="_blank">getProjectDir()</a> method) is
+calculated automatically by Symfony as the directory where the main
+<code translate="no" class="notranslate">composer.json</code> file is stored.</p>
+<p>In deployments not using the <code translate="no" class="notranslate">composer.json</code> file, you'll need to override the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php#method_getProjectDir" class="reference external" title="Symfony\Component\HttpKernel\Kernel::getProjectDir()" rel="external noopener noreferrer" target="_blank">getProjectDir()</a> method
+<a href="reference/configuration/kernel.html#configuration-kernel-project-directory" class="reference internal">as explained in this section</a>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="learn-more">
+    Learn More
+    <a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a>
+</h2>
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-1"><li><a href="deployment/proxies.html">How to Configure Symfony to Work behind a Load Balancer or a Reverse Proxy</a></li></ul></div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

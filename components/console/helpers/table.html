@@ -1,0 +1,1203 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="table">
+    Table
+    <a class="headerlink" href="#table" title="Permalink to this headline">¶</a>
+</h1>
+<p>When building a console application it may be useful to display tabular data:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">+---------------+--------------------------+------------------+
+| ISBN          | Title                    | Author           |
++---------------+--------------------------+------------------+
+| 99921-58-10-7 | Divine Comedy            | Dante Alighieri  |
+| 9971-5-0210-0 | A Tale of Two Cities     | Charles Dickens  |
+| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien |
+| 80-902734-1-6 | And Then There Were None | Agatha Christie  |
++---------------+--------------------------+------------------+</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>To display a table, use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/Table.php" class="reference external" title="Symfony\Component\Console\Helper\Table" rel="external noopener noreferrer" target="_blank">Table</a>,
+set the headers, set the rows and then render the table:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">Table</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SomeCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span> = <span class="hljs-keyword">new</span> Table(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span>
+            <span class="hljs-operator">-&gt;</span>setHeaders([<span class="hljs-string">'ISBN'</span>, <span class="hljs-string">'Title'</span>, <span class="hljs-string">'Author'</span>])
+            <span class="hljs-operator">-&gt;</span>setRows([
+                [<span class="hljs-string">'99921-58-10-7'</span>, <span class="hljs-string">'Divine Comedy'</span>, <span class="hljs-string">'Dante Alighieri'</span>],
+                [<span class="hljs-string">'9971-5-0210-0'</span>, <span class="hljs-string">'A Tale of Two Cities'</span>, <span class="hljs-string">'Charles Dickens'</span>],
+                [<span class="hljs-string">'960-425-059-0'</span>, <span class="hljs-string">'The Lord of the Rings'</span>, <span class="hljs-string">'J. R. R. Tolkien'</span>],
+                [<span class="hljs-string">'80-902734-1-6'</span>, <span class="hljs-string">'And Then There Were None'</span>, <span class="hljs-string">'Agatha Christie'</span>],
+            ])
+        ;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();
+        
+        <span class="hljs-keyword">return</span> Command<span class="hljs-operator">::</span>SUCCESS;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can add a table separator anywhere in the output by passing an instance of
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/TableSeparator.php" class="reference external" title="Symfony\Component\Console\Helper\TableSeparator" rel="external noopener noreferrer" target="_blank">TableSeparator</a> as a row:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">TableSeparator</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setRows([
+    [<span class="hljs-string">'99921-58-10-7'</span>, <span class="hljs-string">'Divine Comedy'</span>, <span class="hljs-string">'Dante Alighieri'</span>],
+    [<span class="hljs-string">'9971-5-0210-0'</span>, <span class="hljs-string">'A Tale of Two Cities'</span>, <span class="hljs-string">'Charles Dickens'</span>],
+    <span class="hljs-keyword">new</span> TableSeparator(),
+    [<span class="hljs-string">'960-425-059-0'</span>, <span class="hljs-string">'The Lord of the Rings'</span>, <span class="hljs-string">'J. R. R. Tolkien'</span>],
+    [<span class="hljs-string">'80-902734-1-6'</span>, <span class="hljs-string">'And Then There Were None'</span>, <span class="hljs-string">'Agatha Christie'</span>],
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">+---------------+--------------------------+------------------+
+| ISBN          | Title                    | Author           |
++---------------+--------------------------+------------------+
+| 99921-58-10-7 | Divine Comedy            | Dante Alighieri  |
+| 9971-5-0210-0 | A Tale of Two Cities     | Charles Dickens  |
++---------------+--------------------------+------------------+
+| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien |
+| 80-902734-1-6 | And Then There Were None | Agatha Christie  |
++---------------+--------------------------+------------------+</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can optionally display titles at the top and the bottom of the table:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setHeaderTitle(<span class="hljs-string">'Books'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setFooterTitle(<span class="hljs-string">'Page 1/2'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">+---------------+----------- Books --------+------------------+
+| ISBN          | Title                    | Author           |
++---------------+--------------------------+------------------+
+| 99921-58-10-7 | Divine Comedy            | Dante Alighieri  |
+| 9971-5-0210-0 | A Tale of Two Cities     | Charles Dickens  |
++---------------+--------------------------+------------------+
+| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien |
+| 80-902734-1-6 | And Then There Were None | Agatha Christie  |
++---------------+--------- Page 1/2 -------+------------------+</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>By default, the width of the columns is calculated automatically based on their
+contents. Use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/Table.php#method_setColumnWidths" class="reference external" title="Symfony\Component\Console\Helper\Table::setColumnWidths()" rel="external noopener noreferrer" target="_blank">setColumnWidths()</a>
+method to set the column widths explicitly:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setColumnWidths([<span class="hljs-number">10</span>, <span class="hljs-number">0</span>, <span class="hljs-number">30</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In this example, the first column width will be <code translate="no" class="notranslate">10</code>, the last column width
+will be <code translate="no" class="notranslate">30</code> and the second column width will be calculated automatically
+because of the <code translate="no" class="notranslate">0</code> value.</p>
+<p>You can also set the width individually for each column with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/Table.php#method_setColumnWidth" class="reference external" title="Symfony\Component\Console\Helper\Table::setColumnWidth()" rel="external noopener noreferrer" target="_blank">setColumnWidth()</a> method.
+Its first argument is the column index (starting from <code translate="no" class="notranslate">0</code>) and the second
+argument is the column width:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setColumnWidth(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setColumnWidth(<span class="hljs-number">2</span>, <span class="hljs-number">30</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The output of this command will be:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">+---------------+--------------------------+--------------------------------+
+| ISBN          | Title                    | Author                         |
++---------------+--------------------------+--------------------------------+
+| 99921-58-10-7 | Divine Comedy            | Dante Alighieri                |
+| 9971-5-0210-0 | A Tale of Two Cities     | Charles Dickens                |
++---------------+--------------------------+--------------------------------+
+| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien               |
+| 80-902734-1-6 | And Then There Were None | Agatha Christie                |
++---------------+--------------------------+--------------------------------+</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Note that the defined column widths are always considered as the minimum column
+widths. If the contents don't fit, the given column width is increased up to the
+longest content length. That's why in the previous example the first column has
+a <code translate="no" class="notranslate">13</code> character length although the user defined <code translate="no" class="notranslate">10</code> as its width.</p>
+<p>If you prefer to wrap long contents in multiple rows, use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/Table.php#method_setColumnMaxWidth" class="reference external" title="Symfony\Component\Console\Helper\Table::setColumnMaxWidth()" rel="external noopener noreferrer" target="_blank">setColumnMaxWidth()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setColumnMaxWidth(<span class="hljs-number">0</span>, <span class="hljs-number">5</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setColumnMaxWidth(<span class="hljs-number">1</span>, <span class="hljs-number">10</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The output of this command will be:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">+-------+------------+--------------------------------+
+| ISBN  | Title      | Author                         |
++-------+------------+--------------------------------+
+| 99921 | Divine Com | Dante Alighieri                |
+| -58-1 | edy        |                                |
+| 0-7   |            |                                |
+|                (the rest of the rows...)            |
++-------+------------+--------------------------------+</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>By default, table contents are displayed horizontally. You can change this behavior
+via the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/Table.php#method_setVertical" class="reference external" title="Symfony\Component\Console\Helper\Table::setVertical()" rel="external noopener noreferrer" target="_blank">setVertical()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setVertical();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The output of this command will be:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">+------------------------------+
+|   ISBN: 99921-58-10-7        |
+|  Title: Divine Comedy        |
+| Author: Dante Alighieri      |
+|------------------------------|
+|   ISBN: 9971-5-0210-0        |
+|  Title: A Tale of Two Cities |
+| Author: Charles Dickens      |
++------------------------------+</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>Support for vertical rendering was introduced in Symfony 6.1.</p>
+</div>
+<p>The table style can be changed to any built-in styles via
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/Table.php#method_setStyle" class="reference external" title="Symfony\Component\Console\Helper\Table::setStyle()" rel="external noopener noreferrer" target="_blank">setStyle()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// same as calling nothing</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setStyle(<span class="hljs-string">'default'</span>);
+
+<span class="hljs-comment">// changes the default style to compact</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setStyle(<span class="hljs-string">'compact'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This code results in:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">ISBN          Title                    Author
+99921-58-10-7 Divine Comedy            Dante Alighieri
+9971-5-0210-0 A Tale of Two Cities     Charles Dickens
+960-425-059-0 The Lord of the Rings    J. R. R. Tolkien
+80-902734-1-6 And Then There Were None Agatha Christie</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also set the style to <code translate="no" class="notranslate">borderless</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setStyle(<span class="hljs-string">'borderless'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>which outputs:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">=============== ========================== ==================
+ ISBN            Title                      Author
+=============== ========================== ==================
+ 99921-58-10-7   Divine Comedy              Dante Alighieri
+ 9971-5-0210-0   A Tale of Two Cities       Charles Dickens
+ 960-425-059-0   The Lord of the Rings      J. R. R. Tolkien
+ 80-902734-1-6   And Then There Were None   Agatha Christie
+=============== ========================== ==================</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also set the style to <code translate="no" class="notranslate">box</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setStyle(<span class="hljs-string">'box'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>which outputs:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">┌───────────────┬──────────────────────────┬──────────────────┐
+│ ISBN          │ Title                    │ Author           │
+├───────────────┼──────────────────────────┼──────────────────┤
+│ 99921-58-10-7 │ Divine Comedy            │ Dante Alighieri  │
+│ 9971-5-0210-0 │ A Tale of Two Cities     │ Charles Dickens  │
+│ 960-425-059-0 │ The Lord of the Rings    │ J. R. R. Tolkien │
+│ 80-902734-1-6 │ And Then There Were None │ Agatha Christie  │
+└───────────────┴──────────────────────────┴──────────────────┘</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also set the style to <code translate="no" class="notranslate">box-double</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setStyle(<span class="hljs-string">'box-double'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>which outputs:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">╔═══════════════╤══════════════════════════╤══════════════════╗
+║ ISBN          │ Title                    │ Author           ║
+╠═══════════════╪══════════════════════════╪══════════════════╣
+║ 99921-58-10-7 │ Divine Comedy            │ Dante Alighieri  ║
+║ 9971-5-0210-0 │ A Tale of Two Cities     │ Charles Dickens  ║
+║ 960-425-059-0 │ The Lord of the Rings    │ J. R. R. Tolkien ║
+║ 80-902734-1-6 │ And Then There Were None │ Agatha Christie  ║
+╚═══════════════╧══════════════════════════╧══════════════════╝</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If the built-in styles do not fit your need, define your own:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">TableStyle</span>;
+
+<span class="hljs-comment">// by default, this is based on the default style</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tableStyle</span> = <span class="hljs-keyword">new</span> TableStyle();
+
+<span class="hljs-comment">// customizes the style</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tableStyle</span>
+    <span class="hljs-operator">-&gt;</span>setHorizontalBorderChars(<span class="hljs-string">'&lt;fg=magenta&gt;|&lt;/&gt;'</span>)
+    <span class="hljs-operator">-&gt;</span>setVerticalBorderChars(<span class="hljs-string">'&lt;fg=magenta&gt;-&lt;/&gt;'</span>)
+    <span class="hljs-operator">-&gt;</span>setDefaultCrossingChar(<span class="hljs-string">' '</span>)
+;
+
+<span class="hljs-comment">// uses the custom style for this table</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setStyle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tableStyle</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Here is a full list of things you can customize:</p>
+<ul>
+    <li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/TableStyle.php#method_setPaddingChar" class="reference external" title="Symfony\Component\Console\Helper\TableStyle::setPaddingChar()" rel="external noopener noreferrer" target="_blank">setPaddingChar()</a></li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/TableStyle.php#method_setHorizontalBorderChars" class="reference external" title="Symfony\Component\Console\Helper\TableStyle::setHorizontalBorderChars()" rel="external noopener noreferrer" target="_blank">setHorizontalBorderChars()</a></li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/TableStyle.php#method_setVerticalBorderChars" class="reference external" title="Symfony\Component\Console\Helper\TableStyle::setVerticalBorderChars()" rel="external noopener noreferrer" target="_blank">setVerticalBorderChars()</a></li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/TableStyle.php#method_setCrossingChars" class="reference external" title="Symfony\Component\Console\Helper\TableStyle::setCrossingChars()" rel="external noopener noreferrer" target="_blank">setCrossingChars()</a></li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/TableStyle.php#method_setDefaultCrossingChar" class="reference external" title="Symfony\Component\Console\Helper\TableStyle::setDefaultCrossingChar()" rel="external noopener noreferrer" target="_blank">setDefaultCrossingChar()</a></li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/TableStyle.php#method_setCellHeaderFormat" class="reference external" title="Symfony\Component\Console\Helper\TableStyle::setCellHeaderFormat()" rel="external noopener noreferrer" target="_blank">setCellHeaderFormat()</a></li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/TableStyle.php#method_setCellRowFormat" class="reference external" title="Symfony\Component\Console\Helper\TableStyle::setCellRowFormat()" rel="external noopener noreferrer" target="_blank">setCellRowFormat()</a></li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/TableStyle.php#method_setBorderFormat" class="reference external" title="Symfony\Component\Console\Helper\TableStyle::setBorderFormat()" rel="external noopener noreferrer" target="_blank">setBorderFormat()</a></li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/TableStyle.php#method_setPadType" class="reference external" title="Symfony\Component\Console\Helper\TableStyle::setPadType()" rel="external noopener noreferrer" target="_blank">setPadType()</a></li>
+</ul>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can also register a style globally:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// registers the style under the colorful name</span>
+Table<span class="hljs-operator">::</span>setStyleDefinition(<span class="hljs-string">'colorful'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tableStyle</span>);
+
+<span class="hljs-comment">// applies the custom style for the given table</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setStyle(<span class="hljs-string">'colorful'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This method can also be used to override a built-in style.</p>
+</div>
+<p>In addition to the built-in table styles, you can also apply different styles
+to each table cell via <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/TableCellStyle.php" class="reference external" title="Symfony\Component\Console\Helper\TableCellStyle" rel="external noopener noreferrer" target="_blank">TableCellStyle</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">Table</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">TableCellStyle</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span> = <span class="hljs-keyword">new</span> Table(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setRows([
+    [
+        <span class="hljs-string">'978-0804169127'</span>,
+        <span class="hljs-keyword">new</span> TableCell(
+            <span class="hljs-string">'Divine Comedy'</span>,
+            [
+                <span class="hljs-string">'style'</span> =&gt; <span class="hljs-keyword">new</span> TableCellStyle([
+                    <span class="hljs-string">'align'</span> =&gt; <span class="hljs-string">'center'</span>,
+                    <span class="hljs-string">'fg'</span> =&gt; <span class="hljs-string">'red'</span>,
+                    <span class="hljs-string">'bg'</span> =&gt; <span class="hljs-string">'green'</span>,
+
+                    <span class="hljs-comment">// or</span>
+                    <span class="hljs-string">'cellFormat'</span> =&gt; <span class="hljs-string">'&lt;info&gt;%s&lt;/info&gt;'</span>,
+                ])
+            ]
+        )
+    ],
+]);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h2 id="spanning-multiple-columns-and-rows">
+    Spanning Multiple Columns and Rows
+    <a class="headerlink" href="#spanning-multiple-columns-and-rows" title="Permalink to this headline">¶</a>
+</h2>
+<p>To make a table cell that spans multiple columns you can use a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/TableCell.php" class="reference external" title="Symfony\Component\Console\Helper\TableCell" rel="external noopener noreferrer" target="_blank">TableCell</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">Table</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">TableCell</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">TableSeparator</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span> = <span class="hljs-keyword">new</span> Table(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span>
+    <span class="hljs-operator">-&gt;</span>setHeaders([<span class="hljs-string">'ISBN'</span>, <span class="hljs-string">'Title'</span>, <span class="hljs-string">'Author'</span>])
+    <span class="hljs-operator">-&gt;</span>setRows([
+        [<span class="hljs-string">'99921-58-10-7'</span>, <span class="hljs-string">'Divine Comedy'</span>, <span class="hljs-string">'Dante Alighieri'</span>],
+        <span class="hljs-keyword">new</span> TableSeparator(),
+        [<span class="hljs-keyword">new</span> TableCell(<span class="hljs-string">'This value spans 3 columns.'</span>, [<span class="hljs-string">'colspan'</span> =&gt; <span class="hljs-number">3</span>])],
+    ])
+;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This results in:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">+---------------+---------------+-----------------+
+| ISBN          | Title         | Author          |
++---------------+---------------+-----------------+
+| 99921-58-10-7 | Divine Comedy | Dante Alighieri |
++---------------+---------------+-----------------+
+| This value spans 3 columns.                     |
++---------------+---------------+-----------------+</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can create a multiple-line page title using a header cell that spans
+the entire table width:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>setHeaders([
+    [<span class="hljs-keyword">new</span> TableCell(<span class="hljs-string">'Main table title'</span>, [<span class="hljs-string">'colspan'</span> =&gt; <span class="hljs-number">3</span>])],
+    [<span class="hljs-string">'ISBN'</span>, <span class="hljs-string">'Title'</span>, <span class="hljs-string">'Author'</span>],
+]);
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This generates:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">+-------+-------+--------+
+| Main table title       |
++-------+-------+--------+
+| ISBN  | Title | Author |
++-------+-------+--------+
+| ...                    |
++-------+-------+--------+</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<p>In a similar way you can span multiple rows:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">Table</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">TableCell</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span> = <span class="hljs-keyword">new</span> Table(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span>
+    <span class="hljs-operator">-&gt;</span>setHeaders([<span class="hljs-string">'ISBN'</span>, <span class="hljs-string">'Title'</span>, <span class="hljs-string">'Author'</span>])
+    <span class="hljs-operator">-&gt;</span>setRows([
+        [
+            <span class="hljs-string">'978-0521567817'</span>,
+            <span class="hljs-string">'De Monarchia'</span>,
+            <span class="hljs-keyword">new</span> TableCell(<span class="hljs-string">"Dante Alighieri\nspans multiple rows"</span>, [<span class="hljs-string">'rowspan'</span> =&gt; <span class="hljs-number">2</span>]),
+        ],
+        [<span class="hljs-string">'978-0804169127'</span>, <span class="hljs-string">'Divine Comedy'</span>],
+    ])
+;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This outputs:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">+----------------+---------------+---------------------+
+| ISBN           | Title         | Author              |
++----------------+---------------+---------------------+
+| 978-0521567817 | De Monarchia  | Dante Alighieri     |
+| 978-0804169127 | Divine Comedy | spans multiple rows |
++----------------+---------------+---------------------+</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can use the <code translate="no" class="notranslate">colspan</code> and <code translate="no" class="notranslate">rowspan</code> options at the same time, which allows
+you to create any table layout you may wish.</p>
+<span id="console-modify-rendered-tables"></span>
+</div>
+<div class="section">
+<h2 id="modifying-rendered-tables">
+    Modifying Rendered Tables
+    <a class="headerlink" href="#modifying-rendered-tables" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <code translate="no" class="notranslate">render()</code> method requires passing the entire table contents. However,
+sometimes that information is not available beforehand because it's generated
+dynamically. In those cases, use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/Table.php#method_appendRow" class="reference external" title="Symfony\Component\Console\Helper\Table::appendRow()" rel="external noopener noreferrer" target="_blank">appendRow()</a> method, which
+takes the same arguments as the <code translate="no" class="notranslate">addRow()</code> method, to add rows at the bottom
+of an already rendered table.</p>
+<p>The only requirement to append rows is that the table must be rendered inside a
+<a href="../../../console.html#console-output-sections" class="reference internal">Console output section</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Helper</span>\<span class="hljs-title">Table</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SomeCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>section();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span> = <span class="hljs-keyword">new</span> Table(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>section</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>addRow([<span class="hljs-string">'Love'</span>]);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>render();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>table</span><span class="hljs-operator">-&gt;</span>appendRow([<span class="hljs-string">'Symfony'</span>]);
+        
+        <span class="hljs-keyword">return</span> Command<span class="hljs-operator">::</span>SUCCESS;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This will display the following table in the terminal:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">+---------+
+| Love    |
+| Symfony |
++---------+</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

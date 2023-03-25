@@ -1,0 +1,303 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="using-encore-in-a-virtual-machine">
+    Using Encore in a Virtual Machine
+    <a class="headerlink" href="#using-encore-in-a-virtual-machine" title="Permalink to this headline">¶</a>
+</h1>
+<p>Encore is compatible with virtual machines such as <a href="https://www.virtualbox.org/" class="reference external" rel="external noopener noreferrer" target="_blank">VirtualBox</a> and <a href="https://www.vmware.com" class="reference external" rel="external noopener noreferrer" target="_blank">VMWare</a>
+but you may need to make some changes to your configuration to make it work.</p>
+<div class="section">
+<h2 id="file-watching-issues">
+    File Watching Issues
+    <a class="headerlink" href="#file-watching-issues" title="Permalink to this headline">¶</a>
+</h2>
+<p>When using a virtual machine, your project root directory is shared with the
+virtual machine using <a href="https://en.wikipedia.org/wiki/Network_File_System" class="reference external" rel="external noopener noreferrer" target="_blank">NFS</a>. This introduces issues with files watching, so
+you must enable the <a href="https://webpack.js.org/configuration/watch/#watchoptionspoll" class="reference external" rel="external noopener noreferrer" target="_blank">polling</a> option to make it work:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// webpack.config.js</span>
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// will be applied for `encore dev --watch` and `encore dev-server` commands</span>
+Encore.configureWatchOptions(<span class="hljs-function"><span class="hljs-params">watchOptions</span> =&gt;</span> {
+    watchOptions.poll = <span class="hljs-number">250</span>; <span class="hljs-comment">// check for changes every 250 milliseconds</span>
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="development-server-issues">
+    Development Server Issues
+    <a class="headerlink" href="#development-server-issues" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="configure-the-public-path">
+    Configure the Public Path
+    <a class="headerlink" href="#configure-the-public-path" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>You can skip this section if your application is running on
+<code translate="no" class="notranslate">http://localhost</code> instead a custom local domain-name like
+<code translate="no" class="notranslate">http://app.vm</code>.</p>
+</div>
+<p>When running the development server, you will probably see the following errors
+in the web console:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">GET http://localhost:8080/build/vendors~app.css net::ERR_CONNECTION_REFUSED
+GET http://localhost:8080/build/runtime.js net::ERR_CONNECTION_REFUSED
+...</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If your Symfony application is running on a custom domain (e.g.
+<code translate="no" class="notranslate">http://app.vm</code>), you must configure the public path explicitly in your
+<code translate="no" class="notranslate">package.json</code>:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">{
+      ...
+      "scripts": {
+<span class="hljs-deletion">-        "dev-server": "encore dev-server",</span>
+<span class="hljs-addition">+        "dev-server": "encore dev-server --public http://app.vm:8080",</span>
+          ...
+      }
+  }</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>After restarting Encore and reloading your web page, you will probably see
+different issues in the web console:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">GET http://app.vm:8080/build/vendors~app.css net::ERR_CONNECTION_REFUSED
+GET http://app.vm:8080/build/runtime.js net::ERR_CONNECTION_REFUSED</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You still need to make other configuration changes, as explained in the
+following sections.</p>
+</div>
+<div class="section">
+<h3 id="allow-external-access">
+    Allow External Access
+    <a class="headerlink" href="#allow-external-access" title="Permalink to this headline">¶</a>
+</h3>
+<p>Add the <code translate="no" class="notranslate">--host 0.0.0.0</code> argument to the <code translate="no" class="notranslate">dev-server</code> configuration in your
+<code translate="no" class="notranslate">package.json</code> file to make the development server accept all incoming
+connections:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">{
+      ...
+      "scripts": {
+<span class="hljs-deletion">-        "dev-server": "encore dev-server --public http://app.vm:8080",</span>
+<span class="hljs-addition">+        "dev-server": "encore dev-server --public http://app.vm:8080 --host 0.0.0.0",</span>
+          ...
+      }
+  }</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Make sure to run the development server inside your virtual machine only;
+otherwise other computers can have access to it.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="fix-invalid-host-header-issue">
+    Fix &quot;Invalid Host header&quot; Issue
+    <a class="headerlink" href="#fix-invalid-host-header-issue" title="Permalink to this headline">¶</a>
+</h3>
+<p>Webpack will respond <code translate="no" class="notranslate">Invalid Host header</code> when trying to access files from
+the dev-server. To fix this, set the <code translate="no" class="notranslate">allowedHosts</code> option:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// webpack.config.js</span>
+<span class="hljs-comment">// ...</span>
+
+Encore
+    <span class="hljs-comment">// ...</span>
+
+    .configureDevServerOptions(<span class="hljs-function"><span class="hljs-params">options</span> =&gt;</span> {
+        options.allowedHosts = all;
+    })</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Beware that <a href="https://webpack.js.org/configuration/dev-server/#devserverallowedhosts" class="reference external" rel="external noopener noreferrer" target="_blank">it's not recommended to set allowedHosts to all</a> in general, but
+here it's required to solve the issue when using Encore in a virtual machine.</p>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

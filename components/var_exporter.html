@@ -1,0 +1,347 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-varexporter-component">
+    The VarExporter Component
+    <a class="headerlink" href="#the-varexporter-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The VarExporter component exports any serializable PHP data structure to
+plain PHP code and allows to instantiate and populate objects without
+calling their constructors.</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require --dev symfony/var-exporter</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="exporting-serializing-variables">
+    Exporting/Serializing Variables
+    <a class="headerlink" href="#exporting-serializing-variables" title="Permalink to this headline">¶</a>
+</h2>
+<p>The main feature of this component is to serialize PHP data structures to plain
+PHP code, similar to PHP's <a href="https://secure.php.net/manual/en/function.var-export.php" class="reference external" title="var_export" rel="external noopener noreferrer" target="_blank">var_export</a> function:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarExporter</span>\<span class="hljs-title">VarExporter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exported</span> = VarExporter<span class="hljs-operator">::</span>export(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>someVariable</span>);
+<span class="hljs-comment">// store the $exported data in some file or cache system for later reuse</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>data</span> = file_put_contents(<span class="hljs-string">'exported.php'</span>, <span class="hljs-string">'&lt;?php return '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exported</span>.<span class="hljs-string">';'</span>);
+
+<span class="hljs-comment">// later, regenerate the original variable when you need it</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>regeneratedVariable</span> = <span class="hljs-keyword">require</span> <span class="hljs-string">'exported.php'</span>;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The reason to use this component instead of <code translate="no" class="notranslate">serialize()</code> or <code translate="no" class="notranslate">igbinary</code> is
+performance: thanks to <a href="https://www.php.net/opcache" class="reference external" rel="external noopener noreferrer" target="_blank">OPcache</a>, the resulting code is significantly faster
+and more memory efficient than using <code translate="no" class="notranslate">unserialize()</code> or <code translate="no" class="notranslate">igbinary_unserialize()</code>.</p>
+<p>In addition, there are some minor differences:</p>
+<ul>
+    <li>If the original variable defines them, all the semantics associated with
+<code translate="no" class="notranslate">serialize()</code> (such as <code translate="no" class="notranslate">__wakeup()</code>, <code translate="no" class="notranslate">__sleep()</code>, and <code translate="no" class="notranslate">Serializable</code>)
+are preserved (<code translate="no" class="notranslate">var_export()</code> ignores them);</li>
+<li>References involving <code translate="no" class="notranslate">SplObjectStorage</code>, <code translate="no" class="notranslate">ArrayObject</code> or <code translate="no" class="notranslate">ArrayIterator</code>
+instances are preserved;</li>
+<li>Missing classes throw a <code translate="no" class="notranslate">ClassNotFoundException</code> instead of being
+unserialized to <code translate="no" class="notranslate">PHP_Incomplete_Class</code> objects;</li>
+<li><code translate="no" class="notranslate">Reflection*</code>, <code translate="no" class="notranslate">IteratorIterator</code> and <code translate="no" class="notranslate">RecursiveIteratorIterator</code>
+classes throw an exception when being serialized.</li>
+</ul>
+<p>The exported data is a <a href="https://www.php-fig.org/psr/psr-2/" class="reference external" rel="external noopener noreferrer" target="_blank">PSR-2</a> compatible PHP file. Consider for example the
+following class hierarchy:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">abstract</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AbstractClass</span>
+</span>{
+    <span class="hljs-keyword">protected</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>foo</span>;
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bar</span>;
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setBar</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bar</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>bar = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bar</span>;
+    }
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConcreteClass</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractClass</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>foo = <span class="hljs-number">123</span>;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>setBar(<span class="hljs-number">234</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>When exporting the <code translate="no" class="notranslate">ConcreteClass</code> data with VarExporter, the generated PHP
+file looks like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">return</span> \Symfony\Component\VarExporter\Internal\Hydrator<span class="hljs-operator">::</span>hydrate(
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>o</span> = [
+        <span class="hljs-keyword">clone</span> (\Symfony\Component\VarExporter\Internal\Registry<span class="hljs-operator">::$</span>prototypes[<span class="hljs-string">'Symfony\\Component\\VarExporter\\Tests\\ConcreteClass'</span>] ?? \Symfony\Component\VarExporter\Internal\Registry<span class="hljs-operator">::</span>p(<span class="hljs-string">'Symfony\\Component\\VarExporter\\Tests\\ConcreteClass'</span>)),
+    ],
+    <span class="hljs-keyword">null</span>,
+    [
+        <span class="hljs-string">'Symfony\\Component\\VarExporter\\Tests\\AbstractClass'</span> =&gt; [
+            <span class="hljs-string">'foo'</span> =&gt; [
+                <span class="hljs-number">123</span>,
+            ],
+            <span class="hljs-string">'bar'</span> =&gt; [
+                <span class="hljs-number">234</span>,
+            ],
+        ],
+    ],
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>o</span>[<span class="hljs-number">0</span>],
+    []
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="instantiating-php-classes">
+    Instantiating PHP Classes
+    <a class="headerlink" href="#instantiating-php-classes" title="Permalink to this headline">¶</a>
+</h2>
+<p>The other main feature provided by this component is an instantiator which can
+create objects and set their properties without calling their constructors or
+any other methods:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarExporter</span>\<span class="hljs-title">Instantiator</span>;
+
+<span class="hljs-comment">// creates an empty instance of Foo</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fooObject</span> = Instantiator<span class="hljs-operator">::</span>instantiate(Foo<span class="hljs-operator">::</span>class);
+
+<span class="hljs-comment">// creates a Foo instance and sets one of its properties</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fooObject</span> = Instantiator<span class="hljs-operator">::</span>instantiate(Foo<span class="hljs-operator">::</span>class, [<span class="hljs-string">'propertyName'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyValue</span>]);
+
+<span class="hljs-comment">// creates a Foo instance and sets a private property defined on its parent Bar class</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fooObject</span> = Instantiator<span class="hljs-operator">::</span>instantiate(Foo<span class="hljs-operator">::</span>class, [], [
+    Bar<span class="hljs-operator">::</span>class =&gt; [<span class="hljs-string">'privateBarProperty'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>propertyValue</span>],
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Instances of <code translate="no" class="notranslate">ArrayObject</code>, <code translate="no" class="notranslate">ArrayIterator</code> and <code translate="no" class="notranslate">SplObjectHash</code> can be
+created by using the special <code translate="no" class="notranslate">&quot;\0&quot;</code> property name to define their internal value:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// Creates an SplObjectHash where $info1 is associated with $object1, etc.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>theObject</span> = Instantiator<span class="hljs-operator">::</span>instantiate(SplObjectStorage<span class="hljs-operator">::</span>class, [
+    <span class="hljs-string">"\0"</span> =&gt; [<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>object1</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>info1</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>object2</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>info2</span>...],
+]);
+
+<span class="hljs-comment">// creates an ArrayObject populated with $inputArray</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>theObject</span> = Instantiator<span class="hljs-operator">::</span>instantiate(ArrayObject<span class="hljs-operator">::</span>class, [
+    <span class="hljs-string">"\0"</span> =&gt; [<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>inputArray</span>],
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

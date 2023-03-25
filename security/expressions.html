@@ -1,0 +1,357 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="using-expressions-in-security-access-controls">
+    Using Expressions in Security Access Controls
+    <a class="headerlink" href="#using-expressions-in-security-access-controls" title="Permalink to this headline">¶</a>
+</h1>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>The best solution for handling complex authorization rules is to use
+the <a href="voters.html" class="reference internal">Voter System</a>.</p>
+</div>
+<p>In addition to security roles like <code translate="no" class="notranslate">ROLE_ADMIN</code>, the <code translate="no" class="notranslate">isGranted()</code> method
+and <code translate="no" class="notranslate">#[IsGranted()]</code> attribute also accept an
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ExpressionLanguage/Expression.php" class="reference external" title="Symfony\Component\ExpressionLanguage\Expression" rel="external noopener noreferrer" target="_blank">Expression</a> object:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-2">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-346a9e668ca6ef61ead394d172f3eb243afe4f4c" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-7b5518fb1d2e424a2e564cba65d1b5733ebed395" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-346a9e668ca6ef61ead394d172f3eb243afe4f4c" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Controller/MyController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ExpressionLanguage</span>\<span class="hljs-title">Expression</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'))]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-comment">#[IsGranted(new Expression(</span>
+        <span class="hljs-string">'"ROLE_ADMIN" in role_names or (is_authenticated() and user.isSuperAdmin())'</span>
+    ))]
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">edit</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-7b5518fb1d2e424a2e564cba65d1b5733ebed395" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/MyController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ExpressionLanguage</span>\<span class="hljs-title">Expression</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>denyAccessUnlessGranted(<span class="hljs-keyword">new</span> Expression(
+            <span class="hljs-string">'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'</span>
+        ));
+
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">edit</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>denyAccessUnlessGranted(<span class="hljs-keyword">new</span> Expression(
+            <span class="hljs-string">'"ROLE_ADMIN" in role_names or (is_authenticated() and user.isSuperAdmin())'</span>
+        ));
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">#[IsGranted()]</code> attribute was introduced in Symfony 6.2.</p>
+</div>
+<p>In this example, if the current user has <code translate="no" class="notranslate">ROLE_ADMIN</code> or if the current
+user object's <code translate="no" class="notranslate">isSuperAdmin()</code> method returns <code translate="no" class="notranslate">true</code>, then access will
+be granted (note: your User object may not have an <code translate="no" class="notranslate">isSuperAdmin()</code> method,
+that method is invented for this example).</p>
+<span id="security-expression-variables"></span>
+<p>The security expression must use any valid <a href="../reference/formats/expression_language.html" class="reference internal">expression language syntax</a>
+and can use any of these variables created by Symfony:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">user</code></dt>
+        
+        <dd>
+                            An instance of <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Core/User/UserInterface.php" class="reference external" title="Symfony\Component\Security\Core\User\UserInterface" rel="external noopener noreferrer" target="_blank">UserInterface</a>
+that represents the current user or <code translate="no" class="notranslate">null</code> if you're not authenticated.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">role_names</code></dt>
+        
+        <dd>
+                            An array with the string representation of the roles the user has. This array
+includes any roles granted indirectly via the <a href="../security.html#security-role-hierarchy" class="reference internal">role hierarchy</a> but it
+does not include the <code translate="no" class="notranslate">IS_AUTHENTICATED_*</code> attributes (see the functions below).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">object</code></dt>
+        
+        <dd>
+                            The object (if any) that's passed as the second argument to <code translate="no" class="notranslate">isGranted()</code>.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">subject</code></dt>
+        
+        <dd>
+                            It stores the same value as <code translate="no" class="notranslate">object</code>, so they are equivalent.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">token</code></dt>
+        
+        <dd>
+                            The token object.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">trust_resolver</code></dt>
+        
+        <dd>
+                            The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Core/Authentication/AuthenticationTrustResolverInterface.php" class="reference external" title="Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface" rel="external noopener noreferrer" target="_blank">AuthenticationTrustResolverInterface</a>,
+object: you'll probably use the <code translate="no" class="notranslate">is_*()</code> functions below instead.
+                    </dd>
+    </dl>
+<p>Additionally, you have access to a number of functions inside the expression:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">is_authenticated()</code></dt>
+        
+        <dd>
+                            Returns <code translate="no" class="notranslate">true</code> if the user is authenticated via &quot;remember-me&quot; or authenticated
+&quot;fully&quot; - i.e. returns true if the user is &quot;logged in&quot;.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">is_remember_me()</code></dt>
+        
+        <dd>
+                            Similar, but not equal to <code translate="no" class="notranslate">IS_AUTHENTICATED_REMEMBERED</code>, see below.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">is_fully_authenticated()</code></dt>
+        
+        <dd>
+                            Equal to checking if the user has the <code translate="no" class="notranslate">IS_AUTHENTICATED_FULLY</code> role.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">is_granted()</code></dt>
+        
+        <dd>
+                            Checks if the user has the given permission. Optionally accepts a
+second argument with the object where permission is checked on. It's
+equivalent to using the <a href="../security.html#security-isgranted" class="reference internal">isGranted() method</a>
+from the security service.
+                    </dd>
+    </dl>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span><code translate="no" class="notranslate">is_remember_me()</code> is different than checking <code translate="no" class="notranslate">IS_AUTHENTICATED_REMEMBERED</code></span></p><p>The <code translate="no" class="notranslate">is_remember_me()</code> and <code translate="no" class="notranslate">is_fully_authenticated()</code> functions are <em>similar</em>
+to using <code translate="no" class="notranslate">IS_AUTHENTICATED_REMEMBERED</code> and <code translate="no" class="notranslate">IS_AUTHENTICATED_FULLY</code>
+with the <code translate="no" class="notranslate">isGranted()</code> function - but they are <strong>not</strong> the same. The
+following controller snippet shows the difference:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ExpressionLanguage</span>\<span class="hljs-title">Expression</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Authorization</span>\<span class="hljs-title">AuthorizationCheckerInterface</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">(AuthorizationCheckerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>authorizationChecker</span>)</span>: <span class="hljs-title">Response</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>access1</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>authorizationChecker</span><span class="hljs-operator">-&gt;</span>isGranted(<span class="hljs-string">'IS_AUTHENTICATED_REMEMBERED'</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>access2</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>authorizationChecker</span><span class="hljs-operator">-&gt;</span>isGranted(<span class="hljs-keyword">new</span> Expression(
+        <span class="hljs-string">'is_remember_me() or is_fully_authenticated()'</span>
+    ));
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Here, <code translate="no" class="notranslate">$access1</code> and <code translate="no" class="notranslate">$access2</code> will be the same value. Unlike the
+behavior of <code translate="no" class="notranslate">IS_AUTHENTICATED_REMEMBERED</code> and <code translate="no" class="notranslate">IS_AUTHENTICATED_FULLY</code>,
+the <code translate="no" class="notranslate">is_remember_me()</code> function <em>only</em> returns true if the user is authenticated
+via a remember-me cookie and <code translate="no" class="notranslate">is_fully_authenticated()</code> <em>only</em> returns
+true if the user has actually logged in during this session (i.e. is
+full-fledged).</p>
+</div></div>
+<div class="section">
+<h2 id="learn-more">
+    Learn more
+    <a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a>
+</h2>
+<ul>
+    <li><a href="../service_container/expression_language.html" class="reference internal">How to Inject Values Based on Complex Expressions</a></li>
+<li><a href="../reference/constraints/Expression.html" class="reference internal">Expression</a></li>
+</ul>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

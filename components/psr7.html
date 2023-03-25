@@ -1,0 +1,280 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-psr-7-bridge">
+    The PSR-7 Bridge
+    <a class="headerlink" href="#the-psr-7-bridge" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The PSR-7 bridge converts <a href="http_foundation.html" class="reference internal">HttpFoundation</a>
+objects from and to objects implementing HTTP message interfaces defined
+by the <a href="https://www.php-fig.org/psr/psr-7/" class="reference external" rel="external noopener noreferrer" target="_blank">PSR-7</a>.</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/psr-http-message-bridge</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+<p>The bridge also needs a PSR-7 and <a href="https://www.php-fig.org/psr/psr-17/" class="reference external" rel="external noopener noreferrer" target="_blank">PSR-17</a> implementation to convert
+HttpFoundation objects to PSR-7 objects. The following command installs the
+<code translate="no" class="notranslate">nyholm/psr7</code> library, a lightweight and fast PSR-7 implementation, but you
+can use any of the <a href="https://packagist.org/providers/psr/http-factory-implementation" class="reference external" rel="external noopener noreferrer" target="_blank">libraries that implement psr/http-factory-implementation</a>:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require nyholm/psr7</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="converting-from-httpfoundation-objects-to-psr-7">
+    Converting from HttpFoundation Objects to PSR-7
+    <a class="headerlink" href="#converting-from-httpfoundation-objects-to-psr-7" title="Permalink to this headline">¶</a>
+</h3>
+<p>The bridge provides an interface of a factory called
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/PsrHttpMessage/HttpMessageFactoryInterface.php" class="reference external" title="Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface" rel="external noopener noreferrer" target="_blank">HttpMessageFactoryInterface</a>
+that builds objects implementing PSR-7 interfaces from HttpFoundation objects.</p>
+<p>The following code snippet explains how to convert a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Request.php" class="reference external" title="Symfony\Component\HttpFoundation\Request" rel="external noopener noreferrer" target="_blank">Request</a>
+to a <code translate="no" class="notranslate">Nyholm\Psr7\ServerRequest</code> class implementing the
+<code translate="no" class="notranslate">Psr\Http\Message\ServerRequestInterface</code> interface:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Nyholm</span>\<span class="hljs-title">Psr7</span>\<span class="hljs-title">Factory</span>\<span class="hljs-title">Psr17Factory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">PsrHttpMessage</span>\<span class="hljs-title">Factory</span>\<span class="hljs-title">PsrHttpFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>symfonyRequest</span> = <span class="hljs-keyword">new</span> Request([], [], [], [], [], [<span class="hljs-string">'HTTP_HOST'</span> =&gt; <span class="hljs-string">'dunglas.fr'</span>], <span class="hljs-string">'Content'</span>);
+<span class="hljs-comment">// The HTTP_HOST server key must be set to avoid an unexpected error</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr17Factory</span> = <span class="hljs-keyword">new</span> Psr17Factory();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psrHttpFactory</span> = <span class="hljs-keyword">new</span> PsrHttpFactory(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr17Factory</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr17Factory</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr17Factory</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr17Factory</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psrRequest</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psrHttpFactory</span><span class="hljs-operator">-&gt;</span>createRequest(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>symfonyRequest</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>And now from a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Response.php" class="reference external" title="Symfony\Component\HttpFoundation\Response" rel="external noopener noreferrer" target="_blank">Response</a> to a
+<code translate="no" class="notranslate">Nyholm\Psr7\Response</code> class implementing the
+<code translate="no" class="notranslate">Psr\Http\Message\ResponseInterface</code> interface:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Nyholm</span>\<span class="hljs-title">Psr7</span>\<span class="hljs-title">Factory</span>\<span class="hljs-title">Psr17Factory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">PsrHttpMessage</span>\<span class="hljs-title">Factory</span>\<span class="hljs-title">PsrHttpFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>symfonyResponse</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Content'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr17Factory</span> = <span class="hljs-keyword">new</span> Psr17Factory();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psrHttpFactory</span> = <span class="hljs-keyword">new</span> PsrHttpFactory(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr17Factory</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr17Factory</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr17Factory</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr17Factory</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psrResponse</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psrHttpFactory</span><span class="hljs-operator">-&gt;</span>createResponse(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>symfonyResponse</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="converting-objects-implementing-psr-7-interfaces-to-httpfoundation">
+    Converting Objects implementing PSR-7 Interfaces to HttpFoundation
+    <a class="headerlink" href="#converting-objects-implementing-psr-7-interfaces-to-httpfoundation" title="Permalink to this headline">¶</a>
+</h3>
+<p>On the other hand, the bridge provide a factory interface called
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/PsrHttpMessage/HttpFoundationFactoryInterface.php" class="reference external" title="Symfony\Bridge\PsrHttpMessage\HttpFoundationFactoryInterface" rel="external noopener noreferrer" target="_blank">HttpFoundationFactoryInterface</a>
+that builds HttpFoundation objects from objects implementing PSR-7 interfaces.</p>
+<p>The next snippet explain how to convert an object implementing the
+<code translate="no" class="notranslate">Psr\Http\Message\ServerRequestInterface</code> interface to a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Request.php" class="reference external" title="Symfony\Component\HttpFoundation\Request" rel="external noopener noreferrer" target="_blank">Request</a> instance:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">PsrHttpMessage</span>\<span class="hljs-title">Factory</span>\<span class="hljs-title">HttpFoundationFactory</span>;
+
+<span class="hljs-comment">// $psrRequest is an instance of Psr\Http\Message\ServerRequestInterface</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>httpFoundationFactory</span> = <span class="hljs-keyword">new</span> HttpFoundationFactory();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>symfonyRequest</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>httpFoundationFactory</span><span class="hljs-operator">-&gt;</span>createRequest(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psrRequest</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>From an object implementing the <code translate="no" class="notranslate">Psr\Http\Message\ResponseInterface</code>
+to a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Response.php" class="reference external" title="Symfony\Component\HttpFoundation\Response" rel="external noopener noreferrer" target="_blank">Response</a> instance:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">PsrHttpMessage</span>\<span class="hljs-title">Factory</span>\<span class="hljs-title">HttpFoundationFactory</span>;
+
+<span class="hljs-comment">// $psrResponse is an instance of Psr\Http\Message\ResponseInterface</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>httpFoundationFactory</span> = <span class="hljs-keyword">new</span> HttpFoundationFactory();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>symfonyResponse</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>httpFoundationFactory</span><span class="hljs-operator">-&gt;</span>createResponse(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psrResponse</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

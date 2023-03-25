@@ -1,0 +1,635 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <span id="creating-pages-in-symfony2"></span>
+<span id="creating-pages-in-symfony"></span>
+<div class="section">
+<h1 id="create-your-first-page-in-symfony">
+    Create your First Page in Symfony
+    <a class="headerlink" href="#create-your-first-page-in-symfony" title="Permalink to this headline">¶</a>
+</h1>
+<p>Creating a new page - whether it's an HTML page or a JSON endpoint - is a
+two-step process:</p>
+<ol class="arabic">
+    <li><strong>Create a route</strong>: A route is the URL (e.g. <code translate="no" class="notranslate">/about</code>) to your page and
+points to a controller;</li>
+<li><strong>Create a controller</strong>: A controller is the PHP function you write that
+builds the page. You take the incoming request information and use it to
+create a Symfony <code translate="no" class="notranslate">Response</code> object, which can hold HTML content, a JSON
+string or even a binary file like an image or PDF.</li>
+</ol>
+<div class="admonition admonition-screencast screencast">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                <span>Screencast</span>
+    </p><p>Do you prefer video tutorials? Check out the <a href="https://symfonycasts.com/screencast/symfony/setup" class="reference external" rel="external noopener noreferrer" target="_blank">Harmonious Development with Symfony</a>
+screencast series.</p>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Symfony <em>embraces</em> the HTTP Request-Response lifecycle. To find out more,
+see <a href="introduction/http_fundamentals.html" class="reference internal">Symfony and HTTP Fundamentals</a>.</p>
+</div>
+<div class="section">
+<h2 id="creating-a-page-route-and-controller">
+    Creating a Page: Route and Controller
+    <a class="headerlink" href="#creating-a-page-route-and-controller" title="Permalink to this headline">¶</a>
+</h2>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Before continuing, make sure you've read the <a href="setup.html" class="reference internal">Setup</a>
+article and can access your new Symfony app in the browser.</p>
+</div>
+<p>Suppose you want to create a page - <code translate="no" class="notranslate">/lucky/number</code> - that generates a lucky (well,
+random) number and prints it. To do that, create a &quot;Controller&quot; class and a
+&quot;controller&quot; method inside of it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/LuckyController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LuckyController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">number</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>number</span> = random_int(<span class="hljs-number">0</span>, <span class="hljs-number">100</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(
+            <span class="hljs-string">'&lt;html&gt;&lt;body&gt;Lucky number: '</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>number</span>.<span class="hljs-string">'&lt;/body&gt;&lt;/html&gt;'</span>
+        );
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now you need to associate this controller function with a public URL (e.g. <code translate="no" class="notranslate">/lucky/number</code>)
+so that the <code translate="no" class="notranslate">number()</code> method is called when a user browses to it. This association
+is defined by creating a <strong>route</strong> in the <code translate="no" class="notranslate">config/routes.yaml</code> file:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/routes.yaml</span>
+
+<span class="hljs-comment"># the "app_lucky_number" route name is not important yet</span>
+<span class="hljs-attr">app_lucky_number:</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">/lucky/number</span>
+    <span class="hljs-attr">controller:</span> <span class="hljs-string">App\Controller\LuckyController::number</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! If you are using Symfony web server, try it out by going to: <a href="http://localhost:8000/lucky/number" class="reference external" rel="external noopener noreferrer" target="_blank">http://localhost:8000/lucky/number</a></p>
+<p>If you see a lucky number being printed back to you, congratulations! But before
+you run off to play the lottery, check out how this works. Remember the two steps
+to create a page?</p>
+<ol class="arabic">
+    <li><em>Create a controller and a method</em>: This is a function where <em>you</em> build the page and ultimately
+return a <code translate="no" class="notranslate">Response</code> object. You'll learn more about <a href="controller.html" class="reference internal">controllers</a>
+in their own section, including how to return JSON responses;</li>
+<li><em>Create a route</em>: In <code translate="no" class="notranslate">config/routes.yaml</code>, the route defines the URL to your
+page (<code translate="no" class="notranslate">path</code>) and what <code translate="no" class="notranslate">controller</code> to call. You'll learn more about <a href="routing.html" class="reference internal">routing</a>
+in its own section, including how to make <em>variable</em> URLs.</li>
+</ol>
+<span id="annotation-routes"></span>
+</div>
+<div class="section">
+<h2 id="annotation-routes">
+    Annotation Routes
+    <a class="headerlink" href="#annotation-routes" title="Permalink to this headline">¶</a>
+</h2>
+<p>Instead of defining your route in YAML, Symfony also allows you to use <em>annotation</em>
+or <em>attribute</em> routes. Attributes are built-in in PHP starting from PHP 8. In earlier
+PHP versions you can use annotations. To do this, install the annotations package:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require annotations</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can now add your route directly <em>above</em> the controller:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-1">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-1ba0374130bdfc918aad281b64f8350bdcae8e04" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-1ba0374130bdfc918aad281b64f8350bdcae8e04" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Controller/LuckyController.php</span>
+
+<span class="hljs-comment">// ...</span>
++ <span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LuckyController</span>
+</span>{
++   <span class="hljs-comment">#[Route('/lucky/number')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">number</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// this looks exactly the same</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>That's it! The page - <a href="http://localhost:8000/lucky/number" class="reference external" rel="external noopener noreferrer" target="_blank">http://localhost:8000/lucky/number</a> will work exactly
+like before! Annotations/attributes are the recommended way to configure routes.</p>
+<span id="flex-quick-intro"></span>
+</div>
+<div class="section">
+<h2 id="auto-installing-recipes-with-symfony-flex">
+    Auto-Installing Recipes with Symfony Flex
+    <a class="headerlink" href="#auto-installing-recipes-with-symfony-flex" title="Permalink to this headline">¶</a>
+</h2>
+<p>You may not have noticed, but when you ran <code translate="no" class="notranslate">composer require annotations</code>, two
+special things happened, both thanks to a powerful Composer plugin called
+<a href="setup.html#symfony-flex" class="reference internal">Flex</a>.</p>
+<p>First, <code translate="no" class="notranslate">annotations</code> isn't a real package name: it's an <em>alias</em> (i.e. shortcut)
+that Flex resolves to <code translate="no" class="notranslate">sensio/framework-extra-bundle</code>.</p>
+<p>Second, after this package was downloaded, Flex runs a <em>recipe</em>, which is a
+set of automated instructions that tell Symfony how to integrate an external
+package. <a href="https://github.com/symfony/recipes/blob/flex/main/RECIPES.md" class="reference external" rel="external noopener noreferrer" target="_blank">Flex recipes</a> exist for many packages and have the ability
+to do a lot, like adding configuration files, creating directories, updating <code translate="no" class="notranslate">.gitignore</code>
+and adding a new config to your <code translate="no" class="notranslate">.env</code> file. Flex <em>automates</em> the installation of
+packages so you can get back to coding.</p>
+</div>
+<div class="section">
+<h2 id="the-bin-console-command">
+    The bin/console Command
+    <a class="headerlink" href="#the-bin-console-command" title="Permalink to this headline">¶</a>
+</h2>
+<p>Your project already has a powerful debugging tool inside: the <code translate="no" class="notranslate">bin/console</code> command.
+Try running it:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You should see a list of commands that can give you debugging information, help generate
+code, generate database migrations and a lot more. As you install more packages,
+you'll see more commands.</p>
+<p>To get a list of <em>all</em> of the routes in your system, use the <code translate="no" class="notranslate">debug:router</code> command:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:router</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You should see your <code translate="no" class="notranslate">app_lucky_number</code> route in the list:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">----------------  -------  -------  -----  --------------
+Name              Method   Scheme   Host   Path
+----------------  -------  -------  -----  --------------
+app_lucky_number  ANY      ANY      ANY    /lucky/number
+----------------  -------  -------  -----  --------------</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You will also see debugging routes besides <code translate="no" class="notranslate">app_lucky_number</code> -- more on
+the debugging routes in the next section.</p>
+<p>You'll learn about many more commands as you continue!</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If your shell is supported, you can also set up console completion support.
+This autocompletes commands and other input when using <code translate="no" class="notranslate">bin/console</code>.
+See <a href="console.html#console-completion-setup" class="reference internal">the Console document</a> for more
+information on how to set up completion.</p>
+</div>
+<span id="web-debug-toolbar"></span>
+</div>
+<div class="section">
+<h2 id="the-web-debug-toolbar-debugging-dream">
+    The Web Debug Toolbar: Debugging Dream
+    <a class="headerlink" href="#the-web-debug-toolbar-debugging-dream" title="Permalink to this headline">¶</a>
+</h2>
+<p>One of Symfony's <em>amazing</em> features is the Web Debug Toolbar: a bar that displays
+a <em>huge</em> amount of debugging information along the bottom of your page while
+developing. This is all included out of the box using a <a href="setup.html#symfony-packs" class="reference internal">Symfony pack</a>
+called <code translate="no" class="notranslate">symfony/profiler-pack</code>.</p>
+<p>You will see a dark bar along the bottom of the page. You'll learn more about
+all the information it holds along the way, but feel free to experiment: hover
+over and click the different icons to get information about routing,
+performance, logging and more.</p>
+</div>
+<div class="section">
+<h2 id="rendering-a-template">
+    Rendering a Template
+    <a class="headerlink" href="#rendering-a-template" title="Permalink to this headline">¶</a>
+</h2>
+<p>If you're returning HTML from your controller, you'll probably want to render
+a template. Fortunately, Symfony comes with <a href="https://twig.symfony.com" class="reference external">Twig</a>: a templating language that's
+minimal, powerful and actually quite fun.</p>
+<p>Install the twig package with:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require twig</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Make sure that <code translate="no" class="notranslate">LuckyController</code> extends Symfony's base
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Controller/AbstractController.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Controller\AbstractController" rel="external noopener noreferrer" target="_blank">AbstractController</a> class:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">// src/Controller/LuckyController.php
+
+  // ...
+<span class="hljs-addition">+ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;</span>
+
+<span class="hljs-deletion">- class LuckyController</span>
+<span class="hljs-addition">+ class LuckyController extends AbstractController</span>
+  {
+      // ...
+  }</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, use the handy <code translate="no" class="notranslate">render()</code> method to render a template. Pass it a <code translate="no" class="notranslate">number</code>
+variable so you can use it in Twig:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/LuckyController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LuckyController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/lucky/number')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">number</span><span class="hljs-params">()</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>number</span> = random_int(<span class="hljs-number">0</span>, <span class="hljs-number">100</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'lucky/number.html.twig'</span>, [
+            <span class="hljs-string">'number'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>number</span>,
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Template files live in the <code translate="no" class="notranslate">templates/</code> directory, which was created for you automatically
+when you installed Twig. Create a new <code translate="no" class="notranslate">templates/lucky</code> directory with a new
+<code translate="no" class="notranslate">number.html.twig</code> file inside:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/lucky/number.html.twig #}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Your lucky number is </span><span class="hljs-template-variable">{{ number }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">{{ number }}</code> syntax is used to <em>print</em> variables in Twig. Refresh your browser
+to get your <em>new</em> lucky number!</p>
+<blockquote><p><a href="http://localhost:8000/lucky/number" class="reference external" rel="external noopener noreferrer" target="_blank">http://localhost:8000/lucky/number</a></p>
+</blockquote>
+<p>Now you may wonder where the Web Debug Toolbar has gone: that's because there is
+no <code translate="no" class="notranslate">&lt;/body&gt;</code> tag in the current template. You can add the body element yourself,
+or extend <code translate="no" class="notranslate">base.html.twig</code>, which contains all default HTML elements.</p>
+<p>In the <a href="templates.html" class="reference internal">templates</a> article, you'll learn all about Twig: how
+to loop, render other templates and leverage its powerful layout inheritance system.</p>
+</div>
+<div class="section">
+<h2 id="checking-out-the-project-structure">
+    Checking out the Project Structure
+    <a class="headerlink" href="#checking-out-the-project-structure" title="Permalink to this headline">¶</a>
+</h2>
+<p>Great news! You've already worked inside the most important directories in your
+project:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">config/</code></dt>
+        
+        <dd>
+                            Contains... configuration!. You will configure routes,
+<a href="service_container.html" class="reference internal">services</a> and packages.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">src/</code></dt>
+        
+        <dd>
+                            All your PHP code lives here.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">templates/</code></dt>
+        
+        <dd>
+                            All your Twig templates live here.
+                    </dd>
+    </dl>
+<p>Most of the time, you'll be working in <code translate="no" class="notranslate">src/</code>, <code translate="no" class="notranslate">templates/</code> or <code translate="no" class="notranslate">config/</code>.
+As you keep reading, you'll learn what can be done inside each of these.</p>
+<p>So what about the other directories in the project?</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">bin/</code></dt>
+        
+        <dd>
+                            The famous <code translate="no" class="notranslate">bin/console</code> file lives here (and other, less important
+executable files).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">var/</code></dt>
+        
+        <dd>
+                            This is where automatically-created files are stored, like cache files
+(<code translate="no" class="notranslate">var/cache/</code>) and logs (<code translate="no" class="notranslate">var/log/</code>).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">vendor/</code></dt>
+        
+        <dd>
+                            Third-party (i.e. &quot;vendor&quot;) libraries live here! These are downloaded via the <a href="https://getcomposer.org" class="reference external" rel="external noopener noreferrer" target="_blank">Composer</a>
+package manager.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">public/</code></dt>
+        
+        <dd>
+                            This is the document root for your project: you put any publicly accessible files
+here.
+                    </dd>
+    </dl>
+<p>And when you install new packages, new directories will be created automatically
+when needed.</p>
+</div>
+<div class="section">
+<h2 id="what-s-next">
+    What's Next?
+    <a class="headerlink" href="#what-s-next" title="Permalink to this headline">¶</a>
+</h2>
+<p>Congrats! You're already starting to master Symfony and learn a whole new
+way of building beautiful, functional, fast and maintainable applications.</p>
+<p>OK, time to finish mastering the fundamentals by reading these articles:</p>
+<ul>
+    <li><a href="routing.html" class="reference internal">Routing</a></li>
+<li><a href="controller.html" class="reference internal">Controller</a></li>
+<li><a href="templates.html" class="reference internal">Creating and Using Templates</a></li>
+<li><a href="configuration.html" class="reference internal">Configuring Symfony</a></li>
+</ul>
+<p>Then, learn about other important topics like the
+<a href="service_container.html" class="reference internal">service container</a>,
+the <a href="forms.html" class="reference internal">form system</a>, using <a href="doctrine.html" class="reference internal">Doctrine</a>
+(if you need to query a database) and more!</p>
+<p>Have fun!</p>
+</div>
+<div class="section">
+<h2 id="go-deeper-with-http-framework-fundamentals">
+    Go Deeper with HTTP &amp; Framework Fundamentals
+    <a class="headerlink" href="#go-deeper-with-http-framework-fundamentals" title="Permalink to this headline">¶</a>
+</h2>
+
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-2"><li><a href="introduction/from_flat_php_to_symfony.html">Symfony versus Flat PHP</a></li><li><a href="introduction/http_fundamentals.html">Symfony and HTTP Fundamentals</a></li></ul></div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,1178 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-create-a-custom-route-loader">
+    How to Create a custom Route Loader
+    <a class="headerlink" href="#how-to-create-a-custom-route-loader" title="Permalink to this headline">¶</a>
+</h1>
+<p>Basic applications can define all their routes in a single configuration file -
+usually <code translate="no" class="notranslate">config/routes.yaml</code> (see <a href="../routing.html#routing-creating-routes" class="reference internal">Routing</a>).
+However, in most applications it's common to import routes definitions from
+different resources: PHP attributes in controller files, YAML, XML
+or PHP files stored in some directory, etc.</p>
+<div class="section">
+<h2 id="built-in-route-loaders">
+    Built-in Route Loaders
+    <a class="headerlink" href="#built-in-route-loaders" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony provides several route loaders for the most common needs:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-d96a7bc052637336b6508058786f0705126c8b4e" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-0c1a08e42fbe40fb90888794ef336f2e6f605c1e" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-6319d12147e2f5a8353296bceff66a0f23c5bd13" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-d96a7bc052637336b6508058786f0705126c8b4e" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/routes.yaml</span>
+<span class="hljs-attr">app_file:</span>
+    <span class="hljs-comment"># loads routes from the given routing file stored in some bundle</span>
+    <span class="hljs-attr">resource:</span> <span class="hljs-string">'@AcmeBundle/Resources/config/routing.yaml'</span>
+
+<span class="hljs-attr">app_psr4:</span>
+    <span class="hljs-comment"># loads routes from the PHP attributes of the controllers found in the given PSR-4 namespace root</span>
+    <span class="hljs-attr">resource:</span>
+        <span class="hljs-attr">path:</span> <span class="hljs-string">'../src/Controller/'</span>
+        <span class="hljs-attr">namespace:</span> <span class="hljs-string">App\Controller</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">attribute</span>
+
+<span class="hljs-attr">app_attributes:</span>
+    <span class="hljs-comment"># loads routes from the PHP attributes of the controllers found in that directory</span>
+    <span class="hljs-attr">resource:</span> <span class="hljs-string">'../src/Controller/'</span>
+    <span class="hljs-attr">type:</span>     <span class="hljs-string">attribute</span>
+
+<span class="hljs-attr">app_class_attributes:</span>
+    <span class="hljs-comment"># loads routes from the PHP attributes of the given class</span>
+    <span class="hljs-attr">resource:</span> <span class="hljs-string">App\Controller\MyController</span>
+    <span class="hljs-attr">type:</span>     <span class="hljs-string">attribute</span>
+
+<span class="hljs-attr">app_directory:</span>
+    <span class="hljs-comment"># loads routes from the YAML, XML or PHP files found in that directory</span>
+    <span class="hljs-attr">resource:</span> <span class="hljs-string">'../legacy/routing/'</span>
+    <span class="hljs-attr">type:</span>     <span class="hljs-string">directory</span>
+
+<span class="hljs-attr">app_bundle:</span>
+    <span class="hljs-comment"># loads routes from the YAML, XML or PHP files found in some bundle directory</span>
+    <span class="hljs-attr">resource:</span> <span class="hljs-string">'@AcmeOtherBundle/Resources/config/routing/'</span>
+    <span class="hljs-attr">type:</span>     <span class="hljs-string">directory</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-0c1a08e42fbe40fb90888794ef336f2e6f605c1e" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/routes.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">routes</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/routing"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/routing
+        https://symfony.com/schema/routing/routing-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- loads routes from the given routing file stored in some bundle --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">"@AcmeBundle/Resources/config/routing.yaml"</span>/&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- loads routes from the PHP attributes of the controllers found in the given PSR-4 namespace root --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"attribute"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">resource</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"../src/Controller/"</span> <span class="hljs-attr">namespace</span>=<span class="hljs-string">"App\Controller"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">import</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- loads routes from the PHP attributes of the controllers found in that directory --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">"../src/Controller/"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"attribute"</span>/&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- loads routes from the PHP attributes of the given class --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">"App\Controller\MyController"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"attribute"</span>/&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- loads routes from the YAML or XML files found in that directory --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">"../legacy/routing/"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"directory"</span>/&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- loads routes from the YAML or XML files found in some bundle directory --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">"@AcmeOtherBundle/Resources/config/routing/"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"directory"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">routes</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-6319d12147e2f5a8353296bceff66a0f23c5bd13" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/routes.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">RoutingConfigurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(RoutingConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>)</span> </span>{
+    <span class="hljs-comment">// loads routes from the given routing file stored in some bundle</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'@AcmeBundle/Resources/config/routing.yaml'</span>);
+
+    <span class="hljs-comment">// loads routes from the PHP attributes (#[Route(...)])</span>
+    <span class="hljs-comment">// of the controllers found in the given PSR-4 namespace root</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(
+        [<span class="hljs-string">'path'</span> =&gt; <span class="hljs-string">'../src/Controller/'</span>, <span class="hljs-string">'namespace'</span> =&gt; <span class="hljs-string">'App\Controller'</span>],
+        <span class="hljs-string">'attribute'</span>,
+    );
+
+    <span class="hljs-comment">// loads routes from the PHP attributes (#[Route(...)])</span>
+    <span class="hljs-comment">// of the controllers found in that directory</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'../src/Controller/'</span>, <span class="hljs-string">'attribute'</span>);
+
+    <span class="hljs-comment">// loads routes from the PHP attributes (#[Route(...)]) of the given class</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'App\Controller\MyController'</span>, <span class="hljs-string">'attribute'</span>);
+
+    <span class="hljs-comment">// loads routes from the YAML or XML files found in that directory</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'../legacy/routing/'</span>, <span class="hljs-string">'directory'</span>);
+
+    <span class="hljs-comment">// loads routes from the YAML or XML files found in some bundle directory</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'@AcmeOtherBundle/Resources/config/routing/'</span>, <span class="hljs-string">'directory'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The <code translate="no" class="notranslate">attribute</code> value of the second argument of <code translate="no" class="notranslate">import()</code> was introduced
+in Symfony 6.1.</p>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The feature to import routes from a PSR-4 namespace root was introduced in Symfony 6.2.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When importing resources, the key (e.g. <code translate="no" class="notranslate">app_file</code>) is the name of the collection.
+Just be sure that it's unique per file so no other lines override it.</p>
+</div>
+<p>If your application needs are different, you can create your own custom route
+loader as explained in the next section.</p>
+</div>
+<div class="section">
+<h2 id="what-is-a-custom-route-loader">
+    What is a Custom Route Loader
+    <a class="headerlink" href="#what-is-a-custom-route-loader" title="Permalink to this headline">¶</a>
+</h2>
+<p>A custom route loader enables you to generate routes based on some
+conventions, patterns or integrations. An example for this use-case is the
+<a href="https://github.com/Tobion/OpenAPI-Symfony-Routing" class="reference external" rel="external noopener noreferrer" target="_blank">OpenAPI-Symfony-Routing</a> library where routes are generated based on
+OpenAPI/Swagger annotations. Another example is the <a href="https://github.com/sonata-project/SonataAdminBundle" class="reference external" rel="external noopener noreferrer" target="_blank">SonataAdminBundle</a> that
+creates routes based on CRUD conventions.</p>
+</div>
+<div class="section">
+<h2 id="loading-routes">
+    Loading Routes
+    <a class="headerlink" href="#loading-routes" title="Permalink to this headline">¶</a>
+</h2>
+<p>The routes in a Symfony application are loaded by the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Routing/DelegatingLoader.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Routing\DelegatingLoader" rel="external noopener noreferrer" target="_blank">DelegatingLoader</a>.
+This loader uses several other loaders (delegates) to load resources of
+different types, for instance YAML files or <code translate="no" class="notranslate">#[Route]</code> attributes in controller
+files. The specialized loaders implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderInterface.php" class="reference external" title="Symfony\Component\Config\Loader\LoaderInterface" rel="external noopener noreferrer" target="_blank">LoaderInterface</a>
+and therefore have two important methods:
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderInterface.php#method_supports" class="reference external" title="Symfony\Component\Config\Loader\LoaderInterface::supports()" rel="external noopener noreferrer" target="_blank">supports()</a>
+and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderInterface.php#method_load" class="reference external" title="Symfony\Component\Config\Loader\LoaderInterface::load()" rel="external noopener noreferrer" target="_blank">load()</a>.</p>
+<p>Take these lines from the <code translate="no" class="notranslate">routes.yaml</code>:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-9089fbab6d0b589e4499c619a5e82d73398ac5f6" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-947ad742f85206bb54921ac985b85bcdb9bc09c8" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-4cb91009c48171475ae91814a818869d317d3bb9" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-9089fbab6d0b589e4499c619a5e82d73398ac5f6" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/routes.yaml</span>
+<span class="hljs-attr">controllers:</span>
+    <span class="hljs-attr">resource:</span> <span class="hljs-string">../src/Controller/</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">attribute</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-947ad742f85206bb54921ac985b85bcdb9bc09c8" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/routes.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">routes</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/routing"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/routing
+        https://symfony.com/schema/routing/routing-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">"../src/Controller"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"attribute"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">routes</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-4cb91009c48171475ae91814a818869d317d3bb9" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/routes.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">RoutingConfigurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(RoutingConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'../src/Controller'</span>, <span class="hljs-string">'attribute'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>When the main loader parses this, it tries all registered delegate loaders and calls
+their <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderInterface.php#method_supports" class="reference external" title="Symfony\Component\Config\Loader\LoaderInterface::supports()" rel="external noopener noreferrer" target="_blank">supports()</a>
+method with the given resource (<code translate="no" class="notranslate">../src/Controller/</code>)
+and type (<code translate="no" class="notranslate">attribute</code>) as arguments. When one of the loader returns <code translate="no" class="notranslate">true</code>,
+its <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderInterface.php#method_load" class="reference external" title="Symfony\Component\Config\Loader\LoaderInterface::load()" rel="external noopener noreferrer" target="_blank">load()</a> method
+will be called, which should return a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Routing/RouteCollection.php" class="reference external" title="Symfony\Component\Routing\RouteCollection" rel="external noopener noreferrer" target="_blank">RouteCollection</a>
+containing <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Routing/Route.php" class="reference external" title="Symfony\Component\Routing\Route" rel="external noopener noreferrer" target="_blank">Route</a> objects.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Routes loaded this way will be cached by the Router the same way as
+when they are defined in one of the default formats (e.g. XML, YAML,
+PHP file).</p>
+</div>
+</div>
+<div class="section">
+<h2 id="loading-routes-with-a-custom-service">
+    Loading Routes with a Custom Service
+    <a class="headerlink" href="#loading-routes-with-a-custom-service" title="Permalink to this headline">¶</a>
+</h2>
+<p>Using a regular Symfony service is the simplest way to load routes in a
+customized way. It's much easier than creating a full custom route loader, so
+you should always consider this option first.</p>
+<p>To do so, define <code translate="no" class="notranslate">type: service</code> as the type of the loaded routing resource
+and configure the service and method to call:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-766c38175ba6410bf5587f52943b3a7c2da06886" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-1b3ebb8b626955353483a2dc41b685e1b70d4fab" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-1bd3b32dc46cbfd5b2048ef5cfac9115d2b15733" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-766c38175ba6410bf5587f52943b3a7c2da06886" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/routes.yaml</span>
+<span class="hljs-attr">admin_routes:</span>
+    <span class="hljs-attr">resource:</span> <span class="hljs-string">'admin_route_loader::loadRoutes'</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">service</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-1b3ebb8b626955353483a2dc41b685e1b70d4fab" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/routes.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">routes</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/routing"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/routing
+        https://symfony.com/schema/routing/routing-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">"admin_route_loader::loadRoutes"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"service"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">routes</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-1bd3b32dc46cbfd5b2048ef5cfac9115d2b15733" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/routes.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">RoutingConfigurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(RoutingConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'admin_route_loader::loadRoutes'</span>, <span class="hljs-string">'service'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>In this example, the routes are loaded by calling the <code translate="no" class="notranslate">loadRoutes()</code> method
+of the service whose ID is <code translate="no" class="notranslate">admin_route_loader</code>. Your service doesn't have to
+extend or implement any special class, but the called method must return a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Routing/RouteCollection.php" class="reference external" title="Symfony\Component\Routing\RouteCollection" rel="external noopener noreferrer" target="_blank">RouteCollection</a> object.</p>
+<p>If you're using <a href="../service_container.html#services-autoconfigure" class="reference internal">autoconfigure</a>, your class should
+implement the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Routing/RouteLoaderInterface.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Routing\RouteLoaderInterface" rel="external noopener noreferrer" target="_blank">RouteLoaderInterface</a>
+interface to be tagged automatically. If you're <strong>not using autoconfigure</strong>,
+tag it manually with <code translate="no" class="notranslate">routing.route_loader</code>.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The routes defined using service route loaders will be automatically
+cached by the framework. So whenever your service should load new routes,
+don't forget to clear the cache.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If your service is invokable, you don't need to specify the method to use.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="creating-a-custom-loader">
+    Creating a custom Loader
+    <a class="headerlink" href="#creating-a-custom-loader" title="Permalink to this headline">¶</a>
+</h2>
+<p>To load routes from some custom source (i.e. from something other than attributes,
+YAML or XML files), you need to create a custom route loader. This loader
+has to implement <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderInterface.php" class="reference external" title="Symfony\Component\Config\Loader\LoaderInterface" rel="external noopener noreferrer" target="_blank">LoaderInterface</a>.</p>
+<p>In most cases it is easier to extend from
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/Loader.php" class="reference external" title="Symfony\Component\Config\Loader\Loader" rel="external noopener noreferrer" target="_blank">Loader</a> instead of implementing
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderInterface.php" class="reference external" title="Symfony\Component\Config\Loader\LoaderInterface" rel="external noopener noreferrer" target="_blank">LoaderInterface</a> yourself.</p>
+<p>The sample loader below supports loading routing resources with a type of
+<code translate="no" class="notranslate">extra</code>. The type name should not clash with other loaders that might
+support the same type of resource. Make up any name specific to what
+you do. The resource name itself is not actually used in the example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Routing/ExtraLoader.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Routing</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Loader</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Route</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">RouteCollection</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExtraLoader</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Loader</span>
+</span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isLoaded</span> = <span class="hljs-keyword">false</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resource</span>, string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span> = null)</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">true</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>isLoaded) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> \RuntimeException(<span class="hljs-string">'Do not add the "extra" loader twice'</span>);
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span> = <span class="hljs-keyword">new</span> RouteCollection();
+
+        <span class="hljs-comment">// prepare a new route</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span> = <span class="hljs-string">'/extra/{parameter}'</span>;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaults</span> = [
+            <span class="hljs-string">'_controller'</span> =&gt; <span class="hljs-string">'App\Controller\ExtraController::extra'</span>,
+        ];
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requirements</span> = [
+            <span class="hljs-string">'parameter'</span> =&gt; <span class="hljs-string">'\d+'</span>,
+        ];
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>route</span> = <span class="hljs-keyword">new</span> Route(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaults</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requirements</span>);
+
+        <span class="hljs-comment">// add the new route to the route collection</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routeName</span> = <span class="hljs-string">'extraRoute'</span>;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routeName</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>route</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>isLoaded = <span class="hljs-keyword">true</span>;
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">supports</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resource</span>, string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span> = null)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'extra'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Make sure the controller you specify really exists. In this case you
+have to create an <code translate="no" class="notranslate">extra()</code> method in the <code translate="no" class="notranslate">ExtraController</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ExtraController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExtraController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">extra</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>parameter</span>)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>parameter</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now define a service for the <code translate="no" class="notranslate">ExtraLoader</code>:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-99a12d68af35b0039412987d4b5b229cffc81bd5" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-5c5641ee1648dec53df14603137e93bc17bfe79f" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-79ee1e0c94c72f1b2dd51968af468354fd7d2a78" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-99a12d68af35b0039412987d4b5b229cffc81bd5" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-string">App\Routing\ExtraLoader:</span>
+        <span class="hljs-attr">tags:</span> <span class="hljs-string">[routing.loader]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-5c5641ee1648dec53df14603137e93bc17bfe79f" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Routing\ExtraLoader"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"routing.loader"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-79ee1e0c94c72f1b2dd51968af468354fd7d2a78" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">ExtraLoader</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(ExtraLoader<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>tag(<span class="hljs-string">'routing.loader'</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Notice the tag <code translate="no" class="notranslate">routing.loader</code>. All services with this <em>tag</em> will be marked
+as potential route loaders and added as specialized route loaders to the
+<code translate="no" class="notranslate">routing.loader</code> <em>service</em>, which is an instance of
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Routing/DelegatingLoader.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Routing\DelegatingLoader" rel="external noopener noreferrer" target="_blank">DelegatingLoader</a>.</p>
+<div class="section">
+<h3 id="using-the-custom-loader">
+    Using the Custom Loader
+    <a class="headerlink" href="#using-the-custom-loader" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you did nothing else, your custom routing loader would <em>not</em> be called.
+What remains to do is adding a few lines to the routing configuration:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-593c41d92a10bfc0bab82cfb70c279f2b4df3dfb" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-b281bf73d0d08ee184c40dbd1a840be7557225e0" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-97fb89da26772f48364fb728486927a9499d0eeb" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-593c41d92a10bfc0bab82cfb70c279f2b4df3dfb" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/routes.yaml</span>
+<span class="hljs-attr">app_extra:</span>
+    <span class="hljs-attr">resource:</span> <span class="hljs-string">.</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">extra</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-b281bf73d0d08ee184c40dbd1a840be7557225e0" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/routes.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">routes</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/routing"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/routing
+        https://symfony.com/schema/routing/routing-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">import</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">"."</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"extra"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">routes</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-97fb89da26772f48364fb728486927a9499d0eeb" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/routes.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>\<span class="hljs-title">RoutingConfigurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(RoutingConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-string">'.'</span>, <span class="hljs-string">'extra'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>The important part here is the <code translate="no" class="notranslate">type</code> key. Its value should be <code translate="no" class="notranslate">extra</code> as
+this is the type which the <code translate="no" class="notranslate">ExtraLoader</code> supports and this will make sure
+its <code translate="no" class="notranslate">load()</code> method gets called. The <code translate="no" class="notranslate">resource</code> key is insignificant
+for the <code translate="no" class="notranslate">ExtraLoader</code>, so it is set to <code translate="no" class="notranslate">.</code> (a single dot).</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The routes defined using custom route loaders will be automatically
+cached by the framework. So whenever you change something in the loader
+class itself, don't forget to clear the cache.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="more-advanced-loaders">
+    More Advanced Loaders
+    <a class="headerlink" href="#more-advanced-loaders" title="Permalink to this headline">¶</a>
+</h2>
+<p>If your custom route loader extends from
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/Loader.php" class="reference external" title="Symfony\Component\Config\Loader\Loader" rel="external noopener noreferrer" target="_blank">Loader</a> as shown above, you
+can also make use of the provided resolver, an instance of
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderResolver.php" class="reference external" title="Symfony\Component\Config\Loader\LoaderResolver" rel="external noopener noreferrer" target="_blank">LoaderResolver</a>, to load secondary
+routing resources.</p>
+<p>You still need to implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderInterface.php#method_supports" class="reference external" title="Symfony\Component\Config\Loader\LoaderInterface::supports()" rel="external noopener noreferrer" target="_blank">supports()</a>
+and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderInterface.php#method_load" class="reference external" title="Symfony\Component\Config\Loader\LoaderInterface::load()" rel="external noopener noreferrer" target="_blank">load()</a>.
+Whenever you want to load another resource - for instance a YAML routing
+configuration file - you can call the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/Loader.php#method_import" class="reference external" title="Symfony\Component\Config\Loader\Loader::import()" rel="external noopener noreferrer" target="_blank">import()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Routing/AdvancedLoader.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Routing</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Loader</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">RouteCollection</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AdvancedLoader</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Loader</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resource</span>, string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span> = null)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span> = <span class="hljs-keyword">new</span> RouteCollection();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resource</span> = <span class="hljs-string">'@ThirdPartyBundle/Resources/config/routes.yaml'</span>;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span> = <span class="hljs-string">'yaml'</span>;
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>importedRoutes</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>import(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resource</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>addCollection(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>importedRoutes</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">supports</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resource</span>, string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span> = null)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'advanced_extra'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The resource name and type of the imported routing configuration can
+be anything that would normally be supported by the routing configuration
+loader (YAML, XML, PHP, attribute, etc.).</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>For more advanced uses, check out the <a href="https://symfony.com/doc/current/cmf/components/routing/chain.html" class="reference external">ChainRouter</a> provided by the Symfony
+CMF project. This router allows applications to use two or more routers
+combined, for example to keep using the default Symfony routing system when
+writing a custom router.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

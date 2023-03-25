@@ -1,0 +1,238 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-use-the-submit-function-to-handle-form-submissions">
+    How to Use the submit() Function to Handle Form Submissions
+    <a class="headerlink" href="#how-to-use-the-submit-function-to-handle-form-submissions" title="Permalink to this headline">¶</a>
+</h1>
+<p>The recommended way of <a href="../forms.html#processing-forms" class="reference internal">processing Symfony forms</a> is to
+use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormInterface.php#method_handleRequest" class="reference external" title="Symfony\Component\Form\FormInterface::handleRequest()" rel="external noopener noreferrer" target="_blank">handleRequest()</a> method
+to detect when the form has been submitted. However, you can also use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormInterface.php#method_submit" class="reference external" title="Symfony\Component\Form\FormInterface::submit()" rel="external noopener noreferrer" target="_blank">submit()</a> method to have better
+control over when exactly your form is submitted and what data is passed to it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">new</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>: <span class="hljs-title">Response</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span> = <span class="hljs-keyword">new</span> Task();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createForm(TaskType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>);
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>isMethod(<span class="hljs-string">'POST'</span>)) {
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>submit(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>request<span class="hljs-operator">-&gt;</span>get(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>getName()));
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isSubmitted() &amp;&amp; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isValid()) {
+            <span class="hljs-comment">// perform some action...</span>
+
+            <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>redirectToRoute(<span class="hljs-string">'task_success'</span>);
+        }
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'task/new.html.twig'</span>, [
+        <span class="hljs-string">'form'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>,
+    ]);
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The list of fields submitted with the <code translate="no" class="notranslate">submit()</code> method must be the same as
+the fields defined by the form class. Otherwise, you'll see a form validation error:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">new</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>: <span class="hljs-title">Response</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>isMethod(<span class="hljs-string">'POST'</span>)) {
+        <span class="hljs-comment">// '$json' represents payload data sent by React/Angular/Vue</span>
+        <span class="hljs-comment">// the merge of parameters is needed to submit all form fields</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>submit(array_merge(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>json</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>request<span class="hljs-operator">-&gt;</span>all()));
+
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Forms consisting of nested fields expect an array in
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormInterface.php#method_submit" class="reference external" title="Symfony\Component\Form\FormInterface::submit()" rel="external noopener noreferrer" target="_blank">submit()</a>. You can also submit
+individual fields by calling <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormInterface.php#method_submit" class="reference external" title="Symfony\Component\Form\FormInterface::submit()" rel="external noopener noreferrer" target="_blank">submit()</a>
+directly on the field:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'firstName'</span>)<span class="hljs-operator">-&gt;</span>submit(<span class="hljs-string">'Fabien'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>When submitting a form via a &quot;PATCH&quot; request, you may want to update only a few
+submitted fields. To achieve this, you may pass an optional second boolean
+argument to <code translate="no" class="notranslate">submit()</code>. Passing <code translate="no" class="notranslate">false</code> will remove any missing fields
+within the form object. Otherwise, the missing fields will be set to <code translate="no" class="notranslate">null</code>.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When the second parameter <code translate="no" class="notranslate">$clearMissing</code> is <code translate="no" class="notranslate">false</code>, like with the
+&quot;PATCH&quot; method, the validation will only apply to the submitted fields. If
+you need to validate all the underlying data, add the required fields
+manually so that they are validated:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// 'email' and 'username' are added manually to force their validation</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>submit(array_merge([<span class="hljs-string">'email'</span> =&gt; <span class="hljs-keyword">null</span>, <span class="hljs-string">'username'</span> =&gt; <span class="hljs-keyword">null</span>], <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>request<span class="hljs-operator">-&gt;</span>all()), <span class="hljs-keyword">false</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

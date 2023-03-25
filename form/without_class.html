@@ -1,0 +1,296 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-use-a-form-without-a-data-class">
+    How to Use a Form without a Data Class
+    <a class="headerlink" href="#how-to-use-a-form-without-a-data-class" title="Permalink to this headline">¶</a>
+</h1>
+<p>In most cases, a form is tied to an object, and the fields of the form get
+and store their data on the properties of that object. This is exactly what
+you've seen so far in this article with the <code translate="no" class="notranslate">Task</code> class.</p>
+<p>But sometimes, you may want to use a form without a class, and get back an
+array of the submitted data. The <code translate="no" class="notranslate">getData()</code> method allows you to do
+exactly that:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ContactController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ContactController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">contact</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaultData</span> = [<span class="hljs-string">'message'</span> =&gt; <span class="hljs-string">'Type your message here'</span>];
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createFormBuilder(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaultData</span>)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'name'</span>, TextType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'email'</span>, EmailType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'message'</span>, TextareaType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'send'</span>, SubmitType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>getForm();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>handleRequest(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isSubmitted() &amp;&amp; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isValid()) {
+            <span class="hljs-comment">// data is an array with "name", "email", and "message" keys</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>data</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>getData();
+        }
+
+        <span class="hljs-comment">// ... render the form</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>By default, a form actually assumes that you want to work with arrays of
+data, instead of an object. There are exactly two ways that you can change
+this behavior and tie the form to an object instead:</p>
+<ol class="arabic">
+    <li>Pass an object when creating the form (as the first argument to <code translate="no" class="notranslate">createFormBuilder()</code>
+or the second argument to <code translate="no" class="notranslate">createForm()</code>);</li>
+<li>Declare the <code translate="no" class="notranslate">data_class</code> option on your form.</li>
+</ol>
+<p>If you <em>don't</em> do either of these, then the form will return the data as
+an array. In this example, since <code translate="no" class="notranslate">$defaultData</code> is not an object (and
+no <code translate="no" class="notranslate">data_class</code> option is set), <code translate="no" class="notranslate">$form-&gt;getData()</code> ultimately returns
+an array.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can also access POST values (in this case &quot;name&quot;) directly through
+the request object, like so:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>request<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'name'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Be advised, however, that in most cases using the <code translate="no" class="notranslate">getData()</code> method is
+a better choice, since it returns the data (usually an object) after
+it's been transformed by the Form component.</p>
+</div>
+<div class="section">
+<h2 id="adding-validation">
+    Adding Validation
+    <a class="headerlink" href="#adding-validation" title="Permalink to this headline">¶</a>
+</h2>
+<p>The only missing piece is validation. Usually, when you call <code translate="no" class="notranslate">$form-&gt;handleRequest($request)</code>,
+the object is validated by reading the constraints that you applied to that
+class. If your form is mapped to an object (i.e. you're using the <code translate="no" class="notranslate">data_class</code>
+option or passing an object to your form), this is almost always the approach
+you want to use. See <a href="../validation.html" class="reference internal">Validation</a> for more details.</p>
+<span id="form-option-constraints"></span>
+<p>But if the form is not mapped to an object and you instead want to retrieve an
+array of your submitted data, how can you add constraints to the data of
+your form?</p>
+<p>The answer is to set up the constraints yourself, and attach them to the individual
+fields. The overall approach is covered a bit more in <a href="../validation/raw_values.html" class="reference internal">this validation article</a>,
+but here's a short example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormBuilderInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span>\<span class="hljs-title">Length</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span>\<span class="hljs-title">NotBlank</span>;
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+        <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'firstName'</span>, TextType<span class="hljs-operator">::</span>class, [
+            <span class="hljs-string">'constraints'</span> =&gt; <span class="hljs-keyword">new</span> Length([<span class="hljs-string">'min'</span> =&gt; <span class="hljs-number">3</span>]),
+        ])
+        <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'lastName'</span>, TextType<span class="hljs-operator">::</span>class, [
+            <span class="hljs-string">'constraints'</span> =&gt; [
+                <span class="hljs-keyword">new</span> NotBlank(),
+                <span class="hljs-keyword">new</span> Length([<span class="hljs-string">'min'</span> =&gt; <span class="hljs-number">3</span>]),
+            ],
+        ])
+    ;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you are using validation groups, you need to either reference the
+<code translate="no" class="notranslate">Default</code> group when creating the form, or set the correct group on
+the constraint you are adding:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">new</span> NotBlank([<span class="hljs-string">'groups'</span> =&gt; [<span class="hljs-string">'create'</span>, <span class="hljs-string">'update'</span>]]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If the form is not mapped to an object, every object in your array of
+submitted data is validated using the <code translate="no" class="notranslate">Symfony<wbr>\Component<wbr>\Validator<wbr>\Constraints<wbr>\Valid</code>
+constraint, unless you <a href="disabling_validation.html" class="reference internal">disable validation</a>.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When a form is only partially submitted (for example, in an HTTP PATCH
+request), only the constraints from the submitted form fields will be
+evaluated.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

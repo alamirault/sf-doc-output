@@ -1,0 +1,244 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="adapters-for-interoperability-between-psr-6-and-psr-16-cache">
+    Adapters For Interoperability between PSR-6 and PSR-16 Cache
+    <a class="headerlink" href="#adapters-for-interoperability-between-psr-6-and-psr-16-cache" title="Permalink to this headline">¶</a>
+</h1>
+<p>Sometimes, you may have a Cache object that implements the <a href="https://www.php-fig.org/psr/psr-16/" class="reference external" rel="external noopener noreferrer" target="_blank">PSR-16</a>
+standard, but need to pass it to an object that expects a <a href="../../components/cache.html#cache-component-psr6-caching" class="reference internal">PSR-6</a>
+cache adapter. Or, you might have the opposite situation. The cache component contains
+two classes for bidirectional interoperability between PSR-6 and PSR-16 caches.</p>
+<div class="section">
+<h2 id="using-a-psr-16-cache-object-as-a-psr-6-cache">
+    Using a PSR-16 Cache Object as a PSR-6 Cache
+    <a class="headerlink" href="#using-a-psr-16-cache-object-as-a-psr-6-cache" title="Permalink to this headline">¶</a>
+</h2>
+<p>Suppose you want to work with a class that requires a PSR-6 Cache pool object. For
+example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">CacheItemPoolInterface</span>;
+
+<span class="hljs-comment">// just a made-up class for the example</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GitHubApiClient</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-comment">// this requires a PSR-6 cache object</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(CacheItemPoolInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cachePool</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>But, you already have a PSR-16 cache object, and you'd like to pass this to the class
+instead. No problem! The Cache component provides the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/Psr16Adapter.php" class="reference external" title="Symfony\Component\Cache\Adapter\Psr16Adapter" rel="external noopener noreferrer" target="_blank">Psr16Adapter</a> class for exactly
+this use-case:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">Psr16Adapter</span>;
+
+<span class="hljs-comment">// $psr16Cache is the PSR-16 object that you want to use as a PSR-6 one</span>
+
+<span class="hljs-comment">// a PSR-6 cache that uses your cache internally!</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr6Cache</span> = <span class="hljs-keyword">new</span> Psr16Adapter(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr16Cache</span>);
+
+<span class="hljs-comment">// now use this wherever you want</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>githubApiClient</span> = <span class="hljs-keyword">new</span> GitHubApiClient(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr6Cache</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="using-a-psr-6-cache-object-as-a-psr-16-cache">
+    Using a PSR-6 Cache Object as a PSR-16 Cache
+    <a class="headerlink" href="#using-a-psr-6-cache-object-as-a-psr-16-cache" title="Permalink to this headline">¶</a>
+</h2>
+<p>Suppose you want to work with a class that requires a PSR-16 Cache object. For
+example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">SimpleCache</span>\<span class="hljs-title">CacheInterface</span>;
+
+<span class="hljs-comment">// just a made-up class for the example</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GitHubApiClient</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-comment">// this requires a PSR-16 cache object</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(CacheInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>But, you already have a PSR-6 cache pool object, and you'd like to pass this to
+the class instead. No problem! The Cache component provides the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Psr16Cache.php" class="reference external" title="Symfony\Component\Cache\Psr16Cache" rel="external noopener noreferrer" target="_blank">Psr16Cache</a> class for exactly
+this use-case:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">FilesystemAdapter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Psr16Cache</span>;
+
+<span class="hljs-comment">// the PSR-6 cache object that you want to use</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr6Cache</span> = <span class="hljs-keyword">new</span> FilesystemAdapter();
+
+<span class="hljs-comment">// a PSR-16 cache that uses your cache internally!</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr16Cache</span> = <span class="hljs-keyword">new</span> Psr16Cache(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr6Cache</span>);
+
+<span class="hljs-comment">// now use this wherever you want</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>githubApiClient</span> = <span class="hljs-keyword">new</span> GitHubApiClient(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>psr16Cache</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

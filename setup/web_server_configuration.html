@@ -1,0 +1,792 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="configuring-a-web-server">
+    Configuring a Web Server
+    <a class="headerlink" href="#configuring-a-web-server" title="Permalink to this headline">¶</a>
+</h1>
+<p>The preferred way to develop your Symfony application is to use
+<a href="symfony_server.html" class="reference internal">Symfony Local Web Server</a>.</p>
+<p>However, when running the application in the production environment, you'll need
+to use a fully-featured web server. This article describes several ways to use
+Symfony with Apache or Nginx.</p>
+<p>When using Apache, you can configure PHP as an
+<a href="web_server_configuration.html#web-server-apache-mod-php" class="reference internal">Apache module</a> or with FastCGI using
+<a href="web_server_configuration.html#web-server-apache-fpm" class="reference internal">PHP FPM</a>. FastCGI also is the preferred way
+to use PHP <a href="web_server_configuration.html#web-server-nginx" class="reference internal">with Nginx</a>.</p>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span>The <code translate="no" class="notranslate">public/</code> directory</span></p><p>The <code translate="no" class="notranslate">public/</code> directory is the home of all of your application's public and
+static files, including images, stylesheets and JavaScript files. It is
+also where the front controller (<code translate="no" class="notranslate">index.php</code>) lives.</p>
+<p>The public directory serves as the document root when configuring your
+web server. In the examples below, the <code translate="no" class="notranslate">public/</code> directory will be the
+document root. This directory is <code translate="no" class="notranslate">/var/www/project/public/</code>.</p>
+<p>If your hosting provider requires you to change the <code translate="no" class="notranslate">public/</code> directory to
+another location (e.g. <code translate="no" class="notranslate">public_html/</code>) make sure you
+<a href="../configuration/override_dir_structure.html#override-web-dir" class="reference internal">override the location of the public/ directory</a>.</p>
+</div></div>
+<span id="web-server-nginx"></span>
+<div class="section">
+<h2 id="nginx">
+    Nginx
+    <a class="headerlink" href="#nginx" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <strong>minimum configuration</strong> to get your application running under Nginx is:</p>
+<div translate="no" class="highlight-nginx notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs nginx"><span class="hljs-section">server</span> {
+    <span class="hljs-attribute">server_name</span> domain.tld www.domain.tld;
+    <span class="hljs-attribute">root</span> /var/www/project/public;
+
+    <span class="hljs-attribute">location</span> / {
+        <span class="hljs-comment"># try to serve file directly, fallback to index.php</span>
+        <span class="hljs-attribute">try_files</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uri</span> /index.php<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>is_args</span><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>args</span>;
+    }
+
+    <span class="hljs-comment"># optionally disable falling back to PHP script for the asset directories;</span>
+    <span class="hljs-comment"># nginx will return a 404 error when files are not found instead of passing the</span>
+    <span class="hljs-comment"># request to Symfony (improves performance but Symfony's 404 page is not displayed)</span>
+    <span class="hljs-comment"># location /bundles {</span>
+    <span class="hljs-comment">#     try_files $uri =404;</span>
+    <span class="hljs-comment"># }</span>
+
+    <span class="hljs-attribute">location</span> <span class="hljs-regexp">~ ^/index\.php(/|$)</span> {
+        <span class="hljs-attribute">fastcgi_pass</span> unix:/var/run/php/php-fpm.sock;
+        <span class="hljs-attribute">fastcgi_split_path_info</span><span class="hljs-regexp"> ^(.+\.php)(/.*)$</span>;
+        <span class="hljs-attribute">include</span> fastcgi_params;
+
+        <span class="hljs-comment"># optionally set the value of the environment variables used in the application</span>
+        <span class="hljs-comment"># fastcgi_param APP_ENV prod;</span>
+        <span class="hljs-comment"># fastcgi_param APP_SECRET &lt;app-secret-id&gt;;</span>
+        <span class="hljs-comment"># fastcgi_param DATABASE_URL "mysql://db_user:db_pass@host:3306/db_name";</span>
+
+        <span class="hljs-comment"># When you are using symlinks to link the document root to the</span>
+        <span class="hljs-comment"># current version of your application, you should pass the real</span>
+        <span class="hljs-comment"># application path instead of the path to the symlink to PHP</span>
+        <span class="hljs-comment"># FPM.</span>
+        <span class="hljs-comment"># Otherwise, PHP's OPcache may not properly detect changes to</span>
+        <span class="hljs-comment"># your PHP files (see https://github.com/zendtech/ZendOptimizerPlus/issues/126</span>
+        <span class="hljs-comment"># for more information).</span>
+        <span class="hljs-comment"># Caveat: When PHP-FPM is hosted on a different machine from nginx</span>
+        <span class="hljs-comment">#         $realpath_root may not resolve as you expect! In this case try using</span>
+        <span class="hljs-comment">#         $document_root instead.</span>
+        <span class="hljs-attribute">fastcgi_param</span> SCRIPT_FILENAME <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>realpath_root</span><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fastcgi_script_name</span>;
+        <span class="hljs-attribute">fastcgi_param</span> DOCUMENT_ROOT <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>realpath_root</span>;
+        <span class="hljs-comment"># Prevents URIs that include the front controller. This will 404:</span>
+        <span class="hljs-comment"># http://domain.tld/index.php/some-path</span>
+        <span class="hljs-comment"># Remove the internal directive to allow URIs like this</span>
+        internal;
+    }
+
+    <span class="hljs-comment"># return 404 for all other php files not matching the front controller</span>
+    <span class="hljs-comment"># this prevents access to other php files you don't want to be accessible.</span>
+    <span class="hljs-attribute">location</span> <span class="hljs-regexp">~ \.php$</span> {
+        <span class="hljs-attribute">return</span> <span class="hljs-number">404</span>;
+    }
+
+    <span class="hljs-attribute">error_log</span> /var/log/nginx/project_error.log;
+    <span class="hljs-attribute">access_log</span> /var/log/nginx/project_access.log;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you use NGINX Unit, check out the official article about
+<a href="https://unit.nginx.org/howto/symfony/" class="reference external" rel="external noopener noreferrer" target="_blank">How to run Symfony applications using NGINX Unit</a>.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Depending on your PHP-FPM config, the <code translate="no" class="notranslate">fastcgi_pass</code> can also be
+<code translate="no" class="notranslate">fastcgi_pass 127.0.0.1:9000</code>.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>This executes <strong>only</strong> <code translate="no" class="notranslate">index.php</code> in the public directory. All other files
+ending in &quot;.php&quot; will be denied.</p>
+<p>If you have other PHP files in your public directory that need to be executed,
+be sure to include them in the <code translate="no" class="notranslate">location</code> block above.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>After you deploy to production, make sure that you <strong>cannot</strong> access the <code translate="no" class="notranslate">index.php</code>
+script (i.e. <code translate="no" class="notranslate">http://example.com/index.php</code>).</p>
+</div>
+<p>For advanced Nginx configuration options, read the official <a href="https://www.nginx.com/resources/wiki/start/topics/recipes/symfony/" class="reference external" rel="external noopener noreferrer" target="_blank">Nginx documentation</a>.</p>
+<span id="web-server-apache-mod-php"></span>
+</div>
+<div class="section">
+<h2 id="adding-rewrite-rules-for-apache">
+    Adding Rewrite Rules for Apache
+    <a class="headerlink" href="#adding-rewrite-rules-for-apache" title="Permalink to this headline">¶</a>
+</h2>
+<p>The easiest way is to install the <code translate="no" class="notranslate">apache</code> <a href="../setup.html#symfony-packs" class="reference internal">Symfony pack</a>
+by executing the following command:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/apache-pack</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This pack installs a <code translate="no" class="notranslate">.htaccess</code> file in the <code translate="no" class="notranslate">public/</code> directory that contains
+the rewrite rules needed to serve the Symfony application.</p>
+<p>In production servers, you should move the <code translate="no" class="notranslate">.htaccess</code> rules into the main
+Apache configuration file to improve performance. To do so, copy the
+<code translate="no" class="notranslate">.htaccess</code> contents inside the <code translate="no" class="notranslate">&lt;Directory&gt;</code> configuration associated to
+the Symfony application <code translate="no" class="notranslate">public/</code> directory (and replace <code translate="no" class="notranslate">AllowOverride All</code>
+by <code translate="no" class="notranslate">AllowOverride None</code>):</p>
+<div translate="no" class="highlight-apache notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs apache"><span class="hljs-section">&lt;VirtualHost *:80&gt;</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attribute"><span class="hljs-nomarkup">DocumentRoot</span></span> /var/www/project/public
+
+    <span class="hljs-section">&lt;Directory /var/www/project/public&gt;</span>
+        <span class="hljs-attribute">AllowOverride</span> None
+
+        <span class="hljs-comment"># Copy .htaccess contents here</span>
+    <span class="hljs-section">&lt;/Directory&gt;</span>
+<span class="hljs-section">&lt;/VirtualHost&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="apache-with-mod-php-php-cgi">
+    Apache with mod_php/PHP-CGI
+    <a class="headerlink" href="#apache-with-mod-php-php-cgi" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <strong>minimum configuration</strong> to get your application running under Apache is:</p>
+<div translate="no" class="highlight-apache notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs apache"><span class="hljs-section">&lt;VirtualHost *:80&gt;</span>
+    <span class="hljs-attribute"><span class="hljs-nomarkup">ServerName</span></span> domain.tld
+    <span class="hljs-attribute">ServerAlias</span> www.domain.tld
+
+    <span class="hljs-attribute"><span class="hljs-nomarkup">DocumentRoot</span></span> /var/www/project/public
+    <span class="hljs-section">&lt;Directory /var/www/project/public&gt;</span>
+        <span class="hljs-attribute">AllowOverride</span> <span class="hljs-literal">All</span>
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Order</span></span> Allow,Deny
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Allow</span></span> from <span class="hljs-literal">All</span>
+    <span class="hljs-section">&lt;/Directory&gt;</span>
+
+    <span class="hljs-comment"># uncomment the following lines if you install assets as symlinks</span>
+    <span class="hljs-comment"># or run into problems when compiling LESS/Sass/CoffeeScript assets</span>
+    <span class="hljs-comment"># &lt;Directory /var/www/project&gt;</span>
+    <span class="hljs-comment">#     Options FollowSymlinks</span>
+    <span class="hljs-comment"># &lt;/Directory&gt;</span>
+
+    <span class="hljs-attribute">ErrorLog</span> /var/log/apache2/project_error.log
+    <span class="hljs-attribute">CustomLog</span> /var/log/apache2/project_access.log combined
+<span class="hljs-section">&lt;/VirtualHost&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If your system supports the <code translate="no" class="notranslate">APACHE_LOG_DIR</code> variable, you may want
+to use <code translate="no" class="notranslate">${APACHE_LOG_DIR}/</code> instead of hardcoding <code translate="no" class="notranslate">/var/log/apache2/</code>.</p>
+</div>
+<p>Use the following <strong>optimized configuration</strong> to disable <code translate="no" class="notranslate">.htaccess</code> support
+and increase web server performance:</p>
+<div translate="no" class="highlight-apache notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs apache"><span class="hljs-section">&lt;VirtualHost *:80&gt;</span>
+    <span class="hljs-attribute"><span class="hljs-nomarkup">ServerName</span></span> domain.tld
+    <span class="hljs-attribute">ServerAlias</span> www.domain.tld
+
+    <span class="hljs-attribute"><span class="hljs-nomarkup">DocumentRoot</span></span> /var/www/project/public
+    <span class="hljs-attribute">DirectoryIndex</span> /index.php
+
+    <span class="hljs-section">&lt;Directory /var/www/project/public&gt;</span>
+        <span class="hljs-attribute">AllowOverride</span> None
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Order</span></span> Allow,Deny
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Allow</span></span> from <span class="hljs-literal">All</span>
+
+        <span class="hljs-attribute">FallbackResource</span> /index.php
+    <span class="hljs-section">&lt;/Directory&gt;</span>
+
+    <span class="hljs-comment"># uncomment the following lines if you install assets as symlinks</span>
+    <span class="hljs-comment"># or run into problems when compiling LESS/Sass/CoffeeScript assets</span>
+    <span class="hljs-comment"># &lt;Directory /var/www/project&gt;</span>
+    <span class="hljs-comment">#     Options FollowSymlinks</span>
+    <span class="hljs-comment"># &lt;/Directory&gt;</span>
+
+    <span class="hljs-comment"># optionally disable the fallback resource for the asset directories</span>
+    <span class="hljs-comment"># which will allow Apache to return a 404 error when files are</span>
+    <span class="hljs-comment"># not found instead of passing the request to Symfony</span>
+    <span class="hljs-section">&lt;Directory /var/www/project/public/bundles&gt;</span>
+        <span class="hljs-attribute">DirectoryIndex</span> disabled
+        <span class="hljs-attribute">FallbackResource</span> disabled
+    <span class="hljs-section">&lt;/Directory&gt;</span>
+    <span class="hljs-attribute">ErrorLog</span> /var/log/apache2/project_error.log
+    <span class="hljs-attribute">CustomLog</span> /var/log/apache2/project_access.log combined
+
+    <span class="hljs-comment"># optionally set the value of the environment variables used in the application</span>
+    <span class="hljs-comment">#SetEnv APP_ENV prod</span>
+    <span class="hljs-comment">#SetEnv APP_SECRET &lt;app-secret-id&gt;</span>
+    <span class="hljs-comment">#SetEnv DATABASE_URL "mysql://db_user:db_pass@host:3306/db_name"</span>
+<span class="hljs-section">&lt;/VirtualHost&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Use <code translate="no" class="notranslate">FallbackResource</code> on Apache 2.4.25 or higher, due to a bug which was
+fixed on that release causing the root <code translate="no" class="notranslate">/</code> to hang.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you are using <strong>php-cgi</strong>, Apache does not pass HTTP basic username and
+password to PHP by default. To work around this limitation, you should use
+the following configuration snippet:</p>
+<div translate="no" class="highlight-apache notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs apache"><span class="hljs-attribute"><span class="hljs-nomarkup">RewriteRule</span></span> .* -<span class="hljs-meta"> [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="using-mod-php-php-cgi-with-apache-2-4">
+    Using mod_php/PHP-CGI with Apache 2.4
+    <a class="headerlink" href="#using-mod-php-php-cgi-with-apache-2-4" title="Permalink to this headline">¶</a>
+</h3>
+<p>In Apache 2.4, <code translate="no" class="notranslate">Order Allow,Deny</code> has been replaced by <code translate="no" class="notranslate">Require all granted</code>.
+Hence, you need to modify your <code translate="no" class="notranslate">Directory</code> permission settings as follows:</p>
+<div translate="no" class="highlight-apache notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs apache"><span class="hljs-section">&lt;Directory /var/www/project/public&gt;</span>
+    <span class="hljs-attribute">Require</span> <span class="hljs-literal">all</span> granted
+    <span class="hljs-comment"># ...</span>
+<span class="hljs-section">&lt;/Directory&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>For advanced Apache configuration options, read the official <a href="https://httpd.apache.org/docs/" class="reference external" rel="external noopener noreferrer" target="_blank">Apache documentation</a>.</p>
+<span id="web-server-apache-fpm"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="apache-with-php-fpm">
+    Apache with PHP-FPM
+    <a class="headerlink" href="#apache-with-php-fpm" title="Permalink to this headline">¶</a>
+</h2>
+<p>To make use of PHP-FPM with Apache, you first have to ensure that you have
+the FastCGI process manager <code translate="no" class="notranslate">php-fpm</code> binary and Apache's FastCGI module
+installed (for example, on a Debian based system you have to install the
+<code translate="no" class="notranslate">libapache2-mod-fastcgi</code> and <code translate="no" class="notranslate">php&lt;version&gt;-fpm</code> packages).</p>
+<p>PHP-FPM uses so-called <em>pools</em> to handle incoming FastCGI requests. You can
+configure an arbitrary number of pools in the FPM configuration. In a pool
+you configure either a TCP socket (IP and port) or a Unix domain socket to
+listen on. Each pool can also be run under a different UID and GID:</p>
+<div translate="no" class="highlight-ini notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs ini"><span class="hljs-comment">; a pool called www</span>
+<span class="hljs-section">[www]</span>
+<span class="hljs-attr">user</span> = www-data
+<span class="hljs-attr">group</span> = www-data
+
+<span class="hljs-comment">; use a unix domain socket</span>
+<span class="hljs-attr">listen</span> = /var/run/php/php-fpm.sock
+
+<span class="hljs-comment">; or listen on a TCP socket</span>
+<span class="hljs-attr">listen</span> = <span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>:<span class="hljs-number">9000</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="using-mod-proxy-fcgi-with-apache-2-4">
+    Using mod_proxy_fcgi with Apache 2.4
+    <a class="headerlink" href="#using-mod-proxy-fcgi-with-apache-2-4" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you are running Apache 2.4, you can use <code translate="no" class="notranslate">mod_proxy_fcgi</code> to pass incoming
+requests to PHP-FPM. Configure PHP-FPM to listen on a TCP or Unix socket, enable
+<code translate="no" class="notranslate">mod_proxy</code> and <code translate="no" class="notranslate">mod_proxy_fcgi</code> in your Apache configuration, and use the
+<code translate="no" class="notranslate">SetHandler</code> directive to pass requests for PHP files to PHP FPM:</p>
+<div translate="no" class="highlight-apache notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs apache"><span class="hljs-section">&lt;VirtualHost *:80&gt;</span>
+    <span class="hljs-attribute"><span class="hljs-nomarkup">ServerName</span></span> domain.tld
+    <span class="hljs-attribute">ServerAlias</span> www.domain.tld
+
+    <span class="hljs-comment"># Uncomment the following line to force Apache to pass the Authorization</span>
+    <span class="hljs-comment"># header to PHP: required for "basic_auth" under PHP-FPM and FastCGI</span>
+    <span class="hljs-comment">#</span>
+    <span class="hljs-comment"># SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1</span>
+
+    <span class="hljs-comment"># For Apache 2.4.9 or higher</span>
+    <span class="hljs-comment"># Using SetHandler avoids issues with using ProxyPassMatch in combination</span>
+    <span class="hljs-comment"># with mod_rewrite or mod_autoindex</span>
+    <span class="hljs-section">&lt;FilesMatch \.php$&gt;</span>
+        <span class="hljs-attribute"><span class="hljs-nomarkup">SetHandler</span></span> proxy:fcgi://127.0.0.1:9000
+        <span class="hljs-comment"># for Unix sockets, Apache 2.4.10 or higher</span>
+        <span class="hljs-comment"># SetHandler proxy:unix:/path/to/fpm.sock|fcgi://dummy</span>
+    <span class="hljs-section">&lt;/FilesMatch&gt;</span>
+
+    <span class="hljs-comment"># If you use Apache version below 2.4.9 you must consider update or use this instead</span>
+    <span class="hljs-comment"># ProxyPassMatch ^/(.*\.php(/.*)?)$ fcgi://127.0.0.1:9000/var/www/project/public/$1</span>
+
+    <span class="hljs-comment"># If you run your Symfony application on a subpath of your document root, the</span>
+    <span class="hljs-comment"># regular expression must be changed accordingly:</span>
+    <span class="hljs-comment"># ProxyPassMatch ^/path-to-app/(.*\.php(/.*)?)$ fcgi://127.0.0.1:9000/var/www/project/public/$1</span>
+
+    <span class="hljs-attribute"><span class="hljs-nomarkup">DocumentRoot</span></span> /var/www/project/public
+    <span class="hljs-section">&lt;Directory /var/www/project/public&gt;</span>
+        <span class="hljs-comment"># enable the .htaccess rewrites</span>
+        <span class="hljs-attribute">AllowOverride</span> <span class="hljs-literal">All</span>
+        <span class="hljs-attribute">Require</span> <span class="hljs-literal">all</span> granted
+    <span class="hljs-section">&lt;/Directory&gt;</span>
+
+    <span class="hljs-comment"># uncomment the following lines if you install assets as symlinks</span>
+    <span class="hljs-comment"># or run into problems when compiling LESS/Sass/CoffeeScript assets</span>
+    <span class="hljs-comment"># &lt;Directory /var/www/project&gt;</span>
+    <span class="hljs-comment">#     Options FollowSymlinks</span>
+    <span class="hljs-comment"># &lt;/Directory&gt;</span>
+
+    <span class="hljs-attribute">ErrorLog</span> /var/log/apache2/project_error.log
+    <span class="hljs-attribute">CustomLog</span> /var/log/apache2/project_access.log combined
+<span class="hljs-section">&lt;/VirtualHost&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="php-fpm-with-apache-2-2">
+    PHP-FPM with Apache 2.2
+    <a class="headerlink" href="#php-fpm-with-apache-2-2" title="Permalink to this headline">¶</a>
+</h3>
+<p>On Apache 2.2 or lower, you cannot use <code translate="no" class="notranslate">mod_proxy_fcgi</code>. You have to use
+the <a href="https://docs.oracle.com/cd/B31017_01/web.1013/q20204/mod_fastcgi.html#FastCgiExternalServer" class="reference external" rel="external noopener noreferrer" target="_blank">FastCgiExternalServer</a> directive instead. Therefore, your Apache configuration
+should look something like this:</p>
+<div translate="no" class="highlight-apache notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs apache"><span class="hljs-section">&lt;VirtualHost *:80&gt;</span>
+    <span class="hljs-attribute"><span class="hljs-nomarkup">ServerName</span></span> domain.tld
+    <span class="hljs-attribute">ServerAlias</span> www.domain.tld
+
+    <span class="hljs-attribute">AddHandler</span> php7-fcgi .php
+    <span class="hljs-attribute">Action</span> php7-fcgi /php7-fcgi
+    <span class="hljs-attribute">Alias</span> /php7-fcgi /usr/lib/cgi-bin/php7-fcgi
+    <span class="hljs-attribute">FastCgiExternalServer</span> /usr/lib/cgi-bin/php7-fcgi -host 127.0.0.1:9000 -pass-header Authorization
+
+    <span class="hljs-attribute"><span class="hljs-nomarkup">DocumentRoot</span></span> /var/www/project/public
+    <span class="hljs-section">&lt;Directory /var/www/project/public&gt;</span>
+        <span class="hljs-comment"># enable the .htaccess rewrites</span>
+        <span class="hljs-attribute">AllowOverride</span> <span class="hljs-literal">All</span>
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Order</span></span> Allow,Deny
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Allow</span></span> from <span class="hljs-literal">all</span>
+    <span class="hljs-section">&lt;/Directory&gt;</span>
+
+    <span class="hljs-comment"># uncomment the following lines if you install assets as symlinks</span>
+    <span class="hljs-comment"># or run into problems when compiling LESS/Sass/CoffeeScript assets</span>
+    <span class="hljs-comment"># &lt;Directory /var/www/project&gt;</span>
+    <span class="hljs-comment">#     Options FollowSymlinks</span>
+    <span class="hljs-comment"># &lt;/Directory&gt;</span>
+
+    <span class="hljs-attribute">ErrorLog</span> /var/log/apache2/project_error.log
+    <span class="hljs-attribute">CustomLog</span> /var/log/apache2/project_access.log combined
+<span class="hljs-section">&lt;/VirtualHost&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you prefer to use a Unix socket, you have to use the <code translate="no" class="notranslate">-socket</code> option
+instead:</p>
+<div translate="no" class="highlight-apache notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs apache"><span class="hljs-attribute">FastCgiExternalServer</span> /usr/lib/cgi-bin/php7-fcgi -socket /var/run/php/php-fpm.sock -pass-header Authorization</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

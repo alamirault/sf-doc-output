@@ -1,0 +1,854 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-upload-files">
+    How to Upload Files
+    <a class="headerlink" href="#how-to-upload-files" title="Permalink to this headline">¶</a>
+</h1>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Instead of handling file uploading yourself, you may consider using the
+<a href="https://github.com/dustin10/VichUploaderBundle" class="reference external" rel="external noopener noreferrer" target="_blank">VichUploaderBundle</a> community bundle. This bundle provides all the common
+operations (such as file renaming, saving and deleting) and it's tightly
+integrated with Doctrine ORM, MongoDB ODM, PHPCR ODM and Propel.</p>
+</div>
+<p>Imagine that you have a <code translate="no" class="notranslate">Product</code> entity in your application and you want to
+add a PDF brochure for each product. To do so, add a new property called
+<code translate="no" class="notranslate">brochureFilename</code> in the <code translate="no" class="notranslate">Product</code> entity:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Entity/Product.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Mapping</span> <span class="hljs-title">as</span> <span class="hljs-title">ORM</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Product</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-comment">#[ORM\Column(type: 'string')]</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>brochureFilename</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getBrochureFilename</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>brochureFilename;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setBrochureFilename</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>brochureFilename</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>brochureFilename = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>brochureFilename</span>;
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Note that the type of the <code translate="no" class="notranslate">brochureFilename</code> column is <code translate="no" class="notranslate">string</code> instead of
+<code translate="no" class="notranslate">binary</code> or <code translate="no" class="notranslate">blob</code> because it only stores the PDF file name instead of the
+file contents.</p>
+<p>The next step is to add a new field to the form that manages the <code translate="no" class="notranslate">Product</code>
+entity. This must be a <code translate="no" class="notranslate">FileType</code> field so the browsers can display the file
+upload widget. The trick to make it work is to add the form field as &quot;unmapped&quot;,
+so Symfony doesn't try to get/set its value from the related entity:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/ProductType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">FileType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormBuilderInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span>\<span class="hljs-title">File</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-comment">// ...</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'brochure'</span>, FileType<span class="hljs-operator">::</span>class, [
+                <span class="hljs-string">'label'</span> =&gt; <span class="hljs-string">'Brochure (PDF file)'</span>,
+
+                <span class="hljs-comment">// unmapped means that this field is not associated to any entity property</span>
+                <span class="hljs-string">'mapped'</span> =&gt; <span class="hljs-keyword">false</span>,
+
+                <span class="hljs-comment">// make it optional so you don't have to re-upload the PDF file</span>
+                <span class="hljs-comment">// every time you edit the Product details</span>
+                <span class="hljs-string">'required'</span> =&gt; <span class="hljs-keyword">false</span>,
+
+                <span class="hljs-comment">// unmapped fields can't define their validation using annotations</span>
+                <span class="hljs-comment">// in the associated entity, so you can use the PHP constraint classes</span>
+                <span class="hljs-string">'constraints'</span> =&gt; [
+                    <span class="hljs-keyword">new</span> File([
+                        <span class="hljs-string">'maxSize'</span> =&gt; <span class="hljs-string">'1024k'</span>,
+                        <span class="hljs-string">'mimeTypes'</span> =&gt; [
+                            <span class="hljs-string">'application/pdf'</span>,
+                            <span class="hljs-string">'application/x-pdf'</span>,
+                        ],
+                        <span class="hljs-string">'mimeTypesMessage'</span> =&gt; <span class="hljs-string">'Please upload a valid PDF document'</span>,
+                    ])
+                ],
+            ])
+            <span class="hljs-comment">// ...</span>
+        ;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-string">'data_class'</span> =&gt; Product<span class="hljs-operator">::</span>class,
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, update the template that renders the form to display the new <code translate="no" class="notranslate">brochure</code>
+field (the exact template code to add depends on the method used by your application
+to <a href="../form/form_customization.html" class="reference internal">customize form rendering</a>):</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/product/new.html.twig #}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Adding a new product<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+
+</span><span class="hljs-template-variable">{{ form_start(form) }}</span><span class="xml">
+    </span><span class="hljs-comment">{# ... #}</span><span class="xml">
+
+    </span><span class="hljs-template-variable">{{ form_row(form.brochure) }}</span><span class="xml">
+</span><span class="hljs-template-variable">{{ form_end(form) }}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Finally, you need to update the code of the controller that handles the form:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ProductController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">ProductType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">File</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">FileException</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">File</span>\<span class="hljs-title">UploadedFile</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">Slugger</span>\<span class="hljs-title">SluggerInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/product/new', name: 'app_product_new')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">new</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, SluggerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span> = <span class="hljs-keyword">new</span> Product();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createForm(ProductType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>handleRequest(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isSubmitted() &amp;&amp; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isValid()) {
+            <span class="hljs-comment">/** <span class="hljs-doctag">@var</span> UploadedFile $brochureFile */</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>brochureFile</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'brochure'</span>)<span class="hljs-operator">-&gt;</span>getData();
+
+            <span class="hljs-comment">// this condition is needed because the 'brochure' field is not required</span>
+            <span class="hljs-comment">// so the PDF file must be processed only when a file is uploaded</span>
+            <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>brochureFile</span>) {
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>originalFilename</span> = pathinfo(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>brochureFile</span><span class="hljs-operator">-&gt;</span>getClientOriginalName(), PATHINFO_FILENAME);
+                <span class="hljs-comment">// this is needed to safely include the file name as part of the URL</span>
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>safeFilename</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span><span class="hljs-operator">-&gt;</span>slug(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>originalFilename</span>);
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>newFilename</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>safeFilename</span>.<span class="hljs-string">'-'</span>.uniqid().<span class="hljs-string">'.'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>brochureFile</span><span class="hljs-operator">-&gt;</span>guessExtension();
+
+                <span class="hljs-comment">// Move the file to the directory where brochures are stored</span>
+                <span class="hljs-keyword">try</span> {
+                    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>brochureFile</span><span class="hljs-operator">-&gt;</span>move(
+                        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getParameter(<span class="hljs-string">'brochures_directory'</span>),
+                        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>newFilename</span>
+                    );
+                } <span class="hljs-keyword">catch</span> (FileException <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>e</span>) {
+                    <span class="hljs-comment">// ... handle exception if something happens during file upload</span>
+                }
+
+                <span class="hljs-comment">// updates the 'brochureFilename' property to store the PDF file name</span>
+                <span class="hljs-comment">// instead of its contents</span>
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>setBrochureFilename(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>newFilename</span>);
+            }
+
+            <span class="hljs-comment">// ... persist the $product variable or any other work</span>
+
+            <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>redirectToRoute(<span class="hljs-string">'app_product_list'</span>);
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>render(<span class="hljs-string">'product/new.html.twig'</span>, [
+            <span class="hljs-string">'form'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>,
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, create the <code translate="no" class="notranslate">brochures_directory</code> parameter that was used in the
+controller to specify the directory in which the brochures should be stored:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+
+<span class="hljs-comment"># ...</span>
+<span class="hljs-attr">parameters:</span>
+    <span class="hljs-attr">brochures_directory:</span> <span class="hljs-string">'%kernel.project_dir%/public/uploads/brochures'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>There are some important things to consider in the code of the above controller:</p>
+<ol class="arabic">
+    <li>In Symfony applications, uploaded files are objects of the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/UploadedFile.php" class="reference external" title="Symfony\Component\HttpFoundation\File\UploadedFile" rel="external noopener noreferrer" target="_blank">UploadedFile</a> class. This class
+provides methods for the most common operations when dealing with uploaded files;</li>
+<li>A well-known security best practice is to never trust the input provided by
+users. This also applies to the files uploaded by your visitors. The <code translate="no" class="notranslate">UploadedFile</code>
+class provides methods to get the original file extension
+(<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/UploadedFile.php#method_getClientOriginalExtension" class="reference external" title="Symfony\Component\HttpFoundation\File\UploadedFile::getClientOriginalExtension()" rel="external noopener noreferrer" target="_blank">getClientOriginalExtension()</a>),
+the original file size (<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/UploadedFile.php#method_getSize" class="reference external" title="Symfony\Component\HttpFoundation\File\UploadedFile::getSize()" rel="external noopener noreferrer" target="_blank">getSize()</a>)
+and the original file name (<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/UploadedFile.php#method_getClientOriginalName" class="reference external" title="Symfony\Component\HttpFoundation\File\UploadedFile::getClientOriginalName()" rel="external noopener noreferrer" target="_blank">getClientOriginalName()</a>).
+However, they are considered <em>not safe</em> because a malicious user could tamper
+that information. That's why it's always better to generate a unique name and
+use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/UploadedFile.php#method_guessExtension" class="reference external" title="Symfony\Component\HttpFoundation\File\UploadedFile::guessExtension()" rel="external noopener noreferrer" target="_blank">guessExtension()</a>
+method to let Symfony guess the right extension according to the file MIME type;</li>
+</ol>
+<p>You can use the following code to link to the PDF brochure of a product:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ asset('uploads/brochures/' ~ product.brochureFilename) }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span>View brochure (PDF)<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>When creating a form to edit an already persisted item, the file form type
+still expects a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/File.php" class="reference external" title="Symfony\Component\HttpFoundation\File\File" rel="external noopener noreferrer" target="_blank">File</a>
+instance. As the persisted entity now contains only the relative file path,
+you first have to concatenate the configured upload path with the stored
+filename and create a new <code translate="no" class="notranslate">File</code> class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">File</span>\<span class="hljs-title">File</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>setBrochureFilename(
+    <span class="hljs-keyword">new</span> File(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getParameter(<span class="hljs-string">'brochures_directory'</span>).<span class="hljs-string">'/'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>getBrochureFilename())
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="creating-an-uploader-service">
+    Creating an Uploader Service
+    <a class="headerlink" href="#creating-an-uploader-service" title="Permalink to this headline">¶</a>
+</h2>
+<p>To avoid logic in controllers, making them big, you can extract the upload
+logic to a separate service:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Service/FileUploader.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Service</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">File</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">FileException</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">File</span>\<span class="hljs-title">UploadedFile</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">String</span>\<span class="hljs-title">Slugger</span>\<span class="hljs-title">SluggerInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FileUploader</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>targetDirectory</span>,
+        private SluggerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>slugger</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">upload</span><span class="hljs-params">(UploadedFile <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>)</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>originalFilename</span> = pathinfo(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span><span class="hljs-operator">-&gt;</span>getClientOriginalName(), PATHINFO_FILENAME);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>safeFilename</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>slugger<span class="hljs-operator">-&gt;</span>slug(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>originalFilename</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fileName</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>safeFilename</span>.<span class="hljs-string">'-'</span>.uniqid().<span class="hljs-string">'.'</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span><span class="hljs-operator">-&gt;</span>guessExtension();
+
+        <span class="hljs-keyword">try</span> {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span><span class="hljs-operator">-&gt;</span>move(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getTargetDirectory(), <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fileName</span>);
+        } <span class="hljs-keyword">catch</span> (FileException <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>e</span>) {
+            <span class="hljs-comment">// ... handle exception if something happens during file upload</span>
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fileName</span>;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getTargetDirectory</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>targetDirectory;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>In addition to the generic <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/Exception/FileException.php" class="reference external" title="Symfony\Component\HttpFoundation\File\Exception\FileException" rel="external noopener noreferrer" target="_blank">FileException</a>
+class there are other exception classes to handle failed file uploads:
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/Exception/CannotWriteFileException.php" class="reference external" title="Symfony\Component\HttpFoundation\File\Exception\CannotWriteFileException" rel="external noopener noreferrer" target="_blank">CannotWriteFileException</a>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/Exception/ExtensionFileException.php" class="reference external" title="Symfony\Component\HttpFoundation\File\Exception\ExtensionFileException" rel="external noopener noreferrer" target="_blank">ExtensionFileException</a>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/Exception/FormSizeFileException.php" class="reference external" title="Symfony\Component\HttpFoundation\File\Exception\FormSizeFileException" rel="external noopener noreferrer" target="_blank">FormSizeFileException</a>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/Exception/IniSizeFileException.php" class="reference external" title="Symfony\Component\HttpFoundation\File\Exception\IniSizeFileException" rel="external noopener noreferrer" target="_blank">IniSizeFileException</a>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/Exception/NoFileException.php" class="reference external" title="Symfony\Component\HttpFoundation\File\Exception\NoFileException" rel="external noopener noreferrer" target="_blank">NoFileException</a>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/Exception/NoTmpDirFileException.php" class="reference external" title="Symfony\Component\HttpFoundation\File\Exception\NoTmpDirFileException" rel="external noopener noreferrer" target="_blank">NoTmpDirFileException</a>,
+and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/File/Exception/PartialFileException.php" class="reference external" title="Symfony\Component\HttpFoundation\File\Exception\PartialFileException" rel="external noopener noreferrer" target="_blank">PartialFileException</a>.</p>
+</div>
+<p>Then, define a service for this class:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-399fcfec08dc43d31f0c0f95718acea4bd83e8f0" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-705d0ecdf2e04891ef7d63a958bcb19ac8d72d1b" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-943b650342536f1a1eb9758effa8fa8c64cf89f4" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-399fcfec08dc43d31f0c0f95718acea4bd83e8f0" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-string">App\Service\FileUploader:</span>
+        <span class="hljs-attr">arguments:</span>
+            <span class="hljs-string">$targetDirectory:</span> <span class="hljs-string">'%brochures_directory%'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-705d0ecdf2e04891ef7d63a958bcb19ac8d72d1b" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Service\FileUploader"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">argument</span>&gt;</span>%brochures_directory%<span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-943b650342536f1a1eb9758effa8fa8c64cf89f4" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Service</span>\<span class="hljs-title">FileUploader</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(FileUploader<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>arg(<span class="hljs-string">'$targetDirectory'</span>, <span class="hljs-string">'%brochures_directory%'</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Now you're ready to use this service in the controller:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/ProductController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Service</span>\<span class="hljs-title">FileUploader</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">new</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, FileUploader <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fileUploader</span>)</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isSubmitted() &amp;&amp; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isValid()) {
+        <span class="hljs-comment">/** <span class="hljs-doctag">@var</span> UploadedFile $brochureFile */</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>brochureFile</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'brochure'</span>)<span class="hljs-operator">-&gt;</span>getData();
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>brochureFile</span>) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>brochureFileName</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fileUploader</span><span class="hljs-operator">-&gt;</span>upload(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>brochureFile</span>);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>setBrochureFilename(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>brochureFileName</span>);
+        }
+
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="using-a-doctrine-listener">
+    Using a Doctrine Listener
+    <a class="headerlink" href="#using-a-doctrine-listener" title="Permalink to this headline">¶</a>
+</h2>
+<p>The previous versions of this article explained how to handle file uploads using
+<a href="../doctrine/events.html#doctrine-lifecycle-listener" class="reference internal">Doctrine listeners</a>. However, this is no longer
+recommended, because Doctrine events shouldn't be used for your domain logic.</p>
+<p>Moreover, Doctrine listeners are often dependent on internal Doctrine behavior
+which may change in future versions. Also, they can introduce performance issues
+unwillingly (because your listener persists entities which cause other entities to
+be changed and persisted).</p>
+<p>As an alternative, you can use <a href="../event_dispatcher.html" class="reference internal">Symfony events, listeners and subscribers</a>.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

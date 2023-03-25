@@ -1,0 +1,361 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-define-commands-as-services">
+    How to Define Commands as Services
+    <a class="headerlink" href="#how-to-define-commands-as-services" title="Permalink to this headline">¶</a>
+</h1>
+<p>If you're using the <a href="../service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>,
+your command classes are already registered as services. Great! This is the
+recommended setup.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>You can also manually register your command as a service by configuring the service
+and <a href="../service_container/tags.html" class="reference internal">tagging it</a> with <code translate="no" class="notranslate">console.command</code>.</p>
+</div>
+<p>For example, suppose you want to log something from within your command:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Command</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Log</span>\<span class="hljs-title">LoggerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsCommand</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+
+<span class="hljs-comment">#[AsCommand(name: 'app:sunshine')]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SunshineCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private LoggerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>logger</span>,
+    )</span> </span>{
+        <span class="hljs-comment">// you *must* call the parent constructor</span>
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>__construct();
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configure</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>
+            <span class="hljs-operator">-&gt;</span>setDescription(<span class="hljs-string">'Good morning!'</span>);
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>logger<span class="hljs-operator">-&gt;</span>info(<span class="hljs-string">'Waking up the sun'</span>);
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-keyword">return</span> Command<span class="hljs-operator">::</span>SUCCESS;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you're using the <a href="../service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>,
+the command class will automatically be registered as a service and passed the <code translate="no" class="notranslate">$logger</code>
+argument (thanks to autowiring). In other words, you only need to create this
+class and everything works automatically! You can call the <code translate="no" class="notranslate">app:sunshine</code>
+command and start logging.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>You <em>do</em> have access to services in <code translate="no" class="notranslate">configure()</code>. However, if your command is
+not <a href="commands_as_services.html#console-command-service-lazy-loading" class="reference internal">lazy</a>, try to avoid doing any
+work (e.g. making database queries), as that code will be run, even if you're using
+the console to execute a different command.</p>
+</div>
+<span id="console-command-service-lazy-loading"></span>
+<div class="section">
+<h2 id="lazy-loading">
+    Lazy Loading
+    <a class="headerlink" href="#lazy-loading" title="Permalink to this headline">¶</a>
+</h2>
+<p>To make your command lazily loaded, either define its name using the PHP
+<code translate="no" class="notranslate">AsCommand</code> attribute:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsCommand</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">#[AsCommand(name: 'app:sunshine')]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SunshineCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Or set the <code translate="no" class="notranslate">command</code> attribute on the <code translate="no" class="notranslate">console.command</code> tag in your service definition:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-fc0bbcd63f6934af12aa57c39401db9efb2ce10f" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-8ec52dc1bc412a62c2e8c5b4502365a7cefef7ab" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-8d31e0d8704fb73aa54f5e64058bea430787ab51" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-fc0bbcd63f6934af12aa57c39401db9efb2ce10f" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-string">App\Command\SunshineCommand:</span>
+        <span class="hljs-attr">tags:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">name:</span> <span class="hljs-string">'console.command'</span><span class="hljs-string">,</span> <span class="hljs-attr">command:</span> <span class="hljs-string">'app:sunshine'</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-8ec52dc1bc412a62c2e8c5b4502365a7cefef7ab" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Command\SunshineCommand"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"console.command"</span> <span class="hljs-attr">command</span>=<span class="hljs-string">"app:sunshine"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-8d31e0d8704fb73aa54f5e64058bea430787ab51" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">SunshineCommand</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>register(SunshineCommand<span class="hljs-operator">::</span>class)
+    <span class="hljs-operator">-&gt;</span>addTag(<span class="hljs-string">'console.command'</span>, [<span class="hljs-string">'command'</span> =&gt; <span class="hljs-string">'app:sunshine'</span>])
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If the command defines aliases (using the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Command/Command.php#method_getAliases" class="reference external" title="Symfony\Component\Console\Command\Command::getAliases()" rel="external noopener noreferrer" target="_blank">getAliases()</a> method)
+you must add one <code translate="no" class="notranslate">console.command</code> tag per alias.</p>
+</div>
+<p>That's it. One way or another, the <code translate="no" class="notranslate">SunshineCommand</code> will be instantiated
+only when the <code translate="no" class="notranslate">app:sunshine</code> command is actually called.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>You don't need to call <code translate="no" class="notranslate">setName()</code> for configuring the command when it is lazy.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Calling the <code translate="no" class="notranslate">list</code> command will instantiate all commands, including lazy commands.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

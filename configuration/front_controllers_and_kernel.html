@@ -1,0 +1,485 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="understanding-how-the-front-controller-kernel-and-environments-work-together">
+    Understanding how the Front Controller, Kernel and Environments Work together
+    <a class="headerlink" href="#understanding-how-the-front-controller-kernel-and-environments-work-together" title="Permalink to this headline">¶</a>
+</h1>
+<p>The <a href="../configuration.html#configuration-environments" class="reference internal">configuration environments</a> section
+explained the basics on how Symfony uses environments to run your application
+with different configuration settings. This section will explain a bit more
+in-depth what happens when your application is bootstrapped. To hook into this
+process, you need to understand three parts that work together:</p>
+<ul>
+    <li><a href="front_controllers_and_kernel.html#the-front-controller" class="reference internal">The Front Controller</a></li>
+<li><a href="front_controllers_and_kernel.html#the-kernel-class" class="reference internal">The Kernel Class</a></li>
+<li><a href="front_controllers_and_kernel.html#the-environments" class="reference internal">The Environments</a></li>
+</ul>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Usually, you will not need to define your own front controller or
+<code translate="no" class="notranslate">Kernel</code> class as Symfony provides sensible default implementations.
+This article is provided to explain what is going on behind the scenes.</p>
+</div>
+<span id="architecture-front-controller"></span>
+<div class="section">
+<h2 id="the-front-controller">
+    The Front Controller
+    <a class="headerlink" href="#the-front-controller" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://en.wikipedia.org/wiki/Front_Controller_pattern" class="reference external" rel="external noopener noreferrer" target="_blank">front controller</a> is a design pattern; it is a section of code that <em>all</em>
+requests served by an application run through.</p>
+<p>In the Symfony Skeleton, this role is taken by the <code translate="no" class="notranslate">index.php</code> file in the
+<code translate="no" class="notranslate">public/</code> directory. This is the very first PHP script that is run when a
+request is processed.</p>
+<p>The main purpose of the front controller is to create an instance of the
+<code translate="no" class="notranslate">Kernel</code> (more on that in a second), make it handle the request and return
+the resulting response to the browser.</p>
+<p>Because every request is routed through it, the front controller can be
+used to perform global initialization prior to setting up the kernel or
+to <a href="https://en.wikipedia.org/wiki/Decorator_pattern" class="reference external" rel="external noopener noreferrer" target="_blank">decorate</a> the kernel with additional features. Examples include:</p>
+<ul>
+    <li>Configuring the autoloader or adding additional autoloading mechanisms;</li>
+<li>Adding HTTP level caching by wrapping the kernel with an instance of
+<a href="../http_cache.html#symfony-gateway-cache" class="reference internal">HttpCache</a>;</li>
+<li>Enabling the <a href="https://github.com/symfony/debug" class="reference external" rel="external noopener noreferrer" target="_blank">Debug component</a>.</li>
+</ul>
+<p>You can choose the front controller that's used by adding it in the URL, like:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">http://localhost/index.php/some/path/...</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As you can see, this URL contains the PHP script to be used as the front
+controller. You can use that to switch to a custom made front controller
+that is located in the <code translate="no" class="notranslate">public/</code> directory.</p>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>You almost never want to show the front controller in the URL. This is
+achieved by configuring the web server, as shown in
+<a href="../setup/web_server_configuration.html" class="reference internal">Configuring a Web Server</a>.</p>
+</div>
+<p>Technically, the <code translate="no" class="notranslate">bin/console</code> script used when running Symfony on the command
+line is also a front controller, only that is not used for web, but for command
+line requests.</p>
+</div>
+<div class="section">
+<h2 id="the-kernel-class">
+    The Kernel Class
+    <a class="headerlink" href="#the-kernel-class" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php" class="reference external" title="Symfony\Component\HttpKernel\Kernel" rel="external noopener noreferrer" target="_blank">Kernel</a> is the core of
+Symfony. It is responsible for setting up all the bundles used by
+your application and providing them with the application's configuration.
+It then creates the service container before serving requests in its
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/HttpKernelInterface.php#method_handle" class="reference external" title="Symfony\Component\HttpKernel\HttpKernelInterface::handle()" rel="external noopener noreferrer" target="_blank">handle()</a>
+method.</p>
+<p>The kernel used in Symfony applications extends from <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php" class="reference external" title="Symfony\Component\HttpKernel\Kernel" rel="external noopener noreferrer" target="_blank">Kernel</a>
+and uses the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Kernel/MicroKernelTrait.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait" rel="external noopener noreferrer" target="_blank">MicroKernelTrait</a>.
+The <code translate="no" class="notranslate">Kernel</code> class leaves some methods from <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/KernelInterface.php" class="reference external" title="Symfony\Component\HttpKernel\KernelInterface" rel="external noopener noreferrer" target="_blank">KernelInterface</a>
+unimplemented and the <code translate="no" class="notranslate">MicroKernelTrait</code> defines several abstract methods, so
+you must implement them all:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/KernelInterface.php#method_registerBundles" class="reference external" title="Symfony\Component\HttpKernel\KernelInterface::registerBundles()" rel="external noopener noreferrer" target="_blank">registerBundles()</a></dt>
+        
+        <dd>
+                            It must return an array of all bundles needed to run the application.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Kernel/MicroKernelTrait.php#method_configureRoutes" class="reference external" title="Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait::configureRoutes()" rel="external noopener noreferrer" target="_blank">configureRoutes()</a></dt>
+        
+        <dd>
+                            It adds individual routes or collections of routes to the application (for
+example loading the routes defined in some config file).
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Kernel/MicroKernelTrait.php#method_configureContainer" class="reference external" title="Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait::configureContainer()" rel="external noopener noreferrer" target="_blank">configureContainer()</a></dt>
+        
+        <dd>
+                            It loads the application configuration from config files or using the
+<code translate="no" class="notranslate">loadFromExtension()</code> method and can also register new container parameters
+and services.
+                    </dd>
+    </dl>
+<p>To fill these (small) blanks, your application needs to extend the Kernel class
+and use the MicroKernelTrait to implement these methods. Symfony provides by
+default that kernel in the <code translate="no" class="notranslate">src/Kernel.php</code> file.</p>
+<p>This class uses the name of the environment - which is passed to the Kernel's
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php#method___construct" class="reference external" title="Symfony\Component\HttpKernel\Kernel::__construct()" rel="external noopener noreferrer" target="_blank">constructor</a>
+method and is available via <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php#method_getEnvironment" class="reference external" title="Symfony\Component\HttpKernel\Kernel::getEnvironment()" rel="external noopener noreferrer" target="_blank">getEnvironment()</a> -
+to decide which bundles to enable. The logic for that is in <code translate="no" class="notranslate">registerBundles()</code>.</p>
+<p>You are free to create your own, alternative or additional <code translate="no" class="notranslate">Kernel</code> variants.
+All you need is to adapt your (or add a new) front controller to make use of the
+new kernel.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The name and location of the <code translate="no" class="notranslate">Kernel</code> is not fixed. When putting
+<a href="multiple_kernels.html" class="reference internal">multiple kernels into a single application</a>,
+it might therefore make sense to add additional sub-directories, for example
+<code translate="no" class="notranslate">src/admin/AdminKernel.php</code> and <code translate="no" class="notranslate">src/api/ApiKernel.php</code>. All that matters
+is that your front controller is able to create an instance of the appropriate kernel.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>There's a lot more the <code translate="no" class="notranslate">Kernel</code> can be used for, for example
+<a href="override_dir_structure.html" class="reference internal">overriding the default directory structure</a>.
+But odds are high that you don't need to change things like this on the
+fly by having several <code translate="no" class="notranslate">Kernel</code> implementations.</p>
+</div>
+<span id="debug-mode"></span>
+<div class="section">
+<h3 id="debug-mode">
+    Debug Mode
+    <a class="headerlink" href="#debug-mode" title="Permalink to this headline">¶</a>
+</h3>
+<p>The second argument to the <code translate="no" class="notranslate">Kernel</code> constructor specifies if the application
+should run in &quot;debug mode&quot;. Regardless of the
+<a href="../configuration.html#configuration-environments" class="reference internal">configuration environment</a>, a Symfony
+application can be run with debug mode set to <code translate="no" class="notranslate">true</code> or <code translate="no" class="notranslate">false</code>.</p>
+<p>This affects many things in the application, such as displaying stack traces on
+error pages or if cache files are dynamically rebuilt on each request. Though
+not a requirement, debug mode is generally set to <code translate="no" class="notranslate">true</code> for the <code translate="no" class="notranslate">dev</code> and
+<code translate="no" class="notranslate">test</code> environments and <code translate="no" class="notranslate">false</code> for the <code translate="no" class="notranslate">prod</code> environment.</p>
+<p>Similar to <a href="../configuration.html#selecting-the-active-environment" class="reference internal">configuring the environment</a>
+you can also enable/disable the debug mode using <a href="../configuration.html#config-dot-env" class="reference internal">the .env file</a>:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash"><span class="hljs-comment"># .env</span>
+<span class="hljs-comment"># set it to 1 to enable the debug mode</span>
+APP_DEBUG=0</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This value can be overridden for commands by passing the <code translate="no" class="notranslate">APP_DEBUG</code> value
+before running them:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># Use the debug mode defined in the .env file</span>
+<span class="hljs-prompt">$ </span>php bin/console command_name
+
+<span class="hljs-comment"># Ignore the .env file and enable the debug mode for this command</span>
+<span class="hljs-prompt">$ </span>APP_DEBUG=1 php bin/console command_name</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Internally, the value of the debug mode becomes the <code translate="no" class="notranslate">kernel.debug</code>
+parameter used inside the <a href="../service_container.html" class="reference internal">service container</a>.
+If you look inside the application configuration file, you'll see the
+parameter used, for example, to turn Twig's debug mode on:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-177fa325fde486eaa526dcfa38370cba1c84b428" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-cf4853ac7ab2a32127efc4699e380a88404410bc" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-8fe380066a1f8cd0389b5ba7a1af599d7a3f4cd0" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-177fa325fde486eaa526dcfa38370cba1c84b428" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/twig.yaml</span>
+<span class="hljs-attr">twig:</span>
+    <span class="hljs-attr">debug:</span> <span class="hljs-string">'%kernel.debug%'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-cf4853ac7ab2a32127efc4699e380a88404410bc" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:twig</span>=<span class="hljs-string">"http://symfony.com/schema/dic/twig"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/twig
+        https://symfony.com/schema/dic/twig/twig-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">twig:config</span> <span class="hljs-attr">debug</span>=<span class="hljs-string">"%kernel.debug%"</span>/&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-8fe380066a1f8cd0389b5ba7a1af599d7a3f4cd0" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/twig.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">TwigConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(TwigConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span><span class="hljs-operator">-&gt;</span>debug(<span class="hljs-string">'%kernel.debug%'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="section">
+<h2 id="the-environments">
+    The Environments
+    <a class="headerlink" href="#the-environments" title="Permalink to this headline">¶</a>
+</h2>
+<p>As mentioned above, the <code translate="no" class="notranslate">Kernel</code> has to implement another method -
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Kernel/MicroKernelTrait.php#method_configureContainer" class="reference external" title="Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait::configureContainer()" rel="external noopener noreferrer" target="_blank">configureContainer()</a>.
+This method is responsible for loading the application's configuration from the
+right <em>environment</em>.</p>
+<p><a href="../configuration.html#configuration-environments" class="reference internal">Configuration environments</a> allow to execute
+the same code using different configuration. Symfony provides three environments
+by default called <code translate="no" class="notranslate">dev</code>, <code translate="no" class="notranslate">prod</code> and <code translate="no" class="notranslate">test</code>.</p>
+<p>More technically, these names are nothing more than strings passed from the
+front controller to the <code translate="no" class="notranslate">Kernel</code>'s constructor. This name can then be used in
+the <code translate="no" class="notranslate">configureContainer()</code> method to decide which configuration files to load.</p>
+<p>Symfony's default <code translate="no" class="notranslate">Kernel</code> class implements this method by loading first the
+config files found on <code translate="no" class="notranslate">config/packages/*</code> and then, the files found on
+<code translate="no" class="notranslate">config/packages/ENVIRONMENT_NAME/</code>. You are free to implement this method
+differently if you need a more sophisticated way of loading your configuration.</p>
+<div class="section">
+<h3 id="environments-and-the-cache-directory">
+    Environments and the Cache Directory
+    <a class="headerlink" href="#environments-and-the-cache-directory" title="Permalink to this headline">¶</a>
+</h3>
+<p>Symfony takes advantage of caching in many ways: the application configuration,
+routing configuration, Twig templates and more are cached to PHP objects
+stored in files on the filesystem.</p>
+<p>By default, these cached files are largely stored in the <code translate="no" class="notranslate">var/cache/</code> directory.
+However, each environment caches its own set of files:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">your-project/
+├─ var/
+│  ├─ cache/
+│  │  ├─ dev/   # cache directory for the *dev* environment
+│  │  └─ prod/  # cache directory for the *prod* environment
+│  ├─ ...</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Sometimes, when debugging, it may be helpful to inspect a cached file to
+understand how something is working. When doing so, remember to look in
+the directory of the environment you're using (most commonly <code translate="no" class="notranslate">dev/</code> while
+developing and debugging). While it can vary, the <code translate="no" class="notranslate">var/cache/dev/</code> directory
+includes the following:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">App_KernelDevDebugContainer.php</code></dt>
+        
+        <dd>
+                            The cached &quot;service container&quot; that represents the cached application
+configuration.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">url_generating_routes.php</code></dt>
+        
+        <dd>
+                            The cached routing configuration used when generating URLs.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">url_matching_routes.php</code></dt>
+        
+        <dd>
+                            The cached configuration used for route matching - look here to see the compiled
+regular expression logic used to match incoming URLs to different routes.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">twig/</code></dt>
+        
+        <dd>
+                            This directory contains all the cached Twig templates.
+                    </dd>
+    </dl>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>You can change the cache directory location and name. For more information
+read the article <a href="override_dir_structure.html" class="reference internal">How to Override Symfony's default Directory Structure</a>.</p>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,1061 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-runtime-component">
+    The Runtime Component
+    <a class="headerlink" href="#the-runtime-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The Runtime Component decouples the bootstrapping logic from any global state
+to make sure the application can run with runtimes like PHP-PM, ReactPHP,
+Swoole, etc. without any changes.</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/runtime</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>The Runtime component abstracts most bootstrapping logic as so-called
+<em>runtimes</em>, allowing you to write front-controllers in a generic way.
+For instance, the Runtime component allows Symfony's <code translate="no" class="notranslate">public/index.php</code>
+to look like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// public/index.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Kernel</span>;
+
+<span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Kernel(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>[<span class="hljs-string">'APP_ENV'</span>], (bool) <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>[<span class="hljs-string">'APP_DEBUG'</span>]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>So how does this front-controller work? At first, the special
+<code translate="no" class="notranslate">autoload_runtime.php</code> file is automatically created by the Composer plugin in
+the component. This file runs the following logic:</p>
+<ol class="arabic">
+    <li>It instantiates a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/RuntimeInterface.php" class="reference external" title="Symfony\Component\Runtime\RuntimeInterface" rel="external noopener noreferrer" target="_blank">RuntimeInterface</a>;</li>
+<li>The callable (returned by <code translate="no" class="notranslate">public/index.php</code>) is passed to the Runtime, whose job
+is to resolve the arguments (in this example: <code translate="no" class="notranslate">array $context</code>);</li>
+<li>Then, this callable is called to get the application (<code translate="no" class="notranslate">App\Kernel</code>);</li>
+<li>At last, the Runtime is used to run the application (i.e. calling
+<code translate="no" class="notranslate">$kernel-&gt;handle(Request::createFromGlobals())-&gt;send()</code>).</li>
+</ol>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>If you use the Composer <code translate="no" class="notranslate">--no-plugins</code> option, the <code translate="no" class="notranslate">autoload_runtime.php</code>
+file won't be created.</p>
+<p>If you use the Composer <code translate="no" class="notranslate">--no-scripts</code> option, make sure your Composer version
+is <code translate="no" class="notranslate">&gt;=2.1.3</code>; otherwise the <code translate="no" class="notranslate">autoload_runtime.php</code> file won't be created.</p>
+</div>
+<p>To make a console application, the bootstrap code would look like:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">#!/usr/bin/env php</span>
+<span class="hljs-meta">&lt;?php</span>
+<span class="hljs-comment">// bin/console</span>
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Kernel</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Application</span>;
+
+<span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span> = <span class="hljs-keyword">new</span> Kernel(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>[<span class="hljs-string">'APP_ENV'</span>], (bool) <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>[<span class="hljs-string">'APP_DEBUG'</span>]);
+
+    <span class="hljs-comment">// returning an "Application" makes the Runtime run a Console</span>
+    <span class="hljs-comment">// application instead of the HTTP Kernel</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Application(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="selecting-runtimes">
+    Selecting Runtimes
+    <a class="headerlink" href="#selecting-runtimes" title="Permalink to this headline">¶</a>
+</h2>
+<p>The default Runtime is <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/SymfonyRuntime.php" class="reference external" title="Symfony\Component\Runtime\SymfonyRuntime" rel="external noopener noreferrer" target="_blank">SymfonyRuntime</a>. It
+works excellent on most applications running with a webserver using PHP-FPM like
+Nginx or Apache.</p>
+<p>The component also provides a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/GenericRuntime.php" class="reference external" title="Symfony\Component\Runtime\GenericRuntime" rel="external noopener noreferrer" target="_blank">GenericRuntime</a>,
+which uses PHP's <code translate="no" class="notranslate">$_SERVER</code>, <code translate="no" class="notranslate">$_POST</code>, <code translate="no" class="notranslate">$_GET</code>, <code translate="no" class="notranslate">$_FILES</code> and
+<code translate="no" class="notranslate">$_SESSION</code> superglobals. You may also use a custom Runtime (e.g. to
+integrate with Swoole or AWS Lambda).</p>
+<p>Use the <code translate="no" class="notranslate">APP_RUNTIME</code> environment variable or by specifying the
+<code translate="no" class="notranslate">extra.runtime.class</code> in <code translate="no" class="notranslate">composer.json</code> to change the Runtime class:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"require"</span>: {
+        <span class="hljs-attr">"..."</span>: <span class="hljs-string">"..."</span>
+    },
+    <span class="hljs-attr">"extra"</span>: {
+        <span class="hljs-attr">"runtime"</span>: {
+            <span class="hljs-attr">"class"</span>: <span class="hljs-string">"Symfony\\Component\\Runtime\\GenericRuntime"</span>
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="using-the-runtime">
+    Using the Runtime
+    <a class="headerlink" href="#using-the-runtime" title="Permalink to this headline">¶</a>
+</h2>
+<p>A Runtime is responsible for passing arguments into the closure and run the
+application returned by the closure. The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/SymfonyRuntime.php" class="reference external" title="Symfony\Component\Runtime\SymfonyRuntime" rel="external noopener noreferrer" target="_blank">SymfonyRuntime</a> and
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/GenericRuntime.php" class="reference external" title="Symfony\Component\Runtime\GenericRuntime" rel="external noopener noreferrer" target="_blank">GenericRuntime</a> supports a number of
+arguments and different applications that you can use in your
+front-controllers.</p>
+<div class="section">
+<h3 id="resolvable-arguments">
+    Resolvable Arguments
+    <a class="headerlink" href="#resolvable-arguments" title="Permalink to this headline">¶</a>
+</h3>
+<p>The closure returned from the front-controller may have zero or more arguments:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// public/index.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+
+<span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The following arguments are supported by the <code translate="no" class="notranslate">SymfonyRuntime</code>:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Request.php" class="reference external" title="Symfony\Component\HttpFoundation\Request" rel="external noopener noreferrer" target="_blank">Request</a></dt>
+        
+        <dd>
+                            A request created from globals.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Input/InputInterface.php" class="reference external" title="Symfony\Component\Console\Input\InputInterface" rel="external noopener noreferrer" target="_blank">InputInterface</a></dt>
+        
+        <dd>
+                            An input to read options and arguments.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Output/OutputInterface.php" class="reference external" title="Symfony\Component\Console\Output\OutputInterface" rel="external noopener noreferrer" target="_blank">OutputInterface</a></dt>
+        
+        <dd>
+                            Console output to print to the CLI with style.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Application.php" class="reference external" title="Symfony\Component\Console\Application" rel="external noopener noreferrer" target="_blank">Application</a></dt>
+        
+        <dd>
+                            An application for creating CLI applications.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Command/Command.php" class="reference external" title="Symfony\Component\Command\Command" rel="external noopener noreferrer" target="_blank">Command</a></dt>
+        
+        <dd>
+                            For creating one line command CLI applications (using
+<code translate="no" class="notranslate">Command::setCode()</code>).
+                    </dd>
+    </dl>
+<p>And these arguments are supported by both the <code translate="no" class="notranslate">SymfonyRuntime</code> and
+<code translate="no" class="notranslate">GenericRuntime</code> (both type and variable name are important):</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">array $context</code></dt>
+        
+        <dd>
+                            This is the same as <code translate="no" class="notranslate">$_SERVER</code> + <code translate="no" class="notranslate">$_ENV</code>.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">array $argv</code></dt>
+        
+        <dd>
+                            The arguments passed to the command (same as <code translate="no" class="notranslate">$_SERVER[&#039;argv&#039;]</code>).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">array $request</code></dt>
+        
+        <dd>
+                            With keys <code translate="no" class="notranslate">query</code>, <code translate="no" class="notranslate">body</code>, <code translate="no" class="notranslate">files</code> and <code translate="no" class="notranslate">session</code>.
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h3 id="resolvable-applications">
+    Resolvable Applications
+    <a class="headerlink" href="#resolvable-applications" title="Permalink to this headline">¶</a>
+</h3>
+<p>The application returned by the closure below is a Symfony Kernel. However,
+a number of different applications are supported:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// public/index.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Kernel</span>;
+
+<span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Kernel(<span class="hljs-string">'prod'</span>, <span class="hljs-keyword">false</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">SymfonyRuntime</code> can handle these applications:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/HttpKernelInterface.php" class="reference external" title="Symfony\Component\HttpKernel\HttpKernelInterface" rel="external noopener noreferrer" target="_blank">HttpKernelInterface</a></dt>
+        
+        <dd>
+                            The application will be run with <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/Runner/Symfony/HttpKernelRunner.php" class="reference external" title="Symfony\Component\Runtime\Runner\Symfony\HttpKernelRunner" rel="external noopener noreferrer" target="_blank">HttpKernelRunner</a>
+like a &quot;standard&quot; Symfony application.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Response.php" class="reference external" title="Symfony\Component\HttpFoundation\Response" rel="external noopener noreferrer" target="_blank">Response</a></dt>
+        
+        <dd>
+                            <p class="first">The Response will be printed by
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/Runner/Symfony/ResponseRunner.php" class="reference external" title="Symfony\Component\Runtime\Runner\Symfony\ResponseRunner" rel="external noopener noreferrer" target="_blank">ResponseRunner</a>:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// public/index.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Hello world'</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Command/Command.php" class="reference external" title="Symfony\Component\Console\Command\Command" rel="external noopener noreferrer" target="_blank">Command</a></dt>
+        
+        <dd>
+                            <p class="first">To write single command applications. This will use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/Runner/Symfony/ConsoleApplicationRunner.php" class="reference external" title="Symfony\Component\Runtime\Runner\Symfony\ConsoleApplicationRunner" rel="external noopener noreferrer" target="_blank">ConsoleApplicationRunner</a>:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+
+<span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Command <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span><span class="hljs-operator">-&gt;</span>setCode(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span> </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>write(<span class="hljs-string">'Hello World'</span>);
+    });
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span>;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Application.php" class="reference external" title="Symfony\Component\Console\Application" rel="external noopener noreferrer" target="_blank">Application</a></dt>
+        
+        <dd>
+                            <p class="first">Useful with console applications with more than one command. This will use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/Runner/Symfony/ConsoleApplicationRunner.php" class="reference external" title="Symfony\Component\Runtime\Runner\Symfony\ConsoleApplicationRunner" rel="external noopener noreferrer" target="_blank">ConsoleApplicationRunner</a>:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Application</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+
+<span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span> = <span class="hljs-keyword">new</span> Command(<span class="hljs-string">'hello'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span><span class="hljs-operator">-&gt;</span>setCode(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span> </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>write(<span class="hljs-string">'Hello World'</span>);
+    });
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>app</span> = <span class="hljs-keyword">new</span> Application();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>app</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>app</span><span class="hljs-operator">-&gt;</span>setDefaultCommand(<span class="hljs-string">'hello'</span>, <span class="hljs-keyword">true</span>);
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>app</span>;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+    </dl>
+<p>The <code translate="no" class="notranslate">GenericRuntime</code> and <code translate="no" class="notranslate">SymfonyRuntime</code> also support these generic
+applications:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/RunnerInterface.php" class="reference external" title="Symfony\Component\Runtime\RunnerInterface" rel="external noopener noreferrer" target="_blank">RunnerInterface</a></dt>
+        
+        <dd>
+                            <p class="first">The <code translate="no" class="notranslate">RunnerInterface</code> is a way to use a custom application with the
+generic Runtime:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// public/index.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Runtime</span>\<span class="hljs-title">RunnerInterface</span>;
+
+<span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RunnerInterface</span> </span>{
+        <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span><span class="hljs-params">()</span>: <span class="hljs-title">int</span>
+        </span>{
+            <span class="hljs-keyword">echo</span> <span class="hljs-string">'Hello World'</span>;
+
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+        }
+    };
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">callable</code></dt>
+        
+        <dd>
+                            <p class="first">Your &quot;application&quot; can also be a <code translate="no" class="notranslate">callable</code>. The first callable will return
+the &quot;application&quot; and the second callable is the &quot;application&quot; itself:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// public/index.php</span>
+<span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>app</span> = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">echo</span> <span class="hljs-string">'Hello World'</span>;
+
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    };
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>app</span>;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">void</code></dt>
+        
+        <dd>
+                            <p class="first">If the callable doesn't return anything, the <code translate="no" class="notranslate">SymfonyRuntime</code> will assume
+everything is fine:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">'Hello world'</span>;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h3 id="using-options">
+    Using Options
+    <a class="headerlink" href="#using-options" title="Permalink to this headline">¶</a>
+</h3>
+<p>Some behavior of the Runtimes can be modified through runtime options. They
+can be set using the <code translate="no" class="notranslate">APP_RUNTIME_OPTIONS</code> environment variable:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'APP_RUNTIME_OPTIONS'</span>] = [
+    <span class="hljs-string">'project_dir'</span> =&gt; <span class="hljs-string">'/var/task'</span>,
+];
+
+<span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also configure <code translate="no" class="notranslate">extra.runtime</code> in <code translate="no" class="notranslate">composer.json</code>:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"require"</span>: {
+        <span class="hljs-attr">"..."</span>: <span class="hljs-string">"..."</span>
+    },
+    <span class="hljs-attr">"extra"</span>: {
+        <span class="hljs-attr">"runtime"</span>: {
+            <span class="hljs-attr">"project_dir"</span>: <span class="hljs-string">"/var/task"</span>
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, update your Composer files (running <code translate="no" class="notranslate">composer dump-autoload</code>, for instance),
+so that the <code translate="no" class="notranslate">vendor/autoload_runtime.php</code> files gets regenerated with the new option.</p>
+<p>The following options are supported by the <code translate="no" class="notranslate">SymfonyRuntime</code>:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">env</code> (default: <code translate="no" class="notranslate">APP_ENV</code> environment variable, or <code translate="no" class="notranslate">&quot;dev&quot;</code>)</dt>
+        
+        <dd>
+                            To define the name of the environment the app runs in.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">disable_dotenv</code> (default: <code translate="no" class="notranslate">false</code>)</dt>
+        
+        <dd>
+                            To disable looking for <code translate="no" class="notranslate">.env</code> files.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">dotenv_path</code> (default: <code translate="no" class="notranslate">.env</code>)</dt>
+        
+        <dd>
+                            To define the path of dot-env files.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">dotenv_overload</code> (default: <code translate="no" class="notranslate">false</code>)</dt>
+        
+        <dd>
+                            To tell Dotenv whether to override <code translate="no" class="notranslate">.env</code> vars with <code translate="no" class="notranslate">.env.local</code> (or other <code translate="no" class="notranslate">.env.*</code> files)
+                    </dd>
+                        <dt><code translate="no" class="notranslate">use_putenv</code></dt>
+        
+        <dd>
+                            To tell Dotenv to set env vars using <code translate="no" class="notranslate">putenv()</code> (NOT RECOMMENDED).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">prod_envs</code> (default: <code translate="no" class="notranslate">[&quot;prod&quot;]</code>)</dt>
+        
+        <dd>
+                            To define the names of the production envs.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">test_envs</code> (default: <code translate="no" class="notranslate">[&quot;test&quot;]</code>)</dt>
+        
+        <dd>
+                            To define the names of the test envs.
+                    </dd>
+    </dl>
+<p>Besides these, the <code translate="no" class="notranslate">GenericRuntime</code> and <code translate="no" class="notranslate">SymfonyRuntime</code> also support
+these options:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">debug</code> (default: the value of the env var defined by <code translate="no" class="notranslate">debug_var_name</code> option</dt>
+        
+        <dd>
+                            (usually, <code translate="no" class="notranslate">APP_DEBUG</code>), or <code translate="no" class="notranslate">true</code> if such env var is not defined)
+Toggles the <a href="../configuration/front_controllers_and_kernel.html#debug-mode" class="reference internal">debug mode</a> of Symfony applications (e.g. to
+display errors)
+                    </dd>
+                        <dt><code translate="no" class="notranslate">runtimes</code></dt>
+        
+        <dd>
+                            Maps &quot;application types&quot; to a <code translate="no" class="notranslate">GenericRuntime</code> implementation that
+knows how to deal with each of them.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">error_handler</code> (default: <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/Internal/BasicErrorHandler.php" class="reference external" title="Symfony\Component\Runtime\Internal\BasicErrorHandler" rel="external noopener noreferrer" target="_blank">BasicErrorHandler</a> or <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/Internal/SymfonyErrorHandler.php" class="reference external" title="Symfony\Component\Runtime\Internal\SymfonyErrorHandler" rel="external noopener noreferrer" target="_blank">SymfonyErrorHandler</a> for <code translate="no" class="notranslate">SymfonyRuntime</code>)</dt>
+        
+        <dd>
+                            Defines the class to use to handle PHP errors.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">env_var_name</code> (default: <code translate="no" class="notranslate">&quot;APP_ENV&quot;</code>)</dt>
+        
+        <dd>
+                            Defines the name of the env var that stores the name of the
+<a href="../configuration.html#configuration-environments" class="reference internal">configuration environment</a>
+to use when running the application.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">debug_var_name</code> (default: <code translate="no" class="notranslate">&quot;APP_DEBUG&quot;</code>)</dt>
+        
+        <dd>
+                            Defines the name of the env var that stores the value of the
+<a href="../configuration/front_controllers_and_kernel.html#debug-mode" class="reference internal">debug mode</a> flag to use when running the application.
+                    </dd>
+    </dl>
+</div>
+</div>
+<div class="section">
+<h2 id="create-your-own-runtime">
+    Create Your Own Runtime
+    <a class="headerlink" href="#create-your-own-runtime" title="Permalink to this headline">¶</a>
+</h2>
+<p>This is an advanced topic that describes the internals of the Runtime component.</p>
+<p>Using the Runtime component will benefit maintainers because the bootstrap
+logic could be versioned as a part of a normal package. If the application
+author decides to use this component, the package maintainer of the Runtime
+class will have more control and can fix bugs and add features.</p>
+<p>The Runtime component is designed to be totally generic and able to run any
+application outside of the global state in 6 steps:</p>
+<ol class="arabic">
+    <li>The main entry point returns a <em>callable</em> (the &quot;app&quot;) that wraps the application;</li>
+<li>The <em>app callable</em> is passed to <code translate="no" class="notranslate">RuntimeInterface::getResolver()</code>, which returns
+a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/ResolverInterface.php" class="reference external" title="Symfony\Component\Runtime\ResolverInterface" rel="external noopener noreferrer" target="_blank">ResolverInterface</a>. This resolver returns
+an array with the app callable (or something that decorates this callable) at
+index 0 and all its resolved arguments at index 1.</li>
+<li>The <em>app callable</em> is invoked with its arguments, it will return an object that
+represents the application.</li>
+<li>This <em>application object</em> is passed to <code translate="no" class="notranslate">RuntimeInterface::getRunner()</code>, which
+returns a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/RunnerInterface.php" class="reference external" title="Symfony\Component\Runtime\RunnerInterface" rel="external noopener noreferrer" target="_blank">RunnerInterface</a>: an instance
+that knows how to &quot;run&quot; the application object.</li>
+<li>The <code translate="no" class="notranslate">RunnerInterface::run(object $application)</code> is called and it returns the
+exit status code as `int`.</li>
+<li>The PHP engine is terminated with this status code.</li>
+</ol>
+<p>When creating a new runtime, there are two things to consider: First, what arguments
+will the end user use? Second, what will the user's application look like?</p>
+<p>For instance, imagine you want to create a runtime for <a href="https://reactphp.org/" class="reference external" rel="external noopener noreferrer" target="_blank">ReactPHP</a>:</p>
+<p><strong>What arguments will the end user use?</strong></p>
+<p>For a generic ReactPHP application, no special arguments are
+typically required. This means that you can use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/GenericRuntime.php" class="reference external" title="Symfony\Component\Runtime\GenericRuntime" rel="external noopener noreferrer" target="_blank">GenericRuntime</a>.</p>
+<p><strong>What will the user's application look like?</strong></p>
+<p>There is also no typical React application, so you might want to rely on
+the <a href="https://www.php-fig.org/psr/psr-15/" class="reference external" rel="external noopener noreferrer" target="_blank">PSR-15</a> interfaces for HTTP request handling.</p>
+<p>However, a ReactPHP application will need some special logic to <em>run</em>. That logic
+is added in a new class implementing <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Runtime/RunnerInterface.php" class="reference external" title="Symfony\Component\Runtime\RunnerInterface" rel="external noopener noreferrer" target="_blank">RunnerInterface</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">ServerRequestInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Server</span>\<span class="hljs-title">RequestHandlerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">React</span>\<span class="hljs-title">EventLoop</span>\<span class="hljs-title">Factory</span> <span class="hljs-title">as</span> <span class="hljs-title">ReactFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">React</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Server</span> <span class="hljs-title">as</span> <span class="hljs-title">ReactHttpServer</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">React</span>\<span class="hljs-title">Socket</span>\<span class="hljs-title">Server</span> <span class="hljs-title">as</span> <span class="hljs-title">ReactSocketServer</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Runtime</span>\<span class="hljs-title">RunnerInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ReactPHPRunner</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RunnerInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private RequestHandlerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span>,
+        private int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>port</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span><span class="hljs-params">()</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>application;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loop</span> = ReactFactory<span class="hljs-operator">::</span>create();
+
+        <span class="hljs-comment">// configure ReactPHP to correctly handle the PSR-15 application</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>server</span> = <span class="hljs-keyword">new</span> ReactHttpServer(
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loop</span>,
+            <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ServerRequestInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span> <span class="hljs-title">use</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span>)</span> </span>{
+                <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+            }
+        );
+
+        <span class="hljs-comment">// start the ReactPHP server</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>socket</span> = <span class="hljs-keyword">new</span> ReactSocketServer(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>port, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loop</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>server</span><span class="hljs-operator">-&gt;</span>listen(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>socket</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loop</span><span class="hljs-operator">-&gt;</span>run();
+
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>By extending the <code translate="no" class="notranslate">GenericRuntime</code>, you make sure that the application is
+always using this <code translate="no" class="notranslate">ReactPHPRunner</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Runtime</span>\<span class="hljs-title">GenericRuntime</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Runtime</span>\<span class="hljs-title">RunnerInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ReactPHPRuntime</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">GenericRuntime</span>
+</span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>port</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>port = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>[<span class="hljs-string">'port'</span>] ?? <span class="hljs-number">8080</span>;
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>__construct(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRunner</span><span class="hljs-params">(?object <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span>)</span>: <span class="hljs-title">RunnerInterface</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span> <span class="hljs-keyword">instanceof</span> RequestHandlerInterface) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> ReactPHPRunner(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>port);
+        }
+
+        <span class="hljs-comment">// if it's not a PSR-15 application, use the GenericRuntime to</span>
+        <span class="hljs-comment">// run the application (see "Resolvable Applications" above)</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>getRunner(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The end user will now be able to create front controller like:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">require_once</span> dirname(<span class="hljs-keyword">__DIR__</span>).<span class="hljs-string">'/vendor/autoload_runtime.php'</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> SomeCustomPsr15Application();
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,1201 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-finder-component">
+    The Finder Component
+    <a class="headerlink" href="#the-finder-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The Finder component finds files and directories based on different criteria
+(name, file size, modification time, etc.) via an intuitive fluent interface.</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/finder</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php" class="reference external" title="Symfony\Component\Finder\Finder" rel="external noopener noreferrer" target="_blank">Finder</a> class finds files and/or
+directories:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Finder</span>\<span class="hljs-title">Finder</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span> = <span class="hljs-keyword">new</span> Finder();
+<span class="hljs-comment">// find all files in the current directory</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>in(<span class="hljs-keyword">__DIR__</span>);
+
+<span class="hljs-comment">// check if there are any search results</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>hasResults()) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">foreach</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span> <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>absoluteFilePath</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span><span class="hljs-operator">-&gt;</span>getRealPath();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fileNameWithExtension</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span><span class="hljs-operator">-&gt;</span>getRelativePathname();
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">$file</code> variable is an instance of
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/SplFileInfo.php" class="reference external" title="Symfony\Component\Finder\SplFileInfo" rel="external noopener noreferrer" target="_blank">SplFileInfo</a> which extends PHP's own
+<a href="https://secure.php.net/manual/en/class.splfileinfo.php" class="reference external" title="SplFileInfo" rel="external noopener noreferrer" target="_blank">SplFileInfo</a> to provide methods to work with relative paths.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>The <code translate="no" class="notranslate">Finder</code> object doesn't reset its internal state automatically.
+This means that you need to create a new instance if you do not want
+to get mixed results.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="searching-for-files-and-directories">
+    Searching for Files and Directories
+    <a class="headerlink" href="#searching-for-files-and-directories" title="Permalink to this headline">¶</a>
+</h2>
+<p>The component provides lots of methods to define the search criteria. They all
+can be chained because they implement a <a href="https://en.wikipedia.org/wiki/Fluent_interface" class="reference external" rel="external noopener noreferrer" target="_blank">fluent interface</a>.</p>
+<div class="section">
+<h3 id="location">
+    Location
+    <a class="headerlink" href="#location" title="Permalink to this headline">¶</a>
+</h3>
+<p>The location is the only mandatory criteria. It tells the finder which
+directory to use for the search:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>in(<span class="hljs-keyword">__DIR__</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Search in several locations by chaining calls to
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_in" class="reference external" title="Symfony\Component\Finder\Finder::in()" rel="external noopener noreferrer" target="_blank">in()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// search inside *both* directories</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>in([<span class="hljs-keyword">__DIR__</span>, <span class="hljs-string">'/elsewhere'</span>]);
+
+<span class="hljs-comment">// same as above</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>in(<span class="hljs-keyword">__DIR__</span>)<span class="hljs-operator">-&gt;</span>in(<span class="hljs-string">'/elsewhere'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Use <code translate="no" class="notranslate">*</code> as a wildcard character to search in the directories matching a
+pattern (each pattern has to resolve to at least one directory path):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>in(<span class="hljs-string">'src/Symfony/*/*/Resources'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Exclude directories from matching with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_exclude" class="reference external" title="Symfony\Component\Finder\Finder::exclude()" rel="external noopener noreferrer" target="_blank">exclude()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// directories passed as argument must be relative to the ones defined with the in() method</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>in(<span class="hljs-keyword">__DIR__</span>)<span class="hljs-operator">-&gt;</span>exclude(<span class="hljs-string">'ruby'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>It's also possible to ignore directories that you don't have permission to read:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>ignoreUnreadableDirs()<span class="hljs-operator">-&gt;</span>in(<span class="hljs-keyword">__DIR__</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As the Finder uses PHP iterators, you can pass any URL with a supported
+<a href="https://www.php.net/manual/en/wrappers.php" class="reference external" rel="external noopener noreferrer" target="_blank">PHP wrapper for URL-style protocols</a> (<code translate="no" class="notranslate">ftp://</code>, <code translate="no" class="notranslate">zlib://</code>, etc.):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// always add a trailing slash when looking for in the FTP root dir</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>in(<span class="hljs-string">'ftp://example.com/'</span>);
+
+<span class="hljs-comment">// you can also look for in a FTP directory</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>in(<span class="hljs-string">'ftp://example.com/pub/'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>And it also works with user-defined streams:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Finder</span>\<span class="hljs-title">Finder</span>;
+
+<span class="hljs-comment">// register a 's3://' wrapper with the official AWS SDK</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>s3Client</span> = <span class="hljs-keyword">new</span> Aws\S3\S3Client([<span class="hljs-comment">/* config options */</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>s3Client</span><span class="hljs-operator">-&gt;</span>registerStreamWrapper();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span> = <span class="hljs-keyword">new</span> Finder();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'photos*'</span>)<span class="hljs-operator">-&gt;</span>size(<span class="hljs-string">'&lt; 100K'</span>)<span class="hljs-operator">-&gt;</span>date(<span class="hljs-string">'since 1 hour ago'</span>);
+<span class="hljs-keyword">foreach</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>in(<span class="hljs-string">'s3://bucket-name'</span>) <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>) {
+    <span class="hljs-comment">// ... do something with the file</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>Read the <a href="https://www.php.net/streams" class="reference external" rel="external noopener noreferrer" target="_blank">PHP streams</a> documentation to learn how to create your own streams.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="files-or-directories">
+    Files or Directories
+    <a class="headerlink" href="#files-or-directories" title="Permalink to this headline">¶</a>
+</h3>
+<p>By default, the Finder returns both files and directories. If you need to find either files or directories only, use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_files" class="reference external" title="Symfony\Component\Finder\Finder::files()" rel="external noopener noreferrer" target="_blank">files()</a> and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_directories" class="reference external" title="Symfony\Component\Finder\Finder::directories()" rel="external noopener noreferrer" target="_blank">directories()</a> methods:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// look for files only; ignore directories</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files();
+
+<span class="hljs-comment">// look for directories only; ignore files</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>directories();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you want to follow <a href="https://en.wikipedia.org/wiki/Symbolic_link" class="reference external" rel="external noopener noreferrer" target="_blank">symbolic links</a>, use the <code translate="no" class="notranslate">followLinks()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>followLinks();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="version-control-files">
+    Version Control Files
+    <a class="headerlink" href="#version-control-files" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://en.wikipedia.org/wiki/Version_control" class="reference external" rel="external noopener noreferrer" target="_blank">Version Control Systems</a> (or &quot;VCS&quot; for short), such as Git and Mercurial,
+create some special files to store their metadata. Those files are ignored by
+default when looking for files and directories, but you can change this with the
+<code translate="no" class="notranslate">ignoreVCS()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>ignoreVCS(<span class="hljs-keyword">false</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If the search directory and its subdirectories contain <code translate="no" class="notranslate">.gitignore</code> files, you
+can reuse those rules to exclude files and directories from the results with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_ignoreVCSIgnored" class="reference external" title="Symfony\Component\Finder\Finder::ignoreVCSIgnored()" rel="external noopener noreferrer" target="_blank">ignoreVCSIgnored()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// excludes files/directories matching the .gitignore patterns</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>ignoreVCSIgnored(<span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The rules of a directory always override the rules of its parent directories.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Git looks for <code translate="no" class="notranslate">.gitignore</code> files starting from the repository root directory.
+Symfony's Finder behavior is different and it looks for <code translate="no" class="notranslate">.gitignore</code> files
+starting from the directory used to search files/directories. To be consistent
+with Git behavior, you should explicitly search from the Git repository root.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="file-name">
+    File Name
+    <a class="headerlink" href="#file-name" title="Permalink to this headline">¶</a>
+</h3>
+<p>Find files by name with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_name" class="reference external" title="Symfony\Component\Finder\Finder::name()" rel="external noopener noreferrer" target="_blank">name()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'*.php'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">name()</code> method accepts globs, strings, regexes or an array of globs,
+strings or regexes:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'/\.php$/'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Multiple filenames can be defined by chaining calls or passing an array:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'*.php'</span>)<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'*.twig'</span>);
+
+<span class="hljs-comment">// same as above</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>name([<span class="hljs-string">'*.php'</span>, <span class="hljs-string">'*.twig'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">notName()</code> method excludes files matching a pattern:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>notName(<span class="hljs-string">'*.rb'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Multiple filenames can be excluded by chaining calls or passing an array:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>notName(<span class="hljs-string">'*.rb'</span>)<span class="hljs-operator">-&gt;</span>notName(<span class="hljs-string">'*.py'</span>);
+
+<span class="hljs-comment">// same as above</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>notName([<span class="hljs-string">'*.rb'</span>, <span class="hljs-string">'*.py'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="file-contents">
+    File Contents
+    <a class="headerlink" href="#file-contents" title="Permalink to this headline">¶</a>
+</h3>
+<p>Find files by content with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_contains" class="reference external" title="Symfony\Component\Finder\Finder::contains()" rel="external noopener noreferrer" target="_blank">contains()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>contains(<span class="hljs-string">'lorem ipsum'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">contains()</code> method accepts strings or regexes:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>contains(<span class="hljs-string">'/lorem\s+ipsum$/i'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">notContains()</code> method excludes files containing given pattern:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>notContains(<span class="hljs-string">'dolor sit amet'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="path">
+    Path
+    <a class="headerlink" href="#path" title="Permalink to this headline">¶</a>
+</h3>
+<p>Find files and directories by path with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_path" class="reference external" title="Symfony\Component\Finder\Finder::path()" rel="external noopener noreferrer" target="_blank">path()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// matches files that contain "data" anywhere in their paths (files or directories)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'data'</span>);
+<span class="hljs-comment">// for example this will match data/*.xml and data.xml if they exist</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'data'</span>)<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'*.xml'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Use the forward slash (i.e. <code translate="no" class="notranslate">/</code>) as the directory separator on all platforms,
+including Windows. The component makes the necessary conversion internally.</p>
+<p>The <code translate="no" class="notranslate">path()</code> method accepts a string, a regular expression or an array of
+strings or regular expressions:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'foo/bar'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'/^foo\/bar/'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Multiple paths can be defined by chaining calls or passing an array:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'data'</span>)<span class="hljs-operator">-&gt;</span>path(<span class="hljs-string">'foo/bar'</span>);
+
+<span class="hljs-comment">// same as above</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>path([<span class="hljs-string">'data'</span>, <span class="hljs-string">'foo/bar'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Internally, strings are converted into regular expressions by escaping slashes
+and adding delimiters:</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Original Given String</th>
+                                            <th>Regular Expression Used</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">dirname</code></td>
+                                    <td><code translate="no" class="notranslate">/dirname/</code></td>
+                            </tr>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">a/b/c</code></td>
+                                    <td><code translate="no" class="notranslate">/a\/b\/c/</code></td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_notPath" class="reference external" title="Symfony\Component\Finder\Finder::notPath()" rel="external noopener noreferrer" target="_blank">notPath()</a> method excludes files
+by path:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>notPath(<span class="hljs-string">'other/dir'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Multiple paths can be excluded by chaining calls or passing an array:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>notPath(<span class="hljs-string">'first/dir'</span>)<span class="hljs-operator">-&gt;</span>notPath(<span class="hljs-string">'other/dir'</span>);
+
+<span class="hljs-comment">// same as above</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>notPath([<span class="hljs-string">'first/dir'</span>, <span class="hljs-string">'other/dir'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="file-size">
+    File Size
+    <a class="headerlink" href="#file-size" title="Permalink to this headline">¶</a>
+</h3>
+<p>Find files by size with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_size" class="reference external" title="Symfony\Component\Finder\Finder::size()" rel="external noopener noreferrer" target="_blank">size()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>size(<span class="hljs-string">'&lt; 1.5K'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Restrict by a size range by chaining calls or passing an array:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>size(<span class="hljs-string">'&gt;= 1K'</span>)<span class="hljs-operator">-&gt;</span>size(<span class="hljs-string">'&lt;= 2K'</span>);
+
+<span class="hljs-comment">// same as above</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>size([<span class="hljs-string">'&gt;= 1K'</span>, <span class="hljs-string">'&lt;= 2K'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The comparison operator can be any of the following: <code translate="no" class="notranslate">&gt;</code>, <code translate="no" class="notranslate">&gt;=</code>, <code translate="no" class="notranslate">&lt;</code>,
+<code translate="no" class="notranslate">&lt;=</code>, <code translate="no" class="notranslate">==</code>, <code translate="no" class="notranslate">!=</code>.</p>
+<p>The target value may use magnitudes of kilobytes (<code translate="no" class="notranslate">k</code>, <code translate="no" class="notranslate">ki</code>), megabytes
+(<code translate="no" class="notranslate">m</code>, <code translate="no" class="notranslate">mi</code>), or gigabytes (<code translate="no" class="notranslate">g</code>, <code translate="no" class="notranslate">gi</code>). Those suffixed with an <code translate="no" class="notranslate">i</code> use
+the appropriate <code translate="no" class="notranslate">2**n</code> version in accordance with the <a href="https://physics.nist.gov/cuu/Units/binary.html" class="reference external" rel="external noopener noreferrer" target="_blank">IEC standard</a>.</p>
+</div>
+<div class="section">
+<h3 id="file-date">
+    File Date
+    <a class="headerlink" href="#file-date" title="Permalink to this headline">¶</a>
+</h3>
+<p>Find files by last modified dates with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_date" class="reference external" title="Symfony\Component\Finder\Finder::date()" rel="external noopener noreferrer" target="_blank">date()</a> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>date(<span class="hljs-string">'since yesterday'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Restrict by a date range by chaining calls or passing an array:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>date(<span class="hljs-string">'&gt;= 2018-01-01'</span>)<span class="hljs-operator">-&gt;</span>date(<span class="hljs-string">'&lt;= 2018-12-31'</span>);
+
+<span class="hljs-comment">// same as above</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>date([<span class="hljs-string">'&gt;= 2018-01-01'</span>, <span class="hljs-string">'&lt;= 2018-12-31'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The comparison operator can be any of the following: <code translate="no" class="notranslate">&gt;</code>, <code translate="no" class="notranslate">&gt;=</code>, <code translate="no" class="notranslate">&lt;</code>,
+<code translate="no" class="notranslate">&lt;=</code>, <code translate="no" class="notranslate">==</code>. You can also use <code translate="no" class="notranslate">since</code> or <code translate="no" class="notranslate">after</code> as an alias for <code translate="no" class="notranslate">&gt;</code>,
+and <code translate="no" class="notranslate">until</code> or <code translate="no" class="notranslate">before</code> as an alias for <code translate="no" class="notranslate">&lt;</code>.</p>
+<p>The target value can be any date supported by <a href="https://secure.php.net/manual/en/function.strtotime.php" class="reference external" title="strtotime" rel="external noopener noreferrer" target="_blank">strtotime</a>.</p>
+</div>
+<div class="section">
+<h3 id="directory-depth">
+    Directory Depth
+    <a class="headerlink" href="#directory-depth" title="Permalink to this headline">¶</a>
+</h3>
+<p>By default, the Finder recursively traverses directories. Restrict the depth of
+traversing with <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_depth" class="reference external" title="Symfony\Component\Finder\Finder::depth()" rel="external noopener noreferrer" target="_blank">depth()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// this will only consider files/directories which are direct children</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>depth(<span class="hljs-string">'== 0'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>depth(<span class="hljs-string">'&lt; 3'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Restrict by a depth range by chaining calls or passing an array:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>depth(<span class="hljs-string">'&gt; 2'</span>)<span class="hljs-operator">-&gt;</span>depth(<span class="hljs-string">'&lt; 5'</span>);
+
+<span class="hljs-comment">// same as above</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>depth([<span class="hljs-string">'&gt; 2'</span>, <span class="hljs-string">'&lt; 5'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="custom-filtering">
+    Custom Filtering
+    <a class="headerlink" href="#custom-filtering" title="Permalink to this headline">¶</a>
+</h3>
+<p>To filter results with your own strategy, use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_filter" class="reference external" title="Symfony\Component\Finder\Finder::filter()" rel="external noopener noreferrer" target="_blank">filter()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filter</span> = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(\SplFileInfo <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>)</span>
+</span>{
+    <span class="hljs-keyword">if</span> (strlen(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>) &gt; <span class="hljs-number">10</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+    }
+};
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>filter(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filter</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">filter()</code> method takes a Closure as an argument. For each matching file,
+it is called with the file as a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/SplFileInfo.php" class="reference external" title="Symfony\Component\Finder\SplFileInfo" rel="external noopener noreferrer" target="_blank">SplFileInfo</a>
+instance. The file is excluded from the result set if the Closure returns
+<code translate="no" class="notranslate">false</code>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="sorting-results">
+    Sorting Results
+    <a class="headerlink" href="#sorting-results" title="Permalink to this headline">¶</a>
+</h2>
+<p>Sort the results by name, extension, size or type (directories first, then files):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>sortByName();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>sortByCaseInsensitiveName();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>sortByExtension();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>sortBySize();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>sortByType();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">sortByCaseInsensitiveName()</code>, <code translate="no" class="notranslate">sortByExtension()</code> and <code translate="no" class="notranslate">sortBySize()</code>
+methods were introduced in Symfony 6.2.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>By default, the <code translate="no" class="notranslate">sortByName()</code> method uses the <a href="https://secure.php.net/manual/en/function.strcmp.php" class="reference external" title="strcmp" rel="external noopener noreferrer" target="_blank">strcmp</a> PHP
+function (e.g. <code translate="no" class="notranslate">file1.txt</code>, <code translate="no" class="notranslate">file10.txt</code>, <code translate="no" class="notranslate">file2.txt</code>). Pass <code translate="no" class="notranslate">true</code>
+as its argument to use PHP's <a href="https://en.wikipedia.org/wiki/Natural_sort_order" class="reference external" rel="external noopener noreferrer" target="_blank">natural sort order</a> algorithm instead (e.g.
+<code translate="no" class="notranslate">file1.txt</code>, <code translate="no" class="notranslate">file2.txt</code>, <code translate="no" class="notranslate">file10.txt</code>).</p>
+<p>The <code translate="no" class="notranslate">sortByCaseInsensitiveName()</code> method uses the case insensitive
+<a href="https://secure.php.net/manual/en/function.strcasecmp.php" class="reference external" title="strcasecmp" rel="external noopener noreferrer" target="_blank">strcasecmp</a> PHP function. Pass <code translate="no" class="notranslate">true</code> as its argument to use
+PHP's case insensitive <a href="https://en.wikipedia.org/wiki/Natural_sort_order" class="reference external" rel="external noopener noreferrer" target="_blank">natural sort order</a> algorithm instead (i.e. the
+<a href="https://secure.php.net/manual/en/function.strnatcasecmp.php" class="reference external" title="strnatcasecmp" rel="external noopener noreferrer" target="_blank">strnatcasecmp</a> PHP function)</p>
+</div>
+<p>Sort the files and directories by the last accessed, changed or modified time:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>sortByAccessedTime();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>sortByChangedTime();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>sortByModifiedTime();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also define your own sorting algorithm with the <code translate="no" class="notranslate">sort()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>sort(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(\SplFileInfo <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>a</span>, \SplFileInfo <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>b</span>)</span> </span>{
+    <span class="hljs-keyword">return</span> strcmp(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>a</span><span class="hljs-operator">-&gt;</span>getRealPath(), <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>b</span><span class="hljs-operator">-&gt;</span>getRealPath());
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can reverse any sorting by using the <code translate="no" class="notranslate">reverseSorting()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// results will be sorted "Z to A" instead of the default "A to Z"</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>sortByName()<span class="hljs-operator">-&gt;</span>reverseSorting();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Notice that the <code translate="no" class="notranslate">sort*</code> methods need to get all matching elements to do
+their jobs. For large iterators, it is slow.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="transforming-results-into-arrays">
+    Transforming Results into Arrays
+    <a class="headerlink" href="#transforming-results-into-arrays" title="Permalink to this headline">¶</a>
+</h2>
+<p>A Finder instance is an <a href="https://secure.php.net/manual/en/class.iteratoraggregate.php" class="reference external" title="IteratorAggregate" rel="external noopener noreferrer" target="_blank">IteratorAggregate</a> PHP class. So, in addition
+to iterating over the Finder results with <code translate="no" class="notranslate">foreach</code>, you can also convert it
+to an array with the <a href="https://secure.php.net/manual/en/function.iterator-to-array.php" class="reference external" title="iterator_to_array" rel="external noopener noreferrer" target="_blank">iterator_to_array</a> function, or get the
+number of items with <a href="https://secure.php.net/manual/en/function.iterator-count.php" class="reference external" title="iterator_count" rel="external noopener noreferrer" target="_blank">iterator_count</a>.</p>
+<p>If you call to the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/Finder.php#method_in" class="reference external" title="Symfony\Component\Finder\Finder::in()" rel="external noopener noreferrer" target="_blank">in()</a> method more
+than once to search through multiple locations, pass <code translate="no" class="notranslate">false</code> as a second
+parameter to <a href="https://secure.php.net/manual/en/function.iterator-to-array.php" class="reference external" title="iterator_to_array" rel="external noopener noreferrer" target="_blank">iterator_to_array</a> to avoid issues (a separate
+iterator is created for each location and, if you don't pass <code translate="no" class="notranslate">false</code> to
+<a href="https://secure.php.net/manual/en/function.iterator-to-array.php" class="reference external" title="iterator_to_array" rel="external noopener noreferrer" target="_blank">iterator_to_array</a>, keys of result sets are used and some of them
+might be duplicated and their values overwritten).</p>
+</div>
+<div class="section">
+<h2 id="reading-contents-of-returned-files">
+    Reading Contents of Returned Files
+    <a class="headerlink" href="#reading-contents-of-returned-files" title="Permalink to this headline">¶</a>
+</h2>
+<p>The contents of returned files can be read with
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Finder/SplFileInfo.php#method_getContents" class="reference external" title="Symfony\Component\Finder\SplFileInfo::getContents()" rel="external noopener noreferrer" target="_blank">getContents()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Finder</span>\<span class="hljs-title">Finder</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span> = <span class="hljs-keyword">new</span> Finder();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span><span class="hljs-operator">-&gt;</span>files()<span class="hljs-operator">-&gt;</span>in(<span class="hljs-keyword">__DIR__</span>);
+
+<span class="hljs-keyword">foreach</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>finder</span> <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span>) {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>contents</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>file</span><span class="hljs-operator">-&gt;</span>getContents();
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

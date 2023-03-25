@@ -1,0 +1,532 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-unit-test-your-forms">
+    How to Unit Test your Forms
+    <a class="headerlink" href="#how-to-unit-test-your-forms" title="Permalink to this headline">¶</a>
+</h1>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>This article is intended for developers who create
+<a href="create_custom_field_type.html" class="reference internal">custom form types</a>. If you are using
+the <a href="../reference/forms/types.html" class="reference internal">built-in Symfony form types</a> or the form
+types provided by third-party bundles, you don't need to unit test them.</p>
+</div>
+<p>The Form component consists of 3 core objects: a form type (implementing
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormTypeInterface.php" class="reference external" title="Symfony\Component\Form\FormTypeInterface" rel="external noopener noreferrer" target="_blank">FormTypeInterface</a>), the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Form.php" class="reference external" title="Symfony\Component\Form\Form" rel="external noopener noreferrer" target="_blank">Form</a> and the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormView.php" class="reference external" title="Symfony\Component\Form\FormView" rel="external noopener noreferrer" target="_blank">FormView</a>.</p>
+<p>The only class that is usually manipulated by programmers is the form type class
+which serves as a form blueprint. It is used to generate the <code translate="no" class="notranslate">Form</code> and the
+<code translate="no" class="notranslate">FormView</code>. You could test it directly by mocking its interactions with the
+factory but it would be complex. It is better to pass it to FormFactory like it
+is done in a real application. It is easier to bootstrap and you can trust
+the Symfony components enough to use them as a testing base.</p>
+<p>There is already a class that you can benefit from for testing:
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Test/TypeTestCase.php" class="reference external" title="Symfony\Component\Form\Test\TypeTestCase" rel="external noopener noreferrer" target="_blank">TypeTestCase</a>. It is used to test the
+core types and you can use it to test your types too.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Depending on the way you installed your Symfony or Symfony Form component
+the tests may not be downloaded. Use the <code translate="no" class="notranslate">--prefer-source</code> option with
+Composer if this is the case.</p>
+</div>
+<div class="section">
+<h2 id="the-basics">
+    The Basics
+    <a class="headerlink" href="#the-basics" title="Permalink to this headline">¶</a>
+</h2>
+<p>The simplest <code translate="no" class="notranslate">TypeTestCase</code> implementation looks like the following:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// tests/Form/Type/TestedTypeTest.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TestedType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Model</span>\<span class="hljs-title">TestObject</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Test</span>\<span class="hljs-title">TypeTestCase</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestedTypeTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TypeTestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testSubmitValidData</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>formData</span> = [
+            <span class="hljs-string">'test'</span> =&gt; <span class="hljs-string">'test'</span>,
+            <span class="hljs-string">'test2'</span> =&gt; <span class="hljs-string">'test2'</span>,
+        ];
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>model</span> = <span class="hljs-keyword">new</span> TestObject();
+        <span class="hljs-comment">// $model will retrieve data from the form submission; pass it as the second argument</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>factory<span class="hljs-operator">-&gt;</span>create(TestedType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>model</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expected</span> = <span class="hljs-keyword">new</span> TestObject();
+        <span class="hljs-comment">// ...populate $expected properties with the data stored in $formData</span>
+
+        <span class="hljs-comment">// submit the data to the form directly</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>submit(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>formData</span>);
+
+        <span class="hljs-comment">// This check ensures there are no transformation failures</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertTrue(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isSynchronized());
+
+        <span class="hljs-comment">// check that $model was modified as expected when the form was submitted</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertEquals(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expected</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>model</span>);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testCustomFormView</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>formData</span> = <span class="hljs-keyword">new</span> TestObject();
+        <span class="hljs-comment">// ... prepare the data as you need</span>
+
+        <span class="hljs-comment">// The initial data may be used to compute custom view variables</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>view</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>factory<span class="hljs-operator">-&gt;</span>create(TestedType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>formData</span>)
+            <span class="hljs-operator">-&gt;</span>createView();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertArrayHasKey(<span class="hljs-string">'custom_var'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>view</span><span class="hljs-operator">-&gt;</span>vars);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertSame(<span class="hljs-string">'expected value'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>view</span><span class="hljs-operator">-&gt;</span>vars[<span class="hljs-string">'custom_var'</span>]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>So, what does it test? Here comes a detailed explanation.</p>
+<p>First you verify if the <code translate="no" class="notranslate">FormType</code> compiles. This includes basic class
+inheritance, the <code translate="no" class="notranslate">buildForm()</code> method and options resolution. This should
+be the first test you write:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>factory<span class="hljs-operator">-&gt;</span>create(TestedType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>formData</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This test checks that none of your data transformers used by the form
+produces an error. The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/FormInterface.php#method_isSynchronized" class="reference external" title="Symfony\Component\Form\FormInterface::isSynchronized()" rel="external noopener noreferrer" target="_blank">isSynchronized()</a>
+method is only set to <code translate="no" class="notranslate">false</code> if a data transformer throws an exception:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>submit(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>formData</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertTrue(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span><span class="hljs-operator">-&gt;</span>isSynchronized());</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Don't test the validation: it is applied by a listener that is not
+active in the test case and it relies on validation configuration.
+Instead, unit test your custom constraints directly or read how
+to <a href="unit_testing.html#form_unit_testing-adding_custom_extensions" class="reference internal">add custom extensions</a>
+in the last section of this page.</p>
+</div>
+<p>Next, verify the submission and mapping of the form. The test below checks if
+all the fields are correctly specified:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertEquals(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expected</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>formData</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Finally, check the creation of the <code translate="no" class="notranslate">FormView</code>. You can check that a custom
+variable exists and will be available in your form themes:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertArrayHasKey(<span class="hljs-string">'custom_var'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>view</span><span class="hljs-operator">-&gt;</span>vars);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertSame(<span class="hljs-string">'expected value'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>view</span><span class="hljs-operator">-&gt;</span>vars[<span class="hljs-string">'custom_var'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Use <a href="https://phpunit.readthedocs.io/en/9.5/writing-tests-for-phpunit.html#data-providers" class="reference external" rel="external noopener noreferrer" target="_blank">PHPUnit data providers</a> to test multiple form conditions using
+the same test code.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When your type relies on the <code translate="no" class="notranslate">EntityType</code>, you should register the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Doctrine/Form/DoctrineOrmExtension.php" class="reference external" title="Symfony\Bridge\Doctrine\Form\DoctrineOrmExtension" rel="external noopener noreferrer" target="_blank">DoctrineOrmExtension</a>, which will
+need to mock the <code translate="no" class="notranslate">ManagerRegistry</code>.</p>
+<p>However, If you cannot use a mock to write your test, you should extend
+the <code translate="no" class="notranslate">KernelTestCase</code> instead and use the <code translate="no" class="notranslate">form.factory</code> service to
+create the form.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="testing-types-registered-as-services">
+    Testing Types Registered as Services
+    <a class="headerlink" href="#testing-types-registered-as-services" title="Permalink to this headline">¶</a>
+</h2>
+<p>Your form may be used as a service, as it depends on other services (e.g. the
+Doctrine entity manager). In these cases, using the above code won't work, as
+the Form component instantiates the form type without passing any arguments
+to the constructor.</p>
+<p>To solve this, you have to mock the injected dependencies, instantiate your own
+form type and use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/PreloadedExtension.php" class="reference external" title="Symfony\Component\Form\PreloadedExtension" rel="external noopener noreferrer" target="_blank">PreloadedExtension</a> to
+make sure the <code translate="no" class="notranslate">FormRegistry</code> uses the created instance:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// tests/Form/Type/TestedTypeTest.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TestedType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Persistence</span>\<span class="hljs-title">ObjectManager</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">PreloadedExtension</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Test</span>\<span class="hljs-title">TypeTestCase</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestedTypeTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TypeTestCase</span>
+</span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>objectManager</span>;
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setUp</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// mock any dependencies</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>objectManager = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createMock(ObjectManager<span class="hljs-operator">::</span>class);
+
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>setUp();
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getExtensions</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// create a type instance with the mocked dependencies</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span> = <span class="hljs-keyword">new</span> TestedType(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>objectManager);
+
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-comment">// register the type instances with the PreloadedExtension</span>
+            <span class="hljs-keyword">new</span> PreloadedExtension([<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span>], []),
+        ];
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testSubmitValidData</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-comment">// Instead of creating a new instance, the one created in</span>
+        <span class="hljs-comment">// getExtensions() will be used.</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>factory<span class="hljs-operator">-&gt;</span>create(TestedType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>formData</span>);
+
+        <span class="hljs-comment">// ... your test</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="form_unit_testing-adding_custom_extensions"></span>
+</div>
+<div class="section">
+<h2 id="adding-custom-extensions">
+    Adding Custom Extensions
+    <a class="headerlink" href="#adding-custom-extensions" title="Permalink to this headline">¶</a>
+</h2>
+<p>It often happens that you use some options that are added by
+<a href="create_form_type_extension.html" class="reference internal">form extensions</a>. One of the
+cases may be the <code translate="no" class="notranslate">ValidatorExtension</code> with its <code translate="no" class="notranslate">invalid_message</code> option.
+The <code translate="no" class="notranslate">TypeTestCase</code> only loads the core form extension, which means an
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/OptionsResolver/Exception/InvalidOptionsException.php" class="reference external" title="Symfony\Component\OptionsResolver\Exception\InvalidOptionsException" rel="external noopener noreferrer" target="_blank">InvalidOptionsException</a>
+will be raised if you try to test a class that depends on other extensions.
+The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Test/TypeTestCase.php#method_getExtensions" class="reference external" title="Symfony\Component\Form\Test\TypeTestCase::getExtensions()" rel="external noopener noreferrer" target="_blank">getExtensions()</a> method
+allows you to return a list of extensions to register:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// tests/Form/Type/TestedTypeTest.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">ValidatorExtension</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Validation</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestedTypeTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TypeTestCase</span>
+</span>{
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getExtensions</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span> = Validation<span class="hljs-operator">::</span>createValidator();
+
+        <span class="hljs-comment">// or if you also need to read constraints from annotations</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span> = Validation<span class="hljs-operator">::</span>createValidatorBuilder()
+            <span class="hljs-operator">-&gt;</span>enableAnnotationMapping(<span class="hljs-keyword">true</span>)
+            <span class="hljs-operator">-&gt;</span>addDefaultDoctrineAnnotationReader()
+            <span class="hljs-operator">-&gt;</span>getValidator();
+
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-keyword">new</span> ValidatorExtension(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span>),
+        ];
+    }
+
+    <span class="hljs-comment">// ... your tests</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>By default only the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Extension/Core/CoreExtension.php" class="reference external" title="Symfony\Component\Form\Extension\Core\CoreExtension" rel="external noopener noreferrer" target="_blank">CoreExtension</a> is
+registered in tests. You can find other extensions from the Form component
+in the <code translate="no" class="notranslate">Symfony\Component\Form\Extension</code> namespace.</p>
+</div>
+<p>It is also possible to load custom form types, form type extensions or type
+guessers using the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Test/FormIntegrationTestCase.php#method_getTypes" class="reference external" title="Symfony\Component\Form\Test\FormIntegrationTestCase::getTypes()" rel="external noopener noreferrer" target="_blank">getTypes()</a>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Test/FormIntegrationTestCase.php#method_getTypeExtensions" class="reference external" title="Symfony\Component\Form\Test\FormIntegrationTestCase::getTypeExtensions()" rel="external noopener noreferrer" target="_blank">getTypeExtensions()</a>
+and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Test/FormIntegrationTestCase.php#method_getTypeGuessers" class="reference external" title="Symfony\Component\Form\Test\FormIntegrationTestCase::getTypeGuessers()" rel="external noopener noreferrer" target="_blank">getTypeGuessers()</a>
+methods.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

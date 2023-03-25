@@ -1,0 +1,551 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="flex-compose-your-application">
+    Flex: Compose your Application
+    <a class="headerlink" href="#flex-compose-your-application" title="Permalink to this headline">¶</a>
+</h1>
+<p>After reading the first part of this tutorial, you have decided that Symfony was
+worth another 10 minutes. Great choice! In this second part, you'll learn about
+Symfony Flex: the amazing tool that makes adding new features as simple as running
+one command. It's also the reason why Symfony is ideal for a small micro-service
+or a huge application. Curious? Perfect!</p>
+<div class="section">
+<h2 id="symfony-start-micro">
+    Symfony: Start Micro!
+    <a class="headerlink" href="#symfony-start-micro" title="Permalink to this headline">¶</a>
+</h2>
+<p>Unless you're building a pure API (more on that soon!), you'll probably want to
+render HTML. To do that, you'll use <a href="https://twig.symfony.com/" class="reference external">Twig</a>. Twig is a flexible, fast, and secure
+template engine for PHP. It makes your templates more readable and concise; it also
+makes them more friendly for web designers.</p>
+<p>Is Twig already installed in our application? Actually, not yet! And that's great!
+When you start a new Symfony project, it's <em>small</em>:  only the most critical dependencies
+are included in your <code translate="no" class="notranslate">composer.json</code> file:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">&quot;require&quot;: {
+    &quot;...&quot;,
+    &quot;symfony/console&quot;: &quot;^6.1&quot;,
+    &quot;symfony/flex&quot;: &quot;^2.0&quot;,
+    &quot;symfony/framework-bundle&quot;: &quot;^6.1&quot;,
+    &quot;symfony/yaml&quot;: &quot;^6.1&quot;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This makes Symfony different from any other PHP framework! Instead of starting with
+a <em>bulky</em> app with <em>every</em> possible feature you might ever need, a Symfony app is
+small, simple and <em>fast</em>. And you're in total control of what you add.</p>
+</div>
+<div class="section">
+<h2 id="flex-recipes-and-aliases">
+    Flex Recipes and Aliases
+    <a class="headerlink" href="#flex-recipes-and-aliases" title="Permalink to this headline">¶</a>
+</h2>
+<p>So how can we install and configure Twig? By running one single command:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require twig</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Two <em>very</em> interesting things happen behind the scenes thanks to Symfony Flex: a
+Composer plugin that is already installed in our project.</p>
+<p>First, <code translate="no" class="notranslate">twig</code> is not the name of a Composer package: it's a Flex <em>alias</em> that
+points to <code translate="no" class="notranslate">symfony/twig-bundle</code>. Flex resolves that alias for Composer.</p>
+<p>And second, Flex installs a <em>recipe</em> for <code translate="no" class="notranslate">symfony/twig-bundle</code>. What's a recipe?
+It's a way for a library to automatically configure itself by adding and modifying
+files. Thanks to recipes, adding features is seamless and automated: install a package
+and you're done!</p>
+<p>You can find a full list of recipes and aliases inside <a href="https://github.com/symfony/recipes/blob/flex/main/RECIPES.md" class="reference external" rel="external noopener noreferrer" target="_blank">RECIPES.md on the recipes repository</a>.</p>
+<p>What did this recipe do? In addition to automatically enabling the feature in
+<code translate="no" class="notranslate">config/bundles.php</code>, it added 3 things:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">config/packages/twig.yaml</code></dt>
+        
+        <dd>
+                            A configuration file that sets up Twig with sensible defaults.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">config/packages/test/twig.yaml</code></dt>
+        
+        <dd>
+                            A configuration file that changes some Twig options when running tests.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">templates/</code></dt>
+        
+        <dd>
+                            This is the directory where template files will live. The recipe also added
+a <code translate="no" class="notranslate">base.html.twig</code> layout file.
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h2 id="twig-rendering-a-template">
+    Twig: Rendering a Template
+    <a class="headerlink" href="#twig-rendering-a-template" title="Permalink to this headline">¶</a>
+</h2>
+<p>Thanks to Flex, after one command, you can start using Twig immediately:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">&lt;?php
+  // src/Controller/DefaultController.php
+  namespace App\Controller;
+
+  use Symfony\Component\Routing\Annotation\Route;
+<span class="hljs-deletion">- use Symfony\Component\HttpFoundation\Response;</span>
+<span class="hljs-addition">+ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;</span>
+
+<span class="hljs-deletion">- class DefaultController</span>
+<span class="hljs-addition">+ class DefaultController extends AbstractController</span>
+  {
+       #[Route('/hello/{name}', methods: ['GET'])]
+       public function index(string $name): Response
+       {
+<span class="hljs-deletion">-        return new Response("Hello $name!");</span>
+<span class="hljs-addition">+        return $this-&gt;render('default/index.html.twig', [</span>
+<span class="hljs-addition">+            'name' =&gt; $name,</span>
+<span class="hljs-addition">+        ]);</span>
+       }
+  }</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>By extending <code translate="no" class="notranslate">AbstractController</code>, you now have access to a number of shortcut
+methods and tools, like <code translate="no" class="notranslate">render()</code>. Create the new template:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/default/index.html.twig #}</span><span class="xml">
+<span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Hello </span><span class="hljs-template-variable">{{ name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! The <code translate="no" class="notranslate">{{ name }}</code> syntax will print the <code translate="no" class="notranslate">name</code> variable that's passed
+in from the controller. If you're new to Twig, welcome! You'll learn more about
+its syntax and power later.</p>
+<p>But, right now, the page <em>only</em> contains the <code translate="no" class="notranslate">h1</code> tag. To give it an HTML layout,
+extend <code translate="no" class="notranslate">base.html.twig</code>:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/default/index.html.twig #}</span><span class="xml">
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">extends</span></span> 'base.html.twig' %}</span><span class="xml">
+
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> body %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Hello </span><span class="hljs-template-variable">{{ name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This is called template inheritance: our page now inherits the HTML structure from
+<code translate="no" class="notranslate">base.html.twig</code>.</p>
+</div>
+<div class="section">
+<h2 id="profiler-debugging-paradise">
+    Profiler: Debugging Paradise
+    <a class="headerlink" href="#profiler-debugging-paradise" title="Permalink to this headline">¶</a>
+</h2>
+<p>One of the <em>coolest</em> features of Symfony isn't even installed yet! Let's fix that:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require profiler</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Yes! This is another alias! And Flex <em>also</em> installs another recipe, which automates
+the configuration of Symfony's Profiler. What's the result? Refresh!</p>
+<p>See that black bar on the bottom? That's the web debug toolbar, and it's your new
+best friend. By hovering over each icon, you can get information about what controller
+was executed, performance information, cache hits &amp; misses and a lot more. Click
+any icon to go into the <em>profiler</em> where you have even <em>more</em> detailed debugging
+and performance data!</p>
+<p>Oh, and as you install more libraries, you'll get more tools (like a web debug toolbar
+icon that shows database queries).</p>
+<p>You can now directly use the profiler because it configured <em>itself</em> thanks to
+the recipe. What else can we install?</p>
+</div>
+<div class="section">
+<h2 id="rich-api-support">
+    Rich API Support
+    <a class="headerlink" href="#rich-api-support" title="Permalink to this headline">¶</a>
+</h2>
+<p>Are you building an API? You can already return JSON from any controller:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/DefaultController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">JsonResponse</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DefaultController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-comment">#[Route('/api/hello/{name}', methods: ['GET'])]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">apiHello</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>)</span>: <span class="hljs-title">JsonResponse</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>json([
+            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>,
+            <span class="hljs-string">'symfony'</span> =&gt; <span class="hljs-string">'rocks'</span>,
+        ]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>But for a <em>truly</em> rich API, try installing <a href="https://api-platform.com/" class="reference external" rel="external noopener noreferrer" target="_blank">API Platform</a>:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require api</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This is an alias to <code translate="no" class="notranslate">api-platform/api-pack</code> <a href="../setup.html#symfony-packs" class="reference internal">Symfony pack</a>,
+which has dependencies on several other packages, like Symfony's Validator and
+Security components, as well as the Doctrine ORM. In fact, Flex installed <em>5</em> recipes!</p>
+<p>But like usual, we can immediately start using the new library. Want to create a
+rich API for a <code translate="no" class="notranslate">product</code> table? Create a <code translate="no" class="notranslate">Product</code> entity and give it the
+<code translate="no" class="notranslate">#[ApiResource]</code> attribute:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Entity/Product.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">ApiPlatform</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">ApiResource</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">Mapping</span> <span class="hljs-title">as</span> <span class="hljs-title">ORM</span>;
+
+<span class="hljs-comment">#[ORM\Entity]</span>
+<span class="hljs-comment">#[ApiResource]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Product</span>
+</span>{
+    <span class="hljs-comment">#[ORM\Id]</span>
+    <span class="hljs-comment">#[ORM\GeneratedValue(strategy: 'AUTO')]</span>
+    <span class="hljs-comment">#[ORM\Column(type: 'integer')]</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>;
+
+    <span class="hljs-comment">#[ORM\Column(type: 'string')]</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>;
+
+    <span class="hljs-comment">#[ORM\Column(type: 'integer')]</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span>;
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Done! You now have endpoints to list, add, update and delete products! Don't believe
+me? List your routes by running:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console debug:router
+
+------------------------------ -------- -------------------------------------
+ Name                           Method   Path
+------------------------------ -------- -------------------------------------
+ api_products_get_collection    GET      /api/products.{_format}
+ api_products_post_collection   POST     /api/products.{_format}
+ api_products_get_item          GET      /api/products/{id}.{_format}
+ api_products_put_item          PUT      /api/products/{id}.{_format}
+ api_products_delete_item       DELETE   /api/products/{id}.{_format}
+ ...
+------------------------------ -------- -------------------------------------</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id=" easily-remove-recipes"></span>
+</div>
+<div class="section">
+<h2 id="removing-recipes">
+    Removing Recipes
+    <a class="headerlink" href="#removing-recipes" title="Permalink to this headline">¶</a>
+</h2>
+<p>Not convinced yet? No problem: remove the library:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer remove api</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Flex will <em>uninstall</em> the recipes: removing files and undoing changes to put your
+app back in its original state. Experiment without worry.</p>
+</div>
+<div class="section">
+<h2 id="more-features-architecture-and-speed">
+    More Features, Architecture and Speed
+    <a class="headerlink" href="#more-features-architecture-and-speed" title="Permalink to this headline">¶</a>
+</h2>
+<p>I hope you're as excited about Flex as I am! But we still have <em>one</em> more chapter,
+and it's the most important yet. I want to show you how Symfony empowers you to quickly
+build features <em>without</em> sacrificing code quality or performance. It's all about
+the service container, and it's Symfony's super power. Read on: about <a href="the_architecture.html" class="reference internal">The Architecture</a>.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,230 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="cache-invalidation">
+    Cache Invalidation
+    <a class="headerlink" href="#cache-invalidation" title="Permalink to this headline">¶</a>
+</h1>
+<p>Cache invalidation is the process of removing all cached items related to a
+change in the state of your model. The most basic kind of invalidation is direct
+item deletion. But when the state of a primary resource has spread across
+several cached items, keeping them in sync can be difficult.</p>
+<p>The Symfony Cache component provides two mechanisms to help solve this problem:</p>
+<ul>
+    <li><a href="cache_invalidation.html#cache-component-tags" class="reference internal">Tags-based invalidation</a> for managing data dependencies;</li>
+<li><a href="cache_invalidation.html#cache-component-expiration" class="reference internal">Expiration based invalidation</a> for time-related dependencies.</li>
+</ul>
+<span id="cache-component-tags"></span>
+<div class="section">
+<h2 id="using-cache-tags">
+    Using Cache Tags
+    <a class="headerlink" href="#using-cache-tags" title="Permalink to this headline">¶</a>
+</h2>
+<p>To benefit from tags-based invalidation, you need to attach the proper tags to
+each cached item. Each tag is a plain string identifier that you can use at any
+time to trigger the removal of all items associated with this tag.</p>
+<p>To attach tags to cached items, you need to use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Contracts/Cache/ItemInterface.php#method_tag" class="reference external" title="Symfony\Contracts\Cache\ItemInterface::tag()" rel="external noopener noreferrer" target="_blank">tag()</a> method that is implemented by
+cache items:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>item</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'cache_key'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ItemInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>item</span>)</span> </span>{
+    <span class="hljs-comment">// [...]</span>
+    <span class="hljs-comment">// add one or more tags</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>item</span><span class="hljs-operator">-&gt;</span>tag(<span class="hljs-string">'tag_1'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>item</span><span class="hljs-operator">-&gt;</span>tag([<span class="hljs-string">'tag_2'</span>, <span class="hljs-string">'tag_3'</span>]);
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cachedValue</span>;
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If <code translate="no" class="notranslate">$cache</code> implements <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Contracts/Cache/TagAwareCacheInterface.php" class="reference external" title="Symfony\Contracts\Cache\TagAwareCacheInterface" rel="external noopener noreferrer" target="_blank">TagAwareCacheInterface</a>,
+you can invalidate the cached items by calling
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Contracts/Cache/TagAwareCacheInterface.php#method_invalidateTags" class="reference external" title="Symfony\Contracts\Cache\TagAwareCacheInterface::invalidateTags()" rel="external noopener noreferrer" target="_blank">invalidateTags()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// invalidate all items related to `tag_1` or `tag_3`</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>invalidateTags([<span class="hljs-string">'tag_1'</span>, <span class="hljs-string">'tag_3'</span>]);
+
+<span class="hljs-comment">// if you know the cache key, you can also delete the item directly</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>delete(<span class="hljs-string">'cache_key'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Using tag invalidation is very useful when tracking cache keys becomes difficult.</p>
+<div class="section">
+<h3 id="tag-aware-adapters">
+    Tag Aware Adapters
+    <a class="headerlink" href="#tag-aware-adapters" title="Permalink to this headline">¶</a>
+</h3>
+<p>To store tags, you need to wrap a cache adapter with the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/TagAwareAdapter.php" class="reference external" title="Symfony\Component\Cache\Adapter\TagAwareAdapter" rel="external noopener noreferrer" target="_blank">TagAwareAdapter</a> class or implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Contracts/Cache/TagAwareCacheInterface.php" class="reference external" title="Symfony\Contracts\Cache\TagAwareCacheInterface" rel="external noopener noreferrer" target="_blank">TagAwareCacheInterface</a> and its
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/TagAwareAdapterInterface.php#method_invalidateTags" class="reference external" title="Symfony\Component\Cache\Adapter\TagAwareAdapterInterface::invalidateTags()" rel="external noopener noreferrer" target="_blank">invalidateTags()</a>
+method.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When using a Redis backend, consider using <a href="../../components/cache/adapters/redis_adapter.html#redis-tag-aware-adapter" class="reference internal">RedisTagAwareAdapter</a>
+which is optimized for this purpose. When using filesystem, likewise consider to use
+<a href="../../components/cache/adapters/filesystem_adapter.html#filesystem-tag-aware-adapter" class="reference internal">FilesystemTagAwareAdapter</a>.</p>
+</div>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/TagAwareAdapter.php" class="reference external" title="Symfony\Component\Cache\Adapter\TagAwareAdapter" rel="external noopener noreferrer" target="_blank">TagAwareAdapter</a> class implements
+instantaneous invalidation (time complexity is <code translate="no" class="notranslate">O(N)</code> where <code translate="no" class="notranslate">N</code> is the number
+of invalidated tags). It needs one or two cache adapters: the first required
+one is used to store cached items; the second optional one is used to store tags
+and their invalidation version number (conceptually similar to their latest
+invalidation date). When only one adapter is used, items and tags are all stored
+in the same place. By using two adapters, you can e.g. store some big cached items
+on the filesystem or in the database and keep tags in a Redis database to sync all
+your fronts and have very fast invalidation checks:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">FilesystemAdapter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">RedisAdapter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">TagAwareAdapter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span> = <span class="hljs-keyword">new</span> TagAwareAdapter(
+    <span class="hljs-comment">// Adapter for cached items</span>
+    <span class="hljs-keyword">new</span> FilesystemAdapter(),
+    <span class="hljs-comment">// Adapter for tags</span>
+    <span class="hljs-keyword">new</span> RedisAdapter(<span class="hljs-string">'redis://localhost'</span>)
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/TagAwareAdapter.php" class="reference external" title="Symfony\Component\Cache\Adapter\TagAwareAdapter" rel="external noopener noreferrer" target="_blank">TagAwareAdapter</a>
+implements <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/PruneableInterface.php" class="reference external" title="Symfony\Component\Cache\PruneableInterface" rel="external noopener noreferrer" target="_blank">PruneableInterface</a>,
+enabling manual
+<a href="cache_pools.html#component-cache-cache-pool-prune" class="reference internal">pruning of expired cache entries</a> by
+calling its <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/TagAwareAdapter.php#method_prune" class="reference external" title="Symfony\Component\Cache\Adapter\TagAwareAdapter::prune()" rel="external noopener noreferrer" target="_blank">prune()</a>
+method (assuming the wrapped adapter itself implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/PruneableInterface.php" class="reference external" title="Symfony\Component\Cache\PruneableInterface" rel="external noopener noreferrer" target="_blank">PruneableInterface</a>).</p>
+</div>
+<span id="cache-component-expiration"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="using-cache-expiration">
+    Using Cache Expiration
+    <a class="headerlink" href="#using-cache-expiration" title="Permalink to this headline">¶</a>
+</h2>
+<p>If your data is valid only for a limited period of time, you can specify their
+lifetime or their expiration date with the PSR-6 interface, as explained in the
+<a href="cache_items.html" class="reference internal">Cache Items</a> article.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

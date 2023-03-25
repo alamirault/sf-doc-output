@@ -1,0 +1,411 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-configure-symfony-to-work-behind-a-load-balancer-or-a-reverse-proxy">
+    How to Configure Symfony to Work behind a Load Balancer or a Reverse Proxy
+    <a class="headerlink" href="#how-to-configure-symfony-to-work-behind-a-load-balancer-or-a-reverse-proxy" title="Permalink to this headline">¶</a>
+</h1>
+<p>When you deploy your application, you may be behind a load balancer (e.g.
+an AWS Elastic Load Balancing) or a reverse proxy (e.g. Varnish for
+<a href="../http_cache.html" class="reference internal">caching</a>).</p>
+<p>For the most part, this doesn't cause any problems with Symfony. But, when
+a request passes through a proxy, certain request information is sent using
+either the standard <code translate="no" class="notranslate">Forwarded</code> header or <code translate="no" class="notranslate">X-Forwarded-*</code> headers. For example,
+instead of reading the <code translate="no" class="notranslate">REMOTE_ADDR</code> header (which will now be the IP address of
+your reverse proxy), the user's true IP will be stored in a standard <code translate="no" class="notranslate">Forwarded: for=&quot;...&quot;</code>
+header or a <code translate="no" class="notranslate">X-Forwarded-For</code> header.</p>
+<p>If you don't configure Symfony to look for these headers, you'll get incorrect
+information about the client's IP address, whether or not the client is connecting
+via HTTPS, the client's port and the hostname being requested.</p>
+<span id="request-set-trusted-proxies"></span>
+<div class="section">
+<h2 id="solution-settrustedproxies">
+    Solution: <code translate="no" class="notranslate">setTrustedProxies()</code>
+    <a class="headerlink" href="#solution-settrustedproxies" title="Permalink to this headline">¶</a>
+</h2>
+<p>To fix this, you need to tell Symfony which reverse proxy IP addresses to trust
+and what headers your reverse proxy uses to send information:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-d7db4a4b6a8875642d9bd91fac40e2c595029932" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-3f78ea6f8dd1eb81106f0c52a5d3b9e83887903f" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-3d21eba2bd33accb0f7555d7e5b09b5981436b05" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-d7db4a4b6a8875642d9bd91fac40e2c595029932" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/framework.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-comment"># the IP address (or range) of your proxy</span>
+    <span class="hljs-attr">trusted_proxies:</span> <span class="hljs-string">'192.0.0.1,10.0.0.0/8'</span>
+    <span class="hljs-comment"># trust *all* "X-Forwarded-*" headers</span>
+    <span class="hljs-attr">trusted_headers:</span> <span class="hljs-string">['x-forwarded-for',</span> <span class="hljs-string">'x-forwarded-host'</span><span class="hljs-string">,</span> <span class="hljs-string">'x-forwarded-proto'</span><span class="hljs-string">,</span> <span class="hljs-string">'x-forwarded-port'</span><span class="hljs-string">,</span> <span class="hljs-string">'x-forwarded-prefix'</span><span class="hljs-string">]</span>
+    <span class="hljs-comment"># or, if your proxy instead uses the "Forwarded" header</span>
+    <span class="hljs-attr">trusted_headers:</span> <span class="hljs-string">['forwarded']</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-3f78ea6f8dd1eb81106f0c52a5d3b9e83887903f" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/framework.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- the IP address (or range) of your proxy --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:trusted-proxies</span>&gt;</span>192.0.0.1,10.0.0.0/8<span class="hljs-tag">&lt;/<span class="hljs-name">framework:trusted-proxies</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- trust *all* "X-Forwarded-*" headers --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:trusted-header</span>&gt;</span>x-forwarded-for<span class="hljs-tag">&lt;/<span class="hljs-name">framework:trusted-header</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:trusted-header</span>&gt;</span>x-forwarded-host<span class="hljs-tag">&lt;/<span class="hljs-name">framework:trusted-header</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:trusted-header</span>&gt;</span>x-forwarded-proto<span class="hljs-tag">&lt;/<span class="hljs-name">framework:trusted-header</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:trusted-header</span>&gt;</span>x-forwarded-port<span class="hljs-tag">&lt;/<span class="hljs-name">framework:trusted-header</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:trusted-header</span>&gt;</span>x-forwarded-prefix<span class="hljs-tag">&lt;/<span class="hljs-name">framework:trusted-header</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- or, if your proxy instead uses the "Forwarded" header --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:trusted-header</span>&gt;</span>forwarded<span class="hljs-tag">&lt;/<span class="hljs-name">framework:trusted-header</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-3d21eba2bd33accb0f7555d7e5b09b5981436b05" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/framework.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>
+        <span class="hljs-comment">// the IP address (or range) of your proxy</span>
+        <span class="hljs-operator">-&gt;</span>trustedProxies(<span class="hljs-string">'192.0.0.1,10.0.0.0/8'</span>)
+        <span class="hljs-comment">// trust *all* "X-Forwarded-*" headers (the ! prefix means to not trust those headers)</span>
+        <span class="hljs-operator">-&gt;</span>trustedHeaders([<span class="hljs-string">'x-forwarded-for'</span>, <span class="hljs-string">'x-forwarded-host'</span>, <span class="hljs-string">'x-forwarded-proto'</span>, <span class="hljs-string">'x-forwarded-port'</span>, <span class="hljs-string">'x-forwarded-prefix'</span>])
+        <span class="hljs-comment">// or, if your proxy instead uses the "Forwarded" header</span>
+        <span class="hljs-operator">-&gt;</span>trustedHeaders([<span class="hljs-string">'forwarded'</span>])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Enabling the <code translate="no" class="notranslate">Request::HEADER_X_FORWARDED_HOST</code> option exposes the
+application to <a href="https://www.skeletonscribe.net/2013/05/practical-http-host-header-attacks.html" class="reference external" rel="external noopener noreferrer" target="_blank">HTTP Host header attacks</a>. Make sure the proxy really
+sends an <code translate="no" class="notranslate">x-forwarded-host</code> header.</p>
+</div>
+<p>The Request object has several <code translate="no" class="notranslate">Request::HEADER_*</code> constants that control exactly
+<em>which</em> headers from your reverse proxy are trusted. The argument is a bit field,
+so you can also pass your own value (e.g. <code translate="no" class="notranslate">0b00110</code>).</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>The &quot;trusted proxies&quot; feature does not work as expected when using the
+<a href="http://nginx.org/en/docs/http/ngx_http_realip_module.html" class="reference external" rel="external noopener noreferrer" target="_blank">nginx realip module</a>. Disable that module when serving Symfony applications.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="but-what-if-the-ip-of-my-reverse-proxy-changes-constantly">
+    But what if the IP of my Reverse Proxy Changes Constantly!
+    <a class="headerlink" href="#but-what-if-the-ip-of-my-reverse-proxy-changes-constantly" title="Permalink to this headline">¶</a>
+</h2>
+<p>Some reverse proxies (like AWS Elastic Load Balancing) don't have a
+static IP address or even a range that you can target with the CIDR notation.
+In this case, you'll need to - <em>very carefully</em> - trust <em>all</em> proxies.</p>
+<ol class="arabic">
+    <li>Configure your web server(s) to <em>not</em> respond to traffic from <em>any</em> clients
+other than your load balancers. For AWS, this can be done with <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/elb-security-groups.html" class="reference external" rel="external noopener noreferrer" target="_blank">security groups</a>.</li>
+<li><p>Once you've guaranteed that traffic will only come from your trusted reverse
+proxies, configure Symfony to <em>always</em> trust incoming request:</p>
+<blockquote><div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/framework.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-comment"># trust *all* requests (the 'REMOTE_ADDR' string is replaced at</span>
+    <span class="hljs-comment"># run time by $_SERVER['REMOTE_ADDR'])</span>
+    <span class="hljs-attr">trusted_proxies:</span> <span class="hljs-string">'127.0.0.1,REMOTE_ADDR'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</blockquote></li>
+</ol>
+<p>That's it! It's critical that you prevent traffic from all non-trusted sources.
+If you allow outside traffic, they could &quot;spoof&quot; their true IP address and
+other information.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>In applications using <a href="../setup.html#symfony-flex" class="reference internal">Symfony Flex</a> you can set the
+<code translate="no" class="notranslate">TRUSTED_PROXIES</code> env var:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash"><span class="hljs-comment"># .env</span>
+TRUSTED_PROXIES=127.0.0.1,REMOTE_ADDR</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/framework.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">trusted_proxies:</span> <span class="hljs-string">'%env(TRUSTED_PROXIES)%'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<p>If you are also using a reverse proxy on top of your load balancer (e.g.
+<a href="https://en.wikipedia.org/wiki/Amazon_CloudFront" class="reference external" rel="external noopener noreferrer" target="_blank">CloudFront</a>), calling <code translate="no" class="notranslate">$request-&gt;server-&gt;get(&#039;REMOTE_ADDR&#039;)</code> won't be
+enough, as it will only trust the node sitting directly above your application
+(in this case your load balancer). You also need to append the IP addresses or
+ranges of any additional proxy (e.g. <a href="https://ip-ranges.amazonaws.com/ip-ranges.json" class="reference external" rel="external noopener noreferrer" target="_blank">CloudFront IP ranges</a>) to the array of
+trusted proxies.</p>
+</div>
+<div class="section">
+<h2 id="custom-headers-when-using-a-reverse-proxy">
+    Custom Headers When Using a Reverse Proxy
+    <a class="headerlink" href="#custom-headers-when-using-a-reverse-proxy" title="Permalink to this headline">¶</a>
+</h2>
+<p>Some reverse proxies (like <a href="https://en.wikipedia.org/wiki/Amazon_CloudFront" class="reference external" rel="external noopener noreferrer" target="_blank">CloudFront</a> with <code translate="no" class="notranslate">CloudFront-Forwarded-Proto</code>)
+may force you to use a custom header. For instance you have
+<code translate="no" class="notranslate">Custom-Forwarded-Proto</code> instead of <code translate="no" class="notranslate">X-Forwarded-Proto</code>.</p>
+<p>In this case, you'll need to set the header <code translate="no" class="notranslate">X-Forwarded-Proto</code> with the value
+of <code translate="no" class="notranslate">Custom-Forwarded-Proto</code> early enough in your application, i.e. before
+handling the request:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// public/index.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'HTTP_X_FORWARDED_PROTO'</span>] = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'HTTP_CUSTOM_FORWARDED_PROTO'</span>];
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

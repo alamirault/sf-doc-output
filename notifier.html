@@ -1,0 +1,2442 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="creating-and-sending-notifications">
+    Creating and Sending Notifications
+    <a class="headerlink" href="#creating-and-sending-notifications" title="Permalink to this headline">¶</a>
+</h1>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<p>Current web applications use many different channels to send messages to
+the users (e.g. SMS, Slack messages, emails, push notifications, etc.). The
+Notifier component in Symfony is an abstraction on top of all these
+channels. It provides a dynamic way to manage how the messages are sent.
+Get the Notifier installed using:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/notifier</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="channels-chatters-texters-email-and-browser"></span>
+</div>
+<div class="section">
+<h2 id="channels-chatters-texters-email-browser-and-push">
+    Channels: Chatters, Texters, Email, Browser and Push
+    <a class="headerlink" href="#channels-chatters-texters-email-browser-and-push" title="Permalink to this headline">¶</a>
+</h2>
+<p>The notifier component can send notifications to different channels. Each
+channel can integrate with different providers (e.g. Slack or Twilio SMS)
+by using transports.</p>
+<p>The notifier component supports the following channels:</p>
+<ul>
+    <li><a href="notifier.html#notifier-sms-channel" class="reference internal">SMS channel</a> sends notifications to phones via
+SMS messages;</li>
+<li><a href="notifier.html#notifier-chat-channel" class="reference internal">Chat channel</a> sends notifications to chat
+services like Slack and Telegram;</li>
+<li><a href="notifier.html#notifier-email-channel" class="reference internal">Email channel</a> integrates the <a href="mailer.html" class="reference internal">Symfony Mailer</a>;</li>
+<li>Browser channel uses <a href="session.html#flash-messages" class="reference internal">flash messages</a>.</li>
+<li><a href="notifier.html#notifier-push-channel" class="reference internal">Push channel</a> sends notifications to phones and browsers via push notifications.</li>
+</ul>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Use <a href="configuration/secrets.html" class="reference internal">secrets</a> to securely store your
+API's tokens.</p>
+</div>
+<span id="notifier-sms-channel"></span>
+<div class="section">
+<h3 id="sms-channel">
+    SMS Channel
+    <a class="headerlink" href="#sms-channel" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>If any of the DSN values contains any character considered special in a
+URI (such as <code translate="no" class="notranslate">+</code>, <code translate="no" class="notranslate">@</code>, <code translate="no" class="notranslate">$</code>, <code translate="no" class="notranslate">#</code>, <code translate="no" class="notranslate">/</code>, <code translate="no" class="notranslate">:</code>, <code translate="no" class="notranslate">*</code>, <code translate="no" class="notranslate">!</code>), you must
+encode them. See <a href="https://www.ietf.org/rfc/rfc3986.txt" class="reference external" rel="external noopener noreferrer" target="_blank">RFC 3986</a> for the full list of reserved characters or use the
+<a href="https://secure.php.net/manual/en/function.urlencode.php" class="reference external" title="urlencode" rel="external noopener noreferrer" target="_blank">urlencode</a> function to encode them.</p>
+</div>
+<p>The SMS channel uses <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Texter.php" class="reference external" title="Symfony\Component\Notifier\Texter" rel="external noopener noreferrer" target="_blank">Texter</a> classes
+to send SMS messages to mobile phones. This feature requires subscribing to
+a third-party service that sends SMS messages. Symfony provides integration
+with a couple popular SMS services:</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Service</th>
+                                            <th>Package</th>
+                                            <th>DSN</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td>46elks</td>
+                                    <td><code translate="no" class="notranslate">symfony/forty-six-elks-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">forty-six-elks://API_USERNAME:API_PASSWORD@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>AllMySms</td>
+                                    <td><code translate="no" class="notranslate">symfony/all-my-sms-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">allmysms://LOGIN:APIKEY@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>AmazonSns</td>
+                                    <td><code translate="no" class="notranslate">symfony/amazon-sns-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">sns://ACCESS_KEY:SECRET_KEY@default?region=REGION</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Bandwidth</td>
+                                    <td><code translate="no" class="notranslate">symfony/bandwidth-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">bandwidth://USERNAME:PASSWORD@default?from=FROM&amp;account_id=ACCOUNT_ID&amp;application_id=APPLICATION_ID&amp;priority=PRIORITY</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Clickatell</td>
+                                    <td><code translate="no" class="notranslate">symfony/clickatell-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">clickatell://ACCESS_TOKEN@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>ContactEveryone</td>
+                                    <td><code translate="no" class="notranslate">symfony/contact-everyone-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">contact-everyone://TOKEN@default?&amp;diffusionname=DIFFUSION_NAME&amp;category=CATEGORY</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Esendex</td>
+                                    <td><code translate="no" class="notranslate">symfony/esendex-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">esendex://USER_NAME:PASSWORD@default?accountreference=ACCOUNT_REFERENCE&amp;from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>FakeSms</td>
+                                    <td><code translate="no" class="notranslate">symfony/fake-sms-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">fakesms+email://MAILER_SERVICE_ID?to=TO&amp;from=FROM</code> or <code translate="no" class="notranslate">fakesms+logger://default</code></td>
+                            </tr>
+                    <tr>
+                                    <td>FreeMobile</td>
+                                    <td><code translate="no" class="notranslate">symfony/free-mobile-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">freemobile://LOGIN:API_KEY@default?phone=PHONE</code></td>
+                            </tr>
+                    <tr>
+                                    <td>GatewayApi</td>
+                                    <td><code translate="no" class="notranslate">symfony/gateway-api-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">gatewayapi://TOKEN@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Infobip</td>
+                                    <td><code translate="no" class="notranslate">symfony/infobip-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">infobip://AUTH_TOKEN@HOST?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Iqsms</td>
+                                    <td><code translate="no" class="notranslate">symfony/iqsms-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">iqsms://LOGIN:PASSWORD@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>iSendPro</td>
+                                    <td><code translate="no" class="notranslate">symfony/isendpro-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">isendpro://ACCOUNT_KEY_ID@default?from=FROM&amp;no_stop=NO_STOP&amp;sandbox=SANDBOX</code></td>
+                            </tr>
+                    <tr>
+                                    <td>KazInfoTeh</td>
+                                    <td><code translate="no" class="notranslate">symfony/kaz-info-teh-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">kaz-info-teh://USERNAME:PASSWORD@default?sender=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>LightSms</td>
+                                    <td><code translate="no" class="notranslate">symfony/light-sms-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">lightsms://LOGIN:TOKEN@default?from=PHONE</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Mailjet</td>
+                                    <td><code translate="no" class="notranslate">symfony/mailjet-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">mailjet://TOKEN@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>MessageBird</td>
+                                    <td><code translate="no" class="notranslate">symfony/message-bird-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">messagebird://TOKEN@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>MessageMedia</td>
+                                    <td><code translate="no" class="notranslate">symfony/message-media-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">messagemedia://API_KEY:API_SECRET@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Mobyt</td>
+                                    <td><code translate="no" class="notranslate">symfony/mobyt-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">mobyt://USER_KEY:ACCESS_TOKEN@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Nexmo</td>
+                                    <td><code translate="no" class="notranslate">symfony/nexmo-notifier</code></td>
+                                    <td>Abandoned in favor of Vonage (symfony/vonage-notifier).</td>
+                            </tr>
+                    <tr>
+                                    <td>Octopush</td>
+                                    <td><code translate="no" class="notranslate">symfony/octopush-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">octopush://USERLOGIN:APIKEY@default?from=FROM&amp;type=TYPE</code></td>
+                            </tr>
+                    <tr>
+                                    <td>OrangeSms</td>
+                                    <td><code translate="no" class="notranslate">symfony/orange-sms-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">orange-sms://CLIENT_ID:CLIENT_SECRET@default?from=FROM&amp;sender_name=SENDER_NAME</code></td>
+                            </tr>
+                    <tr>
+                                    <td>OvhCloud</td>
+                                    <td><code translate="no" class="notranslate">symfony/ovh-cloud-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">ovhcloud://APPLICATION_KEY:APPLICATION_SECRET@default?consumer_key=CONSUMER_KEY&amp;service_name=SERVICE_NAME&amp;no_stop_clause=true</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Plivo</td>
+                                    <td><code translate="no" class="notranslate">symfony/plivo-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">plivo://AUTH_ID:AUTH_TOKEN@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>RingCentral</td>
+                                    <td><code translate="no" class="notranslate">symfony/ring-central-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">ringcentral://API_TOKEN@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Sendberry</td>
+                                    <td><code translate="no" class="notranslate">symfony/sendberry-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">sendberry://USERNAME:PASSWORD@default?auth_key=AUTH_KEY&amp;from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Sendinblue</td>
+                                    <td><code translate="no" class="notranslate">symfony/sendinblue-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">sendinblue://API_KEY@default?sender=PHONE</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Sms77</td>
+                                    <td><code translate="no" class="notranslate">symfony/sms77-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">sms77://API_KEY@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Sinch</td>
+                                    <td><code translate="no" class="notranslate">symfony/sinch-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">sinch://ACCOUNT_ID:AUTH_TOKEN@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Smsapi</td>
+                                    <td><code translate="no" class="notranslate">symfony/smsapi-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">smsapi://TOKEN@default?from=FROM&amp;test=0</code></td>
+                            </tr>
+                    <tr>
+                                    <td>SmsBiuras</td>
+                                    <td><code translate="no" class="notranslate">symfony/sms-biuras-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">smsbiuras://UID:API_KEY@default?from=FROM&amp;test_mode=0</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Smsc</td>
+                                    <td><code translate="no" class="notranslate">symfony/smsc-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">smsc://LOGIN:PASSWORD@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>SMSFactor</td>
+                                    <td><code translate="no" class="notranslate">symfony/sms-factor-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">sms-factor://TOKEN@default?sender=SENDER&amp;push_type=PUSH_TYPE</code></td>
+                            </tr>
+                    <tr>
+                                    <td>SpotHit</td>
+                                    <td><code translate="no" class="notranslate">symfony/spot-hit-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">spothit://TOKEN@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Telnyx</td>
+                                    <td><code translate="no" class="notranslate">symfony/telnyx-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">telnyx://API_KEY@default?from=FROM&amp;messaging_profile_id=MESSAGING_PROFILE_ID</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Termii</td>
+                                    <td><code translate="no" class="notranslate">symfony/termii-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">termii://API_KEY@default?from=FROM&amp;channel=CHANNEL</code></td>
+                            </tr>
+                    <tr>
+                                    <td>TurboSms</td>
+                                    <td><code translate="no" class="notranslate">symfony/turbo-sms-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">turbosms://AUTH_TOKEN@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Twilio</td>
+                                    <td><code translate="no" class="notranslate">symfony/twilio-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">twilio://SID:TOKEN@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Vonage</td>
+                                    <td><code translate="no" class="notranslate">symfony/vonage-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">vonage://KEY:SECRET@default?from=FROM</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Yunpian</td>
+                                    <td><code translate="no" class="notranslate">symfony/yunpian-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">yunpian://APIKEY@default</code></td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The 46elks, OrangeSms, KazInfoTeh and Sendberry integrations were introduced in Symfony 6.1.
+The <code translate="no" class="notranslate">no_stop_clause</code> option in <code translate="no" class="notranslate">OvhCloud</code> DSN was introduced in Symfony 6.1.
+The <code translate="no" class="notranslate">test</code> option in <code translate="no" class="notranslate">Smsapi</code> DSN was introduced in Symfony 6.1.</p>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The ContactEveryone and SMSFactor integrations were introduced in Symfony 6.2.</p>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The Bandwith, iSendPro, Plivo, RingCentral and Termii integrations were introduced
+in Symfony 6.3.
+The <code translate="no" class="notranslate">from</code> option in <code translate="no" class="notranslate">Smsapi</code> DSN is optional since Symfony 6.3.</p>
+</div>
+<p>To enable a texter, add the correct DSN in your <code translate="no" class="notranslate">.env</code> file and
+configure the <code translate="no" class="notranslate">texter_transports</code>:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash"><span class="hljs-comment"># .env</span>
+TWILIO_DSN=twilio://SID:TOKEN@default?from=FROM</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-5f6e692f27476227dc9c8b4fa815e9af397e2b84" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-971b1995cb3bdc583c07db13c4d36d6394c1aeb3" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-dd97252b5ed8d9c3fa4c13056ad2ecb79bc19732" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-5f6e692f27476227dc9c8b4fa815e9af397e2b84" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/notifier.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">notifier:</span>
+        <span class="hljs-attr">texter_transports:</span>
+            <span class="hljs-attr">twilio:</span> <span class="hljs-string">'%env(TWILIO_DSN)%'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-971b1995cb3bdc583c07db13c4d36d6394c1aeb3" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/notifier.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:notifier</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:texter-transport</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"twilio"</span>&gt;</span>
+                %env(TWILIO_DSN)%
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:texter-transport</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:notifier</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-dd97252b5ed8d9c3fa4c13056ad2ecb79bc19732" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/notifier.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>notifier()
+        <span class="hljs-operator">-&gt;</span>texterTransport(<span class="hljs-string">'twilio'</span>, env(<span class="hljs-string">'TWILIO_DSN'</span>))
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<span id="sending-sms"></span>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/TexterInterface.php" class="reference external" title="Symfony\Component\Notifier\TexterInterface" rel="external noopener noreferrer" target="_blank">TexterInterface</a> class allows you to
+send SMS messages:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/SecurityController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">SmsMessage</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">TexterInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SecurityController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/login/success')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loginSuccess</span><span class="hljs-params">(TexterInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>texter</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>sms</span> = <span class="hljs-keyword">new</span> SmsMessage(
+            <span class="hljs-comment">// the phone number to send the SMS message to</span>
+            <span class="hljs-string">'+1411111111'</span>,
+            <span class="hljs-comment">// the message</span>
+            <span class="hljs-string">'A new login was detected!'</span>,
+            <span class="hljs-comment">// optionally, you can override default "from" defined in transports</span>
+            <span class="hljs-string">'+1422222222'</span>,
+        );
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>sentMessage</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>texter</span><span class="hljs-operator">-&gt;</span>send(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>sms</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The 3rd argument of <code translate="no" class="notranslate">SmsMessage</code> (<code translate="no" class="notranslate">$from</code>) was introduced in Symfony 6.2.</p>
+</div>
+<p>The <code translate="no" class="notranslate">send()</code> method returns a variable of type
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Message/SentMessage.php" class="reference external" title="Symfony\Component\Notifier\Message\SentMessage" rel="external noopener noreferrer" target="_blank">SentMessage</a> which provides
+information such as the message ID and the original message contents.</p>
+<span id="notifier-chat-channel"></span>
+</div>
+<div class="section">
+<h3 id="chat-channel">
+    Chat Channel
+    <a class="headerlink" href="#chat-channel" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>If any of the DSN values contains any character considered special in a
+URI (such as <code translate="no" class="notranslate">+</code>, <code translate="no" class="notranslate">@</code>, <code translate="no" class="notranslate">$</code>, <code translate="no" class="notranslate">#</code>, <code translate="no" class="notranslate">/</code>, <code translate="no" class="notranslate">:</code>, <code translate="no" class="notranslate">*</code>, <code translate="no" class="notranslate">!</code>), you must
+encode them. See <a href="https://www.ietf.org/rfc/rfc3986.txt" class="reference external" rel="external noopener noreferrer" target="_blank">RFC 3986</a> for the full list of reserved characters or use the
+<a href="https://secure.php.net/manual/en/function.urlencode.php" class="reference external" title="urlencode" rel="external noopener noreferrer" target="_blank">urlencode</a> function to encode them.</p>
+</div>
+<p>The chat channel is used to send chat messages to users by using
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Chatter.php" class="reference external" title="Symfony\Component\Notifier\Chatter" rel="external noopener noreferrer" target="_blank">Chatter</a> classes. Symfony provides
+integration with these chat services:</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Service</th>
+                                            <th>Package</th>
+                                            <th>DSN</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td>AmazonSns</td>
+                                    <td><code translate="no" class="notranslate">symfony/amazon-sns-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">sns://ACCESS_KEY:SECRET_KEY@default?region=REGION</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Chatwork</td>
+                                    <td><code translate="no" class="notranslate">symfony/chatwork-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">chatwork://API_TOKEN@default?room_id=ID</code></td>
+                            </tr>
+                    <tr>
+                                    <td><a href="notifier/discord.html" class="reference internal">Discord</a></td>
+                                    <td><code translate="no" class="notranslate">symfony/discord-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">discord://TOKEN@default?webhook_id=ID</code></td>
+                            </tr>
+                    <tr>
+                                    <td>FakeChat</td>
+                                    <td><code translate="no" class="notranslate">symfony/fake-chat-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">fakechat+email://default?to=TO&amp;from=FROM</code> or <code translate="no" class="notranslate">fakechat+logger://default</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Firebase</td>
+                                    <td><code translate="no" class="notranslate">symfony/firebase-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">firebase://USERNAME:PASSWORD@default</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Gitter</td>
+                                    <td><code translate="no" class="notranslate">symfony/gitter-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">gitter://TOKEN@default?room_id=ROOM_ID</code></td>
+                            </tr>
+                    <tr>
+                                    <td>GoogleChat</td>
+                                    <td><code translate="no" class="notranslate">symfony/google-chat-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">googlechat://ACCESS_KEY:ACCESS_TOKEN@default/SPACE?thread_key=THREAD_KEY</code></td>
+                            </tr>
+                    <tr>
+                                    <td>LINE Notify</td>
+                                    <td><code translate="no" class="notranslate">symfony/line-notify-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">linenotify://TOKEN@default</code></td>
+                            </tr>
+                    <tr>
+                                    <td>LinkedIn</td>
+                                    <td><code translate="no" class="notranslate">symfony/linked-in-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">linkedin://TOKEN:USER_ID@default</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Mastodon</td>
+                                    <td><code translate="no" class="notranslate">symfony/mastodon-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">mastodon://ACCESS_TOKEN@HOST</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Mattermost</td>
+                                    <td><code translate="no" class="notranslate">symfony/mattermost-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">mattermost://ACCESS_TOKEN@HOST/PATH?channel=CHANNEL</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Mercure</td>
+                                    <td><code translate="no" class="notranslate">symfony/mercure-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">mercure://HUB_ID?topic=TOPIC</code></td>
+                            </tr>
+                    <tr>
+                                    <td><a href="notifier/teams.html" class="reference internal">MicrosoftTeams</a></td>
+                                    <td><code translate="no" class="notranslate">symfony/microsoft-teams-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">microsoftteams://default/PATH</code></td>
+                            </tr>
+                    <tr>
+                                    <td>RocketChat</td>
+                                    <td><code translate="no" class="notranslate">symfony/rocket-chat-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">rocketchat://TOKEN@ENDPOINT?channel=CHANNEL</code></td>
+                            </tr>
+                    <tr>
+                                    <td><a href="notifier/slack.html" class="reference internal">Slack</a></td>
+                                    <td><code translate="no" class="notranslate">symfony/slack-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">slack://TOKEN@default?channel=CHANNEL</code></td>
+                            </tr>
+                    <tr>
+                                    <td><a href="notifier/telegram.html" class="reference internal">Telegram</a></td>
+                                    <td><code translate="no" class="notranslate">symfony/telegram-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">telegram://TOKEN@default?channel=CHAT_ID</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Twitter</td>
+                                    <td><code translate="no" class="notranslate">symfony/twitter-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">twitter://API_KEY:API_SECRET:ACCESS_TOKEN:ACCESS_SECRET@default</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Zendesk</td>
+                                    <td><code translate="no" class="notranslate">symfony/zendesk-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">zendesk://EMAIL:TOKEN@SUBDOMAIN</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Zulip</td>
+                                    <td><code translate="no" class="notranslate">symfony/zulip-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">zulip://EMAIL:TOKEN@HOST?channel=CHANNEL</code></td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The Zendesk and Chatwork integration were introduced in Symfony 6.2.</p>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The LINE Notify, Mastodon and Twitter integrations were introduced in Symfony 6.3.</p>
+</div>
+<p>Chatters are configured using the <code translate="no" class="notranslate">chatter_transports</code> setting:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash"><span class="hljs-comment"># .env</span>
+SLACK_DSN=slack://TOKEN@default?channel=CHANNEL</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-1d684c94aaff97328ccc2aa17f68d4f5c25877b4" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-30f9ba5490be5522635f131614879da8c3dc56c5" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-8f601d148b376503bbf2b637c3b6c4a91785f9c2" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-1d684c94aaff97328ccc2aa17f68d4f5c25877b4" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/notifier.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">notifier:</span>
+        <span class="hljs-attr">chatter_transports:</span>
+            <span class="hljs-attr">slack:</span> <span class="hljs-string">'%env(SLACK_DSN)%'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-30f9ba5490be5522635f131614879da8c3dc56c5" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/notifier.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:notifier</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:chatter-transport</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"slack"</span>&gt;</span>
+                %env(SLACK_DSN)%
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:chatter-transport</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:notifier</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-8f601d148b376503bbf2b637c3b6c4a91785f9c2" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/notifier.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>notifier()
+        <span class="hljs-operator">-&gt;</span>chatterTransport(<span class="hljs-string">'slack'</span>, env(<span class="hljs-string">'SLACK_DSN'</span>))
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<span id="sending-chat-messages"></span>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/ChatterInterface.php" class="reference external" title="Symfony\Component\Notifier\ChatterInterface" rel="external noopener noreferrer" target="_blank">ChatterInterface</a> class allows
+you to send messages to chat services:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/CheckoutController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">ChatterInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">ChatMessage</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Annotation</span>\<span class="hljs-title">Route</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CheckoutController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@Route</span>("/checkout/thankyou")
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">thankyou</span><span class="hljs-params">(ChatterInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatter</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span> = (<span class="hljs-keyword">new</span> ChatMessage(<span class="hljs-string">'You got a new invoice for 15 EUR.'</span>))
+            <span class="hljs-comment">// if not set explicitly, the message is sent to the</span>
+            <span class="hljs-comment">// default transport (the first one configured)</span>
+            <span class="hljs-operator">-&gt;</span>transport(<span class="hljs-string">'slack'</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>sentMessage</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatter</span><span class="hljs-operator">-&gt;</span>send(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">send()</code> method returns a variable of type
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Message/SentMessage.php" class="reference external" title="Symfony\Component\Notifier\Message\SentMessage" rel="external noopener noreferrer" target="_blank">SentMessage</a> which provides
+information such as the message ID and the original message contents.</p>
+<span id="notifier-email-channel"></span>
+</div>
+<div class="section">
+<h3 id="email-channel">
+    Email Channel
+    <a class="headerlink" href="#email-channel" title="Permalink to this headline">¶</a>
+</h3>
+<p>The email channel uses the <a href="mailer.html" class="reference internal">Symfony Mailer</a> to send
+notifications using the special
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bridge/Twig/Mime/NotificationEmail.php" class="reference external" title="Symfony\Bridge\Twig\Mime\NotificationEmail" rel="external noopener noreferrer" target="_blank">NotificationEmail</a>. It is
+required to install the Twig bridge along with the Inky and CSS Inliner
+Twig extensions:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/twig-pack twig/cssinliner-extra twig/inky-extra</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>After this, <a href="mailer.html#mailer-transport-setup" class="reference internal">configure the mailer</a>. You can
+also set the default &quot;from&quot; email address that should be used to send the
+notification emails:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-010c4426804c7c31c822023ab1a4bfaa6afba585" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-f44fcc145aeb48cc89f6e1610da32db21a0f3748" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-c9c4e8792247eae42230d0aec0d310991c44c394" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-010c4426804c7c31c822023ab1a4bfaa6afba585" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/mailer.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">mailer:</span>
+        <span class="hljs-attr">dsn:</span> <span class="hljs-string">'%env(MAILER_DSN)%'</span>
+        <span class="hljs-attr">envelope:</span>
+            <span class="hljs-attr">sender:</span> <span class="hljs-string">'notifications@example.com'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-f44fcc145aeb48cc89f6e1610da32db21a0f3748" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/mailer.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:mailer</span>
+            <span class="hljs-attr">dsn</span>=<span class="hljs-string">"%env(MAILER_DSN)%"</span>
+        &gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:envelope</span>
+                <span class="hljs-attr">sender</span>=<span class="hljs-string">"notifications@example.com"</span>
+            /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:mailer</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-c9c4e8792247eae42230d0aec0d310991c44c394" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/mailer.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>mailer()
+        <span class="hljs-operator">-&gt;</span>dsn(env(<span class="hljs-string">'MAILER_DSN'</span>))
+        <span class="hljs-operator">-&gt;</span>envelope()
+            <span class="hljs-operator">-&gt;</span>sender(<span class="hljs-string">'notifications@example.com'</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<span id="notifier-push-channel"></span>
+</div>
+<div class="section">
+<h3 id="push-channel">
+    Push Channel
+    <a class="headerlink" href="#push-channel" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>If any of the DSN values contains any character considered special in a
+URI (such as <code translate="no" class="notranslate">+</code>, <code translate="no" class="notranslate">@</code>, <code translate="no" class="notranslate">$</code>, <code translate="no" class="notranslate">#</code>, <code translate="no" class="notranslate">/</code>, <code translate="no" class="notranslate">:</code>, <code translate="no" class="notranslate">*</code>, <code translate="no" class="notranslate">!</code>), you must
+encode them. See <a href="https://www.ietf.org/rfc/rfc3986.txt" class="reference external" rel="external noopener noreferrer" target="_blank">RFC 3986</a> for the full list of reserved characters or use the
+<a href="https://secure.php.net/manual/en/function.urlencode.php" class="reference external" title="urlencode" rel="external noopener noreferrer" target="_blank">urlencode</a> function to encode them.</p>
+</div>
+<p>The push channel is used to send notifications to users by using
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Texter.php" class="reference external" title="Symfony\Component\Notifier\Texter" rel="external noopener noreferrer" target="_blank">Texter</a> classes. Symfony provides
+integration with these push services:</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Service</th>
+                                            <th>Package</th>
+                                            <th>DSN</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td>Engagespot</td>
+                                    <td><code translate="no" class="notranslate">symfony/engagespot-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">engagespot://API_KEY@default?campaign_name=CAMPAIGN_NAME</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Expo</td>
+                                    <td><code translate="no" class="notranslate">symfony/expo-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">expo://Token@default</code></td>
+                            </tr>
+                    <tr>
+                                    <td>OneSignal</td>
+                                    <td><code translate="no" class="notranslate">symfony/one-signal-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">onesignal://APP_ID:API_KEY@default?defaultRecipientId=DEFAULT_RECIPIENT_ID</code></td>
+                            </tr>
+                    <tr>
+                                    <td>PagerDuty</td>
+                                    <td><code translate="no" class="notranslate">symfony/pager-duty-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">pagerduty://TOKEN@SUBDOMAIN</code></td>
+                            </tr>
+                    <tr>
+                                    <td>Pushover</td>
+                                    <td><code translate="no" class="notranslate">symfony/pushover-notifier</code></td>
+                                    <td><code translate="no" class="notranslate">pushover://USER_KEY:APP_TOKEN@default</code></td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The Engagespot integration was introduced in Symfony 6.1.</p>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The PagerDuty and Pushover integrations were introduced in Symfony 6.3.</p>
+</div>
+<p>To enable a texter, add the correct DSN in your <code translate="no" class="notranslate">.env</code> file and
+configure the <code translate="no" class="notranslate">texter_transports</code>:</p>
+<div translate="no" class="highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs bash"><span class="hljs-comment"># .env</span>
+EXPO_DSN=expo://TOKEN@default</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-32e9965fa50d69d72f0e94743cb4197b20d47dd8" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-e72242c0705cdac6b80497e5512d20c886907250" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-8fb6990d192b643162eb3d275e82724d6250b3f3" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-32e9965fa50d69d72f0e94743cb4197b20d47dd8" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/notifier.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">notifier:</span>
+        <span class="hljs-attr">texter_transports:</span>
+            <span class="hljs-attr">expo:</span> <span class="hljs-string">'%env(EXPO_DSN)%'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-e72242c0705cdac6b80497e5512d20c886907250" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/notifier.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:notifier</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:texter-transport</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"expo"</span>&gt;</span>
+                %env(EXPO_DSN)%
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:texter-transport</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:notifier</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-8fb6990d192b643162eb3d275e82724d6250b3f3" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/notifier.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>notifier()
+        <span class="hljs-operator">-&gt;</span>texterTransport(<span class="hljs-string">'expo'</span>, env(<span class="hljs-string">'EXPO_DSN'</span>))
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h3 id="configure-to-use-failover-or-round-robin-transports">
+    Configure to use Failover or Round-Robin Transports
+    <a class="headerlink" href="#configure-to-use-failover-or-round-robin-transports" title="Permalink to this headline">¶</a>
+</h3>
+<p>Besides configuring one or more separate transports, you can also use the
+special <code translate="no" class="notranslate">||</code> and <code translate="no" class="notranslate">&amp;&amp;</code> characters to implement a failover or round-robin
+transport:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-ea486f7c5c4ca93ce714c67ca0a5d692656c1940" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-b971e80d55461a6ea7a17b23526cf7b6140b286d" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-be4881fc824da5b7f9ea7071984619bf26c15dc4" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-ea486f7c5c4ca93ce714c67ca0a5d692656c1940" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/notifier.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">notifier:</span>
+        <span class="hljs-attr">chatter_transports:</span>
+            <span class="hljs-comment"># Send notifications to Slack and use Telegram if</span>
+            <span class="hljs-comment"># Slack errored</span>
+            <span class="hljs-attr">main:</span> <span class="hljs-string">'%env(SLACK_DSN)% || %env(TELEGRAM_DSN)%'</span>
+
+            <span class="hljs-comment"># Send notifications to the next scheduled transport calculated by round robin</span>
+            <span class="hljs-attr">roundrobin:</span> <span class="hljs-string">'%env(SLACK_DSN)% &amp;&amp; %env(TELEGRAM_DSN)%'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-b971e80d55461a6ea7a17b23526cf7b6140b286d" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/notifier.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:notifier</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- Send notifications to Slack and use Telegram if
+                 Slack errored --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:chatter-transport</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"slack"</span>&gt;</span>
+                %env(SLACK_DSN)% || %env(TELEGRAM_DSN)%
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:chatter-transport</span>&gt;</span>
+
+            <span class="hljs-comment">&lt;!-- Send notifications to the next scheduled transport
+                 calculated by round robin --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:chatter-transport</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"slack"</span>&gt;</span>&lt;![CDATA[
+                %env(SLACK_DSN)% &amp;&amp; %env(TELEGRAM_DSN)%
+            ]]&gt;<span class="hljs-tag">&lt;/<span class="hljs-name">framework:chatter-transport</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:notifier</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-be4881fc824da5b7f9ea7071984619bf26c15dc4" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/notifier.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>notifier()
+        <span class="hljs-comment">// Send notifications to Slack and use Telegram if</span>
+        <span class="hljs-comment">// Slack errored</span>
+        <span class="hljs-operator">-&gt;</span>chatterTransport(<span class="hljs-string">'main'</span>, env(<span class="hljs-string">'SLACK_DSN'</span>).<span class="hljs-string">' || '</span>.env(<span class="hljs-string">'TELEGRAM_DSN'</span>))
+
+        <span class="hljs-comment">// Send notifications to the next scheduled transport calculated by round robin</span>
+        <span class="hljs-operator">-&gt;</span>chatterTransport(<span class="hljs-string">'roundrobin'</span>, env(<span class="hljs-string">'SLACK_DSN'</span>).<span class="hljs-string">' &amp;&amp; '</span>.env(<span class="hljs-string">'TELEGRAM_DSN'</span>))
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="section">
+<h2 id="creating-sending-notifications">
+    Creating &amp; Sending Notifications
+    <a class="headerlink" href="#creating-sending-notifications" title="Permalink to this headline">¶</a>
+</h2>
+<p>To send a notification, autowire the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/NotifierInterface.php" class="reference external" title="Symfony\Component\Notifier\NotifierInterface" rel="external noopener noreferrer" target="_blank">NotifierInterface</a> (service ID
+<code translate="no" class="notranslate">notifier</code>). This class has a <code translate="no" class="notranslate">send()</code> method that allows you to send a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Notification/Notification.php" class="reference external" title="Symfony\Component\Notifier\Notification\Notification" rel="external noopener noreferrer" target="_blank">Notification</a> to a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Recipient/Recipient.php" class="reference external" title="Symfony\Component\Notifier\Recipient\Recipient" rel="external noopener noreferrer" target="_blank">Recipient</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/InvoiceController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Notification</span>\<span class="hljs-title">Notification</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">NotifierInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Recipient</span>\<span class="hljs-title">Recipient</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InvoiceController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/invoice/create')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">(NotifierInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>notifier</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-comment">// Create a Notification that has to be sent</span>
+        <span class="hljs-comment">// using the "email" channel</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>notification</span> = (<span class="hljs-keyword">new</span> Notification(<span class="hljs-string">'New Invoice'</span>, [<span class="hljs-string">'email'</span>]))
+            <span class="hljs-operator">-&gt;</span>content(<span class="hljs-string">'You got a new invoice for 15 EUR.'</span>);
+
+        <span class="hljs-comment">// The receiver of the Notification</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>recipient</span> = <span class="hljs-keyword">new</span> Recipient(
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span><span class="hljs-operator">-&gt;</span>getEmail(),
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>user</span><span class="hljs-operator">-&gt;</span>getPhonenumber()
+        );
+
+        <span class="hljs-comment">// Send the notification to the recipient</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>notifier</span><span class="hljs-operator">-&gt;</span>send(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>notification</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>recipient</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">Notification</code> is created by using two arguments: the subject and
+channels. The channels specify which channel (or transport) should be used
+to send the notification. For instance, <code translate="no" class="notranslate">[&#039;email&#039;, &#039;sms&#039;]</code> will send
+both an email and sms notification to the user.</p>
+<p>The default notification also has a <code translate="no" class="notranslate">content()</code> and <code translate="no" class="notranslate">emoji()</code> method to
+set the notification content and icon.</p>
+<p>Symfony provides the following recipients:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Recipient/NoRecipient.php" class="reference external" title="Symfony\Component\Notifier\Recipient\NoRecipient" rel="external noopener noreferrer" target="_blank">NoRecipient</a></dt>
+        
+        <dd>
+                            This is the default and is useful when there is no need to have
+information about the receiver. For example, the browser channel uses
+the current requests' <a href="session.html#flash-messages" class="reference internal">session flashbag</a>;
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Recipient/Recipient.php" class="reference external" title="Symfony\Component\Notifier\Recipient\Recipient" rel="external noopener noreferrer" target="_blank">Recipient</a></dt>
+        
+        <dd>
+                            This can contain both the email address and the phone number of the user. This
+recipient can be used for all channels (depending on whether they are
+actually set).
+                    </dd>
+    </dl>
+<div class="section">
+<h3 id="configuring-channel-policies">
+    Configuring Channel Policies
+    <a class="headerlink" href="#configuring-channel-policies" title="Permalink to this headline">¶</a>
+</h3>
+<p>Instead of specifying the target channels on creation, Symfony also allows
+you to use notification importance levels. Update the configuration to
+specify what channels should be used for specific levels (using
+<code translate="no" class="notranslate">channel_policy</code>):</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-b8be8ca4efc4c79ccee060fcc499d10434b0c379" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-377034b1635ccf3f311049fd448d54ba3999800f" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-4de0de465745ae78deeb1aaf6ef82657b5b6753a" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-b8be8ca4efc4c79ccee060fcc499d10434b0c379" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/notifier.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">notifier:</span>
+        <span class="hljs-comment"># ...</span>
+        <span class="hljs-attr">channel_policy:</span>
+            <span class="hljs-comment"># Use SMS, Slack and email for urgent notifications</span>
+            <span class="hljs-attr">urgent:</span> <span class="hljs-string">['sms',</span> <span class="hljs-string">'chat/slack'</span><span class="hljs-string">,</span> <span class="hljs-string">'email'</span><span class="hljs-string">]</span>
+
+            <span class="hljs-comment"># Use Slack for highly important notifications</span>
+            <span class="hljs-attr">high:</span> <span class="hljs-string">['chat/slack']</span>
+
+            <span class="hljs-comment"># Use browser for medium and low notifications</span>
+            <span class="hljs-attr">medium:</span> <span class="hljs-string">['browser']</span>
+            <span class="hljs-attr">low:</span> <span class="hljs-string">['browser']</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-377034b1635ccf3f311049fd448d54ba3999800f" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/notifier.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:notifier</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:channel-policy</span>&gt;</span>
+                <span class="hljs-comment">&lt;!-- Use SMS, Slack and Email for urgent notifications --&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:urgent</span>&gt;</span>sms<span class="hljs-tag">&lt;/<span class="hljs-name">framework:urgent</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:urgent</span>&gt;</span>chat/slack<span class="hljs-tag">&lt;/<span class="hljs-name">framework:urgent</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:urgent</span>&gt;</span>email<span class="hljs-tag">&lt;/<span class="hljs-name">framework:urgent</span>&gt;</span>
+
+                <span class="hljs-comment">&lt;!-- Use Slack for highly important notifications --&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:high</span>&gt;</span>chat/slack<span class="hljs-tag">&lt;/<span class="hljs-name">framework:high</span>&gt;</span>
+
+                <span class="hljs-comment">&lt;!-- Use browser for medium and low notifications --&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:medium</span>&gt;</span>browser<span class="hljs-tag">&lt;/<span class="hljs-name">framework:medium</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:low</span>&gt;</span>browser<span class="hljs-tag">&lt;/<span class="hljs-name">framework:low</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:channel-policy</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:notifier</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-4de0de465745ae78deeb1aaf6ef82657b5b6753a" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/notifier.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>notifier()
+        <span class="hljs-comment">// Use SMS, Slack and email for urgent notifications</span>
+        <span class="hljs-operator">-&gt;</span>channelPolicy(<span class="hljs-string">'urgent'</span>, [<span class="hljs-string">'sms'</span>, <span class="hljs-string">'chat/slack'</span>, <span class="hljs-string">'email'</span>])
+        <span class="hljs-comment">// Use Slack for highly important notifications</span>
+        <span class="hljs-operator">-&gt;</span>channelPolicy(<span class="hljs-string">'high'</span>, [<span class="hljs-string">'chat/slack'</span>])
+        <span class="hljs-comment">// Use browser for medium and low notifications</span>
+        <span class="hljs-operator">-&gt;</span>channelPolicy(<span class="hljs-string">'medium'</span>, [<span class="hljs-string">'browser'</span>])
+        <span class="hljs-operator">-&gt;</span>channelPolicy(<span class="hljs-string">'low'</span>, [<span class="hljs-string">'browser'</span>])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Now, whenever the notification's importance is set to &quot;high&quot;, it will be
+sent using the Slack transport:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InvoiceController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-comment">#[Route('/invoice/create')]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">invoice</span><span class="hljs-params">(NotifierInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>notifier</span>)</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>notification</span> = (<span class="hljs-keyword">new</span> Notification(<span class="hljs-string">'New Invoice'</span>))
+            <span class="hljs-operator">-&gt;</span>content(<span class="hljs-string">'You got a new invoice for 15 EUR.'</span>)
+            <span class="hljs-operator">-&gt;</span>importance(Notification<span class="hljs-operator">::</span>IMPORTANCE_HIGH);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>notifier</span><span class="hljs-operator">-&gt;</span>send(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>notification</span>, <span class="hljs-keyword">new</span> Recipient(<span class="hljs-string">'wouter@example.com'</span>));
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="customize-notifications">
+    Customize Notifications
+    <a class="headerlink" href="#customize-notifications" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can extend the <code translate="no" class="notranslate">Notification</code> or <code translate="no" class="notranslate">Recipient</code> base classes to
+customize their behavior. For instance, you can overwrite the
+<code translate="no" class="notranslate">getChannels()</code> method to only return <code translate="no" class="notranslate">sms</code> if the invoice price is
+very high and the recipient has a phone number:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Notifier</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Notification</span>\<span class="hljs-title">Notification</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Recipient</span>\<span class="hljs-title">RecipientInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Recipient</span>\<span class="hljs-title">SmsRecipientInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InvoiceNotification</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Notification</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getChannels</span><span class="hljs-params">(RecipientInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>recipient</span>)</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>price &gt; <span class="hljs-number">10000</span>
+            &amp;&amp; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>recipient</span> <span class="hljs-keyword">instanceof</span> SmsRecipientInterface
+        ) {
+            <span class="hljs-keyword">return</span> [<span class="hljs-string">'sms'</span>];
+        }
+
+        <span class="hljs-keyword">return</span> [<span class="hljs-string">'email'</span>];
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="customize-notification-messages">
+    Customize Notification Messages
+    <a class="headerlink" href="#customize-notification-messages" title="Permalink to this headline">¶</a>
+</h3>
+<p>Each channel has its own notification interface that you can implement to
+customize the notification message. For instance, if you want to modify the
+message based on the chat service, implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Notification/ChatNotificationInterface.php" class="reference external" title="Symfony\Component\Notifier\Notification\ChatNotificationInterface" rel="external noopener noreferrer" target="_blank">ChatNotificationInterface</a>
+and its <code translate="no" class="notranslate">asChatMessage()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Notifier/InvoiceNotification.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Notifier</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">ChatMessage</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Notification</span>\<span class="hljs-title">ChatNotificationInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Notification</span>\<span class="hljs-title">Notification</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Recipient</span>\<span class="hljs-title">RecipientInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InvoiceNotification</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Notification</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ChatNotificationInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>price</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">asChatMessage</span><span class="hljs-params">(RecipientInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>recipient</span>, string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>transport</span> = null)</span>: ?<span class="hljs-title">ChatMessage</span>
+    </span>{
+        <span class="hljs-comment">// Add a custom subject and emoji if the message is sent to Slack</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-string">'slack'</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>transport</span>) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>subject(<span class="hljs-string">'You\'re invoiced '</span>.strval(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>price).<span class="hljs-string">' EUR.'</span>);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>emoji(<span class="hljs-string">"money"</span>);
+            <span class="hljs-keyword">return</span> ChatMessage<span class="hljs-operator">::</span>fromNotification(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span>);
+        }
+
+        <span class="hljs-comment">// If you return null, the Notifier will create the ChatMessage</span>
+        <span class="hljs-comment">// based on this notification as it would without this method.</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Notification/SmsNotificationInterface.php" class="reference external" title="Symfony\Component\Notifier\Notification\SmsNotificationInterface" rel="external noopener noreferrer" target="_blank">SmsNotificationInterface</a>,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Notification/EmailNotificationInterface.php" class="reference external" title="Symfony\Component\Notifier\Notification\EmailNotificationInterface" rel="external noopener noreferrer" target="_blank">EmailNotificationInterface</a>
+and
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Notification/PushNotificationInterface.php" class="reference external" title="Symfony\Component\Notifier\Notification\PushNotificationInterface" rel="external noopener noreferrer" target="_blank">PushNotificationInterface</a>
+also exists to modify messages sent to those channels.</p>
+</div>
+<div class="section">
+<h3 id="customize-browser-notifications-flash-messages">
+    Customize Browser Notifications (Flash Messages)
+    <a class="headerlink" href="#customize-browser-notifications-flash-messages" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>Support for customizing importance levels was introduced in Symfony 6.1.</p>
+</div>
+<p>The default behavior for browser channel notifications is to add a
+<a href="session.html#flash-messages" class="reference internal">flash message</a> with <code translate="no" class="notranslate">notification</code> as its key.</p>
+<p>However, you might prefer to map the importance level of the notification to the
+type of flash message, so you can tweak their style.</p>
+<p>you can do that by overriding the default <code translate="no" class="notranslate">notifier.flash_message_importance_mapper</code>
+service with your own implementation of
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/FlashMessage/FlashMessageImportanceMapperInterface.php" class="reference external" title="Symfony\Component\Notifier\FlashMessage\FlashMessageImportanceMapperInterface" rel="external noopener noreferrer" target="_blank">FlashMessageImportanceMapperInterface</a>
+where you can provide your own &quot;importance&quot; to &quot;alert level&quot; mapping.</p>
+<p>Symfony currently provides an implementation for the Bootstrap CSS framework's
+typical alert levels, which you can implement immediately using:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-ca73e20ce6942bc74e6058d631755b7afb27314a" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-dd584a50de0553d9a3d3b05245f6e4572dd29f3e" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-d1618c0fcc75556d56f972014a22c71ad91e93c3" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-ca73e20ce6942bc74e6058d631755b7afb27314a" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-attr">notifier.flash_message_importance_mapper:</span>
+        <span class="hljs-attr">class:</span> <span class="hljs-string">Symfony\Component\Notifier\FlashMessage\BootstrapFlashMessageImportanceMapper</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-dd584a50de0553d9a3d3b05245f6e4572dd29f3e" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"notifier.flash_message_importance_mapper"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"Symfony\Component\Notifier\FlashMessage\BootstrapFlashMessageImportanceMapper"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-d1618c0fcc75556d56f972014a22c71ad91e93c3" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">FlashMessage</span>\<span class="hljs-title">BootstrapFlashMessageImportanceMapper</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services()
+        <span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'notifier.flash_message_importance_mapper'</span>, BootstrapFlashMessageImportanceMapper<span class="hljs-operator">::</span>class)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="section">
+<h2 id="testing-notifier">
+    Testing Notifier
+    <a class="headerlink" href="#testing-notifier" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony provides a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Test/NotificationAssertionsTrait.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Test\NotificationAssertionsTrait" rel="external noopener noreferrer" target="_blank">NotificationAssertionsTrait</a>
+which provide useful methods for testing your Notifier implementation.
+You can benefit from this class by using it directly or extending the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Test/KernelTestCase.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Test\KernelTestCase" rel="external noopener noreferrer" target="_blank">KernelTestCase</a>.</p>
+<p>See <a href="testing.html#notifier-assertions" class="reference internal">testing documentation</a> for the list of available assertions.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Test/NotificationAssertionsTrait.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Test\NotificationAssertionsTrait" rel="external noopener noreferrer" target="_blank">NotificationAssertionsTrait</a>
+was introduced in Symfony 6.2.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="disabling-delivery">
+    Disabling Delivery
+    <a class="headerlink" href="#disabling-delivery" title="Permalink to this headline">¶</a>
+</h2>
+<p>While developing (or testing), you may want to disable delivery of notifications
+entirely. You can do this by forcing Notifier to use the <code translate="no" class="notranslate">NullTransport</code> for
+all configured texter and chatter transports only in the <code translate="no" class="notranslate">dev</code> (and/or
+<code translate="no" class="notranslate">test</code>) environment:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/dev/notifier.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">notifier:</span>
+        <span class="hljs-attr">texter_transports:</span>
+            <span class="hljs-attr">twilio:</span> <span class="hljs-string">'null://null'</span>
+        <span class="hljs-attr">chatter_transports:</span>
+            <span class="hljs-attr">slack:</span> <span class="hljs-string">'null://null'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="notifier-events"></span>
+</div>
+<div class="section">
+<h2 id="using-events">
+    Using Events
+    <a class="headerlink" href="#using-events" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Transport.php" class="reference external" title="Symfony\Component\Notifier\Transport" rel="external noopener noreferrer" target="_blank">Transport</a>` class of the Notifier component
+allows you to optionally hook into the lifecycle via events.</p>
+<div class="section">
+<h3 id="the-messageevent-class-event">
+    The <code translate="no" class="notranslate">MessageEvent::class</code> Event
+    <a class="headerlink" href="#the-messageevent-class-event" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Typical Purposes</strong>: Doing something before the message is send (like logging
+which message is going to be send, or displaying something about the event
+to be executed.</p>
+<p>Just before send the message, the event class <code translate="no" class="notranslate">MessageEvent</code> is
+dispatched. Listeners receive a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Event/MessageEvent.php" class="reference external" title="Symfony\Component\Notifier\Event\MessageEvent" rel="external noopener noreferrer" target="_blank">MessageEvent</a> event:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">MessageEvent</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span><span class="hljs-operator">-&gt;</span>addListener(MessageEvent<span class="hljs-operator">::</span>class, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(MessageEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span> </span>{
+    <span class="hljs-comment">// gets the message instance</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getMessage();
+
+    <span class="hljs-comment">// log something</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>logger(sprintf(<span class="hljs-string">'Message with subject: %s will be send to %s, $message-&gt;getSubject(), $message-&gt;getRecipientId()'</span>));
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="the-failedmessageevent-event">
+    The <code translate="no" class="notranslate">FailedMessageEvent</code> Event
+    <a class="headerlink" href="#the-failedmessageevent-event" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Typical Purposes</strong>: Doing something before the exception is thrown
+(Retry to send the message or log additional information).</p>
+<p>Whenever an exception is thrown while sending the message, the event class
+<code translate="no" class="notranslate">FailedMessageEvent</code> is dispatched. A listener can do anything useful before
+the exception is thrown.</p>
+<p>Listeners receive a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Event/FailedMessageEvent.php" class="reference external" title="Symfony\Component\Notifier\Event\FailedMessageEvent" rel="external noopener noreferrer" target="_blank">FailedMessageEvent</a> event:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">FailedMessageEvent</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span><span class="hljs-operator">-&gt;</span>addListener(FailedMessageEvent<span class="hljs-operator">::</span>class, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FailedMessageEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span> </span>{
+    <span class="hljs-comment">// gets the message instance</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getMessage();
+
+    <span class="hljs-comment">// gets the error instance</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>error</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getError();
+
+    <span class="hljs-comment">// log something</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>logger(sprintf(<span class="hljs-string">'The message with subject: %s has not been sent successfully. The error is: %s, $message-&gt;getSubject(), $error-&gt;getMessage()'</span>));
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="the-sentmessageevent-event">
+    The <code translate="no" class="notranslate">SentMessageEvent</code> Event
+    <a class="headerlink" href="#the-sentmessageevent-event" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Typical Purposes</strong>: To perform some action when the message is successfully
+sent (like retrieve the id returned when the message is sent).</p>
+<p>After the message has been successfully sent, the event class <code translate="no" class="notranslate">SentMessageEvent</code>
+is dispatched. Listeners receive a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Event/SentMessageEvent.php" class="reference external" title="Symfony\Component\Notifier\Event\SentMessageEvent" rel="external noopener noreferrer" target="_blank">SentMessageEvent</a> event:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">SentMessageEvent</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span><span class="hljs-operator">-&gt;</span>addListener(SentMessageEvent<span class="hljs-operator">::</span>class, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SentMessageEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span> </span>{
+    <span class="hljs-comment">// gets the message instance</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>message</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getOriginalMessage();
+
+    <span class="hljs-comment">// log something</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>logger(sprintf(<span class="hljs-string">'The message has been successfully sent and has id: %s, $message-&gt;getMessageId()'</span>));
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

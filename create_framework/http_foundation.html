@@ -1,0 +1,617 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-httpfoundation-component">
+    The HttpFoundation Component
+    <a class="headerlink" href="#the-httpfoundation-component" title="Permalink to this headline">¶</a>
+</h1>
+<p>Before diving into the framework creation process, let's first step back and
+let's take a look at why you would like to use a framework instead of keeping
+your plain-old PHP applications as is. Why using a framework is actually a good
+idea, even for the simplest snippet of code and why creating your framework on
+top of the Symfony components is better than creating a framework from scratch.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>We won't talk about the traditional benefits of using a framework when
+working on big applications with more than a few developers; the Internet
+already has plenty of good resources on that topic.</p>
+</div>
+<p>Even if the &quot;application&quot; we wrote in the previous chapter was simple enough,
+it suffers from a few problems:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// framework/index.php</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_GET</span>[<span class="hljs-string">'name'</span>];
+
+printf(<span class="hljs-string">'Hello %s'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>First, if the <code translate="no" class="notranslate">name</code> query parameter is not defined in the URL query string,
+you will get a PHP warning; so let's fix it:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// framework/index.php</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_GET</span>[<span class="hljs-string">'name'</span>] ?? <span class="hljs-string">'World'</span>;
+
+printf(<span class="hljs-string">'Hello %s'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, this <em>application is not secure</em>. Can you believe it? Even this simple
+snippet of PHP code is vulnerable to one of the most widespread Internet
+security issue, XSS (Cross-Site Scripting). Here is a more secure version:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_GET</span>[<span class="hljs-string">'name'</span>] ?? <span class="hljs-string">'World'</span>;
+
+header(<span class="hljs-string">'Content-Type: text/html; charset=utf-8'</span>);
+
+printf(<span class="hljs-string">'Hello %s'</span>, htmlspecialchars(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>, ENT_QUOTES, <span class="hljs-string">'UTF-8'</span>));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>As you might have noticed, securing your code with <code translate="no" class="notranslate">htmlspecialchars</code> is
+tedious and error prone. That's one of the reasons why using a template
+engine like <a href="https://twig.symfony.com/" class="reference external">Twig</a>, where auto-escaping is enabled by default, might be a
+good idea (and explicit escaping is also less painful with the usage of a
+simple <code translate="no" class="notranslate">e</code> filter).</p>
+</div>
+<p>As you can see for yourself, the simple code we had written first is not that
+simple anymore if we want to avoid PHP warnings/notices and make the code
+more secure.</p>
+<p>Beyond security, this code can be complex to test. Even if there is not
+much to test, it strikes me that writing unit tests for the simplest possible
+snippet of PHP code is not natural and feels ugly. Here is a tentative PHPUnit
+unit test for the above code:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// framework/test.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IndexTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testHello</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_GET</span>[<span class="hljs-string">'name'</span>] = <span class="hljs-string">'Fabien'</span>;
+
+        ob_start();
+        <span class="hljs-keyword">include</span> <span class="hljs-string">'index.php'</span>;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>content</span> = ob_get_clean();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertEquals(<span class="hljs-string">'Hello Fabien'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>content</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If our application were just slightly bigger, we would have been able to
+find even more problems. If you are curious about them, read the
+<a href="../introduction/from_flat_php_to_symfony.html" class="reference internal">Symfony versus Flat PHP</a> chapter of the book.</p>
+</div>
+<p>At this point, if you are not convinced that security and testing are indeed
+two very good reasons to stop writing code the old way and adopt a framework
+instead (whatever adopting a framework means in this context), you can stop
+reading this book now and go back to whatever code you were working on before.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Using a framework should give you more than just security and testability,
+but the more important thing to keep in mind is that the framework you
+choose must allow you to write better code faster.</p>
+</div>
+<div class="section">
+<h2 id="going-oop-with-the-httpfoundation-component">
+    Going OOP with the HttpFoundation Component
+    <a class="headerlink" href="#going-oop-with-the-httpfoundation-component" title="Permalink to this headline">¶</a>
+</h2>
+<p>Writing web code is about interacting with HTTP. So, the fundamental
+principles of our framework should be around the <a href="https://tools.ietf.org/wg/httpbis/" class="reference external" rel="external noopener noreferrer" target="_blank">HTTP specification</a>.</p>
+<p>The HTTP specification describes how a client (a browser for instance)
+interacts with a server (our application via a web server). The dialog between
+the client and the server is specified by well-defined <em>messages</em>, requests
+and responses: <em>the client sends a request to the server and based on this
+request, the server returns a response</em>.</p>
+<p>In PHP, the request is represented by global variables (<code translate="no" class="notranslate">$_GET</code>, <code translate="no" class="notranslate">$_POST</code>,
+<code translate="no" class="notranslate">$_FILE</code>, <code translate="no" class="notranslate">$_COOKIE</code>, <code translate="no" class="notranslate">$_SESSION</code>...) and the response is generated by
+functions (<code translate="no" class="notranslate">echo</code>, <code translate="no" class="notranslate">header</code>, <code translate="no" class="notranslate">setcookie</code>, ...).</p>
+<p>The first step towards better code is probably to use an Object-Oriented
+approach; that's the main goal of the Symfony HttpFoundation component:
+replacing the default PHP global variables and functions by an Object-Oriented
+layer.</p>
+<p>To use this component, add it as a dependency of the project:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/http-foundation</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Running this command will also automatically download the Symfony
+HttpFoundation component and install it under the <code translate="no" class="notranslate">vendor/</code> directory.
+A <code translate="no" class="notranslate">composer.json</code> and a <code translate="no" class="notranslate">composer.lock</code> file will be generated as well,
+containing the new requirement.</p>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span>Class Autoloading</span></p><p>When installing a new dependency, Composer also generates a
+<code translate="no" class="notranslate">vendor/autoload.php</code> file that allows any class to be <a href="https://www.php.net/autoload" class="reference external" rel="external noopener noreferrer" target="_blank">autoloaded</a>.
+Without autoloading, you would need to require the file where a class
+is defined before being able to use it. But thanks to <a href="https://www.php-fig.org/psr/psr-4/" class="reference external" rel="external noopener noreferrer" target="_blank">PSR-4</a>,
+we can just let Composer and PHP do the hard work for us.</p>
+</div></div>
+<p>Now, let's rewrite our application by using the <code translate="no" class="notranslate">Request</code> and the
+<code translate="no" class="notranslate">Response</code> classes:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// framework/index.php</span>
+<span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>query<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'name'</span>, <span class="hljs-string">'World'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(sprintf(<span class="hljs-string">'Hello %s'</span>, htmlspecialchars(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>, ENT_QUOTES, <span class="hljs-string">'UTF-8'</span>)));
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">createFromGlobals()</code> method creates a <code translate="no" class="notranslate">Request</code> object based on the
+current PHP global variables.</p>
+<p>The <code translate="no" class="notranslate">send()</code> method sends the <code translate="no" class="notranslate">Response</code> object back to the client (it
+first outputs the HTTP headers followed by the content).</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Before the <code translate="no" class="notranslate">send()</code> call, we should have added a call to the
+<code translate="no" class="notranslate">prepare()</code> method (<code translate="no" class="notranslate">$response-&gt;prepare($request);</code>) to ensure that
+our Response were compliant with the HTTP specification. For instance, if
+we were to call the page with the <code translate="no" class="notranslate">HEAD</code> method, it would remove the
+content of the Response.</p>
+</div>
+<p>The main difference with the previous code is that you have total control of
+the HTTP messages. You can create whatever request you want and you are in
+charge of sending the response whenever you see fit.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>We haven't explicitly set the <code translate="no" class="notranslate">Content-Type</code> header in the rewritten
+code as the charset of the Response object defaults to <code translate="no" class="notranslate">UTF-8</code>.</p>
+</div>
+<p>With the <code translate="no" class="notranslate">Request</code> class, you have all the request information at your
+fingertips thanks to a nice and simple API:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// the URI being requested (e.g. /about) minus any query parameters</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo();
+
+<span class="hljs-comment">// retrieves GET and POST variables respectively</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>query<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'foo'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>request<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'bar'</span>, <span class="hljs-string">'default value if bar does not exist'</span>);
+
+<span class="hljs-comment">// retrieves SERVER variables</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>server<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'HTTP_HOST'</span>);
+
+<span class="hljs-comment">// retrieves an instance of UploadedFile identified by foo</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>files<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'foo'</span>);
+
+<span class="hljs-comment">// retrieves a COOKIE value</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>cookies<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'PHPSESSID'</span>);
+
+<span class="hljs-comment">// retrieves a HTTP request header, with normalized, lowercase keys</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>headers<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'host'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>headers<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'content-type'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getMethod();    <span class="hljs-comment">// GET, POST, PUT, DELETE, HEAD</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getLanguages(); <span class="hljs-comment">// an array of languages the client accepts</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also simulate a request:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>create(<span class="hljs-string">'/index.php?name=Fabien'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>With the <code translate="no" class="notranslate">Response</code> class, you can tweak the response:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setContent(<span class="hljs-string">'Hello world!'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setStatusCode(<span class="hljs-number">200</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>headers<span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'Content-Type'</span>, <span class="hljs-string">'text/html'</span>);
+
+<span class="hljs-comment">// configure the HTTP cache headers</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setMaxAge(<span class="hljs-number">10</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>To debug a response, cast it to a string; it will return the HTTP
+representation of the response (headers and content).</p>
+</div>
+<p>Last but not least, these classes, like every other class in the Symfony
+code, have been <a href="https://symfony.com/blog/symfony2-security-audit" class="reference external">audited</a> for security issues by an independent company. And
+being an Open-Source project also means that many other developers around the
+world have read the code and have already fixed potential security problems.
+When was the last time you ordered a professional security audit for your home-made
+framework?</p>
+<p>Even something as simple as getting the client IP address can be insecure:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myIp</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'REMOTE_ADDR'</span>]) {
+    <span class="hljs-comment">// the client is a known one, so give it some more privilege</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>It works perfectly fine until you add a reverse proxy in front of the
+production servers; at this point, you will have to change your code to make
+it work on both your development machine (where you don't have a proxy) and
+your servers:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myIp</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'HTTP_X_FORWARDED_FOR'</span>] || <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myIp</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>_SERVER</span>[<span class="hljs-string">'REMOTE_ADDR'</span>]) {
+    <span class="hljs-comment">// the client is a known one, so give it some more privilege</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Using the <code translate="no" class="notranslate">Request::getClientIp()</code> method would have given you the right
+behavior from day one (and it would have covered the case where you have
+chained proxies):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+
+<span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myIp</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getClientIp()) {
+    <span class="hljs-comment">// the client is a known one, so give it some more privilege</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>And there is an added benefit: it is <em>secure</em> by default. What does it mean?
+The <code translate="no" class="notranslate">$_SERVER[&#039;HTTP_X_FORWARDED_FOR&#039;]</code> value cannot be trusted as it can be
+manipulated by the end user when there is no proxy. So, if you are using this
+code in production without a proxy, it becomes trivially easy to abuse your
+system. That's not the case with the <code translate="no" class="notranslate">getClientIp()</code> method as you must
+explicitly trust your reverse proxies by calling <code translate="no" class="notranslate">setTrustedProxies()</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">Request<span class="hljs-operator">::</span>setTrustedProxies([<span class="hljs-string">'10.0.0.1'</span>]);
+
+<span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myIp</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getClientIp()) {
+    <span class="hljs-comment">// the client is a known one, so give it some more privilege</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>So, the <code translate="no" class="notranslate">getClientIp()</code> method works securely in all circumstances. You can
+use it in all your projects, whatever the configuration is, it will behave
+correctly and safely. That's one of the goals of using a framework. If you were
+to write a framework from scratch, you would have to think about all these
+cases by yourself. Why not use a technology that already works?</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you want to learn more about the HttpFoundation component, you can have
+a look at the <code translate="no" class="notranslate">Symfony\Component\HttpFoundation</code> API or read
+its dedicated <a href="../components/http_foundation.html" class="reference internal">documentation</a>.</p>
+</div>
+<p>Believe it or not but we have our first framework. You can stop now if you want.
+Using just the Symfony HttpFoundation component already allows you to write
+better and more testable code. It also allows you to write code faster as many
+day-to-day problems have already been solved for you.</p>
+<p>As a matter of fact, projects like Drupal have adopted the HttpFoundation
+component; if it works for them, it will probably work for you. Don't reinvent
+the wheel.</p>
+<p>I've almost forgotten to talk about one added benefit: using the HttpFoundation
+component is the start of better interoperability between all frameworks and
+<a href="https://symfony.com/components/HttpFoundation" class="reference external">applications using it</a> (like <a href="https://symfony.com/" class="reference external">Symfony</a>, <a href="https://www.drupal.org/" class="reference external" rel="external noopener noreferrer" target="_blank">Drupal 8</a>, <a href="https://www.phpbb.com/" class="reference external" rel="external noopener noreferrer" target="_blank">phpBB 3</a>, <a href="https://laravel.com/" class="reference external" rel="external noopener noreferrer" target="_blank">Laravel</a>
+and <a href="https://ez.no/" class="reference external" rel="external noopener noreferrer" target="_blank">ezPublish 5</a>,  and <a href="https://symfony.com/components/HttpFoundation" class="reference external">more</a>).</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

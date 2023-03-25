@@ -1,0 +1,932 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-yaml-format">
+    The YAML Format
+    <a class="headerlink" href="#the-yaml-format" title="Permalink to this headline">¶</a>
+</h1>
+<p>The Symfony Yaml Component implements a selected subset of features defined in
+the <a href="https://yaml.org/spec/1.2/spec.html" class="reference external" rel="external noopener noreferrer" target="_blank">YAML 1.2 version specification</a>.</p>
+<div class="section">
+<h2 id="scalars">
+    Scalars
+    <a class="headerlink" href="#scalars" title="Permalink to this headline">¶</a>
+</h2>
+<p>The syntax for scalars is similar to the PHP syntax.</p>
+<div class="section">
+<h3 id="strings">
+    Strings
+    <a class="headerlink" href="#strings" title="Permalink to this headline">¶</a>
+</h3>
+<p>Strings in YAML can be wrapped both in single and double quotes. In some cases,
+they can also be unquoted:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-string">A</span> <span class="hljs-string">string</span> <span class="hljs-string">in</span> <span class="hljs-string">YAML</span>
+
+<span class="hljs-string">'A single-quoted string in YAML'</span>
+
+<span class="hljs-string">"A double-quoted string in YAML"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Quoted styles are useful when a string starts or end with one or more relevant
+spaces, because unquoted strings are trimmed on both end when parsing their
+contents. Quotes are required when the string contains special or reserved characters.</p>
+<p>When using single-quoted strings, any single quote <code translate="no" class="notranslate">&#039;</code> inside its contents
+must be doubled to escape it:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-string">'A single quote '</span><span class="hljs-string">' inside a single-quoted string'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Strings containing any of the following characters must be quoted. Although you
+can use double quotes, for these characters it is more convenient to use single
+quotes, which avoids having to escape any backslash <code translate="no" class="notranslate">\</code>:</p>
+<ul>
+    <li><code translate="no" class="notranslate">:</code>, <code translate="no" class="notranslate">{</code>, <code translate="no" class="notranslate">}</code>, <code translate="no" class="notranslate">[</code>, <code translate="no" class="notranslate">]</code>, <code translate="no" class="notranslate">,</code>, <code translate="no" class="notranslate">&amp;</code>, <code translate="no" class="notranslate">*</code>, <code translate="no" class="notranslate">#</code>, <code translate="no" class="notranslate">?</code>, <code translate="no" class="notranslate">|</code>,
+<code translate="no" class="notranslate">-</code>, <code translate="no" class="notranslate">&lt;</code>, <code translate="no" class="notranslate">&gt;</code>, <code translate="no" class="notranslate">=</code>, <code translate="no" class="notranslate">!</code>, <code translate="no" class="notranslate">%</code>, <code translate="no" class="notranslate">@</code>, <code translate="no" class="notranslate">`</code></li>
+</ul>
+<p>The double-quoted style provides a way to express arbitrary strings, by
+using <code translate="no" class="notranslate">\</code> to escape characters and sequences. For instance, it is very useful
+when you need to embed a <code translate="no" class="notranslate">\n</code> or a Unicode character in a string.</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-string">"A double-quoted string in YAML\n"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If the string contains any of the following control characters, it must be
+escaped with double quotes:</p>
+<ul>
+    <li><code translate="no" class="notranslate">\0</code>, <code translate="no" class="notranslate">\x01</code>, <code translate="no" class="notranslate">\x02</code>, <code translate="no" class="notranslate">\x03</code>, <code translate="no" class="notranslate">\x04</code>, <code translate="no" class="notranslate">\x05</code>, <code translate="no" class="notranslate">\x06</code>, <code translate="no" class="notranslate">\a</code>,
+<code translate="no" class="notranslate">\b</code>, <code translate="no" class="notranslate">\t</code>, <code translate="no" class="notranslate">\n</code>, <code translate="no" class="notranslate">\v</code>, <code translate="no" class="notranslate">\f</code>, <code translate="no" class="notranslate">\r</code>, <code translate="no" class="notranslate">\x0e</code>, <code translate="no" class="notranslate">\x0f</code>, <code translate="no" class="notranslate">\x10</code>,
+<code translate="no" class="notranslate">\x11</code>, <code translate="no" class="notranslate">\x12</code>, <code translate="no" class="notranslate">\x13</code>, <code translate="no" class="notranslate">\x14</code>, <code translate="no" class="notranslate">\x15</code>, <code translate="no" class="notranslate">\x16</code>, <code translate="no" class="notranslate">\x17</code>, <code translate="no" class="notranslate">\x18</code>,
+<code translate="no" class="notranslate">\x19</code>, <code translate="no" class="notranslate">\x1a</code>, <code translate="no" class="notranslate">\e</code>, <code translate="no" class="notranslate">\x1c</code>, <code translate="no" class="notranslate">\x1d</code>, <code translate="no" class="notranslate">\x1e</code>, <code translate="no" class="notranslate">\x1f</code>, <code translate="no" class="notranslate">\N</code>,
+<code translate="no" class="notranslate">\_</code>, <code translate="no" class="notranslate">\L</code>, <code translate="no" class="notranslate">\P</code></li>
+</ul>
+<p>Finally, there are other cases when the strings must be quoted, no matter if
+you're using single or double quotes:</p>
+<ul>
+    <li>When the string is <code translate="no" class="notranslate">true</code> or <code translate="no" class="notranslate">false</code> (otherwise, it would be treated as a
+boolean value);</li>
+<li>When the string is <code translate="no" class="notranslate">null</code> or <code translate="no" class="notranslate">~</code> (otherwise, it would be considered as a
+<code translate="no" class="notranslate">null</code> value);</li>
+<li>When the string looks like a number, such as integers (e.g. <code translate="no" class="notranslate">2</code>, <code translate="no" class="notranslate">14</code>, etc.),
+floats (e.g. <code translate="no" class="notranslate">2.6</code>, <code translate="no" class="notranslate">14.9</code>) and exponential numbers (e.g. <code translate="no" class="notranslate">12e7</code>, etc.)
+(otherwise, it would be treated as a numeric value);</li>
+<li>When the string looks like a date (e.g. <code translate="no" class="notranslate">2014-12-31</code>) (otherwise it would be
+automatically converted into a Unix timestamp).</li>
+</ul>
+<p>When a string contains line breaks, you can use the literal style, indicated
+by the pipe (<code translate="no" class="notranslate">|</code>), to indicate that the string will span several lines. In
+literals, newlines are preserved:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-string">|
+  \/ /| |\/| |
+  / / | |  | |__</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Alternatively, strings can be written with the folded style, denoted by <code translate="no" class="notranslate">&gt;</code>,
+where each line break is replaced by a space:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-string">&gt;
+  This is a very long sentence
+  that spans several lines in the YAML.
+</span>
+<span class="hljs-comment"># This will be parsed as follows: (notice the trailing \n)</span>
+<span class="hljs-comment"># "This is a very long sentence that spans several lines in the YAML.\n"</span>
+
+<span class="hljs-string">&gt;-
+  This is a very long sentence
+  that spans several lines in the YAML.
+</span>
+<span class="hljs-comment"># This will be parsed as follows: (without a trailing \n)</span>
+<span class="hljs-comment"># "This is a very long sentence that spans several lines in the YAML."</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Notice the two spaces before each line in the previous examples. They
+won't appear in the resulting PHP strings.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="numbers">
+    Numbers
+    <a class="headerlink" href="#numbers" title="Permalink to this headline">¶</a>
+</h3>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># an integer</span>
+<span class="hljs-number">12</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># an octal</span>
+<span class="hljs-string">0o14</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># an hexadecimal</span>
+<span class="hljs-number">0xC</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># a float</span>
+<span class="hljs-number">13.4</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># an exponential number</span>
+<span class="hljs-number">1.2e+34</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># infinity</span>
+<span class="hljs-string">.inf</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="nulls">
+    Nulls
+    <a class="headerlink" href="#nulls" title="Permalink to this headline">¶</a>
+</h3>
+<p>Nulls in YAML can be expressed with <code translate="no" class="notranslate">null</code> or <code translate="no" class="notranslate">~</code>.</p>
+</div>
+<div class="section">
+<h3 id="booleans">
+    Booleans
+    <a class="headerlink" href="#booleans" title="Permalink to this headline">¶</a>
+</h3>
+<p>Booleans in YAML are expressed with <code translate="no" class="notranslate">true</code> and <code translate="no" class="notranslate">false</code>.</p>
+</div>
+<div class="section">
+<h3 id="dates">
+    Dates
+    <a class="headerlink" href="#dates" title="Permalink to this headline">¶</a>
+</h3>
+<p>YAML uses the <a href="https://www.iso.org/iso-8601-date-and-time-format.html" class="reference external" rel="external noopener noreferrer" target="_blank">ISO-8601</a> standard to express dates:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-number">2001</span><span class="hljs-number">-12</span><span class="hljs-string">-14T21:59:43.10-05:00</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># simple date</span>
+<span class="hljs-number">2002</span><span class="hljs-number">-12</span><span class="hljs-number">-14</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="yaml-format-collections"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="collections">
+    Collections
+    <a class="headerlink" href="#collections" title="Permalink to this headline">¶</a>
+</h2>
+<p>A YAML file is rarely used to describe a simple scalar. Most of the time, it
+describes a collection. YAML collections can be a sequence (indexed arrays in PHP)
+or a mapping of elements (associative arrays in PHP).</p>
+<p>Sequences use a dash followed by a space:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">PHP</span>
+<span class="hljs-bullet">-</span> <span class="hljs-string">Perl</span>
+<span class="hljs-bullet">-</span> <span class="hljs-string">Python</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The previous YAML file is equivalent to the following PHP code:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">[<span class="hljs-string">'PHP'</span>, <span class="hljs-string">'Perl'</span>, <span class="hljs-string">'Python'</span>];</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Mappings use a colon followed by a space (<code translate="no" class="notranslate">:</code> ) to mark each key/value pair:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-attr">PHP:</span> <span class="hljs-number">5.2</span>
+<span class="hljs-attr">MySQL:</span> <span class="hljs-number">5.1</span>
+<span class="hljs-attr">Apache:</span> <span class="hljs-number">2.2</span><span class="hljs-number">.20</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>which is equivalent to this PHP code:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">[<span class="hljs-string">'PHP'</span> =&gt; <span class="hljs-number">5.2</span>, <span class="hljs-string">'MySQL'</span> =&gt; <span class="hljs-number">5.1</span>, <span class="hljs-string">'Apache'</span> =&gt; <span class="hljs-string">'2.2.20'</span>];</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>In a mapping, a key can be any valid scalar.</p>
+</div>
+<p>The number of spaces between the colon and the value does not matter:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-attr">PHP:</span>    <span class="hljs-number">5.2</span>
+<span class="hljs-attr">MySQL:</span>  <span class="hljs-number">5.1</span>
+<span class="hljs-attr">Apache:</span> <span class="hljs-number">2.2</span><span class="hljs-number">.20</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>YAML uses indentation with one or more spaces to describe nested collections:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-attr">'symfony 1.0':</span>
+  <span class="hljs-attr">PHP:</span>    <span class="hljs-number">5.0</span>
+  <span class="hljs-attr">Propel:</span> <span class="hljs-number">1.2</span>
+<span class="hljs-attr">'symfony 1.2':</span>
+  <span class="hljs-attr">PHP:</span>    <span class="hljs-number">5.2</span>
+  <span class="hljs-attr">Propel:</span> <span class="hljs-number">1.3</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The above YAML is equivalent to the following PHP code:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">[
+    <span class="hljs-string">'symfony 1.0'</span> =&gt; [
+        <span class="hljs-string">'PHP'</span>    =&gt; <span class="hljs-number">5.0</span>,
+        <span class="hljs-string">'Propel'</span> =&gt; <span class="hljs-number">1.2</span>,
+    ],
+    <span class="hljs-string">'symfony 1.2'</span> =&gt; [
+        <span class="hljs-string">'PHP'</span>    =&gt; <span class="hljs-number">5.2</span>,
+        <span class="hljs-string">'Propel'</span> =&gt; <span class="hljs-number">1.3</span>,
+    ],
+];</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>There is one important thing you need to remember when using indentation in a
+YAML file: <em>Indentation must be done with one or more spaces, but never with
+tabulators</em>.</p>
+<p>You can nest sequences and mappings as you like:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-attr">'Chapter 1':</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">Introduction</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">Event</span> <span class="hljs-string">Types</span>
+<span class="hljs-attr">'Chapter 2':</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">Introduction</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">Helpers</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>YAML can also use flow styles for collections, using explicit indicators
+rather than indentation to denote scope.</p>
+<p>A sequence can be written as a comma separated list within square brackets
+(<code translate="no" class="notranslate">[]</code>):</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-string">[PHP,</span> <span class="hljs-string">Perl,</span> <span class="hljs-string">Python]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>A mapping can be written as a comma separated list of key/values within curly
+braces (<code translate="no" class="notranslate">{}</code>):</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-string">{</span> <span class="hljs-attr">PHP:</span> <span class="hljs-number">5.2</span><span class="hljs-string">,</span> <span class="hljs-attr">MySQL:</span> <span class="hljs-number">5.1</span><span class="hljs-string">,</span> <span class="hljs-attr">Apache:</span> <span class="hljs-number">2.2</span><span class="hljs-number">.20</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can mix and match styles to achieve a better readability:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-attr">'Chapter 1':</span> <span class="hljs-string">[Introduction,</span> <span class="hljs-string">Event</span> <span class="hljs-string">Types]</span>
+<span class="hljs-attr">'Chapter 2':</span> <span class="hljs-string">[Introduction,</span> <span class="hljs-string">Helpers]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-attr">'symfony 1.0':</span> <span class="hljs-string">{</span> <span class="hljs-attr">PHP:</span> <span class="hljs-number">5.0</span><span class="hljs-string">,</span> <span class="hljs-attr">Propel:</span> <span class="hljs-number">1.2</span> <span class="hljs-string">}</span>
+<span class="hljs-attr">'symfony 1.2':</span> <span class="hljs-string">{</span> <span class="hljs-attr">PHP:</span> <span class="hljs-number">5.2</span><span class="hljs-string">,</span> <span class="hljs-attr">Propel:</span> <span class="hljs-number">1.3</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="comments">
+    Comments
+    <a class="headerlink" href="#comments" title="Permalink to this headline">¶</a>
+</h2>
+<p>Comments can be added in YAML by prefixing them with a hash mark (<code translate="no" class="notranslate">#</code>):</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># Comment on a line</span>
+<span class="hljs-attr">"symfony 1.0":</span> <span class="hljs-string">{</span> <span class="hljs-attr">PHP:</span> <span class="hljs-number">5.0</span><span class="hljs-string">,</span> <span class="hljs-attr">Propel:</span> <span class="hljs-number">1.2</span> <span class="hljs-string">}</span> <span class="hljs-comment"># Comment at the end of a line</span>
+<span class="hljs-attr">"symfony 1.2":</span> <span class="hljs-string">{</span> <span class="hljs-attr">PHP:</span> <span class="hljs-number">5.2</span><span class="hljs-string">,</span> <span class="hljs-attr">Propel:</span> <span class="hljs-number">1.3</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Comments are ignored by the YAML parser and do not need to be indented
+according to the current level of nesting in a collection.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="explicit-typing">
+    Explicit Typing
+    <a class="headerlink" href="#explicit-typing" title="Permalink to this headline">¶</a>
+</h2>
+<p>The YAML specification defines some tags to set the type of any data explicitly:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-attr">data:</span>
+    <span class="hljs-comment"># this value is parsed as a string (it's not transformed into a DateTime)</span>
+    <span class="hljs-attr">start_date:</span> <span class="hljs-type">!!str</span> <span class="hljs-number">2002</span><span class="hljs-number">-12</span><span class="hljs-number">-14</span>
+
+    <span class="hljs-comment"># this value is parsed as a float number (it will be 3.0 instead of 3)</span>
+    <span class="hljs-attr">price:</span> <span class="hljs-type">!!float</span> <span class="hljs-number">3</span>
+
+    <span class="hljs-comment"># this value is parsed as binary data encoded in base64</span>
+    <span class="hljs-attr">picture:</span> <span class="hljs-type">!!binary</span> <span class="hljs-string">|
+        R0lGODlhDAAMAIQAAP//9/X
+        17unp5WZmZgAAAOfn515eXv
+        Pz7Y6OjuDg4J+fn5OTk6enp
+        56enmleECcgggoBADs=</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="symfony-specific-features">
+    Symfony Specific Features
+    <a class="headerlink" href="#symfony-specific-features" title="Permalink to this headline">¶</a>
+</h2>
+<p>The Yaml component provides some additional features that are not part of the
+official YAML specification but are useful in Symfony applications:</p>
+<ul>
+    <li><p><code translate="no" class="notranslate">!php/const</code> allows to get the value of a PHP constant. This tag takes the
+fully-qualified class name of the constant as its argument:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-attr">data:</span>
+    <span class="hljs-attr">page_limit:</span> <span class="hljs-type">!php</span><span class="hljs-string">/const</span> <span class="hljs-string">App\Pagination\Paginator::PAGE_LIMIT</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div></li>
+<li><p><code translate="no" class="notranslate">!php/object</code> allows to pass the serialized representation of a PHP
+object (created with the <a href="https://www.php.net/manual/en/function.serialize.php" class="reference external" rel="external noopener noreferrer" target="_blank">serialize()</a> function), which will be deserialized
+when parsing the YAML file:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-attr">data:</span>
+    <span class="hljs-attr">my_object:</span> <span class="hljs-type">!php</span><span class="hljs-string">/object</span> <span class="hljs-string">'O:8:"stdClass":1:{s:3:"bar";i:2;}'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div></li>
+<li><p><code translate="no" class="notranslate">!php/enum</code> allows to use a PHP enum case. This tag takes the fully-qualified
+class name of the enum case as its argument:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-attr">data:</span>
+    <span class="hljs-comment"># You can use the typed enum case...</span>
+    <span class="hljs-attr">operator_type:</span> <span class="hljs-type">!php</span><span class="hljs-string">/enum</span> <span class="hljs-string">App\Operator\Enum\Type::Or</span>
+    <span class="hljs-comment"># ... or you can also use "-&gt;value" to directly use the value of a BackedEnum case</span>
+    <span class="hljs-attr">operator_type:</span> <span class="hljs-type">!php</span><span class="hljs-string">/enum</span> <span class="hljs-string">App\Operator\Enum\Type::Or-&gt;value</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div></li>
+</ul>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">!php/enum</code> tag was introduced in Symfony 6.2.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="unsupported-yaml-features">
+    Unsupported YAML Features
+    <a class="headerlink" href="#unsupported-yaml-features" title="Permalink to this headline">¶</a>
+</h2>
+<p>The following YAML features are not supported by the Symfony Yaml component:</p>
+<ul>
+    <li>Multi-documents (<code translate="no" class="notranslate">---</code> and <code translate="no" class="notranslate">...</code> markers);</li>
+<li>Complex mapping keys and complex values starting with <code translate="no" class="notranslate">?</code>;</li>
+<li>Tagged values as keys;</li>
+<li>The following tags and types: <code translate="no" class="notranslate">!!set</code>, <code translate="no" class="notranslate">!!omap</code>, <code translate="no" class="notranslate">!!pairs</code>, <code translate="no" class="notranslate">!!seq</code>,
+<code translate="no" class="notranslate">!!bool</code>, <code translate="no" class="notranslate">!!int</code>, <code translate="no" class="notranslate">!!merge</code>, <code translate="no" class="notranslate">!!null</code>, <code translate="no" class="notranslate">!!timestamp</code>, <code translate="no" class="notranslate">!!value</code>, <code translate="no" class="notranslate">!!yaml</code>;</li>
+<li>Tags (<code translate="no" class="notranslate">TAG</code> directive; example: <code translate="no" class="notranslate">%TAG ! tag:example.com,2000:app/</code>)
+and tag references (example: <code translate="no" class="notranslate">!&lt;tag:example.com,2000:app/foo&gt;</code>);</li>
+<li>Using sequence-like syntax for mapping elements (example: <code translate="no" class="notranslate">{foo, bar}</code>; use
+<code translate="no" class="notranslate">{foo: ~, bar: ~}</code> instead).</li>
+</ul>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

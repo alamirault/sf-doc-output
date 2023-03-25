@@ -1,0 +1,1209 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-create-service-aliases-and-mark-services-as-private">
+    How to Create Service Aliases and Mark Services as Private
+    <a class="headerlink" href="#how-to-create-service-aliases-and-mark-services-as-private" title="Permalink to this headline">¶</a>
+</h1>
+<span id="container-private-services"></span>
+<div class="section">
+<h2 id="marking-services-as-public-private">
+    Marking Services as Public / Private
+    <a class="headerlink" href="#marking-services-as-public-private" title="Permalink to this headline">¶</a>
+</h2>
+<p>When defining a service, it can be made to be <em>public</em> or <em>private</em>. If a service
+is <em>public</em>, it means that you can access it directly from the container at runtime.
+For example, the <code translate="no" class="notranslate">doctrine</code> service is a public service:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// only public services can be accessed in this way</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>doctrine</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'doctrine'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>But typically, services are accessed using <a href="../service_container.html#services-constructor-injection" class="reference internal">dependency injection</a>.
+And in this case, those services do <em>not</em> need to be public.</p>
+<span id="inlined-private-services"></span>
+<p>So unless you <em>specifically</em> need to access a service directly from the container
+via <code translate="no" class="notranslate">$container-&gt;get()</code>, the best-practice is to make your services <em>private</em>.
+In fact, All services  are <a href="../service_container.html#container-public" class="reference internal">private</a> by default.</p>
+<p>You can also control the <code translate="no" class="notranslate">public</code> option on a service-by-service basis:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-355864b7655ba7a5af494794d63c139592097fee" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-74f9634e8eb5117c97304bd7915849076eb77903" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-4c9ef6c2f3814eff7dfdb1b4f222495ad974d0de" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-355864b7655ba7a5af494794d63c139592097fee" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-string">App\Service\Foo:</span>
+        <span class="hljs-attr">public:</span> <span class="hljs-literal">true</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-74f9634e8eb5117c97304bd7915849076eb77903" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Service\Foo"</span> <span class="hljs-attr">public</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-4c9ef6c2f3814eff7dfdb1b4f222495ad974d0de" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Service</span>\<span class="hljs-title">Foo</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(Foo<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span><span class="hljs-keyword">public</span>();
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<span id="services-why-private"></span>
+<p>Private services are special because they allow the container to optimize whether
+and how they are instantiated. This increases the container's performance. It also
+gives you better errors: if you try to reference a non-existent service, you will
+get a clear error when you refresh <em>any</em> page, even if the problematic code would
+not have run on that page.</p>
+<p>Now that the service is private, you <em>must not</em> fetch the service directly
+from the container:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Service</span>\<span class="hljs-title">Foo</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>get(Foo<span class="hljs-operator">::</span>class);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Thus, a service can be marked as private if you do not want to access it
+directly from your code. However, if a service has been marked as private,
+you can still alias it (see below) to access this service (via the alias).</p>
+<span id="services-alias"></span>
+</div>
+<div class="section">
+<h2 id="aliasing">
+    Aliasing
+    <a class="headerlink" href="#aliasing" title="Permalink to this headline">¶</a>
+</h2>
+<p>You may sometimes want to use shortcuts to access some services. You can
+do so by aliasing them and, furthermore, you can even alias non-public
+services.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-4">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-e3249064eabc5017c9fc29e2b59542f42cc27e29" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-4426e0bf5676b771832bce34e1e7533e6adfe9d9" aria-selected="false"
+                 tabindex="-1">
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-ae06acdb6ac879a42fa6eedae6ab50adf243d339" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-077148eb0260ba55c97e3c91bb1ac64181a0d22b" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-e3249064eabc5017c9fc29e2b59542f42cc27e29" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Mail/PhpMailer.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Mail</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsAlias</span>;
+
+<span class="hljs-comment">#[AsAlias(id: 'app.mailer', public: true)]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PhpMailer</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-4426e0bf5676b771832bce34e1e7533e6adfe9d9" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="display: none">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-string">App\Mail\PhpMailer:</span>
+        <span class="hljs-attr">public:</span> <span class="hljs-literal">false</span>
+
+    <span class="hljs-attr">app.mailer:</span>
+        <span class="hljs-attr">alias:</span> <span class="hljs-string">App\Mail\PhpMailer</span>
+        <span class="hljs-attr">public:</span> <span class="hljs-literal">true</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-ae06acdb6ac879a42fa6eedae6ab50adf243d339" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Mail\PhpMailer"</span> <span class="hljs-attr">public</span>=<span class="hljs-string">"false"</span>/&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"app.mailer"</span> <span class="hljs-attr">alias</span>=<span class="hljs-string">"App\Mail\PhpMailer"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-077148eb0260ba55c97e3c91bb1ac64181a0d22b" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Mail</span>\<span class="hljs-title">PhpMailer</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(PhpMailer<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span><span class="hljs-keyword">private</span>();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>alias(<span class="hljs-string">'app.mailer'</span>, PhpMailer<span class="hljs-operator">::</span>class);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The <code translate="no" class="notranslate">#[AsAlias]</code> attribute was introduced in Symfony 6.3.</p>
+</div>
+<p>This means that when using the container directly, you can access the
+<code translate="no" class="notranslate">PhpMailer</code> service by asking for the <code translate="no" class="notranslate">app.mailer</code> service like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'app.mailer'</span>); <span class="hljs-comment">// Would return a PhpMailer instance</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>In YAML, you can also use a shortcut to alias a service:</p>
+<div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">app.mailer:</span> <span class="hljs-string">'@App\Mail\PhpMailer'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>When using <code translate="no" class="notranslate">#[AsAlias]</code> attribute, you may omit passing <code translate="no" class="notranslate">id</code> argument
+if the class implements exactly one interface. <code translate="no" class="notranslate">MailerInterface</code> will be
+alias of <code translate="no" class="notranslate">PhpMailer</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Mail/PhpMailer.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Mail</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsAlias</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Mailer</span>\<span class="hljs-title">MailerInterface</span>;
+
+<span class="hljs-comment">#[AsAlias]</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PhpMailer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">MailerInterface</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="deprecating-service-aliases">
+    Deprecating Service Aliases
+    <a class="headerlink" href="#deprecating-service-aliases" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you decide to deprecate the use of a service alias (because it is outdated
+or you decided not to maintain it anymore), you can deprecate its definition:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-14f4e688d2003b84b3c67d9ea54830029262b54d" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-ed7e90eecd2c2fd91abe50289abfe15b2b55c7fa" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-9e9dc85bafd96ae24e53bd1ee7a7ae225db8dcff" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-14f4e688d2003b84b3c67d9ea54830029262b54d" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-attr">app.mailer:</span>
+    <span class="hljs-attr">alias:</span> <span class="hljs-string">'App\Mail\PhpMailer'</span>
+
+    <span class="hljs-comment"># this outputs the following generic deprecation message:</span>
+    <span class="hljs-comment"># Since acme/package 1.2: The "app.mailer" service alias is deprecated. You should stop using it, as it will be removed in the future</span>
+    <span class="hljs-attr">deprecated:</span>
+        <span class="hljs-attr">package:</span> <span class="hljs-string">'acme/package'</span>
+        <span class="hljs-attr">version:</span> <span class="hljs-string">'1.2'</span>
+
+    <span class="hljs-comment"># you can also define a custom deprecation message (%alias_id% placeholder is available)</span>
+    <span class="hljs-attr">deprecated:</span>
+        <span class="hljs-attr">package:</span> <span class="hljs-string">'acme/package'</span>
+        <span class="hljs-attr">version:</span> <span class="hljs-string">'1.2'</span>
+        <span class="hljs-attr">message:</span> <span class="hljs-string">'The "%alias_id%" alias is deprecated. Do not use it anymore.'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-ed7e90eecd2c2fd91abe50289abfe15b2b55c7fa" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-Instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"app.mailer"</span> <span class="hljs-attr">alias</span>=<span class="hljs-string">"App\Mail\PhpMailer"</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- this outputs the following generic deprecation message:
+                 Since acme/package 1.2: The "app.mailer" service alias is deprecated. You should stop using it, as it will be removed in the future --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">deprecated</span> <span class="hljs-attr">package</span>=<span class="hljs-string">"acme/package"</span> <span class="hljs-attr">version</span>=<span class="hljs-string">"1.2"</span>/&gt;</span>
+
+            <span class="hljs-comment">&lt;!-- you can also define a custom deprecation message (%alias_id% placeholder is available) --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">deprecated</span> <span class="hljs-attr">package</span>=<span class="hljs-string">"acme/package"</span> <span class="hljs-attr">version</span>=<span class="hljs-string">"1.2"</span>&gt;</span>
+                The "%alias_id%" service alias is deprecated. Don't use it anymore.
+            <span class="hljs-tag">&lt;/<span class="hljs-name">deprecated</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-9e9dc85bafd96ae24e53bd1ee7a7ae225db8dcff" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span>
+    <span class="hljs-operator">-&gt;</span>setAlias(<span class="hljs-string">'app.mailer'</span>, <span class="hljs-string">'App\Mail\PhpMailer'</span>)
+
+    <span class="hljs-comment">// this outputs the following generic deprecation message:</span>
+    <span class="hljs-comment">// Since acme/package 1.2: The "app.mailer" service alias is deprecated. You should stop using it, as it will be removed in the future</span>
+    <span class="hljs-operator">-&gt;</span>setDeprecated(<span class="hljs-string">'acme/package'</span>, <span class="hljs-string">'1.2'</span>)
+
+    <span class="hljs-comment">// you can also define a custom deprecation message (%alias_id% placeholder is available)</span>
+    <span class="hljs-operator">-&gt;</span>setDeprecated(
+        <span class="hljs-string">'acme/package'</span>,
+        <span class="hljs-string">'1.2'</span>,
+        <span class="hljs-string">'The "%alias_id%" service alias is deprecated. Don\'t use it anymore.'</span>
+    )
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Now, every time this service alias is used, a deprecation warning is triggered,
+advising you to stop or to change your uses of that alias.</p>
+<p>The message is actually a message template, which replaces occurrences of the
+<code translate="no" class="notranslate">%alias_id%</code> placeholder by the service alias id. You <strong>must</strong> have at least
+one occurrence of the <code translate="no" class="notranslate">%alias_id%</code> placeholder in your template.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="anonymous-services">
+    Anonymous Services
+    <a class="headerlink" href="#anonymous-services" title="Permalink to this headline">¶</a>
+</h2>
+<p>In some cases, you may want to prevent a service being used as a dependency of
+other services. This can be achieved by creating an anonymous service. These
+services are like regular services but they don't define an ID and they are
+created where they are used.</p>
+<p>The following example shows how to inject an anonymous service into another service:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-e06e2cfa2e67f8794202160121fd51fee1db0037" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-f9ad5baf3c957adce6b451760a5398fb047e74b5" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-1d475113e0a0784be413d60b2bcdd88c50d3cf46" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-e06e2cfa2e67f8794202160121fd51fee1db0037" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">App\Foo:</span>
+        <span class="hljs-attr">arguments:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-type">!service</span>
+                <span class="hljs-attr">class:</span> <span class="hljs-string">App\AnonymousBar</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-f9ad5baf3c957adce6b451760a5398fb047e74b5" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"foo"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"App\Foo"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">argument</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"service"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"App\AnonymousBar"</span>/&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-1d475113e0a0784be413d60b2bcdd88c50d3cf46" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">AnonymousBar</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Foo</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(Foo<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>args([inline_service(AnonymousBar<span class="hljs-operator">::</span>class)]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Anonymous services do <em>NOT</em> inherit the definitions provided from the
+defaults defined in the configuration. So you'll need to explicitly mark
+service as autowired or autoconfigured when doing an anonymous service
+e.g.: <code translate="no" class="notranslate">inline_service(Foo::class)-&gt;autowire()-&gt;autoconfigure()</code>.</p>
+</div>
+<p>Using an anonymous service as a factory looks like this:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-95cffe78a6ee3bdfab0cfa4f5ea0206c477600f6" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-fc982d49482548b98d36849e5a1bf960c970cccb" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-7bab7693de17c2ef718b5275fb6398ca55a159fb" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-95cffe78a6ee3bdfab0cfa4f5ea0206c477600f6" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">App\Foo:</span>
+        <span class="hljs-attr">factory:</span> <span class="hljs-string">[</span> <span class="hljs-type">!service</span> <span class="hljs-string">{</span> <span class="hljs-attr">class:</span> <span class="hljs-string">App\FooFactory</span> <span class="hljs-string">},</span> <span class="hljs-string">'constructFoo'</span> <span class="hljs-string">]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-fc982d49482548b98d36849e5a1bf960c970cccb" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"foo"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"App\Foo"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">factory</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"constructFoo"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"App\FooFactory"</span>/&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">factory</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-7bab7693de17c2ef718b5275fb6398ca55a159fb" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">AnonymousBar</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Foo</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(Foo<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>factory([inline_service(AnonymousBar<span class="hljs-operator">::</span>class), <span class="hljs-string">'constructFoo'</span>]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h2 id="deprecating-services">
+    Deprecating Services
+    <a class="headerlink" href="#deprecating-services" title="Permalink to this headline">¶</a>
+</h2>
+<p>Once you have decided to deprecate the use of a service (because it is outdated
+or you decided not to maintain it anymore), you can deprecate its definition:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-68d84ff6cfcaf33d9bf86174b4788917395f485c" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-ddca71e1536064cac2bcaa27cc1a6b2ebffcc529" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-6d6d7ce566c0eb9fd5d614c16c7604e70084c6b4" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-68d84ff6cfcaf33d9bf86174b4788917395f485c" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-string">App\Service\OldService:</span>
+    <span class="hljs-attr">deprecated:</span>
+        <span class="hljs-attr">package:</span> <span class="hljs-string">'vendor-name/package-name'</span>
+        <span class="hljs-attr">version:</span> <span class="hljs-string">'2.8'</span>
+        <span class="hljs-attr">message:</span> <span class="hljs-string">The</span> <span class="hljs-string">"%service_id%"</span> <span class="hljs-string">service</span> <span class="hljs-string">is</span> <span class="hljs-string">deprecated</span> <span class="hljs-string">since</span> <span class="hljs-string">vendor-name/package-name</span> <span class="hljs-number">2.8</span> <span class="hljs-string">and</span> <span class="hljs-string">will</span> <span class="hljs-string">be</span> <span class="hljs-string">removed</span> <span class="hljs-string">in</span> <span class="hljs-number">3.0</span><span class="hljs-string">.</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-ddca71e1536064cac2bcaa27cc1a6b2ebffcc529" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-Instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"App\Service\OldService"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">deprecated</span> <span class="hljs-attr">package</span>=<span class="hljs-string">"vendor-name/package-name"</span> <span class="hljs-attr">version</span>=<span class="hljs-string">"2.8"</span>&gt;</span>The "%service_id%" service is deprecated since vendor-name/package-name 2.8 and will be removed in 3.0.<span class="hljs-tag">&lt;/<span class="hljs-name">deprecated</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-6d6d7ce566c0eb9fd5d614c16c7604e70084c6b4" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Service</span>\<span class="hljs-title">OldService</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>services</span><span class="hljs-operator">-&gt;</span>set(OldService<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>deprecate(
+            <span class="hljs-string">'vendor-name/package-name'</span>,
+            <span class="hljs-string">'2.8'</span>,
+            <span class="hljs-string">'The "%service_id%" service is deprecated since vendor-name/package-name 2.8 and will be removed in 3.0.'</span>
+        );
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Now, every time this service is used, a deprecation warning is triggered,
+advising you to stop or to change your uses of that service.</p>
+<p>The message is actually a message template, which replaces occurrences of the
+<code translate="no" class="notranslate">%service_id%</code> placeholder by the service's id. You <strong>must</strong> have at least one
+occurrence of the <code translate="no" class="notranslate">%service_id%</code> placeholder in your template.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The deprecation message is optional. If not set, Symfony will show this default
+message: <code translate="no" class="notranslate">The &quot;%service_id%&quot; service is deprecated. You should stop using it,
+as it will soon be removed.</code>.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>It is strongly recommended that you define a custom message because the
+default one is too generic. A good message informs when this service was
+deprecated, until when it will be maintained and the alternative services
+to use (if any).</p>
+</div>
+<p>For service decorators (see <a href="service_decoration.html" class="reference internal">How to Decorate Services</a>), if the
+definition does not modify the deprecated status, it will inherit the status from
+the definition that is decorated.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

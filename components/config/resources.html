@@ -1,0 +1,239 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="loading-resources">
+    Loading Resources
+    <a class="headerlink" href="#loading-resources" title="Permalink to this headline">¶</a>
+</h1>
+<p>Loaders populate the application's configuration from different sources
+like YAML files. The Config component defines the interface for such
+loaders. The <a href="../../components/dependency_injection.html" class="reference internal">Dependency Injection</a>
+and <a href="https://github.com/symfony/routing" class="reference external" rel="external noopener noreferrer" target="_blank">Routing</a> components come with specialized loaders for different file
+formats.</p>
+<div class="section">
+<h2 id="locating-resources">
+    Locating Resources
+    <a class="headerlink" href="#locating-resources" title="Permalink to this headline">¶</a>
+</h2>
+<p>Loading the configuration normally starts with a search for resources, mostly
+files. This can be done with the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/FileLocator.php" class="reference external" title="Symfony\Component\Config\FileLocator" rel="external noopener noreferrer" target="_blank">FileLocator</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FileLocator</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configDirectories</span> = [<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/config'</span>];
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fileLocator</span> = <span class="hljs-keyword">new</span> FileLocator(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configDirectories</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>yamlUserFiles</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fileLocator</span><span class="hljs-operator">-&gt;</span>locate(<span class="hljs-string">'users.yaml'</span>, <span class="hljs-keyword">null</span>, <span class="hljs-keyword">false</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The locator receives a collection of locations where it should look for
+files. The first argument of <code translate="no" class="notranslate">locate()</code> is the name of the file to look
+for. The second argument may be the current path and when supplied, the
+locator will look in this directory first. The third argument indicates
+whether or not the locator should return the first file it has found or
+an array containing all matches.</p>
+</div>
+<div class="section">
+<h2 id="resource-loaders">
+    Resource Loaders
+    <a class="headerlink" href="#resource-loaders" title="Permalink to this headline">¶</a>
+</h2>
+<p>For each type of resource (YAML, XML, annotation, etc.) a loader must be
+defined. Each loader should implement
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderInterface.php" class="reference external" title="Symfony\Component\Config\Loader\LoaderInterface" rel="external noopener noreferrer" target="_blank">LoaderInterface</a> or extend the
+abstract <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/FileLoader.php" class="reference external" title="Symfony\Component\Config\Loader\FileLoader" rel="external noopener noreferrer" target="_blank">FileLoader</a> class,
+which allows for recursively importing other resources:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">Acme</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">Loader</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">FileLoader</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Yaml</span>\<span class="hljs-title">Yaml</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">YamlUserLoader</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">FileLoader</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resource</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span> = null)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>configValues</span> = Yaml<span class="hljs-operator">::</span>parse(file_get_contents(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resource</span>));
+
+        <span class="hljs-comment">// ... handle the config values</span>
+
+        <span class="hljs-comment">// maybe import some other resource:</span>
+
+        <span class="hljs-comment">// $this-&gt;import('extra_users.yaml');</span>
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">supports</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resource</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span> = null)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> is_string(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resource</span>) &amp;&amp; <span class="hljs-string">'yaml'</span> === pathinfo(
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resource</span>,
+            PATHINFO_EXTENSION
+        );
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="finding-the-right-loader">
+    Finding the Right Loader
+    <a class="headerlink" href="#finding-the-right-loader" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderResolver.php" class="reference external" title="Symfony\Component\Config\Loader\LoaderResolver" rel="external noopener noreferrer" target="_blank">LoaderResolver</a> receives
+as its first constructor argument a collection of loaders. When a resource
+(for instance an XML file) should be loaded, it loops through this collection
+of loaders and returns the loader which supports this particular resource
+type.</p>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/DelegatingLoader.php" class="reference external" title="Symfony\Component\Config\Loader\DelegatingLoader" rel="external noopener noreferrer" target="_blank">DelegatingLoader</a> makes
+use of the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderResolver.php" class="reference external" title="Symfony\Component\Config\Loader\LoaderResolver" rel="external noopener noreferrer" target="_blank">LoaderResolver</a>.
+When it is asked to load a resource, it delegates this question to the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Config/Loader/LoaderResolver.php" class="reference external" title="Symfony\Component\Config\Loader\LoaderResolver" rel="external noopener noreferrer" target="_blank">LoaderResolver</a>. In case the
+resolver has found a suitable loader, this loader will be asked to load
+the resource:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Acme</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">YamlUserLoader</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">DelegatingLoader</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">LoaderResolver</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loaderResolver</span> = <span class="hljs-keyword">new</span> LoaderResolver([<span class="hljs-keyword">new</span> YamlUserLoader(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fileLocator</span>)]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>delegatingLoader</span> = <span class="hljs-keyword">new</span> DelegatingLoader(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>loaderResolver</span>);
+
+<span class="hljs-comment">// YamlUserLoader is used to load this resource because it supports</span>
+<span class="hljs-comment">// files with the '.yaml' extension</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>delegatingLoader</span><span class="hljs-operator">-&gt;</span>load(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/users.yaml'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

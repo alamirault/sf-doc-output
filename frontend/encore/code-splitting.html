@@ -1,0 +1,166 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="async-code-splitting">
+    Async Code Splitting
+    <a class="headerlink" href="#async-code-splitting" title="Permalink to this headline">¶</a>
+</h1>
+<p>When you require/import a JavaScript or CSS module, Webpack compiles that code into
+the final JavaScript or CSS file. Usually, that's exactly what you want. But what
+if you only need to use a piece of code under certain conditions? For example,
+what if you want to use <a href="https://videojs.com/" class="reference external" rel="external noopener noreferrer" target="_blank">video.js</a> to play a video, but only once a user has
+clicked a link:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// assets/app.js</span>
+
+<span class="hljs-keyword">import</span> $ <span class="hljs-keyword">from</span> <span class="hljs-string">'jquery'</span>;
+<span class="hljs-comment">// a fictional "large" module (e.g. it imports video.js internally)</span>
+<span class="hljs-keyword">import</span> VideoPlayer <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/VideoPlayer'</span>;
+
+$(<span class="hljs-string">'.js-open-video'</span>).on(<span class="hljs-string">'click'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// use the larger VideoPlayer module</span>
+    <span class="hljs-keyword">const</span> player = <span class="hljs-keyword">new</span> VideoPlayer(<span class="hljs-string">'some-element'</span>);
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In this example, the VideoPlayer module and everything it imports will be packaged
+into the final, built JavaScript file, even though it may not be very common for
+someone to actually need it. A better solution is to use <a href="https://webpack.js.org/guides/code-splitting/#dynamic-imports" class="reference external" rel="external noopener noreferrer" target="_blank">dynamic imports</a>: load
+the code via AJAX when it's needed:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// assets/app.js</span>
+
+<span class="hljs-keyword">import</span> $ <span class="hljs-keyword">from</span> <span class="hljs-string">'jquery'</span>;
+
+$(<span class="hljs-string">'.js-open-video'</span>).on(<span class="hljs-string">'click'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// you could start a loading animation here</span>
+
+    <span class="hljs-comment">// use import() as a function - it returns a Promise</span>
+    <span class="hljs-keyword">import</span>(<span class="hljs-string">'./components/VideoPlayer'</span>).then(<span class="hljs-function">(<span class="hljs-params">{ <span class="hljs-keyword">default</span>: VideoPlayer }</span>) =&gt;</span> {
+        <span class="hljs-comment">// you could stop a loading animation here</span>
+
+        <span class="hljs-comment">// use the larger VideoPlayer module</span>
+        <span class="hljs-keyword">const</span> player = <span class="hljs-keyword">new</span> VideoPlayer(<span class="hljs-string">'some-element'</span>);
+
+    }).catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-string">'An error occurred while loading the component'</span>);
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>By using <code translate="no" class="notranslate">import()</code> like a function, the module will be downloaded async and
+the <code translate="no" class="notranslate">.then()</code> callback will be executed when it's finished. The <code translate="no" class="notranslate">VideoPlayer</code>
+argument to the callback will be the loaded module. In other words, it works like
+normal AJAX calls! Behind the scenes, Webpack will package the <code translate="no" class="notranslate">VideoPlayer</code> module
+into a separate file (e.g. <code translate="no" class="notranslate">0.js</code>) so it can be downloaded. All the details are
+handled for you.</p>
+<p>The <code translate="no" class="notranslate">{ default: VideoPlayer }</code> part may look strange. When using the async
+import, your <code translate="no" class="notranslate">.then()</code> callback is passed an object, where the <em>actual</em> module
+is on a <code translate="no" class="notranslate">.default</code> key. There are reasons why this is done, but it does look
+quirky. The <code translate="no" class="notranslate">{ default: VideoPlayer }</code> code makes sure that the <code translate="no" class="notranslate">VideoPlayer</code>
+module we want is read from this <code translate="no" class="notranslate">.default</code> property.</p>
+<p>For more details and configuration options, see <a href="https://webpack.js.org/guides/code-splitting/#dynamic-imports" class="reference external" rel="external noopener noreferrer" target="_blank">dynamic imports</a> on Webpack's
+documentation.</p>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

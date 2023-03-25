@@ -1,0 +1,999 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-asset-component">
+    The Asset Component
+    <a class="headerlink" href="#the-asset-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The Asset component manages URL generation and versioning of web assets such
+as CSS stylesheets, JavaScript files and image files.</p>
+</blockquote>
+<p>In the past, it was common for web applications to hard-code the URLs of web assets.
+For example:</p>
+<div translate="no" class="highlight-html notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/css"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/css/main.css"</span>&gt;</span>
+
+<span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/images/logo.png"</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">"logo"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This practice is no longer recommended unless the web application is extremely
+simple. Hardcoding URLs can be a disadvantage because:</p>
+<ul>
+    <li><strong>Templates get verbose</strong>: you have to write the full path for each
+asset. When using the Asset component, you can group assets in packages to
+avoid repeating the common part of their path;</li>
+<li><strong>Versioning is difficult</strong>: it has to be custom managed for each
+application. Adding a version (e.g. <code translate="no" class="notranslate">main.css?v=5</code>) to the asset URLs
+is essential for some applications because it allows you to control how
+the assets are cached. The Asset component allows you to define different
+versioning strategies for each package;</li>
+<li><strong>Moving assets' location</strong> is cumbersome and error-prone: it requires you to
+carefully update the URLs of all assets included in all templates. The Asset
+component allows to move assets effortlessly just by changing the base path
+value associated with the package of assets;</li>
+<li><strong>It's nearly impossible to use multiple CDNs</strong>: this technique requires
+you to change the URL of the asset randomly for each request. The Asset component
+provides out-of-the-box support for any number of multiple CDNs, both regular
+(<code translate="no" class="notranslate">http://</code>) and secure (<code translate="no" class="notranslate">https://</code>).</li>
+</ul>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/asset</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<span id="asset-packages"></span>
+<div class="section">
+<h3 id="asset-packages">
+    Asset Packages
+    <a class="headerlink" href="#asset-packages" title="Permalink to this headline">¶</a>
+</h3>
+<p>The Asset component manages assets through packages. A package groups all the
+assets which share the same properties: versioning strategy, base path, CDN hosts,
+etc. In the following basic example, a package is created to manage assets without
+any versioning:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">Package</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">VersionStrategy</span>\<span class="hljs-title">EmptyVersionStrategy</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span> = <span class="hljs-keyword">new</span> Package(<span class="hljs-keyword">new</span> EmptyVersionStrategy());
+
+<span class="hljs-comment">// Absolute path</span>
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/image.png'</span>);
+<span class="hljs-comment">// result: /image.png</span>
+
+<span class="hljs-comment">// Relative path</span>
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'image.png'</span>);
+<span class="hljs-comment">// result: image.png</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Packages implement <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Asset/PackageInterface.php" class="reference external" title="Symfony\Component\Asset\PackageInterface" rel="external noopener noreferrer" target="_blank">PackageInterface</a>,
+which defines the following two methods:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Asset/PackageInterface.php#method_getVersion" class="reference external" title="Symfony\Component\Asset\PackageInterface::getVersion()" rel="external noopener noreferrer" target="_blank">getVersion()</a></dt>
+        
+        <dd>
+                            Returns the asset version for an asset.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Asset/PackageInterface.php#method_getUrl" class="reference external" title="Symfony\Component\Asset\PackageInterface::getUrl()" rel="external noopener noreferrer" target="_blank">getUrl()</a></dt>
+        
+        <dd>
+                            Returns an absolute or root-relative public path.
+                    </dd>
+    </dl>
+<p>With a package, you can:</p>
+<p>A) <a href="asset.html#component-assets-versioning" class="reference internal">version the assets</a>;
+B) set a <a href="asset.html#component-assets-path-package" class="reference internal">common base path</a> (e.g. <code translate="no" class="notranslate">/css</code>)
+   for the assets;
+C) <a href="asset.html#component-assets-cdn" class="reference internal">configure a CDN</a> for the assets</p>
+<span id="component-assets-versioning"></span>
+</div>
+<div class="section">
+<h3 id="versioned-assets">
+    Versioned Assets
+    <a class="headerlink" href="#versioned-assets" title="Permalink to this headline">¶</a>
+</h3>
+<p>One of the main features of the Asset component is the ability to manage
+the versioning of the application's assets. Asset versions are commonly used
+to control how these assets are cached.</p>
+<p>Instead of relying on a simple version mechanism, the Asset component allows
+you to define advanced versioning strategies via PHP classes. The two built-in
+strategies are the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Asset/VersionStrategy/EmptyVersionStrategy.php" class="reference external" title="Symfony\Component\Asset\VersionStrategy\EmptyVersionStrategy" rel="external noopener noreferrer" target="_blank">EmptyVersionStrategy</a>,
+which doesn't add any version to the asset and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Asset/VersionStrategy/StaticVersionStrategy.php" class="reference external" title="Symfony\Component\Asset\VersionStrategy\StaticVersionStrategy" rel="external noopener noreferrer" target="_blank">StaticVersionStrategy</a>,
+which allows you to set the version with a format string.</p>
+<p>In this example, the <code translate="no" class="notranslate">StaticVersionStrategy</code> is used to append the <code translate="no" class="notranslate">v1</code>
+suffix to any asset path:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">Package</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">VersionStrategy</span>\<span class="hljs-title">StaticVersionStrategy</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span> = <span class="hljs-keyword">new</span> Package(<span class="hljs-keyword">new</span> StaticVersionStrategy(<span class="hljs-string">'v1'</span>));
+
+<span class="hljs-comment">// Absolute path</span>
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/image.png'</span>);
+<span class="hljs-comment">// result: /image.png?v1</span>
+
+<span class="hljs-comment">// Relative path</span>
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'image.png'</span>);
+<span class="hljs-comment">// result: image.png?v1</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In case you want to modify the version format, pass a <code translate="no" class="notranslate">sprintf</code>-compatible
+format string as the second argument of the <code translate="no" class="notranslate">StaticVersionStrategy</code>
+constructor:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// puts the 'version' word before the version value</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span> = <span class="hljs-keyword">new</span> Package(<span class="hljs-keyword">new</span> StaticVersionStrategy(<span class="hljs-string">'v1'</span>, <span class="hljs-string">'%s?version=%s'</span>));
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/image.png'</span>);
+<span class="hljs-comment">// result: /image.png?version=v1</span>
+
+<span class="hljs-comment">// puts the asset version before its path</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span> = <span class="hljs-keyword">new</span> Package(<span class="hljs-keyword">new</span> StaticVersionStrategy(<span class="hljs-string">'v1'</span>, <span class="hljs-string">'%2$s/%1$s'</span>));
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/image.png'</span>);
+<span class="hljs-comment">// result: /v1/image.png</span>
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'image.png'</span>);
+<span class="hljs-comment">// result: v1/image.png</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h4 id="json-file-manifest">
+    JSON File Manifest
+    <a class="headerlink" href="#json-file-manifest" title="Permalink to this headline">¶</a>
+</h4>
+<p>A popular strategy to manage asset versioning, which is used by tools such as
+<a href="https://webpack.js.org/" class="reference external" rel="external noopener noreferrer" target="_blank">Webpack</a>, is to generate a JSON file mapping all source file names to their
+corresponding output file:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"css/app.css"</span>: <span class="hljs-string">"build/css/app.b916426ea1d10021f3f17ce8031f93c2.css"</span>,
+    <span class="hljs-attr">"js/app.js"</span>: <span class="hljs-string">"build/js/app.13630905267b809161e71d0f8a0c017b.js"</span>,
+    <span class="hljs-attr">"..."</span>: <span class="hljs-string">"..."</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In those cases, use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Asset/VersionStrategy/JsonManifestVersionStrategy.php" class="reference external" title="Symfony\Component\Asset\VersionStrategy\JsonManifestVersionStrategy" rel="external noopener noreferrer" target="_blank">JsonManifestVersionStrategy</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">Package</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">VersionStrategy</span>\<span class="hljs-title">JsonManifestVersionStrategy</span>;
+
+<span class="hljs-comment">// assumes the JSON file above is called "rev-manifest.json"</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span> = <span class="hljs-keyword">new</span> Package(<span class="hljs-keyword">new</span> JsonManifestVersionStrategy(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/rev-manifest.json'</span>));
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'css/app.css'</span>);
+<span class="hljs-comment">// result: build/css/app.b916426ea1d10021f3f17ce8031f93c2.css</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you request an asset that is <em>not found</em> in the <code translate="no" class="notranslate">rev-manifest.json</code> file,
+the original - <em>unmodified</em> - asset path will be returned. The <code translate="no" class="notranslate">$strictMode</code>
+argument helps debug issues because it throws an exception when the asset is not
+listed in the manifest:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">Package</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">VersionStrategy</span>\<span class="hljs-title">JsonManifestVersionStrategy</span>;
+
+<span class="hljs-comment">// The value of $strictMode can be specific per environment "true" for debugging and "false" for stability.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>strictMode</span> = <span class="hljs-keyword">true</span>;
+<span class="hljs-comment">// assumes the JSON file above is called "rev-manifest.json"</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span> = <span class="hljs-keyword">new</span> Package(<span class="hljs-keyword">new</span> JsonManifestVersionStrategy(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/rev-manifest.json'</span>, <span class="hljs-keyword">null</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>strictMode</span>));
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'not-found.css'</span>);
+<span class="hljs-comment">// error:</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If your JSON file is not on your local filesystem but is accessible over HTTP,
+use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Asset/VersionStrategy/RemoteJsonManifestVersionStrategy.php" class="reference external" title="Symfony\Component\Asset\VersionStrategy\RemoteJsonManifestVersionStrategy" rel="external noopener noreferrer" target="_blank">RemoteJsonManifestVersionStrategy</a>
+with the <a href="../http_client.html" class="reference internal">HttpClient component</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">Package</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">VersionStrategy</span>\<span class="hljs-title">RemoteJsonManifestVersionStrategy</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpClient</span>\<span class="hljs-title">HttpClient</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>httpClient</span> = HttpClient<span class="hljs-operator">::</span>create();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>manifestUrl</span> = <span class="hljs-string">'https://cdn.example.com/rev-manifest.json'</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>package</span> = <span class="hljs-keyword">new</span> Package(<span class="hljs-keyword">new</span> RemoteJsonManifestVersionStrategy(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>manifestUrl</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>httpClient</span>));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h4 id="custom-version-strategies">
+    Custom Version Strategies
+    <a class="headerlink" href="#custom-version-strategies" title="Permalink to this headline">¶</a>
+</h4>
+<p>Use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Asset/VersionStrategy/VersionStrategyInterface.php" class="reference external" title="Symfony\Component\Asset\VersionStrategy\VersionStrategyInterface" rel="external noopener noreferrer" target="_blank">VersionStrategyInterface</a>
+to define your own versioning strategy. For example, your application may need
+to append the current date to all its web assets in order to bust the cache
+every day:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">VersionStrategy</span>\<span class="hljs-title">VersionStrategyInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DateVersionStrategy</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">VersionStrategyInterface</span>
+</span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>version</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>version = date(<span class="hljs-string">'Ymd'</span>);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getVersion</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>version;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">applyVersion</span><span class="hljs-params">(string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> sprintf(<span class="hljs-string">'%s?v=%s'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getVersion(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>));
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="component-assets-path-package"></span>
+</div>
+</div>
+<div class="section">
+<h3 id="grouped-assets">
+    Grouped Assets
+    <a class="headerlink" href="#grouped-assets" title="Permalink to this headline">¶</a>
+</h3>
+<p>Often, many assets live under a common path (e.g. <code translate="no" class="notranslate">/static/images</code>). If
+that's your case, replace the default <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Asset/Package.php" class="reference external" title="Symfony\Component\Asset\Package" rel="external noopener noreferrer" target="_blank">Package</a>
+class with <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Asset/PathPackage.php" class="reference external" title="Symfony\Component\Asset\PathPackage" rel="external noopener noreferrer" target="_blank">PathPackage</a> to avoid repeating
+that path over and over again:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">PathPackage</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pathPackage</span> = <span class="hljs-keyword">new</span> PathPackage(<span class="hljs-string">'/static/images'</span>, <span class="hljs-keyword">new</span> StaticVersionStrategy(<span class="hljs-string">'v1'</span>));
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pathPackage</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'logo.png'</span>);
+<span class="hljs-comment">// result: /static/images/logo.png?v1</span>
+
+<span class="hljs-comment">// Base path is ignored when using absolute paths</span>
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pathPackage</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/logo.png'</span>);
+<span class="hljs-comment">// result: /logo.png?v1</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h4 id="request-context-aware-assets">
+    Request Context Aware Assets
+    <a class="headerlink" href="#request-context-aware-assets" title="Permalink to this headline">¶</a>
+</h4>
+<p>If you are also using the <a href="http_foundation.html" class="reference internal">HttpFoundation</a>
+component in your project (for instance, in a Symfony application), the <code translate="no" class="notranslate">PathPackage</code>
+class can take into account the context of the current request:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">Context</span>\<span class="hljs-title">RequestStackContext</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">PathPackage</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pathPackage</span> = <span class="hljs-keyword">new</span> PathPackage(
+    <span class="hljs-string">'/static/images'</span>,
+    <span class="hljs-keyword">new</span> StaticVersionStrategy(<span class="hljs-string">'v1'</span>),
+    <span class="hljs-keyword">new</span> RequestStackContext(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requestStack</span>)
+);
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pathPackage</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'logo.png'</span>);
+<span class="hljs-comment">// result: /somewhere/static/images/logo.png?v1</span>
+
+<span class="hljs-comment">// Both "base path" and "base url" are ignored when using absolute path for asset</span>
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pathPackage</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/logo.png'</span>);
+<span class="hljs-comment">// result: /logo.png?v1</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now that the request context is set, the <code translate="no" class="notranslate">PathPackage</code> will prepend the
+current request base URL. So, for example, if your entire site is hosted under
+the <code translate="no" class="notranslate">/somewhere</code> directory of your web server root directory and the configured
+base path is <code translate="no" class="notranslate">/static/images</code>, all paths will be prefixed with
+<code translate="no" class="notranslate">/somewhere/static/images</code>.</p>
+<span id="component-assets-cdn"></span>
+</div>
+</div>
+<div class="section">
+<h3 id="absolute-assets-and-cdns">
+    Absolute Assets and CDNs
+    <a class="headerlink" href="#absolute-assets-and-cdns" title="Permalink to this headline">¶</a>
+</h3>
+<p>Applications that host their assets on different domains and CDNs (<em>Content
+Delivery Networks</em>) should use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Asset/UrlPackage.php" class="reference external" title="Symfony\Component\Asset\UrlPackage" rel="external noopener noreferrer" target="_blank">UrlPackage</a>
+class to generate absolute URLs for their assets:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">UrlPackage</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlPackage</span> = <span class="hljs-keyword">new</span> UrlPackage(
+    <span class="hljs-string">'http://static.example.com/images/'</span>,
+    <span class="hljs-keyword">new</span> StaticVersionStrategy(<span class="hljs-string">'v1'</span>)
+);
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlPackage</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/logo.png'</span>);
+<span class="hljs-comment">// result: http://static.example.com/images/logo.png?v1</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also pass a schema-agnostic URL:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">UrlPackage</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlPackage</span> = <span class="hljs-keyword">new</span> UrlPackage(
+    <span class="hljs-string">'//static.example.com/images/'</span>,
+    <span class="hljs-keyword">new</span> StaticVersionStrategy(<span class="hljs-string">'v1'</span>)
+);
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlPackage</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/logo.png'</span>);
+<span class="hljs-comment">// result: //static.example.com/images/logo.png?v1</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This is useful because assets will automatically be requested via HTTPS if
+a visitor is viewing your site in https. If you want to use this, make sure
+that your CDN host supports HTTPS.</p>
+<p>In case you serve assets from more than one domain to improve application
+performance, pass an array of URLs as the first argument to the <code translate="no" class="notranslate">UrlPackage</code>
+constructor:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">UrlPackage</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urls</span> = [
+    <span class="hljs-string">'//static1.example.com/images/'</span>,
+    <span class="hljs-string">'//static2.example.com/images/'</span>,
+];
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlPackage</span> = <span class="hljs-keyword">new</span> UrlPackage(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urls</span>, <span class="hljs-keyword">new</span> StaticVersionStrategy(<span class="hljs-string">'v1'</span>));
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlPackage</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/logo.png'</span>);
+<span class="hljs-comment">// result: http://static1.example.com/images/logo.png?v1</span>
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlPackage</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/icon.png'</span>);
+<span class="hljs-comment">// result: http://static2.example.com/images/icon.png?v1</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>For each asset, one of the URLs will be randomly used. But, the selection
+is deterministic, meaning that each asset will always be served by the same
+domain. This behavior simplifies the management of HTTP cache.</p>
+<div class="section">
+<h4 id="request-context-aware-assets">
+    Request Context Aware Assets
+    <a class="headerlink" href="#request-context-aware-assets" title="Permalink to this headline">¶</a>
+</h4>
+<p>Similarly to application-relative assets, absolute assets can also take into
+account the context of the current request. In this case, only the request
+scheme is considered, in order to select the appropriate base URL (HTTPs or
+protocol-relative URLs for HTTPs requests, any base URL for HTTP requests):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">Context</span>\<span class="hljs-title">RequestStackContext</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">UrlPackage</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlPackage</span> = <span class="hljs-keyword">new</span> UrlPackage(
+    [<span class="hljs-string">'http://example.com/'</span>, <span class="hljs-string">'https://example.com/'</span>],
+    <span class="hljs-keyword">new</span> StaticVersionStrategy(<span class="hljs-string">'v1'</span>),
+    <span class="hljs-keyword">new</span> RequestStackContext(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>requestStack</span>)
+);
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlPackage</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/logo.png'</span>);
+<span class="hljs-comment">// assuming the RequestStackContext says that we are on a secure host</span>
+<span class="hljs-comment">// result: https://example.com/logo.png?v1</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h3 id="named-packages">
+    Named Packages
+    <a class="headerlink" href="#named-packages" title="Permalink to this headline">¶</a>
+</h3>
+<p>Applications that manage lots of different assets may need to group them in
+packages with the same versioning strategy and base path. The Asset component
+includes a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Asset/Packages.php" class="reference external" title="Symfony\Component\Asset\Packages" rel="external noopener noreferrer" target="_blank">Packages</a> class to simplify
+management of several packages.</p>
+<p>In the following example, all packages use the same versioning strategy, but
+they all have different base paths:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">Package</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">Packages</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">PathPackage</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">UrlPackage</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>versionStrategy</span> = <span class="hljs-keyword">new</span> StaticVersionStrategy(<span class="hljs-string">'v1'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaultPackage</span> = <span class="hljs-keyword">new</span> Package(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>versionStrategy</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>namedPackages</span> = [
+    <span class="hljs-string">'img'</span> =&gt; <span class="hljs-keyword">new</span> UrlPackage(<span class="hljs-string">'http://img.example.com/'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>versionStrategy</span>),
+    <span class="hljs-string">'doc'</span> =&gt; <span class="hljs-keyword">new</span> PathPackage(<span class="hljs-string">'/somewhere/deep/for/documents'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>versionStrategy</span>),
+];
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>packages</span> = <span class="hljs-keyword">new</span> Packages(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaultPackage</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>namedPackages</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">Packages</code> class allows to define a default package, which will be applied
+to assets that don't define the name of the package to use. In addition, this
+application defines a package named <code translate="no" class="notranslate">img</code> to serve images from an external
+domain and a <code translate="no" class="notranslate">doc</code> package to avoid repeating long paths when linking to a
+document inside a template:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>packages</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/main.css'</span>);
+<span class="hljs-comment">// result: /main.css?v1</span>
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>packages</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/logo.png'</span>, <span class="hljs-string">'img'</span>);
+<span class="hljs-comment">// result: http://img.example.com/logo.png?v1</span>
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>packages</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'resume.pdf'</span>, <span class="hljs-string">'doc'</span>);
+<span class="hljs-comment">// result: /somewhere/deep/for/documents/resume.pdf?v1</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="local-files-and-other-protocols">
+    Local Files and Other Protocols
+    <a class="headerlink" href="#local-files-and-other-protocols" title="Permalink to this headline">¶</a>
+</h3>
+<p>In addition to HTTP this component supports other protocols (such as <code translate="no" class="notranslate">file://</code>
+and <code translate="no" class="notranslate">ftp://</code>). This allows for example to serve local files in order to
+improve performance:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Asset</span>\<span class="hljs-title">UrlPackage</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>localPackage</span> = <span class="hljs-keyword">new</span> UrlPackage(
+    <span class="hljs-string">'file:///path/to/images/'</span>,
+    <span class="hljs-keyword">new</span> EmptyVersionStrategy()
+);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ftpPackage</span> = <span class="hljs-keyword">new</span> UrlPackage(
+    <span class="hljs-string">'ftp://example.com/images/'</span>,
+    <span class="hljs-keyword">new</span> EmptyVersionStrategy()
+);
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>localPackage</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/logo.png'</span>);
+<span class="hljs-comment">// result: file:///path/to/images/logo.png</span>
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>ftpPackage</span><span class="hljs-operator">-&gt;</span>getUrl(<span class="hljs-string">'/logo.png'</span>);
+<span class="hljs-comment">// result: ftp://example.com/images/logo.png</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="learn-more">
+    Learn more
+    <a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a>
+</h2>
+<ul>
+    <li><a href="../frontend.html" class="reference internal">How to manage CSS and JavaScript assets in Symfony applications</a></li>
+<li><a href="../web_link.html" class="reference internal">WebLink component</a> to preload assets using HTTP/2.</li>
+</ul>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

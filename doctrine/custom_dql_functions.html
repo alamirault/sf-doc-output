@@ -1,0 +1,423 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-register-custom-dql-functions">
+    How to Register custom DQL Functions
+    <a class="headerlink" href="#how-to-register-custom-dql-functions" title="Permalink to this headline">¶</a>
+</h1>
+<p>Doctrine allows you to specify custom DQL functions. For more information
+on this topic, read Doctrine's cookbook article <a href="https://www.doctrine-project.org/projects/doctrine-orm/en/current/cookbook/dql-user-defined-functions.html" class="reference external" rel="external noopener noreferrer" target="_blank">DQL User Defined Functions</a>.</p>
+<p>In Symfony, you can register your custom DQL functions as follows:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-a5e0e188896d327fe6ba44aa62a7350f73fff827" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-05fedc98a9873573029d9a2e8d51ec344dd6d3c9" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-591aabd8a8f16ab37ea03c2172f4108563cb41d4" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-a5e0e188896d327fe6ba44aa62a7350f73fff827" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/doctrine.yaml</span>
+<span class="hljs-attr">doctrine:</span>
+    <span class="hljs-attr">orm:</span>
+        <span class="hljs-comment"># ...</span>
+        <span class="hljs-attr">dql:</span>
+            <span class="hljs-attr">string_functions:</span>
+                <span class="hljs-attr">test_string:</span> <span class="hljs-string">App\DQL\StringFunction</span>
+                <span class="hljs-attr">second_string:</span> <span class="hljs-string">App\DQL\SecondStringFunction</span>
+            <span class="hljs-attr">numeric_functions:</span>
+                <span class="hljs-attr">test_numeric:</span> <span class="hljs-string">App\DQL\NumericFunction</span>
+            <span class="hljs-attr">datetime_functions:</span>
+                <span class="hljs-attr">test_datetime:</span> <span class="hljs-string">App\DQL\DatetimeFunction</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-05fedc98a9873573029d9a2e8d51ec344dd6d3c9" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/doctrine.xml --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:doctrine</span>=<span class="hljs-string">"http://symfony.com/schema/dic/doctrine"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/doctrine
+        https://symfony.com/schema/dic/doctrine/doctrine-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">doctrine:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">doctrine:orm</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">doctrine:dql</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">doctrine:string-function</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"test_string"</span>&gt;</span>App\DQL\StringFunction<span class="hljs-tag">&lt;/<span class="hljs-name">doctrine:string-function</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">doctrine:string-function</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"second_string"</span>&gt;</span>App\DQL\SecondStringFunction<span class="hljs-tag">&lt;/<span class="hljs-name">doctrine:string-function</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">doctrine:numeric-function</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"test_numeric"</span>&gt;</span>App\DQL\NumericFunction<span class="hljs-tag">&lt;/<span class="hljs-name">doctrine:numeric-function</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">doctrine:datetime-function</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"test_datetime"</span>&gt;</span>App\DQL\DatetimeFunction<span class="hljs-tag">&lt;/<span class="hljs-name">doctrine:datetime-function</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">doctrine:dql</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">doctrine:orm</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">doctrine:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-591aabd8a8f16ab37ea03c2172f4108563cb41d4" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/doctrine.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">DQL</span>\<span class="hljs-title">DatetimeFunction</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">DQL</span>\<span class="hljs-title">NumericFunction</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">DQL</span>\<span class="hljs-title">SecondStringFunction</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">DQL</span>\<span class="hljs-title">StringFunction</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">DoctrineConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(DoctrineConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>doctrine</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaultDql</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>doctrine</span><span class="hljs-operator">-&gt;</span>orm()
+        <span class="hljs-operator">-&gt;</span>entityManager(<span class="hljs-string">'default'</span>)
+            <span class="hljs-comment">// ...</span>
+            <span class="hljs-operator">-&gt;</span>dql();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaultDql</span><span class="hljs-operator">-&gt;</span>stringFunction(<span class="hljs-string">'test_string'</span>, StringFunction<span class="hljs-operator">::</span>class);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaultDql</span><span class="hljs-operator">-&gt;</span>stringFunction(<span class="hljs-string">'second_string'</span>, SecondStringFunction<span class="hljs-operator">::</span>class);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaultDql</span><span class="hljs-operator">-&gt;</span>numericFunction(<span class="hljs-string">'test_numeric'</span>, NumericFunction<span class="hljs-operator">::</span>class);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaultDql</span><span class="hljs-operator">-&gt;</span>datetimeFunction(<span class="hljs-string">'test_datetime'</span>, DatetimeFunction<span class="hljs-operator">::</span>class);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>In case the <code translate="no" class="notranslate">entity_managers</code> were named explicitly, configuring the functions with the
+ORM directly will trigger the exception <code translate="no" class="notranslate">Unrecognized option &quot;dql&quot; under &quot;doctrine.orm&quot;</code>.
+The <code translate="no" class="notranslate">dql</code> configuration block must be defined under the named entity manager.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-e0fb4b25fc64e022110a6f29d6faacf1ea37acab" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-9ab520e53cd79806ed0e31fca7923b35596b56fc" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-33a0f618ab7d389d64a3f278d9651469c12b39ac" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-e0fb4b25fc64e022110a6f29d6faacf1ea37acab" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/doctrine.yaml</span>
+<span class="hljs-attr">doctrine:</span>
+    <span class="hljs-attr">orm:</span>
+        <span class="hljs-comment"># ...</span>
+        <span class="hljs-attr">entity_managers:</span>
+            <span class="hljs-attr">example_manager:</span>
+                <span class="hljs-comment"># Place your functions here</span>
+                <span class="hljs-attr">dql:</span>
+                    <span class="hljs-attr">datetime_functions:</span>
+                        <span class="hljs-attr">test_datetime:</span> <span class="hljs-string">App\DQL\DatetimeFunction</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-9ab520e53cd79806ed0e31fca7923b35596b56fc" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/doctrine.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:doctrine</span>=<span class="hljs-string">"http://symfony.com/schema/dic/doctrine"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/doctrine
+        https://symfony.com/schema/dic/doctrine/doctrine-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">doctrine:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">doctrine:orm</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">doctrine:entity-manager</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"example_manager"</span>&gt;</span>
+                <span class="hljs-comment">&lt;!-- place your functions here --&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">doctrine:dql</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">doctrine:datetime-function</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"test_datetime"</span>&gt;</span>
+                        App\DQL\DatetimeFunction
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">doctrine:datetime-function</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">doctrine:dql</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">doctrine:entity-manager</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">doctrine:orm</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">doctrine:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-33a0f618ab7d389d64a3f278d9651469c12b39ac" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/doctrine.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">DQL</span>\<span class="hljs-title">DatetimeFunction</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">DoctrineConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(DoctrineConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>doctrine</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>doctrine</span><span class="hljs-operator">-&gt;</span>orm()
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-operator">-&gt;</span>entityManager(<span class="hljs-string">'example_manager'</span>)
+            <span class="hljs-comment">// place your functions here</span>
+            <span class="hljs-operator">-&gt;</span>dql()
+                <span class="hljs-operator">-&gt;</span>datetimeFunction(<span class="hljs-string">'test_datetime'</span>, DatetimeFunction<span class="hljs-operator">::</span>class);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>DQL functions are instantiated by Doctrine outside of the Symfony
+<a href="../service_container.html" class="reference internal">service container</a> so you can't inject services
+or parameters into a custom DQL function.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

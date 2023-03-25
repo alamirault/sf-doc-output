@@ -1,0 +1,420 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-implement-csrf-protection">
+    How to Implement CSRF Protection
+    <a class="headerlink" href="#how-to-implement-csrf-protection" title="Permalink to this headline">¶</a>
+</h1>
+<p>CSRF - or <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery" class="reference external" rel="external noopener noreferrer" target="_blank">Cross-site request forgery</a> - is a method by which a malicious
+user attempts to make your legitimate users unknowingly submit data that
+they don't intend to submit.</p>
+<p>CSRF protection works by adding a hidden field to your form that contains a
+value that only you and your user know. This ensures that the user - not some
+other entity - is submitting the given data.</p>
+<p>Before using the CSRF protection, install it in your project:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/security-csrf</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, enable/disable the CSRF protection with the <code translate="no" class="notranslate">csrf_protection</code> option
+(see the <a href="../reference/configuration/framework.html#reference-framework-csrf-protection" class="reference internal">CSRF configuration reference</a>
+for more information):</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-2315ca26a7d83940daaae60c17536111f29dca5b" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-8b12c25b4635354013fc6b199186f4ea3391d14d" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-0b9c9a48251fe07d1a62a6a8a07dde7de3262ce6" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-2315ca26a7d83940daaae60c17536111f29dca5b" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/framework.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">csrf_protection:</span> <span class="hljs-string">~</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-8b12c25b4635354013fc6b199186f4ea3391d14d" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/framework.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:csrf-protection</span> <span class="hljs-attr">enabled</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-0b9c9a48251fe07d1a62a6a8a07dde7de3262ce6" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/framework.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>csrfProtection()
+        <span class="hljs-operator">-&gt;</span>enabled(<span class="hljs-keyword">true</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>The tokens used for CSRF protection are meant to be different for every user and
+they are stored in the session. That's why a session is started automatically as
+soon as you render a form with CSRF protection.</p>
+<span id="caching-pages-that-contain-csrf-protected-forms"></span>
+<p>Moreover, this means that you cannot fully cache pages that include CSRF
+protected forms. As an alternative, you can:</p>
+<ul>
+    <li>Embed the form inside an uncached <a href="../http_cache/esi.html" class="reference internal">ESI fragment</a> and
+cache the rest of the page contents;</li>
+<li>Cache the entire page and load the form via an uncached AJAX request;</li>
+<li>Cache the entire page and use <a href="../templates.html#templates-hinclude" class="reference internal">hinclude.js</a> to
+load the CSRF token with an uncached AJAX request and replace the form
+field value with it.</li>
+</ul>
+<div class="section">
+<h2 id="csrf-protection-in-symfony-forms">
+    CSRF Protection in Symfony Forms
+    <a class="headerlink" href="#csrf-protection-in-symfony-forms" title="Permalink to this headline">¶</a>
+</h2>
+<p>Forms created with the Symfony Form component include CSRF tokens by default
+and Symfony checks them automatically, so you don't have to do anything to be
+protected against CSRF attacks.</p>
+<span id="form-csrf-customization"></span>
+<p>By default Symfony adds the CSRF token in a hidden field called <code translate="no" class="notranslate">_token</code>, but
+this can be customized on a form-by-form basis:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/TaskType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Task</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-string">'data_class'</span>      =&gt; Task<span class="hljs-operator">::</span>class,
+            <span class="hljs-comment">// enable/disable CSRF protection for this form</span>
+            <span class="hljs-string">'csrf_protection'</span> =&gt; <span class="hljs-keyword">true</span>,
+            <span class="hljs-comment">// the name of the hidden HTML field that stores the token</span>
+            <span class="hljs-string">'csrf_field_name'</span> =&gt; <span class="hljs-string">'_token'</span>,
+            <span class="hljs-comment">// an arbitrary string used to generate the value of the token</span>
+            <span class="hljs-comment">// using a different string for each form improves its security</span>
+            <span class="hljs-string">'csrf_token_id'</span>   =&gt; <span class="hljs-string">'task_item'</span>,
+        ]);
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also customize the rendering of the CSRF form field creating a custom
+<a href="../form/form_themes.html" class="reference internal">form theme</a> and using <code translate="no" class="notranslate">csrf_token</code> as the prefix of
+the field (e.g. define <code translate="no" class="notranslate">{% block csrf_token_widget %} ... {% endblock %}</code> to
+customize the entire form field contents).</p>
+</div>
+<div class="section">
+<h2 id="csrf-protection-in-login-forms">
+    CSRF Protection in Login Forms
+    <a class="headerlink" href="#csrf-protection-in-login-forms" title="Permalink to this headline">¶</a>
+</h2>
+<p>See <a href="../security.html#form_login-csrf" class="reference internal">Security</a> for a login form that is protected from CSRF
+attacks. You can also configure the
+<a href="../reference/configuration/security.html#reference-security-logout-csrf" class="reference internal">CSRF protection for the logout action</a>.</p>
+<span id="csrf-protection-in-html-forms"></span>
+</div>
+<div class="section">
+<h2 id="generating-and-checking-csrf-tokens-manually">
+    Generating and Checking CSRF Tokens Manually
+    <a class="headerlink" href="#generating-and-checking-csrf-tokens-manually" title="Permalink to this headline">¶</a>
+</h2>
+<p>Although Symfony Forms provide automatic CSRF protection by default, you may
+need to generate and check CSRF tokens manually for example when using regular
+HTML forms not managed by the Symfony Form component.</p>
+<p>Consider a HTML form created to allow deleting items. First, use the
+<a href="../reference/twig_reference.html#reference-twig-function-csrf-token" class="reference internal">csrf_token() Twig function</a> to
+generate a CSRF token in the template and store it as a hidden form field:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">action</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ url('admin_post_delete', { id: post.id }) }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"post"</span>&gt;</span>
+    </span><span class="hljs-comment">{# the argument of csrf_token() is an arbitrary string used to generate the token #}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"hidden"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"token"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ csrf_token('delete-item') }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>/&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"submit"</span>&gt;</span>Delete item<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, get the value of the CSRF token in the controller action and use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Controller/AbstractController.php#method_isCsrfTokenValid" class="reference external" title="Symfony\Bundle\FrameworkBundle\Controller\AbstractController::isCsrfTokenValid()" rel="external noopener noreferrer" target="_blank">isCsrfTokenValid()</a>
+method to check its validity:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">delete</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>: <span class="hljs-title">Response</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>submittedToken</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>request<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'token'</span>);
+
+    <span class="hljs-comment">// 'delete-item' is the same value used in the template to generate the token</span>
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>isCsrfTokenValid(<span class="hljs-string">'delete-item'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>submittedToken</span>)) {
+        <span class="hljs-comment">// ... do something, like deleting an object</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="csrf-tokens-and-compression-side-channel-attacks">
+    CSRF Tokens and Compression Side-Channel Attacks
+    <a class="headerlink" href="#csrf-tokens-and-compression-side-channel-attacks" title="Permalink to this headline">¶</a>
+</h2>
+<p><a href="https://en.wikipedia.org/wiki/BREACH" class="reference external" rel="external noopener noreferrer" target="_blank">BREACH</a> and <a href="https://en.wikipedia.org/wiki/CRIME" class="reference external" rel="external noopener noreferrer" target="_blank">CRIME</a> are security exploits against HTTPS when using HTTP
+compression. Attackers can leverage information leaked by compression to recover
+targeted parts of the plaintext. To mitigate these attacks, and prevent an
+attacker from guessing the CSRF tokens, a random mask is prepended to the token
+and used to scramble it.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

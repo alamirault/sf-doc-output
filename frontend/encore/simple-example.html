@@ -1,0 +1,956 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="encore-setting-up-your-project">
+    Encore: Setting up your Project
+    <a class="headerlink" href="#encore-setting-up-your-project" title="Permalink to this headline">¶</a>
+</h1>
+<p>After <a href="installation.html" class="reference internal">installing Encore</a>, your app already
+has a few files, organized into an <code translate="no" class="notranslate">assets/</code> directory:</p>
+<ul>
+    <li><code translate="no" class="notranslate">assets/app.js</code></li>
+<li><code translate="no" class="notranslate">assets/bootstrap.js</code></li>
+<li><code translate="no" class="notranslate">assets/controllers.json</code></li>
+<li><code translate="no" class="notranslate">assets/styles/app.css</code></li>
+<li><code translate="no" class="notranslate">assets/controllers/hello_controller.js</code></li>
+</ul>
+<p>With Encore, think of your <code translate="no" class="notranslate">app.js</code> file like a standalone JavaScript
+application: it will <em>require</em> all of the dependencies it needs (e.g. jQuery or React),
+<em>including</em> any CSS. Your <code translate="no" class="notranslate">app.js</code> file is already doing this with a JavaScript
+<code translate="no" class="notranslate">import</code> statement:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// assets/app.js</span>
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-string">'./styles/app.css'</span>;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Encore's job (via Webpack) is simple: to read and follow <em>all</em> of the <code translate="no" class="notranslate">import</code>
+statements and create one final <code translate="no" class="notranslate">app.js</code> (and <code translate="no" class="notranslate">app.css</code>) that contains <em>everything</em>
+your app needs. Encore can do a lot more: minify files, pre-process Sass/LESS,
+support React, Vue.js, etc.</p>
+<p>The other files - <code translate="no" class="notranslate">bootstrap.js</code>, <code translate="no" class="notranslate">controllers.json</code> and <code translate="no" class="notranslate">hello_controller.js</code>
+relate to a topic you'll learn about soon: <a href="simple-example.html#stimulus-symfony-ux" class="reference internal">Stimulus &amp; Symfony UX</a>.</p>
+<div class="section">
+<h2 id="configuring-encore-webpack">
+    Configuring Encore/Webpack
+    <a class="headerlink" href="#configuring-encore-webpack" title="Permalink to this headline">¶</a>
+</h2>
+<p>Everything in Encore is configured via a <code translate="no" class="notranslate">webpack.config.js</code> file at the root
+of your project. It already holds the basic config you need:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// webpack.config.js</span>
+<span class="hljs-keyword">const</span> Encore = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@symfony/webpack-encore'</span>);
+
+Encore
+    <span class="hljs-comment">// directory where compiled assets will be stored</span>
+    .setOutputPath(<span class="hljs-string">'public/build/'</span>)
+    <span class="hljs-comment">// public path used by the web server to access the output path</span>
+    .setPublicPath(<span class="hljs-string">'/build'</span>)
+
+    .addEntry(<span class="hljs-string">'app'</span>, <span class="hljs-string">'./assets/app.js'</span>)
+
+    <span class="hljs-comment">// uncomment this if you want use jQuery in the following example</span>
+    .autoProvidejQuery()
+;
+
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <em>key</em> part is <code translate="no" class="notranslate">addEntry()</code>: this tells Encore to load the <code translate="no" class="notranslate">assets/app.js</code>
+file and follow <em>all</em> of the <code translate="no" class="notranslate">require()</code> statements. It will then package everything
+together and - thanks to the first <code translate="no" class="notranslate">app</code> argument - output final <code translate="no" class="notranslate">app.js</code> and
+<code translate="no" class="notranslate">app.css</code> files into the <code translate="no" class="notranslate">public/build</code> directory.</p>
+<span id="encore-build-assets"></span>
+<p>To build the assets, run the following if you use the Yarn package manager:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># compile assets and automatically re-compile when files change</span>
+<span class="hljs-prompt">$ </span>yarn watch
+<span class="hljs-comment"># or</span>
+<span class="hljs-prompt">$ </span>npm run watch
+
+<span class="hljs-comment"># or, run a dev-server that can sometimes update your code without refreshing the page</span>
+<span class="hljs-prompt">$ </span>yarn dev-server
+<span class="hljs-comment"># or</span>
+<span class="hljs-prompt">$ </span>npm run dev-server
+
+<span class="hljs-comment"># compile assets once</span>
+<span class="hljs-prompt">$ </span>yarn dev
+<span class="hljs-comment"># or</span>
+<span class="hljs-prompt">$ </span>npm run dev
+
+<span class="hljs-comment"># on deploy, create a production build</span>
+<span class="hljs-prompt">$ </span>yarn build
+<span class="hljs-comment"># or</span>
+<span class="hljs-prompt">$ </span>npm run build</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>All of these commands - e.g. <code translate="no" class="notranslate">dev</code> or <code translate="no" class="notranslate">watch</code> - are shortcuts that are defined
+in your <code translate="no" class="notranslate">package.json</code> file.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Whenever you make changes in your <code translate="no" class="notranslate">webpack.config.js</code> file, you must
+stop and restart <code translate="no" class="notranslate">encore</code>.</p>
+</div>
+<p>Congrats! You now have three new files:</p>
+<ul>
+    <li><code translate="no" class="notranslate">public/build/app.js</code> (holds all the JavaScript for your &quot;app&quot; entry)</li>
+<li><code translate="no" class="notranslate">public/build/app.css</code> (holds all the CSS for your &quot;app&quot; entry)</li>
+<li><code translate="no" class="notranslate">public/build/runtime.js</code> (a file that helps Webpack do its job)</li>
+</ul>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>In reality, you probably have a few <em>more</em> files in <code translate="no" class="notranslate">public/build</code>. Some of
+these are due to <a href="split-chunks.html" class="reference internal">code splitting</a>, an optimization
+that helps performance, but doesn't affect how things work. Others help Encore
+do its work.</p>
+</div>
+<p>Next, to include these in your base layout, you can leverage two Twig helpers from
+WebpackEncoreBundle:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="hljs-comment">{# templates/base.html.twig #}</span><span class="xml">
+<span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> stylesheets %}</span><span class="xml">
+            </span><span class="hljs-comment">{# 'app' must match the first argument to addEntry() in webpack.config.js #}</span><span class="xml">
+            </span><span class="hljs-template-variable">{{ encore_entry_link_tags('app') }}</span><span class="xml">
+
+            <span class="hljs-comment">&lt;!-- Renders a link tag (if your module requires any CSS)
+                 &lt;link rel="stylesheet" href="/build/app.css"&gt; --&gt;</span>
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span><span class="xml">
+
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> javascripts %}</span><span class="xml">
+            </span><span class="hljs-template-variable">{{ encore_entry_script_tags('app') }}</span><span class="xml">
+
+            <span class="hljs-comment">&lt;!-- Renders app.js &amp; a webpack runtime.js file
+                &lt;script src="/build/runtime.js" defer&gt;&lt;/script&gt;
+                &lt;script src="/build/app.js" defer&gt;&lt;/script&gt;
+                See note below about the "defer" attribute --&gt;</span>
+        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span><span class="xml">
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="encore-entrypointsjson-simple-description"></span>
+<p>That's it! When you refresh your page, all of the JavaScript from
+<code translate="no" class="notranslate">assets/app.js</code> - as well as any other JavaScript files it included - will
+be executed. All the CSS files that were required will also be displayed.</p>
+<p>The <code translate="no" class="notranslate">encore_entry_link_tags()</code> and <code translate="no" class="notranslate">encore_entry_script_tags()</code> functions
+read from a <code translate="no" class="notranslate">public/build/entrypoints.json</code> file that's generated by Encore to know the exact
+filename(s) to render. This file is <em>especially</em> useful because you can
+<a href="versioning.html" class="reference internal">enable versioning</a> or
+<a href="cdn.html" class="reference internal">point assets to a CDN</a> without making <em>any</em> changes to your
+template: the paths in <code translate="no" class="notranslate">entrypoints.json</code> will always be the final, correct paths.
+And if you use <a href="split-chunks.html" class="reference internal">splitEntryChunks()</a> (where Webpack splits the output into even
+more files), all the necessary <code translate="no" class="notranslate">script</code> and <code translate="no" class="notranslate">link</code> tags will render automatically.</p>
+<p>If you are not using Symfony you won't have the <code translate="no" class="notranslate">encore_entry_*</code> functions available.
+Instead, you can point directly to the final built files or write code to parse
+<code translate="no" class="notranslate">entrypoints.json</code> manually. The entrypoints file is needed only if you're using
+certain optional features, like <code translate="no" class="notranslate">splitEntryChunks()</code>.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>1.9.0</span>
+    </p><p>The <code translate="no" class="notranslate">defer</code> attribute on the <code translate="no" class="notranslate">script</code> tags delays the execution of the
+JavaScript until the page loads (similar to putting the <code translate="no" class="notranslate">script</code> at the
+bottom of the page). The ability to always add this attribute was introduced
+in WebpackEncoreBundle 1.9.0 and is automatically enabled in that bundle's
+recipe in the <code translate="no" class="notranslate">config/packages/webpack_encore.yaml</code> file. See
+<a href="https://github.com/symfony/webpack-encore-bundle#configuration" class="reference external" rel="external noopener noreferrer" target="_blank">WebpackEncoreBundle Configuration</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="requiring-javascript-modules">
+    Requiring JavaScript Modules
+    <a class="headerlink" href="#requiring-javascript-modules" title="Permalink to this headline">¶</a>
+</h2>
+<p>Webpack is a module bundler, which means that you can <code translate="no" class="notranslate">import</code> other JavaScript
+files. First, create a file that exports a function, class or any other value:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// assets/greet.js</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`Yo yo <span class="hljs-subst">${name}</span> - welcome to Encore!`</span>;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>We'll use jQuery to print this message on the page. Install it via:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># if you use the Yarn package manager</span>
+<span class="hljs-prompt">$ </span>yarn add jquery --dev
+
+<span class="hljs-comment"># if you use the npm package manager</span>
+<span class="hljs-prompt">$ </span>npm install jquery --save-dev</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Great! Use <code translate="no" class="notranslate">import</code> to import <code translate="no" class="notranslate">jquery</code> and <code translate="no" class="notranslate">greet.js</code>:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">// assets/app.js
+  // ...
+
+<span class="hljs-addition">+ // loads the jquery package from node_modules</span>
+<span class="hljs-addition">+ import $ from 'jquery';</span>
+
+<span class="hljs-addition">+ // import the function from greet.js (the .js extension is optional)</span>
+<span class="hljs-addition">+ // ./ (or ../) means to look for a local file</span>
+<span class="hljs-addition">+ import greet from './greet';</span>
+
+<span class="hljs-addition">+ $(document).ready(function() {</span>
+<span class="hljs-addition">+     $('body').prepend('&lt;h1&gt;'+greet('jill')+'&lt;/h1&gt;');</span>
+<span class="hljs-addition">+ });</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! If you previously ran <code translate="no" class="notranslate">encore dev --watch</code>, your final, built files
+have already been updated: jQuery and <code translate="no" class="notranslate">greet.js</code> have been automatically
+added to the output file (<code translate="no" class="notranslate">app.js</code>). Refresh to see the message!</p>
+</div>
+<div class="section">
+<h2 id="stimulus-symfony-ux">
+    Stimulus &amp; Symfony UX
+    <a class="headerlink" href="#stimulus-symfony-ux" title="Permalink to this headline">¶</a>
+</h2>
+<p>As simple as the above example is, instead of building your application inside of
+<code translate="no" class="notranslate">app.js</code>, we recommend <a href="https://stimulus.hotwired.dev/" class="reference external" rel="external noopener noreferrer" target="_blank">Stimulus</a>: a small JavaScript framework that makes it
+easy to attach behavior to HTML. It's powerful, and you will love it! Symfony
+even provides packages to add more features to Stimulus. These are called the
+Symfony UX Packages.</p>
+<p>If you followed the setup instructions, you should already have Stimulus installed
+and ready to go! In fact, that's the purpose of the <code translate="no" class="notranslate">assets/bootstrap.js</code> file:
+to initialize Stimulus and automatically load any &quot;controllers&quot; from the
+<code translate="no" class="notranslate">assets/controllers/</code> directory.</p>
+<p>Let's look at a simple Stimulus example. In a Twig template, suppose you have:</p>
+<div translate="no" class="highlight-html+twig highlight-twig notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+twig twig"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> </span></span><span class="hljs-template-variable">{{ stimulus_controller('say-hello') }}</span><span class="xml"><span class="hljs-tag">&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> </span></span><span class="hljs-template-variable">{{ stimulus_target('say-hello', 'name') }}</span><span class="xml"><span class="hljs-tag">&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> </span></span><span class="hljs-template-variable">{{ stimulus_action('say-hello', 'greet') }}</span><span class="xml"><span class="hljs-tag">&gt;</span>
+        Greet
+    <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> </span></span><span class="hljs-template-variable">{{ stimulus_target('say-hello', 'output') }}</span><span class="xml"><span class="hljs-tag">&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">stimulus_controller(&#039;say-hello&#039;)</code> renders a <code translate="no" class="notranslate">data-controller=&quot;say-hello&quot;</code>
+attribute. Whenever this element appears on the page, Stimulus will automatically
+look for and initialize a controller called <code translate="no" class="notranslate">say-hello-controller.js</code>. Create
+that in your <code translate="no" class="notranslate">assets/controllers/</code> directory:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// assets/controllers/say-hello-controller.js</span>
+<span class="hljs-keyword">import</span> { Controller } <span class="hljs-keyword">from</span> <span class="hljs-string">'@hotwired/stimulus'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span> </span>{
+    <span class="hljs-keyword">static</span> targets = [<span class="hljs-string">'name'</span>, <span class="hljs-string">'output'</span>]
+
+    greet() {
+      <span class="hljs-keyword">this</span>.outputTarget.textContent = <span class="hljs-string">`Hello, <span class="hljs-subst">${<span class="hljs-keyword">this</span>.nameTarget.value}</span>!`</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The result? When you click the &quot;Greet&quot; button, it prints your name! And if
+more <code translate="no" class="notranslate">{{ stimulus_controller(&#039;say-hello&#039;) }}</code> elements are added to the page - like
+via Ajax - those will instantly work: no need to reinitialize anything.</p>
+<p>Ready to learn more about Stimulus?</p>
+<ul>
+    <li>Read the <a href="https://stimulus.hotwired.dev/handbook/introduction" class="reference external" rel="external noopener noreferrer" target="_blank">Stimulus Documentation</a></li>
+<li>Find out more about how the <a href="../../frontend/ux.html" class="reference internal">Symfony UX system works</a></li>
+<li>See a <a href="../../frontend/ux.html#ux-packages-list" class="reference internal">list of all Symfony UX packages</a></li>
+<li><p>Learn more about the <a href="https://github.com/symfony/stimulus-bridge" class="reference external" rel="external noopener noreferrer" target="_blank">Symfony Stimulus Bridge</a> - including the superpower of
+making your controllers load lazily!</p>
+<div class="admonition admonition-screencast screencast">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                <span>Screencast</span>
+    </p><p>Or check out the <a href="https://symfonycasts.com/screencast/stimulus" class="reference external" rel="external noopener noreferrer" target="_blank">Stimulus Screencast</a> on SymfonyCasts.</p>
+</div></li>
+</ul>
+</div>
+<div class="section">
+<h2 id="turbo-lightning-fast-single-page-application-experience">
+    Turbo: Lightning Fast Single-Page-Application Experience
+    <a class="headerlink" href="#turbo-lightning-fast-single-page-application-experience" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony comes with tight integration with another JavaScript library called <a href="https://turbo.hotwired.dev/" class="reference external" rel="external noopener noreferrer" target="_blank">Turbo</a>.
+Turbo automatically transforms all link clicks and form submits into an Ajax call,
+with zero (or nearly zero) changes to your Symfony code! The result? You get the
+speed of a single page application without having to write any JavaScript.</p>
+<p>To learn more, check out the <a href="https://symfony.com/bundles/ux-turbo/current/index.html" class="reference external">symfony/ux-turbo</a> package.</p>
+<div class="admonition admonition-screencast screencast">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                <span>Screencast</span>
+    </p><p>Or check out the <a href="https://symfonycasts.com/screencast/turbo" class="reference external" rel="external noopener noreferrer" target="_blank">Turbo Screencast</a> on SymfonyCasts.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="page-specific-javascript-or-css">
+    Page-Specific JavaScript or CSS
+    <a class="headerlink" href="#page-specific-javascript-or-css" title="Permalink to this headline">¶</a>
+</h2>
+<p>So far, you only have one final JavaScript file: <code translate="no" class="notranslate">app.js</code>. Encore may be split
+into multiple files for performance (see <a href="split-chunks.html" class="reference internal">split chunks</a>),
+but all of that code is still downloaded on every page.</p>
+<p>What if you have some extra JavaScript or CSS (e.g. for performance) that you only
+want to include on <em>certain</em> pages?</p>
+<div class="section">
+<h3 id="lazy-controllers">
+    Lazy Controllers
+    <a class="headerlink" href="#lazy-controllers" title="Permalink to this headline">¶</a>
+</h3>
+<p>One very nice solution if you're using Stimulus is to leverage <a href="https://github.com/symfony/stimulus-bridge#lazy-controllers" class="reference external" rel="external noopener noreferrer" target="_blank">lazy controllers</a>.
+To activate this on a controller, add a special <code translate="no" class="notranslate">stimulusFetch: &#039;lazy&#039;</code> above
+your controller class:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// assets/controllers/lazy-example-controller.js</span>
+<span class="hljs-keyword">import</span> { Controller } <span class="hljs-keyword">from</span> <span class="hljs-string">'@hotwired/stimulus'</span>;
+
+<span class="hljs-comment">/* stimulusFetch: 'lazy' */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span> </span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! This controller's code - and any modules that it imports - will be
+split to <em>separate</em> files by Encore. Then, those files won't be downloaded until
+the moment a matching element (e.g. <code translate="no" class="notranslate">&lt;div data-controller=&quot;lazy-example&quot;&gt;</code>)
+appears on the page!</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you write your controllers using TypeScript, make sure
+<code translate="no" class="notranslate">removeComments</code> is not set to <code translate="no" class="notranslate">true</code> in your TypeScript config.</p>
+</div>
+<span id="multiple-javascript-entries"></span>
+</div>
+<div class="section">
+<h3 id="multiple-entries">
+    Multiple Entries
+    <a class="headerlink" href="#multiple-entries" title="Permalink to this headline">¶</a>
+</h3>
+<p>Another option is to create page-specific JavaScript or CSS (e.g. checkout, account,
+etc.). To handle this, create a new &quot;entry&quot; JavaScript file for each page:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// assets/checkout.js</span>
+<span class="hljs-comment">// custom code for your checkout page</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// assets/account.js</span>
+<span class="hljs-comment">// custom code for your account page</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Next, use <code translate="no" class="notranslate">addEntry()</code> to tell Webpack to read these two new files when it builds:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">// webpack.config.js
+  Encore
+      // ...
+      .addEntry('app', './assets/app.js')
+<span class="hljs-addition">+     .addEntry('checkout', './assets/checkout.js')</span>
+<span class="hljs-addition">+     .addEntry('account', './assets/account.js')</span>
+      // ...</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>And because you just changed the <code translate="no" class="notranslate">webpack.config.js</code> file, make sure to stop
+and restart Encore:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># if you use the Yarn package manager</span>
+<span class="hljs-prompt">$ </span>yarn watch
+
+<span class="hljs-comment"># if you use the npm package manager</span>
+<span class="hljs-prompt">$ </span>npm run watch</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Webpack will now output a new <code translate="no" class="notranslate">checkout.js</code> file and a new <code translate="no" class="notranslate">account.js</code> file
+in your build directory. And, if any of those files require/import CSS, Webpack
+will <em>also</em> output <code translate="no" class="notranslate">checkout.css</code> and <code translate="no" class="notranslate">account.css</code> files.</p>
+<p>Finally, include the <code translate="no" class="notranslate">script</code> and <code translate="no" class="notranslate">link</code> tags on the individual pages where
+you need them:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">{# templates/.../checkout.html.twig #}
+  {% extends 'base.html.twig' %}
+
+<span class="hljs-addition">+ {% block stylesheets %}</span>
+<span class="hljs-addition">+     {{ parent() }}</span>
+<span class="hljs-addition">+     {{ encore_entry_link_tags('checkout') }}</span>
+<span class="hljs-addition">+ {% endblock %}</span>
+
+<span class="hljs-addition">+ {% block javascripts %}</span>
+<span class="hljs-addition">+     {{ parent() }}</span>
+<span class="hljs-addition">+     {{ encore_entry_script_tags('checkout') }}</span>
+<span class="hljs-addition">+ {% endblock %}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, the checkout page will contain all the JavaScript and CSS for the <code translate="no" class="notranslate">app</code> entry
+(because this is included in <code translate="no" class="notranslate">base.html.twig</code> and there is the <code translate="no" class="notranslate">{{ parent() }}</code> call)
+<em>and</em> your <code translate="no" class="notranslate">checkout</code> entry. With this, JavaScript &amp; CSS needed for every page
+can live inside the <code translate="no" class="notranslate">app</code> entry and code needed only for the checkout page can
+live inside <code translate="no" class="notranslate">checkout</code>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="using-sass-less-stylus">
+    Using Sass/LESS/Stylus
+    <a class="headerlink" href="#using-sass-less-stylus" title="Permalink to this headline">¶</a>
+</h2>
+<p>You've already mastered the basics of Encore. Nice! But, there are <em>many</em> more
+features that you can opt into if you need them. For example, instead of using plain
+CSS you can also use Sass, LESS or Stylus. To use Sass, rename the <code translate="no" class="notranslate">app.css</code>
+file to <code translate="no" class="notranslate">app.scss</code> and update the <code translate="no" class="notranslate">import</code> statement:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">// assets/app.js
+<span class="hljs-deletion">- import './styles/app.css';</span>
+<span class="hljs-addition">+ import './styles/app.scss';</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, tell Encore to enable the Sass preprocessor:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">// webpack.config.js
+  Encore
+      // ...
+
+<span class="hljs-addition">+    .enableSassLoader()</span>
+  ;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Because you just changed your <code translate="no" class="notranslate">webpack.config.js</code> file, you'll need to restart
+Encore. When you do, you'll see an error!</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash">&gt;   Error: Install sass-loader &amp; sass to use enableSassLoader()
+&gt;     yarn add sass-loader@^12.0.0 sass --dev</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Encore supports many features. But, instead of forcing all of them on you, when
+you need a feature, Encore will tell you what you need to install. Run:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># if you use the Yarn package manager</span>
+<span class="hljs-prompt">$ </span>yarn add sass-loader@^12.0.0 sass --dev
+<span class="hljs-prompt">$ </span>yarn encore dev --watch
+
+<span class="hljs-comment"># if you use the npm package manager</span>
+<span class="hljs-prompt">$ </span>npm install sass-loader@^12.0.0 sass --save-dev
+<span class="hljs-prompt">$ </span>npm run watch</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Your app now supports Sass. Encore also supports LESS and Stylus. See
+<a href="css-preprocessors.html" class="reference internal">CSS Preprocessors: Sass, LESS, Stylus, etc.</a>.</p>
+</div>
+<div class="section">
+<h2 id="compiling-only-a-css-file">
+    Compiling Only a CSS File
+    <a class="headerlink" href="#compiling-only-a-css-file" title="Permalink to this headline">¶</a>
+</h2>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Using <code translate="no" class="notranslate">addStyleEntry()</code> is supported, but not recommended. A better option
+is to follow the pattern above: use <code translate="no" class="notranslate">addEntry()</code> to point to a JavaScript
+file, then require the CSS needed from inside of that.</p>
+</div>
+<p>If you want to only compile a CSS file, that's possible via <code translate="no" class="notranslate">addStyleEntry()</code>:</p>
+<div translate="no" class="highlight-javascript notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs javascript"><span class="hljs-comment">// webpack.config.js</span>
+Encore
+    <span class="hljs-comment">// ...</span>
+
+    .addStyleEntry(<span class="hljs-string">'some_page'</span>, <span class="hljs-string">'./assets/styles/some_page.css'</span>)
+;</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This will output a new <code translate="no" class="notranslate">some_page.css</code>.</p>
+</div>
+<div class="section">
+<h2 id="keep-going">
+    Keep Going!
+    <a class="headerlink" href="#keep-going" title="Permalink to this headline">¶</a>
+</h2>
+<p>Encore supports many more features! For a full list of what you can do, see
+<a href="https://github.com/symfony/webpack-encore/blob/master/index.js" class="reference external" rel="external noopener noreferrer" target="_blank">Encore's index.js file</a>. Or, go back to <a href="../../frontend.html#encore-toc" class="reference internal">list of Frontend articles</a>.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

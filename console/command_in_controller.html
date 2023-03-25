@@ -1,0 +1,266 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-call-a-command-from-a-controller">
+    How to Call a Command from a Controller
+    <a class="headerlink" href="#how-to-call-a-command-from-a-controller" title="Permalink to this headline">¶</a>
+</h1>
+<p>The <a href="../components/console.html" class="reference internal">Console component documentation</a> covers how to
+create a console command. This article covers how to use a console command
+directly from your controller.</p>
+<p>You may have the need to call some function that is only available in a console
+command. Usually, you should refactor the command and move some logic into a
+service that can be reused in the controller. However, when the command is part
+of a third-party library, you don't want to modify or duplicate their code.
+Instead, you can run the command directly from the controller.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>In comparison with a direct call from the console, calling a command from
+a controller has a slight performance impact because of the request stack
+overhead.</p>
+</div>
+<p>Imagine you want to run the <code translate="no" class="notranslate">debug:twig</code> from inside your controller:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/DebugTwigController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Application</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">ArrayInput</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">BufferedOutput</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">KernelInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DebugTwigController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">debugTwig</span><span class="hljs-params">(KernelInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span> = <span class="hljs-keyword">new</span> Application(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>setAutoExit(<span class="hljs-keyword">false</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span> = <span class="hljs-keyword">new</span> ArrayInput([
+            <span class="hljs-string">'command'</span> =&gt; <span class="hljs-string">'debug:twig'</span>,
+            <span class="hljs-comment">// (optional) define the value of command arguments</span>
+            <span class="hljs-string">'fooArgument'</span> =&gt; <span class="hljs-string">'barValue'</span>,
+            <span class="hljs-comment">// (optional) pass options to the command</span>
+            <span class="hljs-string">'--bar'</span> =&gt; <span class="hljs-string">'fooValue'</span>,
+        ]);
+
+        <span class="hljs-comment">// You can use NullOutput() if you don't need the output</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> = <span class="hljs-keyword">new</span> BufferedOutput();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>run(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+
+        <span class="hljs-comment">// return the output, don't use if you used NullOutput()</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>content</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>fetch();
+
+        <span class="hljs-comment">// return new Response(""), if you used NullOutput()</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>content</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h2 id="showing-colorized-command-output">
+    Showing Colorized Command Output
+    <a class="headerlink" href="#showing-colorized-command-output" title="Permalink to this headline">¶</a>
+</h2>
+<p>By telling the <code translate="no" class="notranslate">BufferedOutput</code> it is decorated via the second parameter,
+it will return the Ansi color-coded content. The <a href="https://github.com/sensiolabs/ansi-to-html" class="reference external" rel="external noopener noreferrer" target="_blank">SensioLabs AnsiToHtml converter</a>
+can be used to convert this to colorful HTML.</p>
+<p>First, require the package:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require sensiolabs/ansi-to-html</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, use it in your controller:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Controller/DebugTwigController.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">SensioLabs</span>\<span class="hljs-title">AnsiConverter</span>\<span class="hljs-title">AnsiToHtmlConverter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">BufferedOutput</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DebugTwigController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sendSpool</span><span class="hljs-params">(int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>messages</span> = <span class="hljs-number">10</span>)</span>: <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> = <span class="hljs-keyword">new</span> BufferedOutput(
+            OutputInterface<span class="hljs-operator">::</span>VERBOSITY_NORMAL,
+            <span class="hljs-keyword">true</span> <span class="hljs-comment">// true for decorated</span>
+        );
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-comment">// return the output</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>converter</span> = <span class="hljs-keyword">new</span> AnsiToHtmlConverter();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>content</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>fetch();
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>converter</span><span class="hljs-operator">-&gt;</span>convert(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>content</span>));
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">AnsiToHtmlConverter</code> can also be registered <a href="https://github.com/sensiolabs/ansi-to-html#twig-integration" class="reference external" rel="external noopener noreferrer" target="_blank">as a Twig Extension</a>,
+and supports optional themes.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

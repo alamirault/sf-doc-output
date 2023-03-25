@@ -1,0 +1,345 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-test-a-doctrine-repository">
+    How to Test A Doctrine Repository
+    <a class="headerlink" href="#how-to-test-a-doctrine-repository" title="Permalink to this headline">¶</a>
+</h1>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>The <a href="../testing.html#testing-databases" class="reference internal">main Testing guide</a> describes how to use
+and set-up a database for your automated tests. The contents of this
+article show ways to test your Doctrine repositories.</p>
+</div>
+<div class="section">
+<h2 id="mocking-a-doctrine-repository-in-unit-tests">
+    Mocking a Doctrine Repository in Unit Tests
+    <a class="headerlink" href="#mocking-a-doctrine-repository-in-unit-tests" title="Permalink to this headline">¶</a>
+</h2>
+<p><strong>Unit testing Doctrine repositories is not recommended</strong>. Repositories are
+meant to be tested against a real database connection. However, in case you
+still need to do this, look at the following example.</p>
+<p>Suppose the class you want to test looks like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Salary/SalaryCalculator.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Salary</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Employee</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Persistence</span>\<span class="hljs-title">ObjectManager</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SalaryCalculator</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private ObjectManager <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>objectManager</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">calculateTotalSalary</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>employeeRepository</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>objectManager
+            <span class="hljs-operator">-&gt;</span>getRepository(Employee<span class="hljs-operator">::</span>class);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>employee</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>employeeRepository</span><span class="hljs-operator">-&gt;</span>find(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>id</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>employee</span><span class="hljs-operator">-&gt;</span>getSalary() + <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>employee</span><span class="hljs-operator">-&gt;</span>getBonus();
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Since the <code translate="no" class="notranslate">EntityManagerInterface</code> gets injected into the class through the
+constructor, you can pass a mock object within a test:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// tests/Salary/SalaryCalculatorTest.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>\<span class="hljs-title">Salary</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Employee</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Salary</span>\<span class="hljs-title">SalaryCalculator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Persistence</span>\<span class="hljs-title">ObjectManager</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Persistence</span>\<span class="hljs-title">ObjectRepository</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SalaryCalculatorTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testCalculateTotalSalary</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>employee</span> = <span class="hljs-keyword">new</span> Employee();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>employee</span><span class="hljs-operator">-&gt;</span>setSalary(<span class="hljs-number">1000</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>employee</span><span class="hljs-operator">-&gt;</span>setBonus(<span class="hljs-number">1100</span>);
+
+        <span class="hljs-comment">// Now, mock the repository so it returns the mock of the employee</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>employeeRepository</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createMock(ObjectRepository<span class="hljs-operator">::</span>class);
+        <span class="hljs-comment">// use getMock() on PHPUnit 5.3 or below</span>
+        <span class="hljs-comment">// $employeeRepository = $this-&gt;getMock(ObjectRepository::class);</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>employeeRepository</span><span class="hljs-operator">-&gt;</span>expects(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>any())
+            <span class="hljs-operator">-&gt;</span>method(<span class="hljs-string">'find'</span>)
+            <span class="hljs-operator">-&gt;</span>willReturn(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>employee</span>);
+
+        <span class="hljs-comment">// Last, mock the EntityManager to return the mock of the repository</span>
+        <span class="hljs-comment">// (this is not needed if the class being tested injects the</span>
+        <span class="hljs-comment">// repository it uses instead of the entire object manager)</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>objectManager</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createMock(ObjectManager<span class="hljs-operator">::</span>class);
+        <span class="hljs-comment">// use getMock() on PHPUnit 5.3 or below</span>
+        <span class="hljs-comment">// $objectManager = $this-&gt;getMock(ObjectManager::class);</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>objectManager</span><span class="hljs-operator">-&gt;</span>expects(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>any())
+            <span class="hljs-operator">-&gt;</span>method(<span class="hljs-string">'getRepository'</span>)
+            <span class="hljs-operator">-&gt;</span>willReturn(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>employeeRepository</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>salaryCalculator</span> = <span class="hljs-keyword">new</span> SalaryCalculator(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>objectManager</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertEquals(<span class="hljs-number">2100</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>salaryCalculator</span><span class="hljs-operator">-&gt;</span>calculateTotalSalary(<span class="hljs-number">1</span>));
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In this example, you are building the mocks from the inside out, first creating
+the employee which gets returned by the <code translate="no" class="notranslate">Repository</code>, which itself gets
+returned by the <code translate="no" class="notranslate">EntityManager</code>. This way, no real class is involved in
+testing.</p>
+</div>
+<div class="section">
+<h2 id="functional-testing-of-a-doctrine-repository">
+    Functional Testing of A Doctrine Repository
+    <a class="headerlink" href="#functional-testing-of-a-doctrine-repository" title="Permalink to this headline">¶</a>
+</h2>
+<p>In <a href="../testing.html#functional-tests" class="reference internal">functional tests</a> you'll make queries to the
+database using the actual Doctrine repositories, instead of mocking them. To do
+so, get the entity manager via the service container as follows:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// tests/Repository/ProductRepositoryTest.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>\<span class="hljs-title">Repository</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Test</span>\<span class="hljs-title">KernelTestCase</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductRepositoryTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">KernelTestCase</span>
+</span>{
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@var</span> \Doctrine\ORM\EntityManager
+     */</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span>;
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setUp</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span> = <span class="hljs-keyword">self</span><span class="hljs-operator">::</span>bootKernel();
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>entityManager = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>getContainer()
+            <span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'doctrine'</span>)
+            <span class="hljs-operator">-&gt;</span>getManager();
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testSearchByName</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>entityManager
+            <span class="hljs-operator">-&gt;</span>getRepository(Product<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>findOneBy([<span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Priceless widget'</span>])
+        ;
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertSame(<span class="hljs-number">14.50</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>getPrice());
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">tearDown</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-keyword">parent</span><span class="hljs-operator">::</span>tearDown();
+
+        <span class="hljs-comment">// doing this is recommended to avoid memory leaks</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>entityManager<span class="hljs-operator">-&gt;</span>close();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>entityManager = <span class="hljs-keyword">null</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

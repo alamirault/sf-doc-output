@@ -1,0 +1,226 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-define-a-custom-logging-formatter">
+    How to Define a Custom Logging Formatter
+    <a class="headerlink" href="#how-to-define-a-custom-logging-formatter" title="Permalink to this headline">¶</a>
+</h1>
+<p>Each logging handler uses a <code translate="no" class="notranslate">Formatter</code> to format the record before logging
+it. All Monolog handlers use an instance of
+<code translate="no" class="notranslate">Monolog\Formatter\LineFormatter</code> by default but you can replace it.
+Your formatter must implement <code translate="no" class="notranslate">Monolog\Formatter\FormatterInterface</code>.</p>
+<p>For example, to use the built-in <code translate="no" class="notranslate">JsonFormatter</code>, register it as a service then
+configure your handler to use it:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-8677534dc517ace0788be32dff4d7ebd640942b2" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-d6c942487b97a5874fa84c62bb1ca4897ecbae3c" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-abee2d47dc338bc27c1a9e65be5a4aa29097ee5d" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-8677534dc517ace0788be32dff4d7ebd640942b2" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/prod/monolog.yaml (and/or config/packages/dev/monolog.yaml)</span>
+<span class="hljs-attr">monolog:</span>
+    <span class="hljs-attr">handlers:</span>
+        <span class="hljs-attr">file:</span>
+            <span class="hljs-attr">type:</span> <span class="hljs-string">stream</span>
+            <span class="hljs-attr">level:</span> <span class="hljs-string">debug</span>
+            <span class="hljs-attr">formatter:</span> <span class="hljs-string">'monolog.formatter.json'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-d6c942487b97a5874fa84c62bb1ca4897ecbae3c" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/prod/monolog.xml (and/or config/packages/dev/monolog.xml) --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:monolog</span>=<span class="hljs-string">"http://symfony.com/schema/dic/monolog"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/monolog
+        https://symfony.com/schema/dic/monolog/monolog-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">monolog:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">monolog:handler</span>
+            <span class="hljs-attr">name</span>=<span class="hljs-string">"file"</span>
+            <span class="hljs-attr">type</span>=<span class="hljs-string">"stream"</span>
+            <span class="hljs-attr">level</span>=<span class="hljs-string">"debug"</span>
+            <span class="hljs-attr">formatter</span>=<span class="hljs-string">"monolog.formatter.json"</span>
+        /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">monolog:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-abee2d47dc338bc27c1a9e65be5a4aa29097ee5d" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/prod/monolog.php (and/or config/packages/dev/monolog.php)</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">MonologConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(MonologConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monolog</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monolog</span><span class="hljs-operator">-&gt;</span>handler(<span class="hljs-string">'file'</span>)
+        <span class="hljs-operator">-&gt;</span>type(<span class="hljs-string">'stream'</span>)
+        <span class="hljs-operator">-&gt;</span>level(<span class="hljs-string">'debug'</span>)
+        <span class="hljs-operator">-&gt;</span>formatter(<span class="hljs-string">'monolog.formatter.json'</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Many built-in formatters are available in Monolog. A lot of them are declared as services
+and can be used in the <code translate="no" class="notranslate">formatter</code> option:</p>
+<ul>
+    <li><code translate="no" class="notranslate">monolog.formatter.chrome_php</code>: formats a record according to the ChromePHP array format</li>
+<li><code translate="no" class="notranslate">monolog.formatter.gelf_message</code>: serializes a format to GELF format</li>
+<li><code translate="no" class="notranslate">monolog.formatter.html</code>: formats a record into an HTML table</li>
+<li><code translate="no" class="notranslate">monolog.formatter.json</code>: serializes a record into a JSON object</li>
+<li><code translate="no" class="notranslate">monolog.formatter.line</code>: formats a record into a one-line string</li>
+<li><code translate="no" class="notranslate">monolog.formatter.loggly</code>: formats a record information into JSON in a format compatible with Loggly</li>
+<li><code translate="no" class="notranslate">monolog.formatter.logstash</code>: serializes a record to Logstash Event Format</li>
+<li><code translate="no" class="notranslate">monolog.formatter.normalizer</code>: normalizes a record to remove objects/resources so it's easier to dump to various targets</li>
+<li><code translate="no" class="notranslate">monolog.formatter.scalar</code>: formats a record into an associative array of scalar (+ null) values (objects and arrays will be JSON encoded)</li>
+<li><code translate="no" class="notranslate">monolog.formatter.wildfire</code>: serializes a record according to Wildfire's header requirements</li>
+</ul>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

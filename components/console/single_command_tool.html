@@ -1,0 +1,165 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="building-a-single-command-application">
+    Building a single Command Application
+    <a class="headerlink" href="#building-a-single-command-application" title="Permalink to this headline">¶</a>
+</h1>
+<p>When building a command line tool, you may not need to provide several commands.
+In such a case, having to pass the command name each time is tedious. Fortunately,
+it is possible to remove this need by declaring a single command application:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">#!/usr/bin/env php</span>
+<span class="hljs-meta">&lt;?php</span>
+<span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputArgument</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputOption</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">SingleCommandApplication</span>;
+
+(<span class="hljs-keyword">new</span> SingleCommandApplication())
+    <span class="hljs-operator">-&gt;</span>setName(<span class="hljs-string">'My Super Command'</span>) <span class="hljs-comment">// Optional</span>
+    <span class="hljs-operator">-&gt;</span>setVersion(<span class="hljs-string">'1.0.0'</span>) <span class="hljs-comment">// Optional</span>
+    <span class="hljs-operator">-&gt;</span>addArgument(<span class="hljs-string">'foo'</span>, InputArgument<span class="hljs-operator">::</span>OPTIONAL, <span class="hljs-string">'The directory'</span>)
+    <span class="hljs-operator">-&gt;</span>addOption(<span class="hljs-string">'bar'</span>, <span class="hljs-keyword">null</span>, InputOption<span class="hljs-operator">::</span>VALUE_REQUIRED)
+    <span class="hljs-operator">-&gt;</span>setCode(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span> </span>{
+        <span class="hljs-comment">// output arguments and options</span>
+    })
+    <span class="hljs-operator">-&gt;</span>run();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can still register a command as usual:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">#!/usr/bin/env php</span>
+<span class="hljs-meta">&lt;?php</span>
+<span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Acme</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">DefaultCommand</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Application</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span> = <span class="hljs-keyword">new</span> Application(<span class="hljs-string">'echo'</span>, <span class="hljs-string">'1.0.0'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span> = <span class="hljs-keyword">new</span> DefaultCommand();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>setDefaultCommand(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>command</span><span class="hljs-operator">-&gt;</span>getName(), <span class="hljs-keyword">true</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>application</span><span class="hljs-operator">-&gt;</span>run();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Application.php#method_setDefaultCommand" class="reference external" title="Symfony\Component\Console\Application::setDefaultCommand()" rel="external noopener noreferrer" target="_blank">setDefaultCommand()</a> method
+accepts a boolean as second parameter. If true, the command <code translate="no" class="notranslate">echo</code> will then
+always be used, without having to pass its name.</p>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

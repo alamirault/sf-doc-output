@@ -1,0 +1,687 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="upgrading-a-major-version-e-g-5-4-0-to-6-0-0">
+    Upgrading a Major Version (e.g. 5.4.0 to 6.0.0)
+    <a class="headerlink" href="#upgrading-a-major-version-e-g-5-4-0-to-6-0-0" title="Permalink to this headline">¶</a>
+</h1>
+<p>Every two years, Symfony releases a new major version release (the first number
+changes). These releases are the trickiest to upgrade, as they are allowed to
+break backward compatibility. However, Symfony makes this upgrade process as
+smooth as possible.</p>
+<p>This means that you can update most of your code before the major release is
+actually released. This is called making your code <em>future compatible</em>.</p>
+<p>There are a couple of steps to upgrading a major version:</p>
+<ol class="arabic">
+    <li><a href="upgrade_major.html#upgrade-major-symfony-deprecations" class="reference internal">Make your code deprecation free</a>;</li>
+<li><a href="upgrade_major.html#upgrade-major-symfony-composer" class="reference internal">Update to the new major version via Composer</a>;</li>
+<li><a href="upgrade_major.html#upgrade-major-symfony-after" class="reference internal">Update your code to work with the new version</a>.</li>
+</ol>
+<span id="upgrade-major-symfony-deprecations"></span>
+<div class="section">
+<h2 id="1-make-your-code-deprecation-free">
+    1) Make your Code Deprecation Free
+    <a class="headerlink" href="#1-make-your-code-deprecation-free" title="Permalink to this headline">¶</a>
+</h2>
+<p>During the lifecycle of a major release, new features are added and method
+signatures and public API usages are changed. However,
+<a href="upgrade_minor.html" class="reference internal">minor versions</a> should not contain any
+backwards incompatible changes. To accomplish this, the &quot;old&quot; (e.g. functions,
+classes, etc) code still works, but is marked as <em>deprecated</em>, indicating that
+it will be removed/changed in the future and that you should stop using it.</p>
+<p>When the major version is released (e.g. 6.0.0), all deprecated features and
+functionality are removed. So, as long as you've updated your code to stop
+using these deprecated features in the last version before the major (e.g.
+<code translate="no" class="notranslate">5.4.*</code>), you should be able to upgrade without a problem. That means that
+you should first <a href="upgrade_minor.html" class="reference internal">upgrade to the last minor version</a>
+(e.g. 5.4) so that you can see <em>all</em> the deprecations.</p>
+<p>To help you find deprecations, notices are triggered whenever you end up
+using a deprecated feature. When visiting your application in the
+<a href="../configuration.html#configuration-environments" class="reference internal">dev environment</a>
+in your browser, these notices are shown in the web dev toolbar:</p>
+<div class="with-browser"><img src="_images/deprecations-in-profiler.png" align="center" class="with-browser" />
+</div>
+<p>Ultimately, you should aim to stop using the deprecated functionality.
+Sometimes the warning might tell you exactly what to change.</p>
+<p>But other times, the warning might be unclear: a setting somewhere might
+cause a class deeper to trigger the warning. In this case, Symfony does its
+best to give a clear message, but you may need to research that warning further.</p>
+<p>And sometimes, the warning may come from a third-party library or bundle
+that you're using. If that's true, there's a good chance that those deprecations
+have already been updated. In that case, upgrade the library to fix them.</p>
+<p>Once all the deprecation warnings are gone, you can upgrade with a lot
+more confidence.</p>
+<div class="section">
+<h3 id="deprecations-in-phpunit">
+    Deprecations in PHPUnit
+    <a class="headerlink" href="#deprecations-in-phpunit" title="Permalink to this headline">¶</a>
+</h3>
+<p>When you run your tests using PHPUnit, no deprecation notices are shown.
+To help you here, Symfony provides a PHPUnit bridge. This bridge will show
+you a nice summary of all deprecation notices at the end of the test report.</p>
+<p>All you need to do is install the PHPUnit bridge:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require --dev symfony/phpunit-bridge</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, you can start fixing the notices:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># this command is available after running "composer require --dev symfony/phpunit-bridge"</span>
+<span class="hljs-prompt">$ </span>./bin/phpunit
+...
+
+OK (10 tests, 20 assertions)
+
+Remaining deprecation notices (6)
+
+The <span class="hljs-string">"request"</span> service is deprecated and will be removed <span class="hljs-keyword">in</span> 3.0. Add a <span class="hljs-built_in">type</span>-hint <span class="hljs-keyword">for</span>
+Symfony\Component\HttpFoundation\Request to your controller parameters to retrieve the
+request instead: 6x
+    3x <span class="hljs-keyword">in</span> PageAdminTest::testPageShow from Symfony\Cmf\SimpleCmsBundle\Tests\WebTest\Admin
+    2x <span class="hljs-keyword">in</span> PageAdminTest::testPageList from Symfony\Cmf\SimpleCmsBundle\Tests\WebTest\Admin
+    1x <span class="hljs-keyword">in</span> PageAdminTest::testPageEdit from Symfony\Cmf\SimpleCmsBundle\Tests\WebTest\Admin</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Once you fixed them all, the command ends with <code translate="no" class="notranslate">0</code> (success) and you're
+done!</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>You will probably see many deprecations about incompatible native
+return types. See <a href="upgrade_major.html#upgrading-native-return-types" class="reference internal">Add Native Return Types</a>
+for guidance in fixing these deprecations.</p>
+</div>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span>Using the Weak Deprecations Mode</span></p><p>Sometimes, you can't fix all deprecations (e.g. something was deprecated
+in 5.4 and you still need to support 5.3). In these cases, you can still
+use the bridge to fix as many deprecations as possible and then allow
+more of them to make your tests pass again. You can do this by using the
+<code translate="no" class="notranslate">SYMFONY_DEPRECATIONS_HELPER</code> env variable:</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- phpunit.xml.dist --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">phpunit</span>&gt;</span>
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">php</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"SYMFONY_DEPRECATIONS_HELPER"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"max[total]=999999"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">php</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">phpunit</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also execute the command like:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>SYMFONY_DEPRECATIONS_HELPER=max[total]=999999 php ./bin/phpunit</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div></div>
+<span id="upgrade-major-symfony-composer"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="2-update-to-the-new-major-version-via-composer">
+    2) Update to the New Major Version via Composer
+    <a class="headerlink" href="#2-update-to-the-new-major-version-via-composer" title="Permalink to this headline">¶</a>
+</h2>
+<p>Once your code is deprecation free, you can update the Symfony library via
+Composer by modifying your <code translate="no" class="notranslate">composer.json</code> file and changing all the libraries
+starting with <code translate="no" class="notranslate">symfony/</code> to the new major version:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">{
+      "...": "...",
+
+      "require": {
+<span class="hljs-deletion">-         "symfony/cache": "5.4.*",</span>
+<span class="hljs-addition">+         "symfony/cache": "6.0.*",</span>
+<span class="hljs-deletion">-         "symfony/config": "5.4.*",</span>
+<span class="hljs-addition">+         "symfony/config": "6.0.*",</span>
+<span class="hljs-deletion">-         "symfony/console": "5.4.*",</span>
+<span class="hljs-addition">+         "symfony/console": "6.0.*",</span>
+          "...": "...",
+
+          "...": "A few libraries starting with
+                  symfony/ follow their own versioning scheme. You
+                  do not need to update these versions: you can
+                  upgrade them independently whenever you want",
+          "symfony/monolog-bundle": "^3.5",
+      },
+      "...": "...",
+  }</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>At the bottom of your <code translate="no" class="notranslate">composer.json</code> file, in the <code translate="no" class="notranslate">extra</code> block you can
+find a data setting for the Symfony version. Make sure to also upgrade
+this one. For instance, update it to <code translate="no" class="notranslate">6.0.*</code> to upgrade to Symfony 6.0:</p>
+<div translate="no" class="highlight-diff notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs diff">"extra": {
+      "symfony": {
+          "allow-contrib": false,
+<span class="hljs-deletion">-       "require": "5.4.*"</span>
+<span class="hljs-addition">+       "require": "6.0.*"</span>
+      }
+  }</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Next, use Composer to download new versions of the libraries:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer update <span class="hljs-string">"symfony/*"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="dependency-errors">
+    Dependency Errors
+    <a class="headerlink" href="#dependency-errors" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you get a dependency error, it may mean that you also need to upgrade
+other libraries that are dependencies of the Symfony libraries. To allow
+that, pass the <code translate="no" class="notranslate">--with-all-dependencies</code> flag:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer update <span class="hljs-string">"symfony/*"</span> --with-all-dependencies</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This updates <code translate="no" class="notranslate">symfony/*</code> and <em>all</em> packages that those packages depend on.
+By using tight version constraints in <code translate="no" class="notranslate">composer.json</code>, you can control what
+versions each library upgrades to.</p>
+<p>If this still doesn't work, your <code translate="no" class="notranslate">composer.json</code> file may specify a version
+for a library that is not compatible with the newer Symfony version. In that
+case, updating that library to a newer version in <code translate="no" class="notranslate">composer.json</code> may solve
+the issue.</p>
+<p>Or, you may have deeper issues where different libraries depend on conflicting
+versions of other libraries. Check your error message to debug.</p>
+<p>Another issue that may happen is that the project dependencies can be installed
+on your local computer but not on the remote server. This usually happens when
+the PHP versions are different on each machine. The solution is to add the
+<a href="https://getcomposer.org/doc/06-config.md#platform" class="reference external" rel="external noopener noreferrer" target="_blank">platform</a> config option to your `composer.json` file to define the highest
+PHP version allowed for the dependencies (set it to the server's PHP version).</p>
+</div>
+<div class="section">
+<h3 id="upgrading-other-packages">
+    Upgrading other Packages
+    <a class="headerlink" href="#upgrading-other-packages" title="Permalink to this headline">¶</a>
+</h3>
+<p>You may also want to upgrade the rest of your libraries. If you've done a
+good job with your <a href="https://getcomposer.org/doc/articles/versions.md" class="reference external" rel="external noopener noreferrer" target="_blank">version constraints</a> in <code translate="no" class="notranslate">composer.json</code>, you can do
+this safely by running:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer update</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Beware, if you have some unspecific <a href="https://getcomposer.org/doc/articles/versions.md" class="reference external" rel="external noopener noreferrer" target="_blank">version constraints</a> in your
+<code translate="no" class="notranslate">composer.json</code> (e.g. <code translate="no" class="notranslate">dev-master</code>), this could upgrade some
+non-Symfony libraries to new versions that contain backwards-compatibility
+breaking changes.</p>
+</div>
+<span id="upgrade-major-symfony-after"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="3-updating-recipes">
+    3) Updating Recipes
+    <a class="headerlink" href="#3-updating-recipes" title="Permalink to this headline">¶</a>
+</h2>
+<p>Over time - and especially when you upgrade to a new version of a library - an
+updated version of the <a href="../setup.html#recipes-description" class="reference internal">recipe</a> may be available.
+These updates are usually minor - e.g. new comments in a configuration file - but
+it's a good idea to keep your files in sync with the recipes.</p>
+<p>Symfony Flex provides several commands to help upgrade your recipes. Be sure to
+commit any unrelated changes you're working on before starting:</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>1.18</span>
+    </p><p>The <code translate="no" class="notranslate">recipes:update</code> command was introduced in Symfony Flex 1.18.</p>
+</div>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># choose an outdated recipe to update</span>
+<span class="hljs-prompt">$ </span>composer recipes:update
+
+<span class="hljs-comment"># update a specific recipe</span>
+<span class="hljs-prompt">$ </span>composer recipes:update symfony/framework-bundle
+
+<span class="hljs-comment"># see a list of all installed recipes and which have updates available</span>
+<span class="hljs-prompt">$ </span>composer recipes
+
+<span class="hljs-comment"># see detailed information about a specific recipes</span>
+<span class="hljs-prompt">$ </span>composer recipes symfony/framework-bundle</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">recipes:update</code> command is smart: it looks at the difference between the
+recipe when you installed it and the latest version. It then creates a patch and
+applies it to your app. If there are any conflicts, you can resolve them like a
+normal <code translate="no" class="notranslate">git</code> conflict and commit like normal.</p>
+</div>
+<div class="section">
+<h2 id="4-update-your-code-to-work-with-the-new-version">
+    4) Update your Code to Work with the New Version
+    <a class="headerlink" href="#4-update-your-code-to-work-with-the-new-version" title="Permalink to this headline">¶</a>
+</h2>
+<p>In some rare situations, the next major version <em>may</em> contain backwards-compatibility
+breaks. Make sure you read the <code translate="no" class="notranslate">UPGRADE-X.0.md</code> (where X is the new major version)
+included in the Symfony repository for any BC break that you need to be aware of.</p>
+<span id="upgrading-native-return-types"></span>
+</div>
+<div class="section">
+<h2 id="upgrading-to-symfony-6-add-native-return-types">
+    Upgrading to Symfony 6: Add Native Return Types
+    <a class="headerlink" href="#upgrading-to-symfony-6-add-native-return-types" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony 6 will come with native PHP return types to (almost all) methods.</p>
+<p>In PHP, if the parent has a return type declaration, any class implementing
+or overriding the method must have the return type as well. However, you
+can add a return type before the parent adds one. This means that it is
+important to add the native PHP return types to your classes before
+upgrading to Symfony 6.0. Otherwise, you will get incompatible declaration
+errors.</p>
+<p>When debug mode is enabled (typically in the dev and test environment),
+Symfony will trigger deprecations for every incompatible method
+declarations. For instance, the <code translate="no" class="notranslate">UserInterface::getRoles()</code> method will
+have an <code translate="no" class="notranslate">array</code> return type in Symfony 6. In Symfony 5.4, you will get a
+deprecation notice about this and you must add the return type declaration
+to your <code translate="no" class="notranslate">getRoles()</code> method.</p>
+<p>To help with this, Symfony provides a script that can add these return
+types automatically for you. Make sure you installed the <code translate="no" class="notranslate">symfony/error-handler</code>
+component. When installed, generate a complete class map using Composer and
+run the script to iterate over the class map and fix any incompatible
+method:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># Make sure "exclude-from-classmap" is not filled in your "composer.json". Then dump the autoloader:</span>
+
+<span class="hljs-comment"># "-o" is important! This forces Composer to find all classes</span>
+<span class="hljs-prompt">$ </span>composer dump-autoload -o
+
+<span class="hljs-comment"># patch all incompatible method declarations</span>
+<span class="hljs-prompt">$ </span>./vendor/bin/patch-type-declarations</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>This feature is not limited to Symfony packages. It will also help you
+add types and prepare for other dependencies in your project.</p>
+</div>
+<p>The behavior of this script can be modified using the <code translate="no" class="notranslate">SYMFONY_PATCH_TYPE_DECLARATIONS</code>
+env var. The value of this env var is url-encoded (e.g.
+<code translate="no" class="notranslate">param1=value1&amp;param2=value2</code>), the following parameters are available:</p>
+<dl>
+                        <dt><code translate="no" class="notranslate">force</code></dt>
+        
+        <dd>
+                            <p class="first">Enables fixing return types, the value must be one of:</p>
+                            <ul class="last">
+    <li><code translate="no" class="notranslate">2</code> to add all possible return types (default, recommended for applications);</li>
+<li><code translate="no" class="notranslate">1</code> to add return types only to tests, final, internal or private methods;</li>
+<li><code translate="no" class="notranslate">phpdoc</code> to only add <code translate="no" class="notranslate">@return</code> docblock annotations to the incompatible
+methods, or <code translate="no" class="notranslate">#[\ReturnTypeWillChange]</code> if it's triggered by the PHP engine.</li>
+</ul>
+                    </dd>
+                        <dt><code translate="no" class="notranslate">php</code></dt>
+        
+        <dd>
+                            The target version of PHP - e.g. <code translate="no" class="notranslate">7.1</code> doesn't generate &quot;object&quot;
+types (which were introduced in 7.2). This defaults to the PHP version
+used when running the script.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">deprecations</code></dt>
+        
+        <dd>
+                            Set to <code translate="no" class="notranslate">0</code> to disable deprecations. Otherwise, a deprecation notice
+when a child class misses a return type while the parent declares an
+<code translate="no" class="notranslate">@return</code> annotation (defaults to <code translate="no" class="notranslate">1</code>).
+                    </dd>
+    </dl>
+<p>If there are specific files that should be ignored, you can set the
+<code translate="no" class="notranslate">SYMFONY_PATCH_TYPE_EXCLUDE</code> env var to a regex. This regex will be
+matched to the full path to the class and each matching path will be
+ignored (e.g. <code translate="no" class="notranslate">SYMFONY_PATCH_TYPE_EXCLUDE=&quot;/tests\/Fixtures\//&quot;</code>).
+Classes in the <code translate="no" class="notranslate">vendor/</code> directory are always ignored.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The script does not care about code style. Run your code style fixer,
+or <a href="https://github.com/friendsofphp/php-cs-fixer" class="reference external" rel="external noopener noreferrer" target="_blank">PHP CS Fixer</a> with the <code translate="no" class="notranslate">phpdoc_trim_consecutive_blank_line_separation</code>,
+<code translate="no" class="notranslate">no_superfluous_phpdoc_tags</code> and <code translate="no" class="notranslate">ordered_imports</code> rules, after
+patching the types.</p>
+</div>
+<span id="patching-types-for-open-source-maintainers"></span>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span>Patching Types for Open Source Maintainers</span></p><p>Open source bundles and packages need to be more cautious with adding
+return types, as adding a return type forces all users extending the
+class to add the return type as well. The recommended approach is to
+use a 2 step process:</p>
+<ol class="arabic">
+    <li><p>First, create a minor release (i.e. without backwards compatibility
+breaks) where you add types that can be safely introduced and add
+<code translate="no" class="notranslate">@return</code> PHPDoc to all other methods:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># Add type declarations to all internal, final, tests and private methods.</span>
+<span class="hljs-comment"># Update the "php" parameter to match your minimum required PHP version</span>
+<span class="hljs-prompt">$ </span>SYMFONY_PATCH_TYPE_DECLARATIONS=<span class="hljs-string">"force=1&amp;php=7.4"</span> ./vendor/bin/patch-type-declarations
+
+<span class="hljs-comment"># Add PHPDoc to the leftover public and protected methods</span>
+<span class="hljs-prompt">$ </span>SYMFONY_PATCH_TYPE_DECLARATIONS=<span class="hljs-string">"force=phpdoc&amp;php=7.4"</span> ./vendor/bin/patch-type-declarations</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>After running the scripts, check your classes and add more <code translate="no" class="notranslate">@return</code>
+PHPDoc where they are missing. The deprecations and patch script
+work purely based on the PHPDoc information. Users of this release
+will get deprecation notices telling them to add the missing return
+types from your package to their code.</p>
+<p>If you didn't need any PHPDoc and all your method declarations are
+already compatible with Symfony, you can safely allow <code translate="no" class="notranslate">^6.0</code> for
+the Symfony dependencies. Otherwise, you have to continue with (2).</p></li>
+<li><p>Create a new major release (i.e. <em>with</em> backwards compatibility
+breaks) where you add types to all methods:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># Update the "php" parameter to match your minimum required PHP version</span>
+<span class="hljs-prompt">$ </span>SYMFONY_PATCH_TYPE_DECLARATIONS=<span class="hljs-string">"force=2&amp;php=7.4"</span> ./vendor/bin/patch-type-declarations</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, you can safely allow <code translate="no" class="notranslate">^6.0</code> for the Symfony dependencies.</p></li>
+</ol>
+</div></div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

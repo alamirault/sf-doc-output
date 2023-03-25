@@ -1,0 +1,1006 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-use-data-transformers">
+    How to Use Data Transformers
+    <a class="headerlink" href="#how-to-use-data-transformers" title="Permalink to this headline">¶</a>
+</h1>
+<p>Data transformers are used to translate the data for a field into a format that can
+be displayed in a form (and back on submit). They're already used internally for
+many field types. For example, the <a href="../reference/forms/types/date.html" class="reference internal">DateType</a> field
+can be rendered as a <code translate="no" class="notranslate">yyyy-MM-dd</code>-formatted input text box. Internally, a data transformer
+converts the <code translate="no" class="notranslate">DateTime</code> value of the field to a <code translate="no" class="notranslate">yyyy-MM-dd</code> formatted string
+when rendering the form, and then back to a <code translate="no" class="notranslate">DateTime</code> object on submit.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>When a form field has the <code translate="no" class="notranslate">inherit_data</code> option set to <code translate="no" class="notranslate">true</code>, data transformers
+are not applied to that field.</p>
+</div>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>If, instead of transforming the representation of a value, you need to map
+values to a form field and back, you should use a data mapper. Check out
+<a href="data_mappers.html" class="reference internal">When and How to Use Data Mappers</a>.</p>
+</div>
+<span id="simple-example-sanitizing-html-on-user-input"></span>
+<div class="section">
+<h2 id="example-1-transforming-strings-form-data-tags-from-user-input-to-an-array">
+    Example #1: Transforming Strings Form Data Tags from User Input to an Array
+    <a class="headerlink" href="#example-1-transforming-strings-form-data-tags-from-user-input-to-an-array" title="Permalink to this headline">¶</a>
+</h2>
+<p>Suppose you have a Task form with a tags <code translate="no" class="notranslate">text</code> type:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/TaskType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Task</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormBuilderInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'tags'</span>, TextType<span class="hljs-operator">::</span>class);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-string">'data_class'</span> =&gt; Task<span class="hljs-operator">::</span>class,
+        ]);
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Internally the <code translate="no" class="notranslate">tags</code> are stored as an array, but displayed to the user as a
+plain comma separated string to make them easier to edit.</p>
+<p>This is a <em>perfect</em> time to attach a custom data transformer to the <code translate="no" class="notranslate">tags</code>
+field. The easiest way to do this is with the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/CallbackTransformer.php" class="reference external" title="Symfony\Component\Form\CallbackTransformer" rel="external noopener noreferrer" target="_blank">CallbackTransformer</a>
+class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/TaskType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">CallbackTransformer</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormBuilderInterface</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'tags'</span>, TextType<span class="hljs-operator">::</span>class);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'tags'</span>)
+            <span class="hljs-operator">-&gt;</span>addModelTransformer(<span class="hljs-keyword">new</span> CallbackTransformer(
+                <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tagsAsArray</span>)</span>: <span class="hljs-title">string</span> </span>{
+                    <span class="hljs-comment">// transform the array to a string</span>
+                    <span class="hljs-keyword">return</span> implode(<span class="hljs-string">', '</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tagsAsArray</span>);
+                },
+                <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tagsAsString</span>)</span>: <span class="hljs-title">array</span> </span>{
+                    <span class="hljs-comment">// transform the string back to an array</span>
+                    <span class="hljs-keyword">return</span> explode(<span class="hljs-string">', '</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>tagsAsString</span>);
+                }
+            ))
+        ;
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">CallbackTransformer</code> takes two callback functions as arguments. The
+first transforms the original value into a format that'll be used to render the
+field. The second does the reverse: it transforms the submitted value back into
+the format you'll use in your code.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The <code translate="no" class="notranslate">addModelTransformer()</code> method accepts <em>any</em> object that implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/DataTransformerInterface.php" class="reference external" title="Symfony\Component\Form\DataTransformerInterface" rel="external noopener noreferrer" target="_blank">DataTransformerInterface</a> - so you can create
+your own classes, instead of putting all the logic in the form (see the next section).</p>
+</div>
+<p>You can also add the transformer, right when adding the field by changing the format
+slightly:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span><span class="hljs-operator">-&gt;</span>add(
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+        <span class="hljs-operator">-&gt;</span>create(<span class="hljs-string">'tags'</span>, TextType<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>addModelTransformer(<span class="hljs-comment">/* ... */</span>)
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="example-2-transforming-an-issue-number-into-an-issue-entity">
+    Example #2: Transforming an Issue Number into an Issue Entity
+    <a class="headerlink" href="#example-2-transforming-an-issue-number-into-an-issue-entity" title="Permalink to this headline">¶</a>
+</h2>
+<p>Say you have a many-to-one relation from the Task entity to an Issue entity (i.e. each
+Task has an optional foreign key to its related Issue). Adding a list box with all
+possible issues could eventually get <em>really</em> long and take a long time to load.
+Instead, you decide you want to add a text box, where the user can enter the
+issue number.</p>
+<p>Start by setting up the text field like normal:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/TaskType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Task</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextareaType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'description'</span>, TextareaType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'issue'</span>, TextType<span class="hljs-operator">::</span>class)
+        ;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-string">'data_class'</span> =&gt; Task<span class="hljs-operator">::</span>class,
+        ]);
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Good start! But if you stopped here and submitted the form, the Task's <code translate="no" class="notranslate">issue</code>
+property would be a string (e.g. &quot;55&quot;). How can you transform this into an <code translate="no" class="notranslate">Issue</code>
+entity on submit?</p>
+<div class="section">
+<h3 id="creating-the-transformer">
+    Creating the Transformer
+    <a class="headerlink" href="#creating-the-transformer" title="Permalink to this headline">¶</a>
+</h3>
+<p>You could use the <code translate="no" class="notranslate">CallbackTransformer</code> like earlier. But since this is a bit more
+complex, creating a new transformer class will keep the <code translate="no" class="notranslate">TaskType</code> form class simpler.</p>
+<p>Create an <code translate="no" class="notranslate">IssueToNumberTransformer</code> class: it will be responsible for converting
+to and from the issue number and the <code translate="no" class="notranslate">Issue</code> object:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/DataTransformer/IssueToNumberTransformer.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">DataTransformer</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Issue</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">ORM</span>\<span class="hljs-title">EntityManagerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">DataTransformerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">TransformationFailedException</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IssueToNumberTransformer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">DataTransformerInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private EntityManagerInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>entityManager</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-comment">/**
+     * Transforms an object (issue) to a string (number).
+     *
+     * <span class="hljs-doctag">@param</span>  Issue|null $issue
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">transform</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issue</span>)</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">null</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issue</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-string">''</span>;
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issue</span><span class="hljs-operator">-&gt;</span>getId();
+    }
+
+    <span class="hljs-comment">/**
+     * Transforms a string (number) to an object (issue).
+     *
+     * <span class="hljs-doctag">@param</span>  string $issueNumber
+     * <span class="hljs-doctag">@throws</span> TransformationFailedException if object (issue) is not found.
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reverseTransform</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issueNumber</span>)</span>: ?<span class="hljs-title">Issue</span>
+    </span>{
+        <span class="hljs-comment">// no issue number? It's optional, so that's ok</span>
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issueNumber</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+        }
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issue</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>entityManager
+            <span class="hljs-operator">-&gt;</span>getRepository(Issue<span class="hljs-operator">::</span>class)
+            <span class="hljs-comment">// query for the issue with this id</span>
+            <span class="hljs-operator">-&gt;</span>find(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issueNumber</span>)
+        ;
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">null</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issue</span>) {
+            <span class="hljs-comment">// causes a validation error</span>
+            <span class="hljs-comment">// this message is not shown to the user</span>
+            <span class="hljs-comment">// see the invalid_message option</span>
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> TransformationFailedException(sprintf(
+                <span class="hljs-string">'An issue with number "%s" does not exist!'</span>,
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issueNumber</span>
+            ));
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issue</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Like the first example, the transformer has two directions. The <code translate="no" class="notranslate">transform()</code>
+method is responsible for converting the data used in your code to a format that
+can be rendered in your form (e.g. an <code translate="no" class="notranslate">Issue</code> object to its <code translate="no" class="notranslate">id</code>, a string).
+The <code translate="no" class="notranslate">reverseTransform()</code> method does the reverse: it converts the submitted value
+back into the format you want (e.g. convert the <code translate="no" class="notranslate">id</code> back to the <code translate="no" class="notranslate">Issue</code> object).</p>
+<p>To cause a validation error, throw a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Form/Exception/TransformationFailedException.php" class="reference external" title="Symfony\Component\Form\Exception\TransformationFailedException" rel="external noopener noreferrer" target="_blank">TransformationFailedException</a>.
+But the message you pass to this exception won't be shown to the user. You'll set
+that message with the <code translate="no" class="notranslate">invalid_message</code> option (see below).</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When <code translate="no" class="notranslate">null</code> is passed to the <code translate="no" class="notranslate">transform()</code> method, your transformer
+should return an equivalent value of the type it is transforming to (e.g.
+an empty string, 0 for integers or 0.0 for floats).</p>
+</div>
+</div>
+<div class="section">
+<h3 id="using-the-transformer">
+    Using the Transformer
+    <a class="headerlink" href="#using-the-transformer" title="Permalink to this headline">¶</a>
+</h3>
+<p>Next, you need to use the <code translate="no" class="notranslate">IssueToNumberTransformer</code> object inside of <code translate="no" class="notranslate">TaskType</code>
+and add it to the <code translate="no" class="notranslate">issue</code> field. No problem! Add a <code translate="no" class="notranslate">__construct()</code> method
+and type-hint the new class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/TaskType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">DataTransformer</span>\<span class="hljs-title">IssueToNumberTransformer</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextareaType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private IssueToNumberTransformer <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>transformer</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'description'</span>, TextareaType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'issue'</span>, TextType<span class="hljs-operator">::</span>class, [
+                <span class="hljs-comment">// validation message if the data transformer fails</span>
+                <span class="hljs-string">'invalid_message'</span> =&gt; <span class="hljs-string">'That is not a valid issue number'</span>,
+            ]);
+
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'issue'</span>)
+            <span class="hljs-operator">-&gt;</span>addModelTransformer(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>transformer);
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Whenever the transformer throws an exception, the <code translate="no" class="notranslate">invalid_message</code> is shown
+to the user. Instead of showing the same message every time, you can set the
+end-user error message in the data transformer using the
+<code translate="no" class="notranslate">setInvalidMessage()</code> method. It also allows you to include user values:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/DataTransformer/IssueToNumberTransformer.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">DataTransformer</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">DataTransformerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">TransformationFailedException</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IssueToNumberTransformer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">DataTransformerInterface</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reverseTransform</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issueNumber</span>)</span>: ?<span class="hljs-title">Issue</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">null</span> === <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issue</span>) {
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>privateErrorMessage</span> = sprintf(<span class="hljs-string">'An issue with number "%s" does not exist!'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issueNumber</span>);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>publicErrorMessage</span> = <span class="hljs-string">'The given "{{ value }}" value is not a valid issue number.'</span>;
+
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>failure</span> = <span class="hljs-keyword">new</span> TransformationFailedException(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>privateErrorMessage</span>);
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>failure</span><span class="hljs-operator">-&gt;</span>setInvalidMessage(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>publicErrorMessage</span>, [
+                <span class="hljs-string">'{{ value }}'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issueNumber</span>,
+            ]);
+
+            <span class="hljs-keyword">throw</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>failure</span>;
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>issue</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! If you're using the
+<a href="../service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>,
+Symfony will automatically know to pass your <code translate="no" class="notranslate">TaskType</code> an instance of the
+<code translate="no" class="notranslate">IssueToNumberTransformer</code> thanks to <a href="../service_container.html#services-autowire" class="reference internal">autowire</a> and
+<a href="../service_container.html#services-autoconfigure" class="reference internal">autoconfigure</a>.
+Otherwise, <a href="../service_container.html#service-container-creating-service" class="reference internal">register the form class as a service</a>
+and <a href="../service_container/tags.html" class="reference internal">tag it</a> with the <code translate="no" class="notranslate">form.type</code> tag.</p>
+<p>Now, you can use your <code translate="no" class="notranslate">TaskType</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// e.g. somewhere in a controller</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createForm(TaskType<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>task</span>);
+
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Cool, you're done! Your user will be able to enter an issue number into the
+text field, which will be transformed back into an Issue object. This means
+that, after a successful submission, the Form component will pass a real
+<code translate="no" class="notranslate">Issue</code> object to <code translate="no" class="notranslate">Task::setIssue()</code> instead of the issue number.</p>
+<p>If the issue isn't found, a form error will be created for that field and
+its error message can be controlled with the <code translate="no" class="notranslate">invalid_message</code> field option.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Be careful when adding your transformers. For example, the following is <strong>wrong</strong>,
+as the transformer would be applied to the entire form, instead of just this
+field:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// THIS IS WRONG - TRANSFORMER WILL BE APPLIED TO THE ENTIRE FORM</span>
+<span class="hljs-comment">// see above example for correct code</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'issue'</span>, TextType<span class="hljs-operator">::</span>class)
+    <span class="hljs-operator">-&gt;</span>addModelTransformer(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>transformer</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<span id="using-transformers-in-a-custom-field-type"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="creating-a-reusable-issue-selector-field">
+    Creating a Reusable issue_selector Field
+    <a class="headerlink" href="#creating-a-reusable-issue-selector-field" title="Permalink to this headline">¶</a>
+</h2>
+<p>In the above example, you applied the transformer to a normal <code translate="no" class="notranslate">text</code> field. But
+if you do this transformation a lot, it might be better to
+<a href="create_custom_field_type.html" class="reference internal">create a custom field type</a>.
+that does this automatically.</p>
+<p>First, create the custom field type class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/IssueSelectorType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">DataTransformer</span>\<span class="hljs-title">IssueToNumberTransformer</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">AbstractType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextType</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">FormBuilderInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">OptionsResolver</span>\<span class="hljs-title">OptionsResolver</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IssueSelectorType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private IssueToNumberTransformer <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>transformer</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span><span class="hljs-operator">-&gt;</span>addModelTransformer(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>transformer);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureOptions</span><span class="hljs-params">(OptionsResolver <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span><span class="hljs-operator">-&gt;</span>setDefaults([
+            <span class="hljs-string">'invalid_message'</span> =&gt; <span class="hljs-string">'The selected issue does not exist'</span>,
+        ]);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getParent</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> TextType<span class="hljs-operator">::</span>class;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Great! This will act and render like a text field (<code translate="no" class="notranslate">getParent()</code>), but will automatically
+have the data transformer <em>and</em> a nice default value for the <code translate="no" class="notranslate">invalid_message</code> option.</p>
+<p>As long as you're using <a href="../service_container.html#services-autowire" class="reference internal">autowire</a> and
+<a href="../service_container.html#services-autoconfigure" class="reference internal">autoconfigure</a>, you can start using the form immediately:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Form/Type/TaskType.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Type</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">DataTransformer</span>\<span class="hljs-title">IssueToNumberTransformer</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Form</span>\<span class="hljs-title">Extension</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Type</span>\<span class="hljs-title">TextareaType</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TaskType</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractType</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildForm</span><span class="hljs-params">(FormBuilderInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>options</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>builder</span>
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'description'</span>, TextareaType<span class="hljs-operator">::</span>class)
+            <span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'issue'</span>, IssueSelectorType<span class="hljs-operator">::</span>class)
+        ;
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you're not using <code translate="no" class="notranslate">autowire</code> and <code translate="no" class="notranslate">autoconfigure</code>, see
+<a href="create_custom_field_type.html" class="reference internal">How to Create a Custom Form Field Type</a> for how to configure your new <code translate="no" class="notranslate">IssueSelectorType</code>.</p>
+</div>
+<span id="model-and-view-transformers"></span>
+</div>
+<div class="section">
+<h2 id="about-model-and-view-transformers">
+    About Model and View Transformers
+    <a class="headerlink" href="#about-model-and-view-transformers" title="Permalink to this headline">¶</a>
+</h2>
+<p>In the above example, the transformer was used as a &quot;model&quot; transformer.
+In fact, there are two different types of transformers and three different
+types of underlying data.</p>
+<img src="_images/data-transformer-types.png" align="center" />
+<p>In any form, the three different types of data are:</p>
+<ol class="arabic">
+    <li><strong>Model data</strong> - This is the data in the format used in your application
+(e.g. an <code translate="no" class="notranslate">Issue</code> object). If you call <code translate="no" class="notranslate">Form::getData()</code> or <code translate="no" class="notranslate">Form::setData()</code>,
+you're dealing with the &quot;model&quot; data.</li>
+<li><strong>Norm Data</strong> - This is a normalized version of your data and is commonly
+the same as your &quot;model&quot; data (though not in our example). It's not commonly
+used directly.</li>
+<li><strong>View Data</strong> - This is the format that's used to fill in the form fields
+themselves. It's also the format in which the user will submit the data. When
+you call <code translate="no" class="notranslate">Form::submit($data)</code>, the <code translate="no" class="notranslate">$data</code> is in the &quot;view&quot; data format.</li>
+</ol>
+<p>The two different types of transformers help convert to and from each of these
+types of data:</p>
+<dl>
+                        <dt><strong>Model transformers</strong>:</dt>
+        
+        <dd>
+                            <ul class="first">
+    <li><code translate="no" class="notranslate">transform()</code>: &quot;model data&quot; =&gt; &quot;norm data&quot;</li>
+<li><code translate="no" class="notranslate">reverseTransform()</code>: &quot;norm data&quot; =&gt; &quot;model data&quot;</li>
+</ul>
+                    </dd>
+                        <dt><strong>View transformers</strong>:</dt>
+        
+        <dd>
+                            <ul class="first">
+    <li><code translate="no" class="notranslate">transform()</code>: &quot;norm data&quot; =&gt; &quot;view data&quot;</li>
+<li><code translate="no" class="notranslate">reverseTransform()</code>: &quot;view data&quot; =&gt; &quot;norm data&quot;</li>
+</ul>
+                    </dd>
+    </dl>
+<p>Which transformer you need depends on your situation.</p>
+<p>To use the view transformer, call <code translate="no" class="notranslate">addViewTransformer()</code>.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Be careful with model transformers and
+<a href="../reference/forms/types/collection.html" class="reference internal">Collection</a> field types.
+Collection's children are created early at <code translate="no" class="notranslate">PRE_SET_DATA</code> by its
+<code translate="no" class="notranslate">ResizeFormListener</code> and their data is populated later from the normalized
+data. So your model transformer cannot reduce the number of items within the
+Collection (i.e. filtering out some items), as in that case the collection
+ends up with some empty children.</p>
+<p>A possible workaround for that limitation could be not using the underlying
+object directly, but a DTO (Data Transfer Object) instead, that implements
+the transformation of such incompatible data structures.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="so-why-use-the-model-transformer">
+    So why Use the Model Transformer?
+    <a class="headerlink" href="#so-why-use-the-model-transformer" title="Permalink to this headline">¶</a>
+</h2>
+<p>In this example, the field is a <code translate="no" class="notranslate">text</code> field, and a text field is always
+expected to be a simple, scalar format in the &quot;norm&quot; and &quot;view&quot; formats. For
+this reason, the most appropriate transformer was the &quot;model&quot; transformer
+(which converts to/from the <em>norm</em> format - string issue number - to the <em>model</em>
+format - Issue object).</p>
+<p>The difference between the transformers is subtle and you should always think
+about what the &quot;norm&quot; data for a field should really be. For example, the
+&quot;norm&quot; data for a <code translate="no" class="notranslate">text</code> field is a string, but is a <code translate="no" class="notranslate">DateTime</code> object
+for a <code translate="no" class="notranslate">date</code> field.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>As a general rule, the normalized data should contain as much information as possible.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

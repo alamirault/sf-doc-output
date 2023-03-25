@@ -1,0 +1,549 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-clock-component">
+    The Clock Component
+    <a class="headerlink" href="#the-clock-component" title="Permalink to this headline">¶</a>
+</h1>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The Clock component was introduced in Symfony 6.2</p>
+</div>
+<p>The Clock component decouples applications from the system clock. This allows
+you to fix time to improve testability of time-sensitive logic.</p>
+<p>The component provides a <code translate="no" class="notranslate">ClockInterface</code> with the following implementations
+for different use cases:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Clock/NativeClock.php" class="reference external" title="Symfony\Component\Clock\NativeClock" rel="external noopener noreferrer" target="_blank">NativeClock</a></dt>
+        
+        <dd>
+                            Provides a way to interact with the system clock, this is the same as doing
+<code translate="no" class="notranslate">new \DateTimeImmutable()</code>.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Clock/MockClock.php" class="reference external" title="Symfony\Component\Clock\MockClock" rel="external noopener noreferrer" target="_blank">MockClock</a></dt>
+        
+        <dd>
+                            Commonly used in tests as a replacement for the <code translate="no" class="notranslate">NativeClock</code> to be able
+to freeze and change the current time using either <code translate="no" class="notranslate">sleep()</code> or <code translate="no" class="notranslate">modify()</code>.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Clock/MonotonicClock.php" class="reference external" title="Symfony\Component\Clock\MonotonicClock" rel="external noopener noreferrer" target="_blank">MonotonicClock</a>`</dt>
+        
+        <dd>
+                            Relies on <code translate="no" class="notranslate">hrtime()</code> and provides a high resolution, monotonic clock,
+when you need a precise stopwatch.
+                    </dd>
+    </dl>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/clock</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Clock/Clock.php" class="reference external" title="Symfony\Component\Clock\Clock" rel="external noopener noreferrer" target="_blank">Clock</a> class returns the current time and
+allows to use any <a href="https://www.php-fig.org/psr/psr-20/" class="reference external" rel="external noopener noreferrer" target="_blank">PSR-20</a> compatible implementation as a global clock in your
+application:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Clock</span>\<span class="hljs-title">Clock</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Clock</span>\<span class="hljs-title">MockClock</span>;
+
+<span class="hljs-comment">// by default, Clock uses the NativeClock implementation, but you can change</span>
+<span class="hljs-comment">// this by setting any other implementation</span>
+Clock<span class="hljs-operator">::</span>set(<span class="hljs-keyword">new</span> MockClock());
+
+<span class="hljs-comment">// Then, you can get the clock instance</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>clock</span> = Clock<span class="hljs-operator">::</span>get();
+
+<span class="hljs-comment">// Additionally, you can set a timezone</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>clock</span><span class="hljs-operator">-&gt;</span>withTimeZone(<span class="hljs-string">'Europe/Paris'</span>);
+
+<span class="hljs-comment">// From here, you can get the current time</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>now</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>clock</span><span class="hljs-operator">-&gt;</span>now();
+
+<span class="hljs-comment">// And sleep for any number of seconds</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>clock</span><span class="hljs-operator">-&gt;</span>sleep(<span class="hljs-number">2.5</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The Clock component also provides the <code translate="no" class="notranslate">now()</code> function:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">function</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Clock</span>\<span class="hljs-title">now</span>;
+
+<span class="hljs-comment">// Get the current time as a DateTimeImmutable instance</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>now</span> = now();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Later on this page you can learn how to use this clock in your services and tests.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Clock/Clock.php" class="reference external" title="Symfony\Component\Clock\Clock" rel="external noopener noreferrer" target="_blank">Clock</a> class and <code translate="no" class="notranslate">now()</code> function
+were introduced in Symfony 6.3.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="available-clocks-implementations">
+    Available Clocks Implementations
+    <a class="headerlink" href="#available-clocks-implementations" title="Permalink to this headline">¶</a>
+</h2>
+<p>The Clock component provides some ready-to-use implementations of the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Clock/ClockInterface.php" class="reference external" title="Symfony\Component\Clock\ClockInterface" rel="external noopener noreferrer" target="_blank">ClockInterface</a>, which you can use
+as global clocks in your application depending on your needs.</p>
+<div class="section">
+<h3 id="nativeclock">
+    NativeClock
+    <a class="headerlink" href="#nativeclock" title="Permalink to this headline">¶</a>
+</h3>
+<p>A clock service replaces creating a new <code translate="no" class="notranslate">DateTime</code> or
+<code translate="no" class="notranslate">DateTimeImmutable</code> object for the current time. Instead, you inject the
+<code translate="no" class="notranslate">ClockInterface</code> and call <code translate="no" class="notranslate">now()</code>. By default, your application will likely
+use a <code translate="no" class="notranslate">NativeClock</code>, which always returns the current system time. In tests it is replaced with a <code translate="no" class="notranslate">MockClock</code>.</p>
+<p>The following example introduces a service utilizing the Clock component to
+determine the current time:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Clock</span>\<span class="hljs-title">ClockInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExpirationChecker</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private ClockInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>clock</span>
+    )</span> </span>{}
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isExpired</span><span class="hljs-params">(DateTimeInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validUntil</span>)</span>: <span class="hljs-title">bool</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>clock<span class="hljs-operator">-&gt;</span>now() &gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validUntil</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="mockclock">
+    MockClock
+    <a class="headerlink" href="#mockclock" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <code translate="no" class="notranslate">MockClock</code> is instantiated with a time and does not move forward on its own. The time is
+fixed until <code translate="no" class="notranslate">sleep()</code> or <code translate="no" class="notranslate">modify()</code> are called. This gives you full control over what your code
+assumes is the current time.</p>
+<p>When writing a test for this service, you can check both cases where something
+is expired or not, by modifying the clock's time:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Clock</span>\<span class="hljs-title">MockClock</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExpirationCheckerTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testIsExpired</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>clock</span> = <span class="hljs-keyword">new</span> MockClock(<span class="hljs-string">'2022-11-16 15:20:00'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expirationChecker</span> = <span class="hljs-keyword">new</span> ExpirationChecker(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>clock</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validUntil</span> = <span class="hljs-keyword">new</span> DateTimeImmutable(<span class="hljs-string">'2022-11-16 15:25:00'</span>);
+
+        <span class="hljs-comment">// $validUntil is in the future, so it is not expired</span>
+        <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>assertFalse(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expirationChecker</span><span class="hljs-operator">-&gt;</span>isExpired(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validUntil</span>));
+
+        <span class="hljs-comment">// Clock sleeps for 10 minutes, so now is '2022-11-16 15:30:00'</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>clock</span><span class="hljs-operator">-&gt;</span>sleep(<span class="hljs-number">600</span>); <span class="hljs-comment">// Instantly changes time as if we waited for 10 minutes (600 seconds)</span>
+
+        <span class="hljs-comment">// modify the clock, accepts all formats supported by DateTimeImmutable::modify()</span>
+        <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>assertTrue(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expirationChecker</span><span class="hljs-operator">-&gt;</span>isExpired(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validUntil</span>));
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>clock</span><span class="hljs-operator">-&gt;</span>modify(<span class="hljs-string">'2022-11-16 15:00:00'</span>);
+
+        <span class="hljs-comment">// $validUntil is in the future again, so it is no longer expired</span>
+        <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>assertFalse(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expirationChecker</span><span class="hljs-operator">-&gt;</span>isExpired(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validUntil</span>));
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="monotonic-clock">
+    Monotonic Clock
+    <a class="headerlink" href="#monotonic-clock" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <code translate="no" class="notranslate">MonotonicClock</code> allows you to implement a precise stopwatch; depending on
+the system up to nanosecond precision. It can be used to measure the elapsed
+time between two calls without being affected by inconsistencies sometimes introduced
+by the system clock, e.g. by updating it. Instead, it consistently increases time,
+making it especially useful for measuring performance.</p>
+<span id="clock_use-inside-a-service"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="using-a-clock-inside-a-service">
+    Using a Clock inside a Service
+    <a class="headerlink" href="#using-a-clock-inside-a-service" title="Permalink to this headline">¶</a>
+</h2>
+<p>Using the Clock component in your services to retrieve the current time makes
+them easier to test. For example, by using the <code translate="no" class="notranslate">MockClock</code> implementation as
+the default one during tests, you will have full control to set the &quot;current time&quot;
+to any arbitrary date/time.</p>
+<p>In order to use this component in your services, make their classes use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Clock/ClockAwareTrait.php" class="reference external" title="Symfony\Component\Clock\ClockAwareTrait" rel="external noopener noreferrer" target="_blank">ClockAwareTrait</a>. Thanks to
+<a href="../service_container.html#services-autoconfigure" class="reference internal">service autoconfiguration</a>, the <code translate="no" class="notranslate">setClock()</code> method
+of the trait will automatically be called by the service container.</p>
+<p>You can now call the <code translate="no" class="notranslate">$this-&gt;now()</code> method to get the current time:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">TimeUtils</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Clock</span>\<span class="hljs-title">ClockAwareTrait</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MonthSensitive</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">ClockAwareTrait</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isWinterMonth</span><span class="hljs-params">()</span>: <span class="hljs-title">bool</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>now</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>now();
+
+        <span class="hljs-keyword">return</span> match (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>now</span><span class="hljs-operator">-&gt;</span>format(<span class="hljs-string">'F'</span>)) {
+            <span class="hljs-string">'December'</span>, <span class="hljs-string">'January'</span>, <span class="hljs-string">'February'</span>, <span class="hljs-string">'March'</span> =&gt; <span class="hljs-keyword">true</span>,
+            <span class="hljs-keyword">default</span> =&gt; <span class="hljs-keyword">false</span>,
+        };
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Thanks to the <code translate="no" class="notranslate">ClockAwareTrait</code>, and by using the <code translate="no" class="notranslate">MockClock</code> implementation,
+you can set the current time arbitrarily without having to change your service code.
+This will help you test every case of your method without the need of actually
+being in a month or another.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Clock/ClockAwareTrait.php" class="reference external" title="Symfony\Component\Clock\ClockAwareTrait" rel="external noopener noreferrer" target="_blank">ClockAwareTrait</a> was introduced in Symfony 6.3.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="writing-time-sensitive-tests">
+    Writing Time-Sensitive Tests
+    <a class="headerlink" href="#writing-time-sensitive-tests" title="Permalink to this headline">¶</a>
+</h2>
+<p>The Clock component provides another trait, called <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Clock/Test/ClockSensitiveTrait.php" class="reference external" title="Symfony\Component\Clock\Test\ClockSensitiveTrait" rel="external noopener noreferrer" target="_blank">ClockSensitiveTrait</a>,
+to help you write time-sensitive tests. This trait provides methods to freeze
+time and restore the global clock after each test.</p>
+<p>Use the <code translate="no" class="notranslate">ClockSensitiveTrait::mockTime()</code> method to interact with the mocked
+clock in your tests. This method accepts different types as its only argument:</p>
+<ul>
+    <li>A string, which can be a date to set the clock at (e.g. <code translate="no" class="notranslate">1996-07-01</code>) or an
+interval to modify the clock (e.g. <code translate="no" class="notranslate">+2 days</code>);</li>
+<li>A <code translate="no" class="notranslate">DateTimeImmutable</code> to set the clock at;</li>
+<li>A boolean, to freeze or restore the global clock.</li>
+</ul>
+<p>Let's say you want to test the method <code translate="no" class="notranslate">MonthSensitive::isWinterMonth()</code> of the
+above example. This is how you can write that test:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>\<span class="hljs-title">TimeUtils</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">TimeUtils</span>\<span class="hljs-title">MonthSensitive</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Clock</span>\<span class="hljs-title">Test</span>\<span class="hljs-title">ClockSensitiveTrait</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MonthSensitiveTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">ClockSensitiveTrait</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testIsWinterMonth</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>clock</span> = <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>mockTime(<span class="hljs-keyword">new</span> \DateTimeImmutable(<span class="hljs-string">'2022-03-02'</span>));
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monthSensitive</span> = <span class="hljs-keyword">new</span> MonthSensitive();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monthSensitive</span><span class="hljs-operator">-&gt;</span>setClock(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>clock</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertTrue(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monthSensitive</span><span class="hljs-operator">-&gt;</span>isWinterMonth());
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testIsNotWinterMonth</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>clock</span> = <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>mockTime(<span class="hljs-keyword">new</span> \DateTimeImmutable(<span class="hljs-string">'2023-06-02'</span>));
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monthSensitive</span> = <span class="hljs-keyword">new</span> MonthSensitive();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monthSensitive</span><span class="hljs-operator">-&gt;</span>setClock(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>clock</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertFalse(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>monthSensitive</span><span class="hljs-operator">-&gt;</span>isWinterMonth());
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This test will behave the same no matter which time of the year you run it.
+By combining the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Clock/ClockAwareTrait.php" class="reference external" title="Symfony\Component\Clock\ClockAwareTrait" rel="external noopener noreferrer" target="_blank">ClockAwareTrait</a> and
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Clock/Test/ClockSensitiveTrait.php" class="reference external" title="Symfony\Component\Clock\Test\ClockSensitiveTrait" rel="external noopener noreferrer" target="_blank">ClockSensitiveTrait</a>, you have full
+control on your time-sensitive code's behavior.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Clock/Test/ClockSensitiveTrait.php" class="reference external" title="Symfony\Component\Clock\Test\ClockSensitiveTrait" rel="external noopener noreferrer" target="_blank">ClockSensitiveTrait</a> was introduced in Symfony 6.3.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

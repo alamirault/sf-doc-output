@@ -1,0 +1,203 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-semaphore-component">
+    The Semaphore Component
+    <a class="headerlink" href="#the-semaphore-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The Semaphore Component manages <a href="https://en.wikipedia.org/wiki/Semaphore_(programming)" class="reference external" rel="external noopener noreferrer" target="_blank">semaphores</a>, a mechanism to provide
+exclusive access to a shared resource.</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/semaphore</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>In computer science, a semaphore is a variable or abstract data type used to
+control access to a common resource by multiple processes in a concurrent
+system such as a multitasking operating system. The main difference
+with <a href="../lock.html" class="reference internal">locks</a> is that semaphores allow more than one process to
+access a resource, whereas locks only allow one process.</p>
+<p>Create semaphores with the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Semaphore/SemaphoreFactory.php" class="reference external" title="Symfony\Component\Semaphore\SemaphoreFactory" rel="external noopener noreferrer" target="_blank">SemaphoreFactory</a>
+class, which in turn requires another class to manage the storage:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Semaphore</span>\<span class="hljs-title">SemaphoreFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Semaphore</span>\<span class="hljs-title">Store</span>\<span class="hljs-title">RedisStore</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>redis</span> = <span class="hljs-keyword">new</span> Redis();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>redis</span><span class="hljs-operator">-&gt;</span>connect(<span class="hljs-string">'172.17.0.2'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span> = <span class="hljs-keyword">new</span> RedisStore(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>redis</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span> = <span class="hljs-keyword">new</span> SemaphoreFactory(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>store</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The semaphore is created by calling the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Semaphore/SemaphoreFactory.php#method_createSemaphore" class="reference external" title="Symfony\Component\Semaphore\SemaphoreFactory::createSemaphore()" rel="external noopener noreferrer" target="_blank">createSemaphore()</a>
+method. Its first argument is an arbitrary string that represents the locked
+resource. Its second argument is the maximum number of processes allowed. Then, a
+call to the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Semaphore/SemaphoreInterface.php#method_acquire" class="reference external" title="Symfony\Component\Semaphore\SemaphoreInterface::acquire()" rel="external noopener noreferrer" target="_blank">acquire()</a>
+method will try to acquire the semaphore:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>semaphore</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>factory</span><span class="hljs-operator">-&gt;</span>createSemaphore(<span class="hljs-string">'pdf-invoice-generation'</span>, <span class="hljs-number">2</span>);
+
+<span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>semaphore</span><span class="hljs-operator">-&gt;</span>acquire()) {
+    <span class="hljs-comment">// The resource "pdf-invoice-generation" is locked.</span>
+    <span class="hljs-comment">// Here you can safely compute and generate the invoice.</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>semaphore</span><span class="hljs-operator">-&gt;</span>release();
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If the semaphore can not be acquired, the method returns <code translate="no" class="notranslate">false</code>. The
+<code translate="no" class="notranslate">acquire()</code> method can be safely called repeatedly, even if the semaphore is
+already acquired.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Unlike other implementations, the Semaphore component distinguishes
+semaphores instances even when they are created for the same resource. If a
+semaphore has to be used by several services, they should share the same
+<code translate="no" class="notranslate">Semaphore</code> instance returned by the <code translate="no" class="notranslate">SemaphoreFactory::createSemaphore</code>
+method.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you don't release the semaphore explicitly, it will be released
+automatically on instance destruction. In some cases, it can be useful to
+lock a resource across several requests. To disable the automatic release
+behavior, set the fifth argument of the <code translate="no" class="notranslate">createSemaphore()</code> method to <code translate="no" class="notranslate">false</code>.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

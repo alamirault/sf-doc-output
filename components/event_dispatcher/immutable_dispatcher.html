@@ -1,0 +1,128 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-immutable-event-dispatcher">
+    The Immutable Event Dispatcher
+    <a class="headerlink" href="#the-immutable-event-dispatcher" title="Permalink to this headline">¶</a>
+</h1>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/EventDispatcher/ImmutableEventDispatcher.php" class="reference external" title="Symfony\Component\EventDispatcher\ImmutableEventDispatcher" rel="external noopener noreferrer" target="_blank">ImmutableEventDispatcher</a>
+is a locked or frozen event dispatcher. The dispatcher cannot register new
+listeners or subscribers.</p>
+<p>The <code translate="no" class="notranslate">ImmutableEventDispatcher</code> takes another event dispatcher with all
+the listeners and subscribers. The immutable dispatcher is just a proxy
+of this original dispatcher.</p>
+<p>To use it, first create a normal <code translate="no" class="notranslate">EventDispatcher</code> dispatcher and register
+some listeners or subscribers:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventDispatcher</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span> = <span class="hljs-keyword">new</span> EventDispatcher();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span><span class="hljs-operator">-&gt;</span>addListener(<span class="hljs-string">'foo.action'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+});
+
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, inject that into an <code translate="no" class="notranslate">ImmutableEventDispatcher</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">ImmutableEventDispatcher</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>immutableDispatcher</span> = <span class="hljs-keyword">new</span> ImmutableEventDispatcher(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You'll need to use this new dispatcher in your project.</p>
+<p>If you are trying to execute one of the methods which modifies the dispatcher
+(e.g. <code translate="no" class="notranslate">addListener()</code>), a <code translate="no" class="notranslate">BadMethodCallException</code> is thrown.</p>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

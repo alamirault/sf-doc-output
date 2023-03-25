@@ -1,0 +1,1810 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-vardumper-component">
+    The VarDumper Component
+    <a class="headerlink" href="#the-vardumper-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The VarDumper component provides mechanisms for extracting the state out of
+any PHP variables. Built on top, it provides a better <code translate="no" class="notranslate">dump()</code> function
+that you can use instead of <a href="https://secure.php.net/manual/en/function.var-dump.php" class="reference external" title="var_dump" rel="external noopener noreferrer" target="_blank">var_dump</a>.</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require --dev symfony/var-dumper</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If using it inside a Symfony application, make sure that the DebugBundle has
+been installed (or run <code translate="no" class="notranslate">composer require --dev symfony/debug-bundle</code> to install it).</p>
+</div>
+<span id="components-var-dumper-dump"></span>
+</div>
+<div class="section">
+<h2 id="the-dump-function">
+    The dump() Function
+    <a class="headerlink" href="#the-dump-function" title="Permalink to this headline">¶</a>
+</h2>
+<p>The VarDumper component creates a global <code translate="no" class="notranslate">dump()</code> function that you can
+use instead of e.g. <a href="https://secure.php.net/manual/en/function.var-dump.php" class="reference external" title="var_dump" rel="external noopener noreferrer" target="_blank">var_dump</a>. By using it, you'll gain:</p>
+<ul>
+    <li>Per object and resource types specialized view to e.g. filter out
+Doctrine internals while dumping a single proxy entity, or get more
+insight on opened files with <a href="https://secure.php.net/manual/en/function.stream-get-meta-data.php" class="reference external" title="stream_get_meta_data" rel="external noopener noreferrer" target="_blank">stream_get_meta_data</a>;</li>
+<li>Configurable output formats: HTML or colored command line output;</li>
+<li>Ability to dump internal references, either soft ones (objects or
+resources) or hard ones (<code translate="no" class="notranslate">=&amp;</code> on arrays or objects properties).
+Repeated occurrences of the same object/array/resource won't appear
+again and again anymore. Moreover, you'll be able to inspect the
+reference structure of your data;</li>
+<li>Ability to operate in the context of an output buffering handler.</li>
+</ul>
+<p>For example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>;
+
+<span class="hljs-comment">// create a variable, which could be anything!</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>someVar</span> = ...;
+
+dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>someVar</span>);
+
+<span class="hljs-comment">// dump() returns the passed value, so you can dump an object and keep using it</span>
+dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>someObject</span>)<span class="hljs-operator">-&gt;</span>someMethod();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>By default, the output format and destination are selected based on your
+current PHP SAPI:</p>
+<ul>
+    <li>On the command line (CLI SAPI), the output is written on <code translate="no" class="notranslate">STDOUT</code>. This
+can be surprising to some because this bypasses PHP's output buffering
+mechanism;</li>
+<li>On other SAPIs, dumps are written as HTML in the regular output.</li>
+</ul>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can also select the output format explicitly defining the
+<code translate="no" class="notranslate">VAR_DUMPER_FORMAT</code> environment variable and setting its value to either
+<code translate="no" class="notranslate">html</code>, <code translate="no" class="notranslate">cli</code> or <a href="var_dumper.html#var-dumper-dump-server-format" class="reference internal">server</a>.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you want to catch the dump output as a string, please read the
+<a href="var_dumper.html#var-dumper-advanced" class="reference internal">advanced section</a> which contains examples of
+it.
+You'll also learn how to change the format or redirect the output to
+wherever you want.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>In order to have the <code translate="no" class="notranslate">dump()</code> function always available when running
+any PHP code, you can install it globally on your computer:</p>
+<ol class="arabic">
+    <li>Run <code translate="no" class="notranslate">composer global require symfony/var-dumper</code>;</li>
+<li>Add <code translate="no" class="notranslate">auto_prepend_file = ${HOME}/.composer/vendor/autoload.php</code>
+to your <code translate="no" class="notranslate">php.ini</code> file;</li>
+<li>From time to time, run <code translate="no" class="notranslate">composer global update symfony/var-dumper</code>
+to have the latest bug fixes.</li>
+</ol>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The VarDumper component also provides a <code translate="no" class="notranslate">dd()</code> (&quot;dump and die&quot;) helper
+function. This function dumps the variables using <code translate="no" class="notranslate">dump()</code> and
+immediately ends the execution of the script (using <a href="https://secure.php.net/manual/en/function.exit.php" class="reference external" title="exit" rel="external noopener noreferrer" target="_blank">exit</a>).</p>
+</div>
+<span id="var-dumper-dump-server"></span>
+</div>
+<div class="section">
+<h2 id="the-dump-server">
+    The Dump Server
+    <a class="headerlink" href="#the-dump-server" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <code translate="no" class="notranslate">dump()</code> function outputs its contents in the same browser window or
+console terminal as your own application. Sometimes mixing the real output
+with the debug output can be confusing. That's why this component provides a
+server to collect all the dumped data.</p>
+<p>Start the server with the <code translate="no" class="notranslate">server:dump</code> command and whenever you call to
+<code translate="no" class="notranslate">dump()</code>, the dumped data won't be displayed in the output but sent to that
+server, which outputs it to its own console or to an HTML file:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># displays the dumped data in the console:</span>
+<span class="hljs-prompt">$ </span>php bin/console server:dump
+  [OK] Server listening on tcp://0.0.0.0:9912
+
+<span class="hljs-comment"># stores the dumped data in a file using the HTML format:</span>
+<span class="hljs-prompt">$ </span>php bin/console server:dump --format=html &gt; dump.html</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Inside a Symfony application, the output of the dump server is configured with
+the <a href="../reference/configuration/debug.html#configuration-debug-dump_destination" class="reference internal">dump_destination option</a> of the
+<code translate="no" class="notranslate">debug</code> package:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-7a1bf0021fbf01c49b7b382782fb2adc121bc83b" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-718f280ded146e6c0ba34803a70070fa10657e87" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-4b1925f53ff9464f0832fb39431aa6ac4d21f7e1" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-7a1bf0021fbf01c49b7b382782fb2adc121bc83b" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/debug.yaml</span>
+<span class="hljs-attr">debug:</span>
+   <span class="hljs-attr">dump_destination:</span> <span class="hljs-string">"tcp://%env(VAR_DUMPER_SERVER)%"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-718f280ded146e6c0ba34803a70070fa10657e87" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/debug.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:debug</span>=<span class="hljs-string">"http://symfony.com/schema/dic/debug"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/debug
+        https://symfony.com/schema/dic/debug/debug-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">debug:config</span> <span class="hljs-attr">dump-destination</span>=<span class="hljs-string">"tcp://%env(VAR_DUMPER_SERVER)%"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-4b1925f53ff9464f0832fb39431aa6ac4d21f7e1" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/debug.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>extension(<span class="hljs-string">'debug'</span>, [
+        <span class="hljs-string">'dump_destination'</span> =&gt; <span class="hljs-string">'tcp://%env(VAR_DUMPER_SERVER)%'</span>,
+    ]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Outside a Symfony application, use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/ServerDumper.php" class="reference external" title="Symfony\Component\VarDumper\Dumper\ServerDumper" rel="external noopener noreferrer" target="_blank">ServerDumper</a> class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Cloner</span>\<span class="hljs-title">VarCloner</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">CliDumper</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">ContextProvider</span>\<span class="hljs-title">CliContextProvider</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">ContextProvider</span>\<span class="hljs-title">SourceContextProvider</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">HtmlDumper</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">ServerDumper</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">VarDumper</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span> = <span class="hljs-keyword">new</span> VarCloner();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fallbackDumper</span> = \in_array(\PHP_SAPI, [<span class="hljs-string">'cli'</span>, <span class="hljs-string">'phpdbg'</span>]) ? <span class="hljs-keyword">new</span> CliDumper() : <span class="hljs-keyword">new</span> HtmlDumper();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> ServerDumper(<span class="hljs-string">'tcp://127.0.0.1:9912'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>fallbackDumper</span>, [
+    <span class="hljs-string">'cli'</span> =&gt; <span class="hljs-keyword">new</span> CliContextProvider(),
+    <span class="hljs-string">'source'</span> =&gt; <span class="hljs-keyword">new</span> SourceContextProvider(),
+]);
+
+VarDumper<span class="hljs-operator">::</span>setHandler(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>)</span> <span class="hljs-title">use</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span><span class="hljs-operator">-&gt;</span>cloneVar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>));
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The second argument of <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/ServerDumper.php" class="reference external" title="Symfony\Component\VarDumper\Dumper\ServerDumper" rel="external noopener noreferrer" target="_blank">ServerDumper</a>
+is a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/DataDumperInterface.php" class="reference external" title="Symfony\Component\VarDumper\Dumper\DataDumperInterface" rel="external noopener noreferrer" target="_blank">DataDumperInterface</a> instance
+used as a fallback when the server is unreachable. The third argument are the
+context providers, which allow to gather some info about the context in which the
+data was dumped. The built-in context providers are: <code translate="no" class="notranslate">cli</code>, <code translate="no" class="notranslate">request</code> and <code translate="no" class="notranslate">source</code>.</p>
+</div>
+<p>Then you can use the following command to start a server out-of-the-box:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>./vendor/bin/var-dump-server
+  [OK] Server listening on tcp://127.0.0.1:9912</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="var-dumper-dump-server-format"></span>
+<div class="section">
+<h3 id="configuring-the-dump-server-with-environment-variables">
+    Configuring the Dump Server with Environment Variables
+    <a class="headerlink" href="#configuring-the-dump-server-with-environment-variables" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you prefer to not modify the application configuration (e.g. to quickly debug
+a project given to you) use the <code translate="no" class="notranslate">VAR_DUMPER_FORMAT</code> env var.</p>
+<p>First, start the server as usual:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>./vendor/bin/var-dump-server</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, run your code with the <code translate="no" class="notranslate">VAR_DUMPER_FORMAT=server</code> env var by configuring
+this value in the <a href="../configuration.html#config-env-vars" class="reference internal">.env file of your application</a>. For
+console commands, you can also define this env var as follows:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>VAR_DUMPER_FORMAT=server [your-cli-command]</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The host used by the <code translate="no" class="notranslate">server</code> format is the one configured in the
+<code translate="no" class="notranslate">VAR_DUMPER_SERVER</code> env var or <code translate="no" class="notranslate">127.0.0.1:9912</code> if none is defined.
+If you prefer, you can also configure the host in the <code translate="no" class="notranslate">VAR_DUMPER_FORMAT</code>
+env var like this: <code translate="no" class="notranslate">VAR_DUMPER_FORMAT=tcp://127.0.0.1:1234</code>.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="debugbundle-and-twig-integration">
+    DebugBundle and Twig Integration
+    <a class="headerlink" href="#debugbundle-and-twig-integration" title="Permalink to this headline">¶</a>
+</h2>
+<p>The DebugBundle allows greater integration of this component into Symfony
+applications.</p>
+<p>Since generating (even debug) output in the controller or in the model
+of your application may just break it by e.g. sending HTTP headers or
+corrupting your view, the bundle configures the <code translate="no" class="notranslate">dump()</code> function so that
+variables are dumped in the web debug toolbar.</p>
+<p>But if the toolbar cannot be displayed because you e.g. called
+<code translate="no" class="notranslate">die()</code>/<code translate="no" class="notranslate">exit()</code>/<code translate="no" class="notranslate">dd()</code> or a fatal error occurred, then dumps are written
+on the regular output.</p>
+<p>In a Twig template, two constructs are available for dumping a variable.
+Choosing between both is mostly a matter of personal taste, still:</p>
+<ul>
+    <li><code translate="no" class="notranslate">{% dump foo.bar %}</code> is the way to go when the original template output
+shall not be modified: variables are not dumped inline, but in the web
+debug toolbar;</li>
+<li>on the contrary, <code translate="no" class="notranslate">{{ dump(foo.bar) }}</code> dumps inline and thus may or not
+be suited to your use case (e.g. you shouldn't use it in an HTML
+attribute or a <code translate="no" class="notranslate">&lt;script&gt;</code> tag).</li>
+</ul>
+<p>This behavior can be changed by configuring the <code translate="no" class="notranslate">debug.dump_destination</code>
+option. Read more about this and other options in
+<a href="../reference/configuration/debug.html" class="reference internal">the DebugBundle configuration reference</a>.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If the dumped contents are complex, consider using the local search box to
+look for specific variables or values. First, click anywhere on the dumped
+contents and then press <code translate="no" class="notranslate">Ctrl. + F</code> or <code translate="no" class="notranslate">Cmd. + F</code> to make the local
+search box appear. All the common shortcuts to navigate the search results
+are supported (<code translate="no" class="notranslate">Ctrl. + G</code> or <code translate="no" class="notranslate">Cmd. + G</code>, <code translate="no" class="notranslate">F3</code>, etc.) When
+finished, press <code translate="no" class="notranslate">Esc.</code> to hide the box again.</p>
+<p>If you want to use your browser search input, press <code translate="no" class="notranslate">Ctrl. + F</code> or
+<code translate="no" class="notranslate">Cmd. + F</code> again while focusing on VarDumper's search input.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="using-the-vardumper-component-in-your-phpunit-test-suite">
+    Using the VarDumper Component in your PHPUnit Test Suite
+    <a class="headerlink" href="#using-the-vardumper-component-in-your-phpunit-test-suite" title="Permalink to this headline">¶</a>
+</h2>
+<p>The VarDumper component provides
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Test/VarDumperTestTrait.php" class="reference external" title="Symfony\Component\VarDumper\Test\VarDumperTestTrait" rel="external noopener noreferrer" target="_blank">a trait</a>
+that can help writing some of your tests for PHPUnit.</p>
+<p>This will provide you with two new assertions:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Test/VarDumperTestTrait.php#method_assertDumpEquals" class="reference external" title="Symfony\Component\VarDumper\Test\VarDumperTestTrait::assertDumpEquals()" rel="external noopener noreferrer" target="_blank">assertDumpEquals()</a></dt>
+        
+        <dd>
+                            verifies that the dump of the variable given as the second argument matches
+the expected dump provided as the first argument.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Test/VarDumperTestTrait.php#method_assertDumpMatchesFormat" class="reference external" title="Symfony\Component\VarDumper\Test\VarDumperTestTrait::assertDumpMatchesFormat()" rel="external noopener noreferrer" target="_blank">assertDumpMatchesFormat()</a></dt>
+        
+        <dd>
+                            is like the previous method but accepts placeholders in the expected dump,
+based on the <code translate="no" class="notranslate">assertStringMatchesFormat()</code> method provided by PHPUnit.
+                    </dd>
+    </dl>
+<p>The <code translate="no" class="notranslate">VarDumperTestTrait</code> also includes these other methods:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Test/VarDumperTestTrait.php#method_setUpVarDumper" class="reference external" title="Symfony\Component\VarDumper\Test\VarDumperTestTrait::setUpVarDumper()" rel="external noopener noreferrer" target="_blank">setUpVarDumper()</a></dt>
+        
+        <dd>
+                            is used to configure the available casters and their options, which is a way
+to only control the fields you're expecting and allows writing concise tests.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Test/VarDumperTestTrait.php#method_tearDownVarDumper" class="reference external" title="Symfony\Component\VarDumper\Test\VarDumperTestTrait::tearDownVarDumper()" rel="external noopener noreferrer" target="_blank">tearDownVarDumper()</a></dt>
+        
+        <dd>
+                            is called automatically after each case to reset the custom configuration
+made in <code translate="no" class="notranslate">setUpVarDumper()</code>.
+                    </dd>
+    </dl>
+<p>Example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Test</span>\<span class="hljs-title">VarDumperTestTrait</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExampleTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">VarDumperTestTrait</span>;
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setUp</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>casters</span> = [
+            \DateTimeInterface<span class="hljs-operator">::</span>class =&gt; <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(\DateTimeInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>date</span>, array <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>a</span>, Stub <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stub</span>)</span>: <span class="hljs-title">array</span> </span>{
+                <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stub</span><span class="hljs-operator">-&gt;</span>class = <span class="hljs-string">'DateTime'</span>;
+                <span class="hljs-keyword">return</span> [<span class="hljs-string">'date'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>date</span><span class="hljs-operator">-&gt;</span>format(<span class="hljs-string">'d/m/Y'</span>)];
+            },
+        ];
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>flags</span> = CliDumper<span class="hljs-operator">::</span>DUMP_LIGHT_ARRAY | CliDumper<span class="hljs-operator">::</span>DUMP_COMMA_SEPARATOR;
+
+        <span class="hljs-comment">// this configures the casters &amp; flags to use for all the tests in this class.</span>
+        <span class="hljs-comment">// If you need custom configurations per test rather than for the whole class,</span>
+        <span class="hljs-comment">// call this setUpVarDumper() method from those tests instead.</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>setUpVarDumper(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>casters</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>flags</span>);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testWithDumpEquals</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>testedVar</span> = [<span class="hljs-number">123</span>, <span class="hljs-string">'foo'</span>];
+
+        <span class="hljs-comment">// the expected dump contents don't have the default VarDumper structure</span>
+        <span class="hljs-comment">// because of the custom casters and flags used in the test</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expectedDump</span> = <span class="hljs-string">&lt;&lt;&lt;EOTXT
+[
+  123,
+  "foo",
+]
+EOTXT;</span>
+
+        <span class="hljs-comment">// if the first argument is a string, it must be the whole expected dump</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertDumpEquals(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>expectedDump</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>testedVar</span>);
+
+        <span class="hljs-comment">// if the first argument is not a string, assertDumpEquals() dumps it</span>
+        <span class="hljs-comment">// and compares it with the dump of the second argument</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertDumpEquals(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>testedVar</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>testedVar</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="dump-examples-and-output">
+    Dump Examples and Output
+    <a class="headerlink" href="#dump-examples-and-output" title="Permalink to this headline">¶</a>
+</h2>
+<p>For simple variables, reading the output should be straightforward.
+Here are some examples showing first a variable defined in PHP,
+then its dump representation:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> = [
+    <span class="hljs-string">'a simple string'</span> =&gt; <span class="hljs-string">"in an array of 5 elements"</span>,
+    <span class="hljs-string">'a float'</span> =&gt; <span class="hljs-number">1.0</span>,
+    <span class="hljs-string">'an integer'</span> =&gt; <span class="hljs-number">1</span>,
+    <span class="hljs-string">'a boolean'</span> =&gt; <span class="hljs-keyword">true</span>,
+    <span class="hljs-string">'an empty array'</span> =&gt; [],
+];
+dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<img src="_images/01-simple.png" />
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The gray arrow is a toggle button for hiding/showing children of
+nested structures.</p>
+</div>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> = <span class="hljs-string">"This is a multi-line string.\n"</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> .= <span class="hljs-string">"Hovering a string shows its length.\n"</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> .= <span class="hljs-string">"The length of UTF-8 strings is counted in terms of UTF-8 characters.\n"</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> .= <span class="hljs-string">"Non-UTF-8 strings length are counted in octet size.\n"</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> .= <span class="hljs-string">"Because of this `\xE9` octet (\\xE9),\n"</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> .= <span class="hljs-string">"this string is not UTF-8 valid, thus the `b` prefix.\n"</span>;
+dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<img src="_images/02-multi-line-str.png" />
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PropertyExample</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>publicProperty</span> = <span class="hljs-string">'The `+` prefix denotes public properties,'</span>;
+    <span class="hljs-keyword">protected</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>protectedProperty</span> = <span class="hljs-string">'`#` protected ones and `-` private ones.'</span>;
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>privateProperty</span> = <span class="hljs-string">'Hovering a property shows a reminder.'</span>;
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> = <span class="hljs-keyword">new</span> PropertyExample();
+dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<img src="_images/03-object.png" />
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>`#14` is the internal object handle. It allows comparing two
+consecutive dumps of the same object.</p>
+</div>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DynamicPropertyExample</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>declaredProperty</span> = <span class="hljs-string">'This property is declared in the class definition'</span>;
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> = <span class="hljs-keyword">new</span> DynamicPropertyExample();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span><span class="hljs-operator">-&gt;</span>undeclaredProperty = <span class="hljs-string">'Runtime added dynamic properties have `"` around their name.'</span>;
+dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<img src="_images/04-dynamic-property.png" />
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ReferenceExample</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>info</span> = <span class="hljs-string">"Circular and sibling references are displayed as `#number`.\nHovering them highlights all instances in the same dump.\n"</span>;
+}
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> = <span class="hljs-keyword">new</span> ReferenceExample();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span><span class="hljs-operator">-&gt;</span>aCircularReference = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>;
+dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<img src="_images/05-soft-ref.png" />
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> = <span class="hljs-keyword">new</span> \ErrorException(
+    <span class="hljs-string">"For some objects, properties have special values\n"</span>
+    .<span class="hljs-string">"that are best represented as constants, like\n"</span>
+    .<span class="hljs-string">"`severity` below. Hovering displays the value (`2`).\n"</span>,
+    <span class="hljs-number">0</span>,
+    E_WARNING
+);
+dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<img src="_images/06-constants.png" />
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> = [];
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>[<span class="hljs-number">0</span>] = <span class="hljs-number">1</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>[<span class="hljs-number">1</span>] =&amp; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>[<span class="hljs-number">0</span>];
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>[<span class="hljs-number">1</span>] += <span class="hljs-number">1</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>[<span class="hljs-number">2</span>] = [<span class="hljs-string">"Hard references (circular or sibling)"</span>];
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>[<span class="hljs-number">3</span>] =&amp; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>[<span class="hljs-number">2</span>];
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>[<span class="hljs-number">3</span>][] = <span class="hljs-string">"are dumped using `&amp;number` prefixes."</span>;
+dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<img src="_images/07-hard-ref.png" />
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> = <span class="hljs-keyword">new</span> \ArrayObject();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>[] = <span class="hljs-string">"Some resources and special objects like the current"</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>[] = <span class="hljs-string">"one are sometimes best represented using virtual"</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>[] = <span class="hljs-string">"properties that describe their internal state."</span>;
+dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<img src="_images/08-virtual-property.png" />
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> = <span class="hljs-keyword">new</span> AcmeController(
+    <span class="hljs-string">"When a dump goes over its maximum items limit,\n"</span>
+    .<span class="hljs-string">"or when some special objects are encountered,\n"</span>
+    .<span class="hljs-string">"children can be replaced by an ellipsis and\n"</span>
+    .<span class="hljs-string">"optionally followed by a number that says how\n"</span>
+    .<span class="hljs-string">"many have been removed; `9` in this case.\n"</span>
+);
+dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="var-dumper-advanced"></span>
+<img src="_images/09-cut.png" />
+</div>
+<div class="section">
+<h2 id="advanced-usage">
+    Advanced Usage
+    <a class="headerlink" href="#advanced-usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <code translate="no" class="notranslate">dump()</code> function is just a thin wrapper and a more convenient way to call
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/VarDumper.php#method_dump" class="reference external" title="Symfony\Component\VarDumper\VarDumper::dump()" rel="external noopener noreferrer" target="_blank">VarDumper::dump()</a>.
+You can change the behavior of this function by calling
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/VarDumper.php#method_setHandler" class="reference external" title="Symfony\Component\VarDumper\VarDumper::setHandler()" rel="external noopener noreferrer" target="_blank">VarDumper::setHandler($callable)</a>.
+Calls to <code translate="no" class="notranslate">dump()</code> will then be forwarded to <code translate="no" class="notranslate">$callable</code>.</p>
+<p>By adding a handler, you can customize the <a href="var_dumper.html#cloners" class="reference internal">Cloners</a>, <a href="var_dumper.html#dumpers" class="reference internal">Dumpers</a> and <a href="var_dumper.html#casters" class="reference internal">Casters</a>
+as explained below. A simple implementation of a handler function might look
+like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Cloner</span>\<span class="hljs-title">VarCloner</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">CliDumper</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">HtmlDumper</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">VarDumper</span>;
+
+VarDumper<span class="hljs-operator">::</span>setHandler(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span> = <span class="hljs-keyword">new</span> VarCloner();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-string">'cli'</span> === PHP_SAPI ? <span class="hljs-keyword">new</span> CliDumper() : <span class="hljs-keyword">new</span> HtmlDumper();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span><span class="hljs-operator">-&gt;</span>cloneVar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>));
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="cloners">
+    Cloners
+    <a class="headerlink" href="#cloners" title="Permalink to this headline">¶</a>
+</h3>
+<p>A cloner is used to create an intermediate representation of any PHP variable.
+Its output is a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/Data.php" class="reference external" title="Symfony\Component\VarDumper\Cloner\Data" rel="external noopener noreferrer" target="_blank">Data</a>
+object that wraps this representation.</p>
+<p>You can create a <code translate="no" class="notranslate">Data</code> object this way:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Cloner</span>\<span class="hljs-title">VarCloner</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span> = <span class="hljs-keyword">new</span> VarCloner();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>data</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span><span class="hljs-operator">-&gt;</span>cloneVar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myVar</span>);
+<span class="hljs-comment">// this is commonly then passed to the dumper</span>
+<span class="hljs-comment">// see the example at the top of this page</span>
+<span class="hljs-comment">// $dumper-&gt;dump($data);</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Whatever the cloned data structure, resulting <code translate="no" class="notranslate">Data</code> objects are always
+serializable.</p>
+<p>A cloner applies limits when creating the representation, so that one
+can represent only a subset of the cloned variable.
+Before calling <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/VarCloner.php#method_cloneVar" class="reference external" title="Symfony\Component\VarDumper\Cloner\VarCloner::cloneVar()" rel="external noopener noreferrer" target="_blank">cloneVar()</a>,
+you can configure these limits:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/VarCloner.php#method_setMaxItems" class="reference external" title="Symfony\Component\VarDumper\Cloner\VarCloner::setMaxItems()" rel="external noopener noreferrer" target="_blank">setMaxItems()</a></dt>
+        
+        <dd>
+                            Configures the maximum number of items that will be cloned
+<em>past the minimum nesting depth</em>. Items are counted using a breadth-first
+algorithm so that lower level items have higher priority than deeply nested
+items. Specifying <code translate="no" class="notranslate">-1</code> removes the limit.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/VarCloner.php#method_setMinDepth" class="reference external" title="Symfony\Component\VarDumper\Cloner\VarCloner::setMinDepth()" rel="external noopener noreferrer" target="_blank">setMinDepth()</a></dt>
+        
+        <dd>
+                            Configures the minimum tree depth where we are guaranteed to clone
+all the items. After this depth is reached, only <code translate="no" class="notranslate">setMaxItems</code>
+items will be cloned. The default value is <code translate="no" class="notranslate">1</code>, which is consistent
+with older Symfony versions.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/VarCloner.php#method_setMaxString" class="reference external" title="Symfony\Component\VarDumper\Cloner\VarCloner::setMaxString()" rel="external noopener noreferrer" target="_blank">setMaxString()</a></dt>
+        
+        <dd>
+                            Configures the maximum number of characters that will be cloned before
+cutting overlong strings.  Specifying <code translate="no" class="notranslate">-1</code> removes the limit.
+                    </dd>
+    </dl>
+<p>Before dumping it, you can further limit the resulting
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/Data.php" class="reference external" title="Symfony\Component\VarDumper\Cloner\Data" rel="external noopener noreferrer" target="_blank">Data</a> object using the following methods:</p>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/Data.php#method_withMaxDepth" class="reference external" title="Symfony\Component\VarDumper\Cloner\Data::withMaxDepth()" rel="external noopener noreferrer" target="_blank">withMaxDepth()</a></dt>
+        
+        <dd>
+                            Limits dumps in the depth dimension.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/Data.php#method_withMaxItemsPerDepth" class="reference external" title="Symfony\Component\VarDumper\Cloner\Data::withMaxItemsPerDepth()" rel="external noopener noreferrer" target="_blank">withMaxItemsPerDepth()</a></dt>
+        
+        <dd>
+                            Limits the number of items per depth level.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/Data.php#method_withRefHandles" class="reference external" title="Symfony\Component\VarDumper\Cloner\Data::withRefHandles()" rel="external noopener noreferrer" target="_blank">withRefHandles()</a></dt>
+        
+        <dd>
+                            Removes internal objects' handles for sparser output (useful for tests).
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/Data.php#method_seek" class="reference external" title="Symfony\Component\VarDumper\Cloner\Data::seek()" rel="external noopener noreferrer" target="_blank">seek()</a></dt>
+        
+        <dd>
+                            Selects only sub-parts of already cloned arrays, objects or resources.
+                    </dd>
+    </dl>
+<p>Unlike the previous limits on cloners that remove data on purpose, these can
+be changed back and forth before dumping since they do not affect the
+intermediate representation internally.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When no limit is applied, a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/Data.php" class="reference external" title="Symfony\Component\VarDumper\Cloner\Data" rel="external noopener noreferrer" target="_blank">Data</a>
+object is as accurate as the native <a href="https://secure.php.net/manual/en/function.serialize.php" class="reference external" title="serialize" rel="external noopener noreferrer" target="_blank">serialize</a> function,
+and thus could be used for purposes beyond debugging.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="dumpers">
+    Dumpers
+    <a class="headerlink" href="#dumpers" title="Permalink to this headline">¶</a>
+</h3>
+<p>A dumper is responsible for outputting a string representation of a PHP variable,
+using a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/Data.php" class="reference external" title="Symfony\Component\VarDumper\Cloner\Data" rel="external noopener noreferrer" target="_blank">Data</a> object as input.
+The destination and the formatting of this output vary with dumpers.</p>
+<p>This component comes with an <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/HtmlDumper.php" class="reference external" title="Symfony\Component\VarDumper\Dumper\HtmlDumper" rel="external noopener noreferrer" target="_blank">HtmlDumper</a>
+for HTML output and a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/CliDumper.php" class="reference external" title="Symfony\Component\VarDumper\Dumper\CliDumper" rel="external noopener noreferrer" target="_blank">CliDumper</a>
+for optionally colored command line output.</p>
+<p>For example, if you want to dump some <code translate="no" class="notranslate">$variable</code>, do:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Cloner</span>\<span class="hljs-title">VarCloner</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">CliDumper</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span> = <span class="hljs-keyword">new</span> VarCloner();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> CliDumper();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span><span class="hljs-operator">-&gt;</span>cloneVar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>variable</span>));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>By using the first argument of the constructor, you can select the output
+stream where the dump will be written. By default, the <code translate="no" class="notranslate">CliDumper</code> writes
+on <code translate="no" class="notranslate">php://stdout</code> and the <code translate="no" class="notranslate">HtmlDumper</code> on <code translate="no" class="notranslate">php://output</code>. But any PHP
+stream (resource or URL) is acceptable.</p>
+<p>Instead of a stream destination, you can also pass it a <code translate="no" class="notranslate">callable</code> that
+will be called repeatedly for each line generated by a dumper. This
+callable can be configured using the first argument of a dumper's constructor,
+but also using the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/AbstractDumper.php#method_setOutput" class="reference external" title="Symfony\Component\VarDumper\Dumper\AbstractDumper::setOutput()" rel="external noopener noreferrer" target="_blank">setOutput()</a>
+method or the second argument of the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/AbstractDumper.php#method_dump" class="reference external" title="Symfony\Component\VarDumper\Dumper\AbstractDumper::dump()" rel="external noopener noreferrer" target="_blank">dump()</a> method.</p>
+<p>For example, to get a dump as a string in a variable, you can do:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Cloner</span>\<span class="hljs-title">VarCloner</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">CliDumper</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span> = <span class="hljs-keyword">new</span> VarCloner();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> CliDumper();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> = <span class="hljs-string">''</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump(
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span><span class="hljs-operator">-&gt;</span>cloneVar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>variable</span>),
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>line</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>depth</span>)</span> <span class="hljs-title">use</span> <span class="hljs-params">(&amp;<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span> </span>{
+        <span class="hljs-comment">// A negative depth means "end of dump"</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>depth</span> &gt;= <span class="hljs-number">0</span>) {
+            <span class="hljs-comment">// Adds a two spaces indentation to the line</span>
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> .= str_repeat(<span class="hljs-string">'  '</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>depth</span>).<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>line</span>.<span class="hljs-string">"\n"</span>;
+        }
+    }
+);
+
+<span class="hljs-comment">// $output is now populated with the dump representation of $variable</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Another option for doing the same could be:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Cloner</span>\<span class="hljs-title">VarCloner</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">CliDumper</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span> = <span class="hljs-keyword">new</span> VarCloner();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> CliDumper();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> = fopen(<span class="hljs-string">'php://memory'</span>, <span class="hljs-string">'r+b'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span><span class="hljs-operator">-&gt;</span>cloneVar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>variable</span>), <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> = stream_get_contents(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>, <span class="hljs-number">-1</span>, <span class="hljs-number">0</span>);
+
+<span class="hljs-comment">// $output is now populated with the dump representation of $variable</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can pass <code translate="no" class="notranslate">true</code> to the second argument of the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/AbstractDumper.php#method_dump" class="reference external" title="Symfony\Component\VarDumper\Dumper\AbstractDumper::dump()" rel="external noopener noreferrer" target="_blank">dump()</a>
+method to make it return the dump as a string:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span><span class="hljs-operator">-&gt;</span>cloneVar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>variable</span>), <span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<p>Dumpers implement the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/DataDumperInterface.php" class="reference external" title="Symfony\Component\VarDumper\Dumper\DataDumperInterface" rel="external noopener noreferrer" target="_blank">DataDumperInterface</a>
+interface that specifies the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/DataDumperInterface.php#method_dump" class="reference external" title="Symfony\Component\VarDumper\Dumper\DataDumperInterface::dump()" rel="external noopener noreferrer" target="_blank">dump(Data $data)</a>
+method. They also typically implement the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/DumperInterface.php" class="reference external" title="Symfony\Component\VarDumper\Cloner\DumperInterface" rel="external noopener noreferrer" target="_blank">DumperInterface</a> that frees
+them from re-implementing the logic required to walk through a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/Data.php" class="reference external" title="Symfony\Component\VarDumper\Cloner\Data" rel="external noopener noreferrer" target="_blank">Data</a> object's internal structure.</p>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/HtmlDumper.php" class="reference external" title="Symfony\Component\VarDumper\Dumper\HtmlDumper" rel="external noopener noreferrer" target="_blank">HtmlDumper</a> uses a dark
+theme by default. Use the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/HtmlDumper.php#method_setTheme" class="reference external" title="Symfony\Component\VarDumper\Dumper\HtmlDumper::setTheme()" rel="external noopener noreferrer" target="_blank">setTheme()</a>
+method to use a light theme:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>htmlDumper</span><span class="hljs-operator">-&gt;</span>setTheme(<span class="hljs-string">'light'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/HtmlDumper.php" class="reference external" title="Symfony\Component\VarDumper\Dumper\HtmlDumper" rel="external noopener noreferrer" target="_blank">HtmlDumper</a> limits string
+length and nesting depth of the output to make it more readable. These options
+can be overridden by the third optional parameter of the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Dumper/DataDumperInterface.php#method_dump" class="reference external" title="Symfony\Component\VarDumper\Dumper\DataDumperInterface::dump()" rel="external noopener noreferrer" target="_blank">dump(Data $data)</a>
+method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">HtmlDumper</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span> = fopen(<span class="hljs-string">'php://memory'</span>, <span class="hljs-string">'r+b'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> HtmlDumper();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>, [
+    <span class="hljs-comment">// 1 and 160 are the default values for these options</span>
+    <span class="hljs-string">'maxDepth'</span> =&gt; <span class="hljs-number">1</span>,
+    <span class="hljs-string">'maxStringLength'</span> =&gt; <span class="hljs-number">160</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The output format of a dumper can be fine tuned by the two flags
+<code translate="no" class="notranslate">DUMP_STRING_LENGTH</code> and <code translate="no" class="notranslate">DUMP_LIGHT_ARRAY</code> which are passed as a bitmap
+in the third constructor argument. They can also be set via environment
+variables when using
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Test/VarDumperTestTrait.php#method_assertDumpEquals" class="reference external" title="Symfony\Component\VarDumper\Test\VarDumperTestTrait::assertDumpEquals()" rel="external noopener noreferrer" target="_blank">assertDumpEquals($dump, $data, $filter, $message)</a>
+during unit testing.</p>
+<p>The <code translate="no" class="notranslate">$filter</code> argument of <code translate="no" class="notranslate">assertDumpEquals()</code> can be used to pass a
+bit field of <code translate="no" class="notranslate">Caster::EXCLUDE_*</code> constants and influences the expected
+output produced by the different casters.</p>
+<p>If <code translate="no" class="notranslate">DUMP_STRING_LENGTH</code> is set, then the length of a string is displayed
+next to its content:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Cloner</span>\<span class="hljs-title">VarCloner</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">AbstractDumper</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">CliDumper</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>varCloner</span> = <span class="hljs-keyword">new</span> VarCloner();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> = [<span class="hljs-string">'test'</span>];
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> CliDumper();
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>varCloner</span><span class="hljs-operator">-&gt;</span>cloneVar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>), <span class="hljs-keyword">true</span>);
+
+<span class="hljs-comment">// array:1 [</span>
+<span class="hljs-comment">//   0 =&gt; "test"</span>
+<span class="hljs-comment">// ]</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> CliDumper(<span class="hljs-keyword">null</span>, <span class="hljs-keyword">null</span>, AbstractDumper<span class="hljs-operator">::</span>DUMP_STRING_LENGTH);
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>varCloner</span><span class="hljs-operator">-&gt;</span>cloneVar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>), <span class="hljs-keyword">true</span>);
+
+<span class="hljs-comment">// (added string length before the string)</span>
+<span class="hljs-comment">// array:1 [</span>
+<span class="hljs-comment">//   0 =&gt; (4) "test"</span>
+<span class="hljs-comment">// ]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If <code translate="no" class="notranslate">DUMP_LIGHT_ARRAY</code> is set, then arrays are dumped in a shortened format
+similar to PHP's short array notation:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Cloner</span>\<span class="hljs-title">VarCloner</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">AbstractDumper</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">CliDumper</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>varCloner</span> = <span class="hljs-keyword">new</span> VarCloner();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> = [<span class="hljs-string">'test'</span>];
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> CliDumper();
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>varCloner</span><span class="hljs-operator">-&gt;</span>cloneVar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>), <span class="hljs-keyword">true</span>);
+
+<span class="hljs-comment">// array:1 [</span>
+<span class="hljs-comment">//   0 =&gt; "test"</span>
+<span class="hljs-comment">// ]</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> CliDumper(<span class="hljs-keyword">null</span>, <span class="hljs-keyword">null</span>, AbstractDumper<span class="hljs-operator">::</span>DUMP_LIGHT_ARRAY);
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>varCloner</span><span class="hljs-operator">-&gt;</span>cloneVar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>), <span class="hljs-keyword">true</span>);
+
+<span class="hljs-comment">// (no more array:1 prefix)</span>
+<span class="hljs-comment">// [</span>
+<span class="hljs-comment">//   0 =&gt; "test"</span>
+<span class="hljs-comment">// ]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you would like to use both options, then you can combine them by
+using the logical OR operator <code translate="no" class="notranslate">|</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Cloner</span>\<span class="hljs-title">VarCloner</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">AbstractDumper</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Dumper</span>\<span class="hljs-title">CliDumper</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>varCloner</span> = <span class="hljs-keyword">new</span> VarCloner();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span> = [<span class="hljs-string">'test'</span>];
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span> = <span class="hljs-keyword">new</span> CliDumper(<span class="hljs-keyword">null</span>, <span class="hljs-keyword">null</span>, AbstractDumper<span class="hljs-operator">::</span>DUMP_STRING_LENGTH | AbstractDumper<span class="hljs-operator">::</span>DUMP_LIGHT_ARRAY);
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dumper</span><span class="hljs-operator">-&gt;</span>dump(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>varCloner</span><span class="hljs-operator">-&gt;</span>cloneVar(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>var</span>), <span class="hljs-keyword">true</span>);
+
+<span class="hljs-comment">// [</span>
+<span class="hljs-comment">//   0 =&gt; (4) "test"</span>
+<span class="hljs-comment">// ]</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="casters">
+    Casters
+    <a class="headerlink" href="#casters" title="Permalink to this headline">¶</a>
+</h3>
+<p>Objects and resources nested in a PHP variable are &quot;cast&quot; to arrays in the
+intermediate <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/Data.php" class="reference external" title="Symfony\Component\VarDumper\Cloner\Data" rel="external noopener noreferrer" target="_blank">Data</a>
+representation. You can customize the array representation for each object/resource
+by hooking a Caster into this process. The component already includes many
+casters for base PHP classes and other common classes.</p>
+<p>If you want to build your own Caster, you can register one before cloning
+a PHP variable. Casters are registered using either a Cloner's constructor
+or its <code translate="no" class="notranslate">addCasters()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Cloner</span>\<span class="hljs-title">VarCloner</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myCasters</span> = [...];
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span> = <span class="hljs-keyword">new</span> VarCloner(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myCasters</span>);
+
+<span class="hljs-comment">// or</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cloner</span><span class="hljs-operator">-&gt;</span>addCasters(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myCasters</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The provided <code translate="no" class="notranslate">$myCasters</code> argument is an array that maps a class,
+an interface or a resource type to a callable:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myCasters</span> = [
+    <span class="hljs-string">'FooClass'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myFooClassCallableCaster</span>,
+    <span class="hljs-string">':bar resource'</span> =&gt; <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myBarResourceCallableCaster</span>,
+];</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As you can notice, resource types are prefixed by a <code translate="no" class="notranslate">:</code> to prevent
+colliding with a class name.</p>
+<p>Because an object has one main class and potentially many parent classes
+or interfaces, many casters can be applied to one object. In this case,
+casters are called one after the other, starting from casters bound to the
+interfaces, the parents classes and then the main class. Several casters
+can also be registered for the same resource type/class/interface.
+They are called in registration order.</p>
+<p>Casters are responsible for returning the properties of the object or resource
+being cloned in an array. They are callables that accept five arguments:</p>
+<ul>
+    <li>the object or resource being casted;</li>
+<li>an array modeled for objects after PHP's native <code translate="no" class="notranslate">(array)</code> cast operator;</li>
+<li>a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Cloner/Stub.php" class="reference external" title="Symfony\Component\VarDumper\Cloner\Stub" rel="external noopener noreferrer" target="_blank">Stub</a> object
+representing the main properties of the object (class, type, etc.);</li>
+<li>true/false when the caster is called nested in a structure or not;</li>
+<li>A bit field of <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Caster/Caster.php" class="reference external" title="Symfony\Component\VarDumper\Caster\Caster" rel="external noopener noreferrer" target="_blank">Caster</a> <code translate="no" class="notranslate">::EXCLUDE_*</code>
+constants.</li>
+</ul>
+<p>Here is a simple caster not doing anything:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Cloner</span>\<span class="hljs-title">Stub</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">myCaster</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>object</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>array</span>, Stub <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stub</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isNested</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filter</span>)</span>
+</span>{
+    <span class="hljs-comment">// ... populate/alter $array to your needs</span>
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>array</span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>For objects, the <code translate="no" class="notranslate">$array</code> parameter comes pre-populated using PHP's native
+<code translate="no" class="notranslate">(array)</code> casting operator or with the return value of <code translate="no" class="notranslate">$object-&gt;__debugInfo()</code>
+if the magic method exists. Then, the return value of one Caster is given
+as the array argument to the next Caster in the chain.</p>
+<p>When casting with the <code translate="no" class="notranslate">(array)</code> operator, PHP prefixes protected properties
+with a <code translate="no" class="notranslate">\0*\0</code> and private ones with the class owning the property. For example,
+<code translate="no" class="notranslate">\0Foobar\0</code> will be the prefix for all private properties of objects of
+type Foobar. Casters follow this convention and add two more prefixes: <code translate="no" class="notranslate">\0~\0</code>
+is used for virtual properties and <code translate="no" class="notranslate">\0+\0</code> for dynamic ones (runtime added
+properties not in the class declaration).</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Although you can, it is advised to not alter the state of an object
+while casting it in a Caster.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Before writing your own casters, you should check the existing ones.</p>
+</div>
+<div class="section">
+<h4 id="adding-semantics-with-metadata">
+    Adding Semantics with Metadata
+    <a class="headerlink" href="#adding-semantics-with-metadata" title="Permalink to this headline">¶</a>
+</h4>
+<p>Since casters are hooked on specific classes or interfaces, they know about the
+objects they manipulate. By altering the <code translate="no" class="notranslate">$stub</code> object (the third argument of
+any caster), one can transfer this knowledge to the resulting <code translate="no" class="notranslate">Data</code> object,
+thus to dumpers. To help you do this (see the source code for how it works),
+the component comes with a set of wrappers for common additional semantics. You
+can use:</p>
+<ul>
+    <li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Caster/ConstStub.php" class="reference external" title="Symfony\Component\VarDumper\Caster\ConstStub" rel="external noopener noreferrer" target="_blank">ConstStub</a> to wrap a value that is
+best represented by a PHP constant;</li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Caster/ClassStub.php" class="reference external" title="Symfony\Component\VarDumper\Caster\ClassStub" rel="external noopener noreferrer" target="_blank">ClassStub</a> to wrap a PHP identifier
+(<em>i.e.</em> a class name, a method name, an interface, <em>etc.</em>);</li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Caster/CutStub.php" class="reference external" title="Symfony\Component\VarDumper\Caster\CutStub" rel="external noopener noreferrer" target="_blank">CutStub</a> to replace big noisy
+objects/strings/<em>etc.</em> by ellipses;</li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Caster/CutArrayStub.php" class="reference external" title="Symfony\Component\VarDumper\Caster\CutArrayStub" rel="external noopener noreferrer" target="_blank">CutArrayStub</a> to keep only some
+useful keys of an array;</li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Caster/ImgStub.php" class="reference external" title="Symfony\Component\VarDumper\Caster\ImgStub" rel="external noopener noreferrer" target="_blank">ImgStub</a> to wrap an image;</li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Caster/EnumStub.php" class="reference external" title="Symfony\Component\VarDumper\Caster\EnumStub" rel="external noopener noreferrer" target="_blank">EnumStub</a> to wrap a set of virtual
+values (<em>i.e.</em> values that do not exist as properties in the original PHP data
+structure, but are worth listing alongside with real ones);</li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Caster/LinkStub.php" class="reference external" title="Symfony\Component\VarDumper\Caster\LinkStub" rel="external noopener noreferrer" target="_blank">LinkStub</a> to wrap strings that can
+be turned into links by dumpers;</li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Caster/TraceStub.php" class="reference external" title="Symfony\Component\VarDumper\Caster\TraceStub" rel="external noopener noreferrer" target="_blank">TraceStub</a> and their</li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Caster/FrameStub.php" class="reference external" title="Symfony\Component\VarDumper\Caster\FrameStub" rel="external noopener noreferrer" target="_blank">FrameStub</a> and</li>
+<li><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Caster/ArgsStub.php" class="reference external" title="Symfony\Component\VarDumper\Caster\ArgsStub" rel="external noopener noreferrer" target="_blank">ArgsStub</a> relatives to wrap PHP
+traces (used by <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/VarDumper/Caster/ExceptionCaster.php" class="reference external" title="Symfony\Component\VarDumper\Caster\ExceptionCaster" rel="external noopener noreferrer" target="_blank">ExceptionCaster</a>).</li>
+</ul>
+<p>For example, if you know that your <code translate="no" class="notranslate">Product</code> objects have a <code translate="no" class="notranslate">brochure</code> property
+that holds a file name or a URL, you can wrap them in a <code translate="no" class="notranslate">LinkStub</code> to tell
+<code translate="no" class="notranslate">HtmlDumper</code> to make them clickable:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Caster</span>\<span class="hljs-title">LinkStub</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">VarDumper</span>\<span class="hljs-title">Cloner</span>\<span class="hljs-title">Stub</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ProductCaster</span><span class="hljs-params">(Product <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>object</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>array</span>, Stub <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stub</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isNested</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filter</span> = <span class="hljs-number">0</span>)</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>array</span>[<span class="hljs-string">'brochure'</span>] = <span class="hljs-keyword">new</span> LinkStub(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>array</span>[<span class="hljs-string">'brochure'</span>]);
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>array</span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

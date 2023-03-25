@@ -1,0 +1,280 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="metadata">
+    Metadata
+    <a class="headerlink" href="#metadata" title="Permalink to this headline">¶</a>
+</h1>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/Mapping/ClassMetadata.php" class="reference external" title="Symfony\Component\Validator\Mapping\ClassMetadata" rel="external noopener noreferrer" target="_blank">ClassMetadata</a> class
+represents and manages all the configured constraints on a given class.</p>
+<div class="section">
+<h2 id="properties">
+    Properties
+    <a class="headerlink" href="#properties" title="Permalink to this headline">¶</a>
+</h2>
+<p>The Validator component can validate public, protected or private properties.
+The following example shows how to validate that the <code translate="no" class="notranslate">$firstName</code> property of
+the <code translate="no" class="notranslate">Author</code> class has at least 3 characters:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Mapping</span>\<span class="hljs-title">ClassMetadata</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Author</span>
+</span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>firstName</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadValidatorMetadata</span><span class="hljs-params">(ClassMetadata <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addPropertyConstraint(<span class="hljs-string">'firstName'</span>, <span class="hljs-keyword">new</span> Assert\NotBlank());
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addPropertyConstraint(
+            <span class="hljs-string">'firstName'</span>,
+            <span class="hljs-keyword">new</span> Assert\Length([<span class="hljs-string">"min"</span> =&gt; <span class="hljs-number">3</span>])
+        );
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="getters">
+    Getters
+    <a class="headerlink" href="#getters" title="Permalink to this headline">¶</a>
+</h2>
+<p>Constraints can also be applied to the value returned by any public <em>getter</em>
+method, which are the methods whose names start with <code translate="no" class="notranslate">get</code>, <code translate="no" class="notranslate">has</code> or <code translate="no" class="notranslate">is</code>.
+This feature allows validating your objects dynamically.</p>
+<p>Suppose that, for security reasons, you want to validate that a password field
+doesn't match the first name of the user. First, create a public method called
+<code translate="no" class="notranslate">isPasswordSafe()</code> to define this custom validation logic:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isPasswordSafe</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>firstName !== <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>password;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, add the Validator component configuration to the class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Mapping</span>\<span class="hljs-title">ClassMetadata</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Author</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadValidatorMetadata</span><span class="hljs-params">(ClassMetadata <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addGetterConstraint(<span class="hljs-string">'passwordSafe'</span>, <span class="hljs-keyword">new</span> Assert\IsTrue([
+            <span class="hljs-string">'message'</span> =&gt; <span class="hljs-string">'The password cannot match your first name'</span>,
+        ]));
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="classes">
+    Classes
+    <a class="headerlink" href="#classes" title="Permalink to this headline">¶</a>
+</h2>
+<p>Some constraints allow validating the entire object. For example, the
+<a href="../../reference/constraints/Callback.html" class="reference internal">Callback</a> constraint is a generic
+constraint that's applied to the class itself.</p>
+<p>Suppose that the class defines a <code translate="no" class="notranslate">validate()</code> method to hold its custom
+validation logic:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Context</span>\<span class="hljs-title">ExecutionContextInterface</span>;
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">validate</span><span class="hljs-params">(ExecutionContextInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>context</span>)</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, add the Validator component configuration to the class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Mapping</span>\<span class="hljs-title">ClassMetadata</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Author</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadValidatorMetadata</span><span class="hljs-params">(ClassMetadata <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addConstraint(<span class="hljs-keyword">new</span> Assert\Callback(<span class="hljs-string">'validate'</span>));
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

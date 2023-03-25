@@ -1,0 +1,1434 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-style-a-console-command">
+    How to Style a Console Command
+    <a class="headerlink" href="#how-to-style-a-console-command" title="Permalink to this headline">¶</a>
+</h1>
+<p>One of the most boring tasks when creating console commands is to deal with the
+styling of the command's input and output. Displaying titles and tables or asking
+questions to the user involves a lot of repetitive code.</p>
+<p>Consider for example the code used to display the title of the following command:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Command/GreetCommand.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Command</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span><span class="hljs-operator">-&gt;</span>writeln([
+            <span class="hljs-string">'&lt;info&gt;Lorem Ipsum Dolor Sit Amet&lt;/&gt;'</span>,
+            <span class="hljs-string">'&lt;info&gt;==========================&lt;/&gt;'</span>,
+            <span class="hljs-string">''</span>,
+        ]);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Displaying a simple title requires three lines of code, to change the font color,
+underline the contents and leave an additional blank line after the title. Dealing
+with styles is required for well-designed commands, but it complicates their code
+unnecessarily.</p>
+<p>In order to reduce that boilerplate code, Symfony commands can optionally use the
+<strong>Symfony Style Guide</strong>. These styles are implemented as a set of helper methods
+which allow to create <em>semantic</em> commands and forget about their styling.</p>
+<div class="section">
+<h2 id="basic-usage">
+    Basic Usage
+    <a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>In your command, instantiate the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle" rel="external noopener noreferrer" target="_blank">SymfonyStyle</a>
+class and pass the <code translate="no" class="notranslate">$input</code> and <code translate="no" class="notranslate">$output</code> variables as its arguments. Then,
+you can start using any of its helpers, such as <code translate="no" class="notranslate">title()</code>, which displays the
+title of the command:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Command/GreetCommand.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Command</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Style</span>\<span class="hljs-title">SymfonyStyle</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span> = <span class="hljs-keyword">new</span> SymfonyStyle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>title(<span class="hljs-string">'Lorem Ipsum Dolor Sit Amet'</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="helper-methods">
+    Helper Methods
+    <a class="headerlink" href="#helper-methods" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle" rel="external noopener noreferrer" target="_blank">SymfonyStyle</a> class defines some
+helper methods that cover the most common interactions performed by console commands.</p>
+<div class="section">
+<h3 id="titling-methods">
+    Titling Methods
+    <a class="headerlink" href="#titling-methods" title="Permalink to this headline">¶</a>
+</h3>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_title" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::title()" rel="external noopener noreferrer" target="_blank">title()</a></dt>
+        
+        <dd>
+                            <p class="first">It displays the given string as the command title. This method is meant to
+be used only once in a given command, but nothing prevents you to use it
+repeatedly:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>title(<span class="hljs-string">'Lorem ipsum dolor sit amet'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_section" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::section()" rel="external noopener noreferrer" target="_blank">section()</a></dt>
+        
+        <dd>
+                            <p class="first">It displays the given string as the title of some command section. This is
+only needed in complex commands which want to better separate their contents:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>section(<span class="hljs-string">'Adding a User'</span>);
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>section(<span class="hljs-string">'Generating the Password'</span>);
+
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h3 id="content-methods">
+    Content Methods
+    <a class="headerlink" href="#content-methods" title="Permalink to this headline">¶</a>
+</h3>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_text" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::text()" rel="external noopener noreferrer" target="_blank">text()</a></dt>
+        
+        <dd>
+                            <p class="first">It displays the given string or array of strings as regular text. This is
+useful to render help messages and instructions for the user running the
+command:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// use simple strings for short messages</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>text(<span class="hljs-string">'Lorem ipsum dolor sit amet'</span>);
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// consider using arrays when displaying long messages</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>text([
+    <span class="hljs-string">'Lorem ipsum dolor sit amet'</span>,
+    <span class="hljs-string">'Consectetur adipiscing elit'</span>,
+    <span class="hljs-string">'Aenean sit amet arcu vitae sem faucibus porta'</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_listing" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::listing()" rel="external noopener noreferrer" target="_blank">listing()</a></dt>
+        
+        <dd>
+                            <p class="first">It displays an unordered list of elements passed as an array:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>listing([
+    <span class="hljs-string">'Element #1 Lorem ipsum dolor sit amet'</span>,
+    <span class="hljs-string">'Element #2 Lorem ipsum dolor sit amet'</span>,
+    <span class="hljs-string">'Element #3 Lorem ipsum dolor sit amet'</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_table" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::table()" rel="external noopener noreferrer" target="_blank">table()</a></dt>
+        
+        <dd>
+                            <p class="first">It displays the given array of headers and rows as a compact table:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>table(
+    [<span class="hljs-string">'Header 1'</span>, <span class="hljs-string">'Header 2'</span>],
+    [
+        [<span class="hljs-string">'Cell 1-1'</span>, <span class="hljs-string">'Cell 1-2'</span>],
+        [<span class="hljs-string">'Cell 2-1'</span>, <span class="hljs-string">'Cell 2-2'</span>],
+        [<span class="hljs-string">'Cell 3-1'</span>, <span class="hljs-string">'Cell 3-2'</span>],
+    ]
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_horizontalTable" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::horizontalTable()" rel="external noopener noreferrer" target="_blank">horizontalTable()</a></dt>
+        
+        <dd>
+                            <p class="first">It displays the given array of headers and rows as a compact horizontal table:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>horizontalTable(
+    [<span class="hljs-string">'Header 1'</span>, <span class="hljs-string">'Header 2'</span>],
+    [
+        [<span class="hljs-string">'Cell 1-1'</span>, <span class="hljs-string">'Cell 1-2'</span>],
+        [<span class="hljs-string">'Cell 2-1'</span>, <span class="hljs-string">'Cell 2-2'</span>],
+        [<span class="hljs-string">'Cell 3-1'</span>, <span class="hljs-string">'Cell 3-2'</span>],
+    ]
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_definitionList" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::definitionList()" rel="external noopener noreferrer" target="_blank">definitionList()</a></dt>
+        
+        <dd>
+                            <p class="first">It displays the given <code translate="no" class="notranslate">key =&gt; value</code> pairs as a compact list of elements:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>definitionList(
+    <span class="hljs-string">'This is a title'</span>,
+    [<span class="hljs-string">'foo1'</span> =&gt; <span class="hljs-string">'bar1'</span>],
+    [<span class="hljs-string">'foo2'</span> =&gt; <span class="hljs-string">'bar2'</span>],
+    [<span class="hljs-string">'foo3'</span> =&gt; <span class="hljs-string">'bar3'</span>],
+    <span class="hljs-keyword">new</span> TableSeparator(),
+    <span class="hljs-string">'This is another title'</span>,
+    [<span class="hljs-string">'foo4'</span> =&gt; <span class="hljs-string">'bar4'</span>]
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_createTable" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::createTable()" rel="external noopener noreferrer" target="_blank">createTable()</a></dt>
+        
+        <dd>
+                            Creates an instance of <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/Table.php" class="reference external" title="Symfony\Component\Console\Helper\Table" rel="external noopener noreferrer" target="_blank">Table</a>
+styled according to the Symfony Style Guide, which allows you to use
+features such as dynamically appending rows.
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_newLine" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::newLine()" rel="external noopener noreferrer" target="_blank">newLine()</a></dt>
+        
+        <dd>
+                            <p class="first">It displays a blank line in the command output. Although it may seem useful,
+most of the times you won't need it at all. The reason is that every helper
+already adds their own blank lines, so you don't have to care about the
+vertical spacing:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// outputs a single blank line</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>newLine();
+
+<span class="hljs-comment">// outputs three consecutive blank lines</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>newLine(<span class="hljs-number">3</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h3 id="admonition-methods">
+    Admonition Methods
+    <a class="headerlink" href="#admonition-methods" title="Permalink to this headline">¶</a>
+</h3>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_note" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::note()" rel="external noopener noreferrer" target="_blank">note()</a></dt>
+        
+        <dd>
+                            <p class="first">It displays the given string or array of strings as a highlighted admonition.
+Use this helper sparingly to avoid cluttering command's output:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// use simple strings for short notes</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>note(<span class="hljs-string">'Lorem ipsum dolor sit amet'</span>);
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// consider using arrays when displaying long notes</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>note([
+    <span class="hljs-string">'Lorem ipsum dolor sit amet'</span>,
+    <span class="hljs-string">'Consectetur adipiscing elit'</span>,
+    <span class="hljs-string">'Aenean sit amet arcu vitae sem faucibus porta'</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_caution" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::caution()" rel="external noopener noreferrer" target="_blank">caution()</a></dt>
+        
+        <dd>
+                            <p class="first">Similar to the <code translate="no" class="notranslate">note()</code> helper, but the contents are more prominently
+highlighted. The resulting contents resemble an error message, so you should
+avoid using this helper unless strictly necessary:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// use simple strings for short caution message</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>caution(<span class="hljs-string">'Lorem ipsum dolor sit amet'</span>);
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// consider using arrays when displaying long caution messages</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>caution([
+    <span class="hljs-string">'Lorem ipsum dolor sit amet'</span>,
+    <span class="hljs-string">'Consectetur adipiscing elit'</span>,
+    <span class="hljs-string">'Aenean sit amet arcu vitae sem faucibus porta'</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h3 id="progress-bar-methods">
+    Progress Bar Methods
+    <a class="headerlink" href="#progress-bar-methods" title="Permalink to this headline">¶</a>
+</h3>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_progressStart" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::progressStart()" rel="external noopener noreferrer" target="_blank">progressStart()</a></dt>
+        
+        <dd>
+                            <p class="first">It displays a progress bar with a number of steps equal to the argument passed
+to the method (don't pass any value if the length of the progress bar is
+unknown):</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// displays a progress bar of unknown length</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>progressStart();
+
+<span class="hljs-comment">// displays a 100-step length progress bar</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>progressStart(<span class="hljs-number">100</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_progressAdvance" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::progressAdvance()" rel="external noopener noreferrer" target="_blank">progressAdvance()</a></dt>
+        
+        <dd>
+                            <p class="first">It makes the progress bar advance the given number of steps (or <code translate="no" class="notranslate">1</code> step
+if no argument is passed):</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// advances the progress bar 1 step</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>progressAdvance();
+
+<span class="hljs-comment">// advances the progress bar 10 steps</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>progressAdvance(<span class="hljs-number">10</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_progressFinish" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::progressFinish()" rel="external noopener noreferrer" target="_blank">progressFinish()</a></dt>
+        
+        <dd>
+                            <p class="first">It finishes the progress bar (filling up all the remaining steps when its
+length is known):</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>progressFinish();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_progressIterate" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::progressIterate()" rel="external noopener noreferrer" target="_blank">progressIterate()</a></dt>
+        
+        <dd>
+                            <p class="first">If your progress bar loops over an iterable collection, use the
+<code translate="no" class="notranslate">progressIterate()</code> helper:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>iterable</span> = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>];
+
+<span class="hljs-keyword">foreach</span> (<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>progressIterate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>iterable</span>) <span class="hljs-keyword">as</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>) {
+    <span class="hljs-comment">// ... do some work</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_createProgressBar" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::createProgressBar()" rel="external noopener noreferrer" target="_blank">createProgressBar()</a></dt>
+        
+        <dd>
+                            Creates an instance of <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Helper/ProgressBar.php" class="reference external" title="Symfony\Component\Console\Helper\ProgressBar" rel="external noopener noreferrer" target="_blank">ProgressBar</a>
+styled according to the Symfony Style Guide.
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h3 id="user-input-methods">
+    User Input Methods
+    <a class="headerlink" href="#user-input-methods" title="Permalink to this headline">¶</a>
+</h3>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_ask" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::ask()" rel="external noopener noreferrer" target="_blank">ask()</a></dt>
+        
+        <dd>
+                            <p class="first">It asks the user to provide some value:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>ask(<span class="hljs-string">'What is your name?'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                            <p>You can pass the default value as the second argument so the user can
+hit the &lt;Enter&gt; key to select that value:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>ask(<span class="hljs-string">'Where are you from?'</span>, <span class="hljs-string">'United States'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                            <p>In case you need to validate the given value, pass a callback validator as
+the third argument:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>ask(<span class="hljs-string">'Number of workers to start'</span>, <span class="hljs-string">'1'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>number</span>)</span> </span>{
+    <span class="hljs-keyword">if</span> (!is_numeric(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>number</span>)) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> \RuntimeException(<span class="hljs-string">'You must type a number.'</span>);
+    }
+
+    <span class="hljs-keyword">return</span> (int) <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>number</span>;
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_askHidden" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::askHidden()" rel="external noopener noreferrer" target="_blank">askHidden()</a></dt>
+        
+        <dd>
+                            <p class="first">It's very similar to the <code translate="no" class="notranslate">ask()</code> method but the user's input will be hidden
+and it cannot define a default value. Use it when asking for sensitive information:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>askHidden(<span class="hljs-string">'What is your password?'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                            <p>In case you need to validate the given value, pass a callback validator as
+the second argument:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>askHidden(<span class="hljs-string">'What is your password?'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>password</span>)</span> </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">empty</span>(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>password</span>)) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> \RuntimeException(<span class="hljs-string">'Password cannot be empty.'</span>);
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>password</span>;
+});</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_confirm" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::confirm()" rel="external noopener noreferrer" target="_blank">confirm()</a></dt>
+        
+        <dd>
+                            <p class="first">It asks a Yes/No question to the user and it only returns <code translate="no" class="notranslate">true</code> or <code translate="no" class="notranslate">false</code>:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>confirm(<span class="hljs-string">'Restart the web server?'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                            <p>You can pass the default value as the second argument so the user can
+hit the &lt;Enter&gt; key to select that value:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>confirm(<span class="hljs-string">'Restart the web server?'</span>, <span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_choice" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::choice()" rel="external noopener noreferrer" target="_blank">choice()</a></dt>
+        
+        <dd>
+                            <p class="first">It asks a question whose answer is constrained to the given list of valid
+answers:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>choice(<span class="hljs-string">'Select the queue to analyze'</span>, [<span class="hljs-string">'queue1'</span>, <span class="hljs-string">'queue2'</span>, <span class="hljs-string">'queue3'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                            <p>You can pass the default value as the third argument so the user can
+hit the &lt;Enter&gt; key to select that value:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>choice(<span class="hljs-string">'Select the queue to analyze'</span>, [<span class="hljs-string">'queue1'</span>, <span class="hljs-string">'queue2'</span>, <span class="hljs-string">'queue3'</span>], <span class="hljs-string">'queue1'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                            <p>Finally, you can allow users to select multiple choices. To do so, users must
+separate each choice with a comma (e.g. typing <code translate="no" class="notranslate">1, 2</code> will select choice 1
+and 2):</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>choice(<span class="hljs-string">'Select the queue to analyze'</span>, [<span class="hljs-string">'queue1'</span>, <span class="hljs-string">'queue2'</span>, <span class="hljs-string">'queue3'</span>], multiSelect: <span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+    </dl>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">multiSelect</code> option of <code translate="no" class="notranslate">choice()</code> was introduced in Symfony 6.2.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="result-methods">
+    Result Methods
+    <a class="headerlink" href="#result-methods" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you print any URL it won't be broken/cut, it will be clickable - if the terminal provides it. If the &quot;well
+formatted output&quot; is more important, you can switch it off:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>getOutputWrapper()<span class="hljs-operator">-&gt;</span>setAllowCutUrls(<span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<dl>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_success" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::success()" rel="external noopener noreferrer" target="_blank">success()</a></dt>
+        
+        <dd>
+                            <p class="first">It displays the given string or array of strings highlighted as a successful
+message (with a green background and the <code translate="no" class="notranslate">[OK]</code> label). It's meant to be
+used once to display the final result of executing the given command, but you
+can use it repeatedly during the execution of the command:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// use simple strings for short success messages</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>success(<span class="hljs-string">'Lorem ipsum dolor sit amet'</span>);
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// consider using arrays when displaying long success messages</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>success([
+    <span class="hljs-string">'Lorem ipsum dolor sit amet'</span>,
+    <span class="hljs-string">'Consectetur adipiscing elit'</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_info" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::info()" rel="external noopener noreferrer" target="_blank">info()</a></dt>
+        
+        <dd>
+                            <p class="first">It's similar to the <code translate="no" class="notranslate">success()</code> method (the given string or array of strings
+are displayed with a green background) but the <code translate="no" class="notranslate">[OK]</code> label is not prefixed.
+It's meant to be used once to display the final result of executing the given
+command, without showing the result as a successful or failed one:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// use simple strings for short info messages</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>info(<span class="hljs-string">'Lorem ipsum dolor sit amet'</span>);
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// consider using arrays when displaying long info messages</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>info([
+    <span class="hljs-string">'Lorem ipsum dolor sit amet'</span>,
+    <span class="hljs-string">'Consectetur adipiscing elit'</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_warning" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::warning()" rel="external noopener noreferrer" target="_blank">warning()</a></dt>
+        
+        <dd>
+                            <p class="first">It displays the given string or array of strings highlighted as a warning
+message (with a red background and the <code translate="no" class="notranslate">[WARNING]</code> label). It's meant to be
+used once to display the final result of executing the given command, but you
+can use it repeatedly during the execution of the command:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// use simple strings for short warning messages</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>warning(<span class="hljs-string">'Lorem ipsum dolor sit amet'</span>);
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// consider using arrays when displaying long warning messages</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>warning([
+    <span class="hljs-string">'Lorem ipsum dolor sit amet'</span>,
+    <span class="hljs-string">'Consectetur adipiscing elit'</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+                        <dt><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_error" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::error()" rel="external noopener noreferrer" target="_blank">error()</a></dt>
+        
+        <dd>
+                            <p class="first">It displays the given string or array of strings highlighted as an error
+message (with a red background and the <code translate="no" class="notranslate">[ERROR]</code> label). It's meant to be
+used once to display the final result of executing the given command, but you
+can use it repeatedly during the execution of the command:</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// use simple strings for short error messages</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>error(<span class="hljs-string">'Lorem ipsum dolor sit amet'</span>);
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// consider using arrays when displaying long error messages</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>error([
+    <span class="hljs-string">'Lorem ipsum dolor sit amet'</span>,
+    <span class="hljs-string">'Consectetur adipiscing elit'</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+    </dl>
+</div>
+</div>
+<div class="section">
+<h2 id="configuring-the-default-styles">
+    Configuring the Default Styles
+    <a class="headerlink" href="#configuring-the-default-styles" title="Permalink to this headline">¶</a>
+</h2>
+<p>By default, Symfony Styles wrap all contents to avoid having lines of text that
+are too long. The only exception is URLs, which are not wrapped, no matter how
+long they are. This is done to enable clickable URLs in terminals that support them.</p>
+<p>If you prefer to wrap all contents, including URLs, use this method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Command/GreetCommand.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Command</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Style</span>\<span class="hljs-title">SymfonyStyle</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span> = <span class="hljs-keyword">new</span> SymfonyStyle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>getOutputWrapper()<span class="hljs-operator">-&gt;</span>setAllowCutUrls(<span class="hljs-keyword">true</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">setAllowCutUrls()</code> method was introduced in Symfony 6.2.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="defining-your-own-styles">
+    Defining your Own Styles
+    <a class="headerlink" href="#defining-your-own-styles" title="Permalink to this headline">¶</a>
+</h2>
+<p>If you don't like the design of the commands that use the Symfony Style, you can
+define your own set of console styles. Create a class that implements the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/StyleInterface.php" class="reference external" title="Symfony\Component\Console\Style\StyleInterface" rel="external noopener noreferrer" target="_blank">StyleInterface</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Console</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Style</span>\<span class="hljs-title">StyleInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CustomStyle</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">StyleInterface</span>
+</span>{
+    <span class="hljs-comment">// ...implement the methods of the interface</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, instantiate this custom class instead of the default <code translate="no" class="notranslate">SymfonyStyle</code> in
+your commands. Thanks to the <code translate="no" class="notranslate">StyleInterface</code> you won't need to change the code
+of your commands to change their appearance:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Command/GreetCommand.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Console</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">CustomStyle</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>\<span class="hljs-title">Command</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Output</span>\<span class="hljs-title">OutputInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GreetCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">execute</span><span class="hljs-params">(InputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, OutputInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>)</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-comment">// Before</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span> = <span class="hljs-keyword">new</span> SymfonyStyle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+
+        <span class="hljs-comment">// After</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span> = <span class="hljs-keyword">new</span> CustomStyle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="writing-to-the-error-output">
+    Writing to the error output
+    <a class="headerlink" href="#writing-to-the-error-output" title="Permalink to this headline">¶</a>
+</h2>
+<p>If you reuse the output of a command as the input of other commands or dump it
+into a file for later reuse, you probably want to exclude progress bars, notes
+and other output that provides no real value.</p>
+<p>Commands can output information in two different streams: <code translate="no" class="notranslate">stdout</code> (standard
+output) is the stream where the real contents should be output and <code translate="no" class="notranslate">stderr</code>
+(standard error) is the stream where the errors and the debugging messages
+should be output.</p>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle" rel="external noopener noreferrer" target="_blank">SymfonyStyle</a> class provides a
+convenient method called <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Style/SymfonyStyle.php#method_getErrorStyle" class="reference external" title="Symfony\Component\Console\Style\SymfonyStyle::getErrorStyle()" rel="external noopener noreferrer" target="_blank">getErrorStyle()</a>
+to switch between both streams. This method returns a new <code translate="no" class="notranslate">SymfonyStyle</code>
+instance which makes use of the error output:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span> = <span class="hljs-keyword">new</span> SymfonyStyle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>input</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>output</span>);
+
+<span class="hljs-comment">// Write to the standard output</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>write(<span class="hljs-string">'Reusable information'</span>);
+
+<span class="hljs-comment">// Write to the error output</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>io</span><span class="hljs-operator">-&gt;</span>getErrorStyle()<span class="hljs-operator">-&gt;</span>warning(<span class="hljs-string">'Debugging information or errors'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you create a <code translate="no" class="notranslate">SymfonyStyle</code> instance with an <code translate="no" class="notranslate">OutputInterface</code> object
+that is not an instance of <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Console/Output/ConsoleOutputInterface.php" class="reference external" title="Symfony\Component\Console\Output\ConsoleOutputInterface" rel="external noopener noreferrer" target="_blank">ConsoleOutputInterface</a>,
+the <code translate="no" class="notranslate">getErrorStyle()</code> method will have no effect and the returned object
+will still write to the standard output instead of the error output.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

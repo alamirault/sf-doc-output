@@ -1,0 +1,1070 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-httpkernel-component">
+    The HttpKernel Component
+    <a class="headerlink" href="#the-httpkernel-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The HttpKernel component provides a structured process for converting
+a <code translate="no" class="notranslate">Request</code> into a <code translate="no" class="notranslate">Response</code> by making use of the EventDispatcher
+component. It's flexible enough to create a full-stack framework (Symfony),
+a micro-framework (Silex) or an advanced CMS (Drupal).</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/http-kernel</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="the-workflow-of-a-request">
+    The Workflow of a Request
+    <a class="headerlink" href="#the-workflow-of-a-request" title="Permalink to this headline">¶</a>
+</h2>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>This article explains how to use the HttpKernel features as an independent
+component in any PHP application. In Symfony applications everything is
+already configured and ready to use. Read the <a href="../controller.html" class="reference internal">Controller</a> and
+<a href="../event_dispatcher.html" class="reference internal">Events and Event Listeners</a> articles to learn about how to use it to create
+controllers and define events in Symfony applications.</p>
+</div>
+<p>Every HTTP web interaction begins with a request and ends with a response.
+Your job as a developer is to create PHP code that reads the request information
+(e.g. the URL) and creates and returns a response (e.g. an HTML page or JSON string).
+This is a simplified overview of the request workflow in Symfony applications:</p>
+<ol class="arabic">
+    <li>The <strong>user</strong> asks for a <strong>resource</strong> in a <strong>browser</strong>;</li>
+<li>The <strong>browser</strong> sends a <strong>request</strong> to the <strong>server</strong>;</li>
+<li><strong>Symfony</strong> gives the <strong>application</strong> a <strong>Request</strong> object;</li>
+<li>The <strong>application</strong> generates a <strong>Response</strong> object using the data of the <strong>Request</strong> object;</li>
+<li>The <strong>server</strong> sends back the <strong>response</strong> to the <strong>browser</strong>;</li>
+<li>The <strong>browser</strong> displays the <strong>resource</strong> to the <strong>user</strong>.</li>
+</ol>
+<p>Typically, some sort of framework or system is built to handle all the repetitive
+tasks (e.g. routing, security, etc) so that a developer can build each <em>page</em> of
+the application. Exactly <em>how</em> these systems are built varies greatly. The HttpKernel
+component provides an interface that formalizes the process of starting with a
+request and creating the appropriate response. The component is meant to be the
+heart of any application or framework, no matter how varied the architecture of
+that system:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">HttpKernelInterface</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@return</span> Response A Response instance
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle</span><span class="hljs-params">(
+        Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>,
+        int <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>type</span> = self::MAIN_REQUEST,
+        bool <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>catch</span> = true
+    )</span>: <span class="hljs-title">Response</span></span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Internally, <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/HttpKernel.php#method_handle" class="reference external" title="Symfony\Component\HttpKernel\HttpKernel::handle()" rel="external noopener noreferrer" target="_blank">HttpKernel::handle()</a> -
+the concrete implementation of <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/HttpKernelInterface.php#method_handle" class="reference external" title="Symfony\Component\HttpKernel\HttpKernelInterface::handle()" rel="external noopener noreferrer" target="_blank">HttpKernelInterface::handle()</a> -
+defines a workflow that starts with a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Request.php" class="reference external" title="Symfony\Component\HttpFoundation\Request" rel="external noopener noreferrer" target="_blank">Request</a>
+and ends with a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Response.php" class="reference external" title="Symfony\Component\HttpFoundation\Response" rel="external noopener noreferrer" target="_blank">Response</a>.</p>
+<object data="../_images/components/http_kernel/http-workflow.svg" type="image/svg+xml"></object>
+<p>The exact details of this workflow are the key to understanding how the kernel
+(and the Symfony Framework or any other library that uses the kernel) works.</p>
+<div class="section">
+<h3 id="httpkernel-driven-by-events">
+    HttpKernel: Driven by Events
+    <a class="headerlink" href="#httpkernel-driven-by-events" title="Permalink to this headline">¶</a>
+</h3>
+<p>The <code translate="no" class="notranslate">HttpKernel::handle()</code> method works internally by dispatching events.
+This makes the method both flexible, but also a bit abstract, since all the
+&quot;work&quot; of a framework/application built with HttpKernel is actually done
+in event listeners.</p>
+<p>To help explain this process, this document looks at each step of the process
+and talks about how one specific implementation of the HttpKernel - the Symfony
+Framework - works.</p>
+<p>Initially, using the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/HttpKernel.php" class="reference external" title="Symfony\Component\HttpKernel\HttpKernel" rel="external noopener noreferrer" target="_blank">HttpKernel</a> does
+not take many steps. You create an
+<a href="event_dispatcher.html" class="reference internal">event dispatcher</a> and a
+<a href="http_kernel.html#component-http-kernel-resolve-controller" class="reference internal">controller and argument resolver</a>
+(explained below). To complete your working kernel, you'll add more event
+listeners to the events discussed below:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventDispatcher</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">RequestStack</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">ArgumentResolver</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">ControllerResolver</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">HttpKernel</span>;
+
+<span class="hljs-comment">// create the Request object</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span> = <span class="hljs-keyword">new</span> EventDispatcher();
+<span class="hljs-comment">// ... add some event listeners</span>
+
+<span class="hljs-comment">// create your controller and argument resolvers</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controllerResolver</span> = <span class="hljs-keyword">new</span> ControllerResolver();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentResolver</span> = <span class="hljs-keyword">new</span> ArgumentResolver();
+
+<span class="hljs-comment">// instantiate the kernel</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span> = <span class="hljs-keyword">new</span> HttpKernel(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controllerResolver</span>, <span class="hljs-keyword">new</span> RequestStack(), <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentResolver</span>);
+
+<span class="hljs-comment">// actually execute the kernel, which turns the request into a response</span>
+<span class="hljs-comment">// by dispatching events, calling a controller, and returning the response</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+
+<span class="hljs-comment">// send the headers and echo the content</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();
+
+<span class="hljs-comment">// trigger the kernel.terminate event</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>terminate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>See &quot;<a href="http_kernel.html#http-kernel-working-example" class="reference internal">A full working example</a>&quot; for a more concrete implementation.</p>
+<p>For general information on adding listeners to the events below, see
+<a href="http_kernel.html#http-kernel-creating-listener" class="reference internal">Creating an Event Listener</a>.</p>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>There is a wonderful tutorial series on using the HttpKernel component and
+other Symfony components to create your own framework. See
+<a href="../create_framework/introduction.html" class="reference internal">Introduction</a>.</p>
+</div>
+<span id="component-http-kernel-kernel-request"></span>
+</div>
+<div class="section">
+<h3 id="1-the-kernel-request-event">
+    1) The <code translate="no" class="notranslate">kernel.request</code> Event
+    <a class="headerlink" href="#1-the-kernel-request-event" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Typical Purposes</strong>: To add more information to the <code translate="no" class="notranslate">Request</code>, initialize
+parts of the system, or return a <code translate="no" class="notranslate">Response</code> if possible (e.g. a security
+layer that denies access).</p>
+<p><a href="http_kernel.html#component-http-kernel-event-table" class="reference internal">Kernel Events Information Table</a></p>
+<p>The first event that is dispatched inside <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/HttpKernel.php#method_handle" class="reference external" title="Symfony\Component\HttpKernel\HttpKernel::handle()" rel="external noopener noreferrer" target="_blank">HttpKernel::handle</a>
+is <code translate="no" class="notranslate">kernel.request</code>, which may have a variety of different listeners.</p>
+<p>Listeners of this event can be quite varied. Some listeners - such as a security
+listener - might have enough information to create a <code translate="no" class="notranslate">Response</code> object immediately.
+For example, if a security listener determined that a user doesn't have access,
+that listener may return a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/RedirectResponse.php" class="reference external" title="Symfony\Component\HttpFoundation\RedirectResponse" rel="external noopener noreferrer" target="_blank">RedirectResponse</a>
+to the login page or a 403 Access Denied response.</p>
+<p>If a <code translate="no" class="notranslate">Response</code> is returned at this stage, the process skips directly to
+the <a href="http_kernel.html#component-http-kernel-kernel-response" class="reference internal">kernel.response</a> event.</p>
+<p>Other listeners initialize things or add more information to the request.
+For example, a listener might determine and set the locale on the <code translate="no" class="notranslate">Request</code>
+object.</p>
+<p>Another common listener is routing. A router listener may process the <code translate="no" class="notranslate">Request</code>
+and determine the controller that should be rendered (see the next section).
+In fact, the <code translate="no" class="notranslate">Request</code> object has an &quot;<a href="http_foundation.html#component-foundation-attributes" class="reference internal">attributes</a>&quot;
+bag which is a perfect spot to store this extra, application-specific data
+about the request. This means that if your router listener somehow determines
+the controller, it can store it on the <code translate="no" class="notranslate">Request</code> attributes (which can be used
+by your controller resolver).</p>
+<p>Overall, the purpose of the <code translate="no" class="notranslate">kernel.request</code> event is either to create and
+return a <code translate="no" class="notranslate">Response</code> directly, or to add information to the <code translate="no" class="notranslate">Request</code>
+(e.g. setting the locale or setting some other information on the <code translate="no" class="notranslate">Request</code>
+attributes).</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When setting a response for the <code translate="no" class="notranslate">kernel.request</code> event, the propagation
+is stopped. This means listeners with lower priority won't be executed.</p>
+</div>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span><code translate="no" class="notranslate">kernel.request</code> in the Symfony Framework</span></p><p>The most important listener to <code translate="no" class="notranslate">kernel.request</code> in the Symfony Framework
+is the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/EventListener/RouterListener.php" class="reference external" title="Symfony\Component\HttpKernel\EventListener\RouterListener" rel="external noopener noreferrer" target="_blank">RouterListener</a>.
+This class executes the routing layer, which returns an <em>array</em> of information
+about the matched request, including the <code translate="no" class="notranslate">_controller</code> and any placeholders
+that are in the route's pattern (e.g. <code translate="no" class="notranslate">{slug}</code>). See the
+<a href="../routing.html" class="reference internal">Routing documentation</a>.</p>
+<p>This array of information is stored in the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Request.php" class="reference external" title="Symfony\Component\HttpFoundation\Request" rel="external noopener noreferrer" target="_blank">Request</a>
+object's <code translate="no" class="notranslate">attributes</code> array. Adding the routing information here doesn't
+do anything yet, but is used next when resolving the controller.</p>
+</div></div>
+<span id="component-http-kernel-resolve-controller"></span>
+</div>
+<div class="section">
+<h3 id="2-resolve-the-controller">
+    2) Resolve the Controller
+    <a class="headerlink" href="#2-resolve-the-controller" title="Permalink to this headline">¶</a>
+</h3>
+<p>Assuming that no <code translate="no" class="notranslate">kernel.request</code> listener was able to create a <code translate="no" class="notranslate">Response</code>,
+the next step in HttpKernel is to determine and prepare (i.e. resolve) the
+controller. The controller is the part of the end-application's code that
+is responsible for creating and returning the <code translate="no" class="notranslate">Response</code> for a specific page.
+The only requirement is that it is a PHP callable - i.e. a function, method
+on an object or a <code translate="no" class="notranslate">Closure</code>.</p>
+<p>But <em>how</em> you determine the exact controller for a request is entirely up
+to your application. This is the job of the &quot;controller resolver&quot; - a class
+that implements <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ControllerResolverInterface.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ControllerResolverInterface" rel="external noopener noreferrer" target="_blank">ControllerResolverInterface</a>
+and is one of the constructor arguments to <code translate="no" class="notranslate">HttpKernel</code>.</p>
+<p>Your job is to create a class that implements the interface and fill in its
+method: <code translate="no" class="notranslate">getController()</code>. In fact, one default implementation already
+exists, which you can use directly or learn from:
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ControllerResolver.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ControllerResolver" rel="external noopener noreferrer" target="_blank">ControllerResolver</a>.
+This implementation is explained more in the sidebar below:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">ControllerResolverInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getController</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span>: <span class="hljs-title">callable</span>|<span class="hljs-title">false</span></span>;
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Internally, the <code translate="no" class="notranslate">HttpKernel::handle()</code> method first calls
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ControllerResolverInterface.php#method_getController" class="reference external" title="Symfony\Component\HttpKernel\Controller\ControllerResolverInterface::getController()" rel="external noopener noreferrer" target="_blank">getController()</a>
+on the controller resolver. This method is passed the <code translate="no" class="notranslate">Request</code> and is responsible
+for somehow determining and returning a PHP callable (the controller) based
+on the request's information.</p>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span>Resolving the Controller in the Symfony Framework</span></p><p>The Symfony Framework uses the built-in
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ControllerResolver.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ControllerResolver" rel="external noopener noreferrer" target="_blank">ControllerResolver</a>
+class (actually, it uses a subclass with some extra functionality
+mentioned below). This class leverages the information that was placed
+on the <code translate="no" class="notranslate">Request</code> object's <code translate="no" class="notranslate">attributes</code> property during the <code translate="no" class="notranslate">RouterListener</code>.</p>
+<p><strong>getController</strong></p>
+<p>The <code translate="no" class="notranslate">ControllerResolver</code> looks for a <code translate="no" class="notranslate">_controller</code>
+key on the <code translate="no" class="notranslate">Request</code> object's attributes property (recall that this
+information is typically placed on the <code translate="no" class="notranslate">Request</code> via the <code translate="no" class="notranslate">RouterListener</code>).
+This string is then transformed into a PHP callable by doing the following:</p>
+<dl>
+                        <dt>a) If the <code translate="no" class="notranslate">_controller</code> key doesn't follow the recommended PHP namespace</dt>
+        
+        <dd>
+                            format (e.g. <code translate="no" class="notranslate">App\Controller\DefaultController::index</code>) its format is
+transformed into it. For example, the legacy <code translate="no" class="notranslate">FooBundle:Default:index</code>
+format would be changed to <code translate="no" class="notranslate">Acme\FooBundle\Controller\DefaultController::indexAction</code>.
+This transformation is specific to the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Controller/ControllerResolver.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Controller\ControllerResolver" rel="external noopener noreferrer" target="_blank">ControllerResolver</a>
+sub-class used by the Symfony Framework.
+                    </dd>
+                        <dt>b) A new instance of your controller class is instantiated with no</dt>
+        
+        <dd>
+                            constructor arguments.
+                    </dd>
+                        <dt>c) If the controller implements <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DependencyInjection/ContainerAwareInterface.php" class="reference external" title="Symfony\Component\DependencyInjection\ContainerAwareInterface" rel="external noopener noreferrer" target="_blank">ContainerAwareInterface</a>,</dt>
+        
+        <dd>
+                            <code translate="no" class="notranslate">setContainer()</code> is called on the controller object and the container
+is passed to it. This step is also specific to the  <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Controller/ControllerResolver.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Controller\ControllerResolver" rel="external noopener noreferrer" target="_blank">ControllerResolver</a>
+sub-class used by the Symfony Framework.
+                    </dd>
+    </dl>
+</div></div>
+<span id="component-http-kernel-kernel-controller"></span>
+</div>
+<div class="section">
+<h3 id="3-the-kernel-controller-event">
+    3) The <code translate="no" class="notranslate">kernel.controller</code> Event
+    <a class="headerlink" href="#3-the-kernel-controller-event" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Typical Purposes</strong>: Initialize things or change the controller just before
+the controller is executed.</p>
+<p><a href="http_kernel.html#component-http-kernel-event-table" class="reference internal">Kernel Events Information Table</a></p>
+<p>After the controller callable has been determined, <code translate="no" class="notranslate">HttpKernel::handle()</code>
+dispatches the <code translate="no" class="notranslate">kernel.controller</code> event. Listeners to this event might initialize
+some part of the system that needs to be initialized after certain things
+have been determined (e.g. the controller, routing information) but before
+the controller is executed.</p>
+<p>Another typical use-case for this event is to retrieve the attributes from
+the controller using the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ControllerEvent.php#method_getAttributes" class="reference external" title="Symfony\Component\HttpKernel\Event\ControllerEvent::getAttributes()" rel="external noopener noreferrer" target="_blank">getAttributes()</a>
+method. See the Symfony section below for some examples.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">ControllerEvent::getAttributes()</code> method was introduced in Symfony 6.2.</p>
+</div>
+<p>Listeners to this event can also change the controller callable completely
+by calling <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ControllerEvent.php#method_setController" class="reference external" title="Symfony\Component\HttpKernel\Event\ControllerEvent::setController()" rel="external noopener noreferrer" target="_blank">ControllerEvent::setController</a>
+on the event object that's passed to listeners on this event.</p>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span><code translate="no" class="notranslate">kernel.controller</code> in the Symfony Framework</span></p><p>An interesting listener to <code translate="no" class="notranslate">kernel.controller</code> in the Symfony
+Framework is <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/EventListener/CacheAttributeListener.php" class="reference external" title="Symfony\Component\HttpKernel\EventListener\CacheAttributeListener" rel="external noopener noreferrer" target="_blank">CacheAttributeListener</a>.
+This class fetches <code translate="no" class="notranslate">#[Cache]</code> attribute configuration from the
+controller and uses it to configure <a href="../http_cache.html" class="reference internal">HTTP caching</a>
+on the response.</p>
+<p>There are a few other minor listeners to the <code translate="no" class="notranslate">kernel.controller</code> event in
+the Symfony Framework that deal with collecting profiler data when the
+profiler is enabled.</p>
+</div></div>
+</div>
+<div class="section">
+<h3 id="4-getting-the-controller-arguments">
+    4) Getting the Controller Arguments
+    <a class="headerlink" href="#4-getting-the-controller-arguments" title="Permalink to this headline">¶</a>
+</h3>
+<p>Next, <code translate="no" class="notranslate">HttpKernel::handle()</code> calls
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentResolverInterface.php#method_getArguments" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface::getArguments()" rel="external noopener noreferrer" target="_blank">ArgumentResolverInterface::getArguments()</a>.
+Remember that the controller returned in <code translate="no" class="notranslate">getController()</code> is a callable.
+The purpose of <code translate="no" class="notranslate">getArguments()</code> is to return the array of arguments that
+should be passed to that controller. Exactly how this is done is completely
+up to your design, though the built-in <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentResolver.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentResolver" rel="external noopener noreferrer" target="_blank">ArgumentResolver</a>
+is a good example.</p>
+<p>At this point the kernel has a PHP callable (the controller) and an array
+of arguments that should be passed when executing that callable.</p>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span>Getting the Controller Arguments in the Symfony Framework</span></p><p>Now that you know exactly what the controller callable (usually a method
+inside a controller object) is, the <code translate="no" class="notranslate">ArgumentResolver</code> uses <a href="https://www.php.net/manual/en/book.reflection.php" class="reference external" rel="external noopener noreferrer" target="_blank">reflection</a>
+on the callable to return an array of the <em>names</em> of each of the arguments.
+It then iterates over each of these arguments and uses the following tricks
+to determine which value should be passed for each argument:</p>
+<dl>
+                        <dt>a) If the <code translate="no" class="notranslate">Request</code> attributes bag contains a key that matches the name</dt>
+        
+        <dd>
+                            of the argument, that value is used. For example, if the first argument
+to a controller is <code translate="no" class="notranslate">$slug</code> and there is a <code translate="no" class="notranslate">slug</code> key in the <code translate="no" class="notranslate">Request</code>
+<code translate="no" class="notranslate">attributes</code> bag, that value is used (and typically this value came
+from the <code translate="no" class="notranslate">RouterListener</code>).
+                    </dd>
+                        <dt>b) If the argument in the controller is type-hinted with Symfony's</dt>
+        
+        <dd>
+                            <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Request.php" class="reference external" title="Symfony\Component\HttpFoundation\Request" rel="external noopener noreferrer" target="_blank">Request</a> object, the
+<code translate="no" class="notranslate">Request</code> is passed in as the value.
+                    </dd>
+                        <dt>c) If the function or method argument is <a href="https://www.php.net/manual/en/functions.arguments.php#functions.variable-arg-list" class="reference external" rel="external noopener noreferrer" target="_blank">variadic</a> and the <code translate="no" class="notranslate">Request</code></dt>
+        
+        <dd>
+                            <code translate="no" class="notranslate">attributes</code> bag contains an array for that argument, they will all be
+available through the <a href="https://www.php.net/manual/en/functions.arguments.php#functions.variable-arg-list" class="reference external" rel="external noopener noreferrer" target="_blank">variadic</a> argument.
+                    </dd>
+    </dl>
+<p>This functionality is provided by resolvers implementing the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentValueResolverInterface.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface" rel="external noopener noreferrer" target="_blank">ArgumentValueResolverInterface</a>.
+There are four implementations which provide the default behavior of
+Symfony but customization is the key here. By implementing the
+<code translate="no" class="notranslate">ArgumentValueResolverInterface</code> yourself and passing this to the
+<code translate="no" class="notranslate">ArgumentResolver</code>, you can extend this functionality.</p>
+</div></div>
+<span id="component-http-kernel-calling-controller"></span>
+</div>
+<div class="section">
+<h3 id="5-calling-the-controller">
+    5) Calling the Controller
+    <a class="headerlink" href="#5-calling-the-controller" title="Permalink to this headline">¶</a>
+</h3>
+<p>The next step of <code translate="no" class="notranslate">HttpKernel::handle()</code> is executing the controller.</p>
+<p>The job of the controller is to build the response for the given resource.
+This could be an HTML page, a JSON string or anything else. Unlike every
+other part of the process so far, this step is implemented by the &quot;end-developer&quot;,
+for each page that is built.</p>
+<p>Usually, the controller will return a <code translate="no" class="notranslate">Response</code> object. If this is true,
+then the work of the kernel is just about done! In this case, the next step
+is the <a href="http_kernel.html#component-http-kernel-kernel-response" class="reference internal">kernel.response</a> event.</p>
+<p>But if the controller returns anything besides a <code translate="no" class="notranslate">Response</code>, then the kernel
+has a little bit more work to do - <a href="http_kernel.html#component-http-kernel-kernel-view" class="reference internal">kernel.view</a>
+(since the end goal is <em>always</em> to generate a <code translate="no" class="notranslate">Response</code> object).</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>A controller must return <em>something</em>. If a controller returns <code translate="no" class="notranslate">null</code>,
+an exception will be thrown immediately.</p>
+</div>
+<span id="component-http-kernel-kernel-view"></span>
+</div>
+<div class="section">
+<h3 id="6-the-kernel-view-event">
+    6) The <code translate="no" class="notranslate">kernel.view</code> Event
+    <a class="headerlink" href="#6-the-kernel-view-event" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Typical Purposes</strong>: Transform a non-<code translate="no" class="notranslate">Response</code> return value from a controller
+into a <code translate="no" class="notranslate">Response</code></p>
+<p><a href="http_kernel.html#component-http-kernel-event-table" class="reference internal">Kernel Events Information Table</a></p>
+<p>If the controller doesn't return a <code translate="no" class="notranslate">Response</code> object, then the kernel dispatches
+another event - <code translate="no" class="notranslate">kernel.view</code>. The job of a listener to this event is to
+use the return value of the controller (e.g. an array of data or an object)
+to create a <code translate="no" class="notranslate">Response</code>.</p>
+<p>This can be useful if you want to use a &quot;view&quot; layer: instead of returning
+a <code translate="no" class="notranslate">Response</code> from the controller, you return data that represents the page.
+A listener to this event could then use this data to create a <code translate="no" class="notranslate">Response</code> that
+is in the correct format (e.g HTML, JSON, etc).</p>
+<p>At this stage, if no listener sets a response on the event, then an exception
+is thrown: either the controller <em>or</em> one of the view listeners must always
+return a <code translate="no" class="notranslate">Response</code>.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When setting a response for the <code translate="no" class="notranslate">kernel.view</code> event, the propagation
+is stopped. This means listeners with lower priority won't be executed.</p>
+</div>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span><code translate="no" class="notranslate">kernel.view</code> in the Symfony Framework</span></p><p>There is a default listener inside the Symfony Framework for the <code translate="no" class="notranslate">kernel.view</code>
+event. If your controller action returns an array, and you apply the
+<a href="../templates.html#templates-template-attribute" class="reference internal">#[Template()] attribute</a> to that
+controller action, then this listener renders a template, passes the array
+you returned from your controller to that template, and creates a <code translate="no" class="notranslate">Response</code>
+containing the returned content from that template.</p>
+<p>Additionally, a popular community bundle <a href="https://github.com/friendsofsymfony/FOSRestBundle" class="reference external" rel="external noopener noreferrer" target="_blank">FOSRestBundle</a> implements
+a listener on this event which aims to give you a robust view layer
+capable of using a single controller to return many different content-type
+responses (e.g. HTML, JSON, XML, etc).</p>
+</div></div>
+<span id="component-http-kernel-kernel-response"></span>
+</div>
+<div class="section">
+<h3 id="7-the-kernel-response-event">
+    7) The <code translate="no" class="notranslate">kernel.response</code> Event
+    <a class="headerlink" href="#7-the-kernel-response-event" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Typical Purposes</strong>: Modify the <code translate="no" class="notranslate">Response</code> object just before it is sent</p>
+<p><a href="http_kernel.html#component-http-kernel-event-table" class="reference internal">Kernel Events Information Table</a></p>
+<p>The end goal of the kernel is to transform a <code translate="no" class="notranslate">Request</code> into a <code translate="no" class="notranslate">Response</code>. The
+<code translate="no" class="notranslate">Response</code> might be created during the <a href="http_kernel.html#component-http-kernel-kernel-request" class="reference internal">kernel.request</a>
+event, returned from the <a href="http_kernel.html#component-http-kernel-calling-controller" class="reference internal">controller</a>,
+or returned by one of the listeners to the <a href="http_kernel.html#component-http-kernel-kernel-view" class="reference internal">kernel.view</a>
+event.</p>
+<p>Regardless of who creates the <code translate="no" class="notranslate">Response</code>, another event - <code translate="no" class="notranslate">kernel.response</code>
+is dispatched directly afterwards. A typical listener to this event will modify
+the <code translate="no" class="notranslate">Response</code> object in some way, such as modifying headers, adding cookies,
+or even changing the content of the <code translate="no" class="notranslate">Response</code> itself (e.g. injecting some
+JavaScript before the end <code translate="no" class="notranslate">&lt;/body&gt;</code> tag of an HTML response).</p>
+<p>After this event is dispatched, the final <code translate="no" class="notranslate">Response</code> object is returned
+from <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/HttpKernel.php#method_handle" class="reference external" title="Symfony\Component\HttpKernel\HttpKernel::handle()" rel="external noopener noreferrer" target="_blank">handle()</a>. In the
+most typical use-case, you can then call the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Response.php#method_send" class="reference external" title="Symfony\Component\HttpFoundation\Response::send()" rel="external noopener noreferrer" target="_blank">send()</a>
+method, which sends the headers and prints the <code translate="no" class="notranslate">Response</code> content.</p>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span><code translate="no" class="notranslate">kernel.response</code> in the Symfony Framework</span></p><p>There are several minor listeners on this event inside the Symfony Framework,
+and most modify the response in some way. For example, the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/WebProfilerBundle/EventListener/WebDebugToolbarListener.php" class="reference external" title="Symfony\Bundle\WebProfilerBundle\EventListener\WebDebugToolbarListener" rel="external noopener noreferrer" target="_blank">WebDebugToolbarListener</a>
+injects some JavaScript at the bottom of your page in the <code translate="no" class="notranslate">dev</code> environment
+which causes the web debug toolbar to be displayed. Another listener,
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/Firewall/ContextListener.php" class="reference external" title="Symfony\Component\Security\Http\Firewall\ContextListener" rel="external noopener noreferrer" target="_blank">ContextListener</a>
+serializes the current user's information into the
+session so that it can be reloaded on the next request.</p>
+</div></div>
+<span id="component-http-kernel-kernel-terminate"></span>
+</div>
+<div class="section">
+<h3 id="8-the-kernel-terminate-event">
+    8) The <code translate="no" class="notranslate">kernel.terminate</code> Event
+    <a class="headerlink" href="#8-the-kernel-terminate-event" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Typical Purposes</strong>: To perform some &quot;heavy&quot; action after the response has
+been streamed to the user</p>
+<p><a href="http_kernel.html#component-http-kernel-event-table" class="reference internal">Kernel Events Information Table</a></p>
+<p>The final event of the HttpKernel process is <code translate="no" class="notranslate">kernel.terminate</code> and is unique
+because it occurs <em>after</em> the <code translate="no" class="notranslate">HttpKernel::handle()</code> method, and after the
+response is sent to the user. Recall from above, then the code that uses
+the kernel, ends like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// sends the headers and echoes the content</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();
+
+<span class="hljs-comment">// triggers the kernel.terminate event</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>terminate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As you can see, by calling <code translate="no" class="notranslate">$kernel-&gt;terminate</code> after sending the response,
+you will trigger the <code translate="no" class="notranslate">kernel.terminate</code> event where you can perform certain
+actions that you may have delayed in order to return the response as quickly
+as possible to the client (e.g. sending emails).</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Internally, the HttpKernel makes use of the <a href="https://secure.php.net/manual/en/function.fastcgi-finish-request.php" class="reference external" title="fastcgi_finish_request" rel="external noopener noreferrer" target="_blank">fastcgi_finish_request</a>
+PHP function. This means that at the moment, only the <a href="https://www.php.net/manual/en/install.fpm.php" class="reference external" rel="external noopener noreferrer" target="_blank">PHP FPM</a> server
+API is able to send a response to the client while the server's PHP process
+still performs some tasks. With all other server APIs, listeners to <code translate="no" class="notranslate">kernel.terminate</code>
+are still executed, but the response is not sent to the client until they
+are all completed.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Using the <code translate="no" class="notranslate">kernel.terminate</code> event is optional, and should only be
+called if your kernel implements <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/TerminableInterface.php" class="reference external" title="Symfony\Component\HttpKernel\TerminableInterface" rel="external noopener noreferrer" target="_blank">TerminableInterface</a>.</p>
+</div>
+<span id="component-http-kernel-kernel-exception"></span>
+</div>
+<div class="section">
+<h3 id="handling-exceptions-the-kernel-exception-event">
+    Handling Exceptions: the <code translate="no" class="notranslate">kernel.exception</code> Event
+    <a class="headerlink" href="#handling-exceptions-the-kernel-exception-event" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>Typical Purposes</strong>: Handle some type of exception and create an appropriate
+<code translate="no" class="notranslate">Response</code> to return for the exception</p>
+<p><a href="http_kernel.html#component-http-kernel-event-table" class="reference internal">Kernel Events Information Table</a></p>
+<p>If an exception is thrown at any point inside <code translate="no" class="notranslate">HttpKernel::handle()</code>, another
+event - <code translate="no" class="notranslate">kernel.exception</code> is dispatched. Internally, the body of the <code translate="no" class="notranslate">handle()</code>
+method is wrapped in a try-catch block. When any exception is thrown, the
+<code translate="no" class="notranslate">kernel.exception</code> event is dispatched so that your system can somehow respond
+to the exception.</p>
+<object data="../_images/components/http_kernel/http-workflow-exception.svg" type="image/svg+xml"></object>
+<p>Each listener to this event is passed a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ExceptionEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\ExceptionEvent" rel="external noopener noreferrer" target="_blank">ExceptionEvent</a>
+object, which you can use to access the original exception via the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ExceptionEvent.php#method_getThrowable" class="reference external" title="Symfony\Component\HttpKernel\Event\ExceptionEvent::getThrowable()" rel="external noopener noreferrer" target="_blank">getThrowable()</a>
+method. A typical listener on this event will check for a certain type of
+exception and create an appropriate error <code translate="no" class="notranslate">Response</code>.</p>
+<p>For example, to generate a 404 page, you might throw a special type of exception
+and then add a listener on this event that looks for this exception and
+creates and returns a 404 <code translate="no" class="notranslate">Response</code>. In fact, the HttpKernel component
+comes with an <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/EventListener/ErrorListener.php" class="reference external" title="Symfony\Component\HttpKernel\EventListener\ErrorListener" rel="external noopener noreferrer" target="_blank">ErrorListener</a>,
+which if you choose to use, will do this and more by default (see the sidebar
+below for more details).</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When setting a response for the <code translate="no" class="notranslate">kernel.exception</code> event, the propagation
+is stopped. This means listeners with lower priority won't be executed.</p>
+</div>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span><code translate="no" class="notranslate">kernel.exception</code> in the Symfony Framework</span></p><p>There are two main listeners to <code translate="no" class="notranslate">kernel.exception</code> when using the
+Symfony Framework.</p>
+<p><strong>ErrorListener in the HttpKernel Component</strong></p>
+<p>The first comes core to the HttpKernel component
+and is called <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/EventListener/ErrorListener.php" class="reference external" title="Symfony\Component\HttpKernel\EventListener\ErrorListener" rel="external noopener noreferrer" target="_blank">ErrorListener</a>.
+The listener has several goals:</p>
+<ol class="arabic">
+    <li>The thrown exception is converted into a
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/ErrorHandler/Exception/FlattenException.php" class="reference external" title="Symfony\Component\ErrorHandler\Exception\FlattenException" rel="external noopener noreferrer" target="_blank">FlattenException</a>
+object, which contains all the information about the request, but which
+can be printed and serialized.</li>
+<li>If the original exception implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Exception/HttpExceptionInterface.php" class="reference external" title="Symfony\Component\HttpKernel\Exception\HttpExceptionInterface" rel="external noopener noreferrer" target="_blank">HttpExceptionInterface</a>,
+then <code translate="no" class="notranslate">getStatusCode()</code> and <code translate="no" class="notranslate">getHeaders()</code> are called on the exception
+and used to populate the headers and status code of the <code translate="no" class="notranslate">FlattenException</code>
+object. The idea is that these are used in the next step when creating
+the final response. If you want to set custom HTTP headers, you can always
+use the <code translate="no" class="notranslate">setHeaders()</code> method on exceptions derived from the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Exception/HttpException.php" class="reference external" title="Symfony\Component\HttpKernel\Exception\HttpException" rel="external noopener noreferrer" target="_blank">HttpException</a> class.</li>
+<li>If the original exception implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Exception/RequestExceptionInterface.php" class="reference external" title="Symfony\Component\HttpFoundation\Exception\RequestExceptionInterface" rel="external noopener noreferrer" target="_blank">RequestExceptionInterface</a>,
+then the status code of the <code translate="no" class="notranslate">FlattenException</code> object is populated with
+<code translate="no" class="notranslate">400</code> and no other headers are modified.</li>
+<li>A controller is executed and passed the flattened exception. The exact
+controller to render is passed as a constructor argument to this listener.
+This controller will return the final <code translate="no" class="notranslate">Response</code> for this error page.</li>
+</ol>
+<p><strong>ExceptionListener in the Security Component</strong></p>
+<p>The other important listener is the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/Firewall/ExceptionListener.php" class="reference external" title="Symfony\Component\Security\Http\Firewall\ExceptionListener" rel="external noopener noreferrer" target="_blank">ExceptionListener</a>.
+The goal of this listener is to handle security exceptions and, when
+appropriate, <em>help</em> the user to authenticate (e.g. redirect to the login
+page).</p>
+</div></div>
+<span id="http-kernel-creating-listener"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="creating-an-event-listener">
+    Creating an Event Listener
+    <a class="headerlink" href="#creating-an-event-listener" title="Permalink to this headline">¶</a>
+</h2>
+<p>As you've seen, you can create and attach event listeners to any of the events
+dispatched during the <code translate="no" class="notranslate">HttpKernel::handle()</code> cycle. Typically a listener is a PHP
+class with a method that's executed, but it can be anything. For more information
+on creating and attaching event listeners, see <a href="event_dispatcher.html" class="reference internal">The EventDispatcher Component</a>.</p>
+<p>The name of each of the &quot;kernel&quot; events is defined as a constant on the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/KernelEvents.php" class="reference external" title="Symfony\Component\HttpKernel\KernelEvents" rel="external noopener noreferrer" target="_blank">KernelEvents</a> class. Additionally, each
+event listener is passed a single argument, which is some subclass of <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/KernelEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\KernelEvent" rel="external noopener noreferrer" target="_blank">KernelEvent</a>.
+This object contains information about the current state of the system and
+each event has their own event object:</p>
+<span id="component-http-kernel-event-table"></span>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Name</th>
+                                            <th><code translate="no" class="notranslate">KernelEvents</code> Constant</th>
+                                            <th>Argument passed to the listener</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td>kernel.request</td>
+                                    <td><code translate="no" class="notranslate">KernelEvents::REQUEST</code></td>
+                                    <td><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/RequestEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\RequestEvent" rel="external noopener noreferrer" target="_blank">RequestEvent</a></td>
+                            </tr>
+                    <tr>
+                                    <td>kernel.controller</td>
+                                    <td><code translate="no" class="notranslate">KernelEvents::CONTROLLER</code></td>
+                                    <td><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ControllerEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\ControllerEvent" rel="external noopener noreferrer" target="_blank">ControllerEvent</a></td>
+                            </tr>
+                    <tr>
+                                    <td>kernel.controller_arguments</td>
+                                    <td><code translate="no" class="notranslate">KernelEvents::CONTROLLER_ARGUMENTS</code></td>
+                                    <td><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ControllerArgumentsEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent" rel="external noopener noreferrer" target="_blank">ControllerArgumentsEvent</a></td>
+                            </tr>
+                    <tr>
+                                    <td>kernel.view</td>
+                                    <td><code translate="no" class="notranslate">KernelEvents::VIEW</code></td>
+                                    <td><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ViewEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\ViewEvent" rel="external noopener noreferrer" target="_blank">ViewEvent</a></td>
+                            </tr>
+                    <tr>
+                                    <td>kernel.response</td>
+                                    <td><code translate="no" class="notranslate">KernelEvents::RESPONSE</code></td>
+                                    <td><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ResponseEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\ResponseEvent" rel="external noopener noreferrer" target="_blank">ResponseEvent</a></td>
+                            </tr>
+                    <tr>
+                                    <td>kernel.finish_request</td>
+                                    <td><code translate="no" class="notranslate">KernelEvents::FINISH_REQUEST</code></td>
+                                    <td><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/FinishRequestEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\FinishRequestEvent" rel="external noopener noreferrer" target="_blank">FinishRequestEvent</a></td>
+                            </tr>
+                    <tr>
+                                    <td>kernel.terminate</td>
+                                    <td><code translate="no" class="notranslate">KernelEvents::TERMINATE</code></td>
+                                    <td><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/TerminateEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\TerminateEvent" rel="external noopener noreferrer" target="_blank">TerminateEvent</a></td>
+                            </tr>
+                    <tr>
+                                    <td>kernel.exception</td>
+                                    <td><code translate="no" class="notranslate">KernelEvents::EXCEPTION</code></td>
+                                    <td><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/ExceptionEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\ExceptionEvent" rel="external noopener noreferrer" target="_blank">ExceptionEvent</a></td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<span id="http-kernel-working-example"></span>
+</div>
+<div class="section">
+<h2 id="a-full-working-example">
+    A full Working Example
+    <a class="headerlink" href="#a-full-working-example" title="Permalink to this headline">¶</a>
+</h2>
+<p>When using the HttpKernel component, you're free to attach any listeners
+to the core events, use any controller resolver that implements the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ControllerResolverInterface.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ControllerResolverInterface" rel="external noopener noreferrer" target="_blank">ControllerResolverInterface</a> and
+use any argument resolver that implements the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Controller/ArgumentResolverInterface.php" class="reference external" title="Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface" rel="external noopener noreferrer" target="_blank">ArgumentResolverInterface</a>.
+However, the HttpKernel component comes with some built-in listeners and everything
+else that can be used to create a working example:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventDispatcher</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">RequestStack</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">ArgumentResolver</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">ControllerResolver</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">EventListener</span>\<span class="hljs-title">RouterListener</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">HttpKernel</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Matcher</span>\<span class="hljs-title">UrlMatcher</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">RequestContext</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Route</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">RouteCollection</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span> = <span class="hljs-keyword">new</span> RouteCollection();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span><span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'hello'</span>, <span class="hljs-keyword">new</span> Route(<span class="hljs-string">'/hello/{name}'</span>, [
+    <span class="hljs-string">'_controller'</span> =&gt; <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>)</span> </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(
+            sprintf(<span class="hljs-string">"Hello %s"</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'name'</span>))
+        );
+    }]
+));
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span> = <span class="hljs-keyword">new</span> UrlMatcher(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>routes</span>, <span class="hljs-keyword">new</span> RequestContext());
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span> = <span class="hljs-keyword">new</span> EventDispatcher();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span><span class="hljs-operator">-&gt;</span>addSubscriber(<span class="hljs-keyword">new</span> RouterListener(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span>, <span class="hljs-keyword">new</span> RequestStack()));
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controllerResolver</span> = <span class="hljs-keyword">new</span> ControllerResolver();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentResolver</span> = <span class="hljs-keyword">new</span> ArgumentResolver();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span> = <span class="hljs-keyword">new</span> HttpKernel(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>dispatcher</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controllerResolver</span>, <span class="hljs-keyword">new</span> RequestStack(), <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentResolver</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>terminate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="http-kernel-sub-requests"></span>
+</div>
+<div class="section">
+<h2 id="sub-requests">
+    Sub Requests
+    <a class="headerlink" href="#sub-requests" title="Permalink to this headline">¶</a>
+</h2>
+<p>In addition to the &quot;main&quot; request that's sent into <code translate="no" class="notranslate">HttpKernel::handle()</code>,
+you can also send a so-called &quot;sub request&quot;. A sub request looks and acts like
+any other request, but typically serves to render just one small portion of
+a page instead of a full page. You'll most commonly make sub-requests from
+your controller (or perhaps from inside a template, that's being rendered by
+your controller).</p>
+<object data="../_images/components/http_kernel/http-workflow-subrequest.svg" type="image/svg+xml"></object>
+<p>To execute a sub request, use <code translate="no" class="notranslate">HttpKernel::handle()</code>, but change the second
+argument as follows:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">HttpKernelInterface</span>;
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// create some other request manually as needed</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = <span class="hljs-keyword">new</span> Request();
+<span class="hljs-comment">// for example, possibly set its _controller manually</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>attributes<span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'_controller'</span>, <span class="hljs-string">'...'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, HttpKernelInterface<span class="hljs-operator">::</span>SUB_REQUEST);
+<span class="hljs-comment">// do something with this response</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This creates another full request-response cycle where this new <code translate="no" class="notranslate">Request</code> is
+transformed into a <code translate="no" class="notranslate">Response</code>. The only difference internally is that some
+listeners (e.g. security) may only act upon the main request. Each listener
+is passed some subclass of <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/KernelEvent.php" class="reference external" title="Symfony\Component\HttpKernel\Event\KernelEvent" rel="external noopener noreferrer" target="_blank">KernelEvent</a>,
+whose <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Event/KernelEvent.php#method_isMainRequest" class="reference external" title="Symfony\Component\HttpKernel\Event\KernelEvent::isMainRequest()" rel="external noopener noreferrer" target="_blank">isMainRequest()</a>
+method can be used to check if the current request is a &quot;main&quot; or &quot;sub&quot; request.</p>
+<p>For example, a listener that only needs to act on the main request may
+look like this:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">RequestEvent</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelRequest</span><span class="hljs-params">(RequestEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>
+</span>{
+    <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>isMainRequest()) {
+        <span class="hljs-keyword">return</span>;
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="http-kernel-resource-locator"></span>
+</div>
+<div class="section">
+<h2 id="locating-resources">
+    Locating Resources
+    <a class="headerlink" href="#locating-resources" title="Permalink to this headline">¶</a>
+</h2>
+<p>The HttpKernel component is responsible of the bundle mechanism used in Symfony
+applications. The key feature of the bundles is that they allow to override any
+resource used by the application (config files, templates, controllers,
+translation files, etc.)</p>
+<p>This overriding mechanism works because resources are referenced not by their
+physical path but by their logical path. For example, the <code translate="no" class="notranslate">services.xml</code> file
+stored in the <code translate="no" class="notranslate">Resources/config/</code> directory of a bundle called FooBundle is
+referenced as <code translate="no" class="notranslate">@FooBundle/Resources/config/services.xml</code>. This logical path
+will work when the application overrides that file and even if you change the
+directory of FooBundle.</p>
+<p>The HttpKernel component provides a method called <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php#method_locateResource" class="reference external" title="Symfony\Component\HttpKernel\Kernel::locateResource()" rel="external noopener noreferrer" target="_blank">locateResource()</a>
+which can be used to transform logical paths into physical paths:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>kernel</span><span class="hljs-operator">-&gt;</span>locateResource(<span class="hljs-string">'@FooBundle/Resources/config/services.xml'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="learn-more">
+    Learn more
+    <a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a>
+</h2>
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-1"><li><a href="../reference/events.html">Built-in Symfony Events</a></li></ul></div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

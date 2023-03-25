@@ -1,0 +1,2309 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="testing">
+    Testing
+    <a class="headerlink" href="#testing" title="Permalink to this headline">¶</a>
+</h1>
+<p>Whenever you write a new line of code, you also potentially add new bugs.
+To build better and more reliable applications, you should test your code
+using both functional and unit tests.</p>
+<span id="testing-installation"></span>
+<div class="section">
+<h2 id="the-phpunit-testing-framework">
+    The PHPUnit Testing Framework
+    <a class="headerlink" href="#the-phpunit-testing-framework" title="Permalink to this headline">¶</a>
+</h2>
+<p>Symfony integrates with an independent library called <a href="https://phpunit.de/" class="reference external" rel="external noopener noreferrer" target="_blank">PHPUnit</a> to give
+you a rich testing framework. This article won't cover PHPUnit itself,
+which has its own excellent <a href="https://phpunit.readthedocs.io/" class="reference external" rel="external noopener noreferrer" target="_blank">documentation</a>.</p>
+<p>Before creating your first test, install <code translate="no" class="notranslate">symfony/test-pack</code>, which installs
+some other packages needed for testing (such as <code translate="no" class="notranslate">phpunit/phpunit</code>):</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require --dev symfony/<span class="hljs-built_in">test</span>-pack</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>After the library is installed, try running PHPUnit:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/phpunit</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This command automatically runs your application tests. Each test is a
+PHP class ending with &quot;Test&quot; (e.g. <code translate="no" class="notranslate">BlogControllerTest</code>) that lives in
+the <code translate="no" class="notranslate">tests/</code> directory of your application.</p>
+<p>PHPUnit is configured by the <code translate="no" class="notranslate">phpunit.xml.dist</code> file in the root of your
+application. The default configuration provided by Symfony Flex will be
+enough in most cases. Read the <a href="https://phpunit.readthedocs.io/en/9.5/configuration.html" class="reference external" rel="external noopener noreferrer" target="_blank">PHPUnit documentation</a> to discover all
+possible configuration options (e.g. to enable code coverage or to split
+your test into multiple &quot;test suites&quot;).</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p><a href="setup.html#symfony-flex" class="reference internal">Symfony Flex</a> automatically creates
+<code translate="no" class="notranslate">phpunit.xml.dist</code> and <code translate="no" class="notranslate">tests/bootstrap.php</code>. If these files are
+missing, you can try running the recipe again using
+<code translate="no" class="notranslate">composer recipes:install phpunit/phpunit --force -v</code>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="types-of-tests">
+    Types of Tests
+    <a class="headerlink" href="#types-of-tests" title="Permalink to this headline">¶</a>
+</h2>
+<p>There are many types of automated tests and precise definitions often
+differ from project to project. In Symfony, the following definitions are
+used. If you have learned something different, that is not necessarily
+wrong, just different from what the Symfony documentation is using.</p>
+<dl>
+                        <dt><a href="testing.html#unit-tests" class="reference internal">Unit Tests</a></dt>
+        
+        <dd>
+                            These tests ensure that <em>individual</em> units of source code (e.g. a single
+class) behave as intended.
+                    </dd>
+                        <dt><a href="testing.html#integration-tests" class="reference internal">Integration Tests</a></dt>
+        
+        <dd>
+                            These tests test a combination of classes and commonly interact with
+Symfony's service container. These tests do not yet cover the fully
+working application, those are called <em>Application tests</em>.
+                    </dd>
+                        <dt><a href="testing.html#application-tests" class="reference internal">Application Tests</a></dt>
+        
+        <dd>
+                            Application tests test the behavior of a complete application. They
+make HTTP requests (both real and simulated ones) and test that the
+response is as expected.
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h2 id="unit-tests">
+    Unit Tests
+    <a class="headerlink" href="#unit-tests" title="Permalink to this headline">¶</a>
+</h2>
+<p>A <a href="https://en.wikipedia.org/wiki/Unit_testing" class="reference external" rel="external noopener noreferrer" target="_blank">unit test</a> ensures that individual units of source code (e.g. a single
+class or some specific method in some class) meet their design and behave
+as intended. Writing unit tests in a Symfony application is no different
+from writing standard PHPUnit unit tests. You can learn about it in the
+PHPUnit documentation: <a href="https://phpunit.readthedocs.io/en/9.5/writing-tests-for-phpunit.html" class="reference external" rel="external noopener noreferrer" target="_blank">Writing Tests for PHPUnit</a>.</p>
+<p>By convention, the <code translate="no" class="notranslate">tests/</code> directory should replicate the directory
+of your application for unit tests. So, if you're testing a class in the
+<code translate="no" class="notranslate">src/Form/</code> directory, put the test in the <code translate="no" class="notranslate">tests/Form/</code> directory.
+Autoloading is automatically enabled via the <code translate="no" class="notranslate">vendor/autoload.php</code> file
+(as configured by default in the <code translate="no" class="notranslate">phpunit.xml.dist</code> file).</p>
+<p>You can run tests using the <code translate="no" class="notranslate">bin/phpunit</code> command:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># run all tests of the application</span>
+<span class="hljs-prompt">$ </span>php bin/phpunit
+
+<span class="hljs-comment"># run all tests in the Form/ directory</span>
+<span class="hljs-prompt">$ </span>php bin/phpunit tests/Form
+
+<span class="hljs-comment"># run tests for the UserType class</span>
+<span class="hljs-prompt">$ </span>php bin/phpunit tests/Form/UserTypeTest.php</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>In large test suites, it can make sense to create subdirectories for
+each type of tests (e.g. <code translate="no" class="notranslate">tests/Unit/</code> and <code translate="no" class="notranslate">tests/Functional/</code>).</p>
+</div>
+<span id="integration-tests"></span>
+</div>
+<div class="section">
+<h2 id="integration-tests">
+    Integration Tests
+    <a class="headerlink" href="#integration-tests" title="Permalink to this headline">¶</a>
+</h2>
+<p>An integration test will test a larger part of your application compared to
+a unit test (e.g. a combination of services). Integration tests might want
+to use the Symfony Kernel to fetch a service from the dependency injection
+container.</p>
+<p>Symfony provides a <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Test/KernelTestCase.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Test\KernelTestCase" rel="external noopener noreferrer" target="_blank">KernelTestCase</a>
+class to help you creating and booting the kernel in your tests using
+<code translate="no" class="notranslate">bootKernel()</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// tests/Service/NewsletterGeneratorTest.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>\<span class="hljs-title">Service</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Test</span>\<span class="hljs-title">KernelTestCase</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NewsletterGeneratorTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">KernelTestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testSomething</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">self</span><span class="hljs-operator">::</span>bootKernel();
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">KernelTestCase</code> also makes sure your kernel is rebooted for each
+test. This assures that each test is run independently from each other.</p>
+<p>To run your application tests, the <code translate="no" class="notranslate">KernelTestCase</code> class needs to
+find the application kernel to initialize. The kernel class is
+usually defined in the <code translate="no" class="notranslate">KERNEL_CLASS</code> environment variable
+(included in the default <code translate="no" class="notranslate">.env.test</code> file provided by Symfony Flex):</p>
+<div translate="no" class="highlight-env highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs env bash"><span class="hljs-comment"># .env.test</span>
+KERNEL_CLASS=App\Kernel</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If your use case is more complex, you can also override the
+<code translate="no" class="notranslate">getKernelClass()</code> or <code translate="no" class="notranslate">createKernel()</code> methods of your functional
+test, which takes precedence over the <code translate="no" class="notranslate">KERNEL_CLASS</code> env var.</p>
+</div>
+<div class="section">
+<h3 id="set-up-your-test-environment">
+    Set-up your Test Environment
+    <a class="headerlink" href="#set-up-your-test-environment" title="Permalink to this headline">¶</a>
+</h3>
+<p>The tests create a kernel that runs in the <code translate="no" class="notranslate">test</code>
+<a href="configuration.html#configuration-environments" class="reference internal">environment</a>. This allows to have
+special settings for your tests inside <code translate="no" class="notranslate">config/packages/test/</code>.</p>
+<p>If you have Symfony Flex installed, some packages already installed some
+useful test configuration. For example, by default, the Twig bundle is
+configured to be especially strict to catch errors before deploying your
+code to production:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-00735f7df8a6eef7e327bb6b1da2cc622dd99b6a" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-e76180cede2ca4b6b6e3ae14998107acba3960ac" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-f97414e0ea2f374fa6f72dc7e057877249cad5e5" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-00735f7df8a6eef7e327bb6b1da2cc622dd99b6a" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/test/twig.yaml</span>
+<span class="hljs-attr">twig:</span>
+    <span class="hljs-attr">strict_variables:</span> <span class="hljs-literal">true</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-e76180cede2ca4b6b6e3ae14998107acba3960ac" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/test/twig.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:twig</span>=<span class="hljs-string">"http://symfony.com/schema/dic/twig"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/twig
+        https://symfony.com/schema/dic/twig/twig-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span> <span class="hljs-attr">strict-variables</span>=<span class="hljs-string">"true"</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-f97414e0ea2f374fa6f72dc7e057877249cad5e5" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/test/twig.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">TwigConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(TwigConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>twig</span><span class="hljs-operator">-&gt;</span>strictVariables(<span class="hljs-keyword">true</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>You can also use a different environment entirely, or override the default
+debug mode (<code translate="no" class="notranslate">true</code>) by passing each as options to the <code translate="no" class="notranslate">bootKernel()</code>
+method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">self</span><span class="hljs-operator">::</span>bootKernel([
+    <span class="hljs-string">'environment'</span> =&gt; <span class="hljs-string">'my_test_env'</span>,
+    <span class="hljs-string">'debug'</span>       =&gt; <span class="hljs-keyword">false</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>It is recommended to run your test with <code translate="no" class="notranslate">debug</code> set to <code translate="no" class="notranslate">false</code> on
+your CI server, as it significantly improves test performance. This
+disables clearing the cache. If your tests don't run in a clean
+environment each time, you have to manually clear it using for instance
+this code in <code translate="no" class="notranslate">tests/bootstrap.php</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// ensure a fresh cache when debug mode is disabled</span>
+(<span class="hljs-keyword">new</span> \Symfony\Component\Filesystem\Filesystem())<span class="hljs-operator">-&gt;</span>remove(<span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../var/cache/test'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h3 id="customizing-environment-variables">
+    Customizing Environment Variables
+    <a class="headerlink" href="#customizing-environment-variables" title="Permalink to this headline">¶</a>
+</h3>
+<p>If you need to customize some environment variables for your tests (e.g. the
+<code translate="no" class="notranslate">DATABASE_URL</code> used by Doctrine), you can do that by overriding anything you
+need in your <code translate="no" class="notranslate">.env.test</code> file:</p>
+<div translate="no" class="highlight-env highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs env bash"><span class="hljs-comment"># .env.test</span>
+
+<span class="hljs-comment"># ...</span>
+DATABASE_URL=<span class="hljs-string">"mysql://db_user:db_password@127.0.0.1:3306/db_name_test?serverVersion=5.7"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In the test environment, these env files are read (if vars are duplicated
+in them, files lower in the list override previous items):</p>
+<ol class="arabic">
+    <li><code translate="no" class="notranslate">.env</code>: containing env vars with application defaults;</li>
+<li><code translate="no" class="notranslate">.env.test</code>: overriding/setting specific test values or vars;</li>
+<li><code translate="no" class="notranslate">.env.test.local</code>: overriding settings specific for this machine.</li>
+</ol>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>The <code translate="no" class="notranslate">.env.local</code> file is <strong>not</strong> used in the test environment, to
+make each test set-up as consistent as possible.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="retrieving-services-in-the-test">
+    Retrieving Services in the Test
+    <a class="headerlink" href="#retrieving-services-in-the-test" title="Permalink to this headline">¶</a>
+</h3>
+<p>In your integration tests, you often need to fetch the service from the
+service container to call a specific method. After booting the kernel,
+the container is returned by <code translate="no" class="notranslate">static::getContainer()</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// tests/Service/NewsletterGeneratorTest.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>\<span class="hljs-title">Service</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Service</span>\<span class="hljs-title">NewsletterGenerator</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Test</span>\<span class="hljs-title">KernelTestCase</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NewsletterGeneratorTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">KernelTestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testSomething</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// (1) boot the Symfony kernel</span>
+        <span class="hljs-keyword">self</span><span class="hljs-operator">::</span>bootKernel();
+
+        <span class="hljs-comment">// (2) use static::getContainer() to access the service container</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span> = <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>getContainer();
+
+        <span class="hljs-comment">// (3) run some service &amp; test the result</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>newsletterGenerator</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>get(NewsletterGenerator<span class="hljs-operator">::</span>class);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>newsletter</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>newsletterGenerator</span><span class="hljs-operator">-&gt;</span>generateMonthlyNews(<span class="hljs-comment">/* ... */</span>);
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertEquals(<span class="hljs-string">'...'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>newsletter</span><span class="hljs-operator">-&gt;</span>getContent());
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The container from <code translate="no" class="notranslate">static::getContainer()</code> is actually a special test container.
+It gives you access to both the public services and the non-removed
+<a href="service_container.html#container-public" class="reference internal">private services</a>.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you need to test private services that have been removed (those who
+are not used by any other services), you need to declare those private
+services as public in the <code translate="no" class="notranslate">config/services_test.yaml</code> file.</p>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="mocking-dependencies">
+    Mocking Dependencies
+    <a class="headerlink" href="#mocking-dependencies" title="Permalink to this headline">¶</a>
+</h2>
+<p>Sometimes it can be useful to mock a dependency of a tested service.
+From the example in the previous section, let's assume the
+<code translate="no" class="notranslate">NewsletterGenerator</code> has a dependency to a private alias
+<code translate="no" class="notranslate">NewsRepositoryInterface</code> pointing to a private <code translate="no" class="notranslate">NewsRepository</code> service
+and you'd like to use a mocked <code translate="no" class="notranslate">NewsRepositoryInterface</code> instead of the
+concrete one:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Repository</span>\<span class="hljs-title">NewsRepositoryInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NewsletterGeneratorTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">KernelTestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testSomething</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// ... same bootstrap as the section above</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>newsRepository</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createMock(NewsRepositoryInterface<span class="hljs-operator">::</span>class);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>newsRepository</span><span class="hljs-operator">-&gt;</span>expects(<span class="hljs-keyword">self</span><span class="hljs-operator">::</span>once())
+            <span class="hljs-operator">-&gt;</span>method(<span class="hljs-string">'findNewsFromLastMonth'</span>)
+            <span class="hljs-operator">-&gt;</span>willReturn([
+                <span class="hljs-keyword">new</span> News(<span class="hljs-string">'some news'</span>),
+                <span class="hljs-keyword">new</span> News(<span class="hljs-string">'some other news'</span>),
+            ])
+        ;
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>set(NewsRepositoryInterface<span class="hljs-operator">::</span>class, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>newsRepository</span>);
+
+        <span class="hljs-comment">// will be injected the mocked repository</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>newsletterGenerator</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>get(NewsletterGenerator<span class="hljs-operator">::</span>class);
+
+        <span class="hljs-comment">// ...</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>No further configuration in required, as the test service container is a special one
+that allows you to interact with private services and aliases.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The possibility to set a private service with the test service container
+without declaring a public alias for it was introduced in Symfony 6.3.</p>
+</div>
+<span id="testing-databases"></span>
+<div class="section">
+<h3 id="configuring-a-database-for-tests">
+    Configuring a Database for Tests
+    <a class="headerlink" href="#configuring-a-database-for-tests" title="Permalink to this headline">¶</a>
+</h3>
+<p>Tests that interact with the database should use their own separate
+database to not mess with the databases used in the other
+<a href="configuration.html#configuration-environments" class="reference internal">configuration environments</a>.</p>
+<p>To do that, edit or create the <code translate="no" class="notranslate">.env.test.local</code> file at the root
+directory of your project and define the new value for the <code translate="no" class="notranslate">DATABASE_URL</code>
+env var:</p>
+<div translate="no" class="highlight-env highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs env bash"><span class="hljs-comment"># .env.test.local</span>
+DATABASE_URL=<span class="hljs-string">"mysql://USERNAME:PASSWORD@127.0.0.1:3306/DB_NAME?serverVersion=5.7"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This assumes that each developer/machine uses a different database for the
+tests. If the test set-up is the same on each machine, use the <code translate="no" class="notranslate">.env.test</code>
+file instead and commit it to the shared repository. Learn more about
+<a href="configuration.html#configuration-multiple-env-files" class="reference internal">using multiple .env files in Symfony applications</a>.</p>
+<p>After that, you can create the test database and all tables using:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># create the test database</span>
+<span class="hljs-prompt">$ </span>php bin/console --env=<span class="hljs-built_in">test</span> doctrine:database:create
+
+<span class="hljs-comment"># create the tables/columns in the test database</span>
+<span class="hljs-prompt">$ </span>php bin/console --env=<span class="hljs-built_in">test</span> doctrine:schema:create</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>A common practice is to append the <code translate="no" class="notranslate">_test</code> suffix to the original
+database names in tests. If the database name in production is called
+<code translate="no" class="notranslate">project_acme</code> the name of the testing database could be
+<code translate="no" class="notranslate">project_acme_test</code>.</p>
+</div>
+<div class="section">
+<h4 id="resetting-the-database-automatically-before-each-test">
+    Resetting the Database Automatically Before each Test
+    <a class="headerlink" href="#resetting-the-database-automatically-before-each-test" title="Permalink to this headline">¶</a>
+</h4>
+<p>Tests should be independent from each other to avoid side effects. For
+example, if some test modifies the database (by adding or removing an
+entity) it could change the results of other tests.</p>
+<p>The <a href="https://github.com/dmaicher/doctrine-test-bundle" class="reference external" rel="external noopener noreferrer" target="_blank">DAMADoctrineTestBundle</a> uses Doctrine transactions to let each test
+interact with an unmodified database. Install it using:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require --dev dama/doctrine-test-bundle</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, enable it as a PHPUnit extension:</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- phpunit.xml.dist --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">phpunit</span>&gt;</span>
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">extensions</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">extension</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension"</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">extensions</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">phpunit</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it! This bundle uses a clever trick: it begins a database
+transaction before every test and rolls it back automatically after the
+test finishes to undo all changes. Read more in the documentation of the
+<a href="https://github.com/dmaicher/doctrine-test-bundle" class="reference external" rel="external noopener noreferrer" target="_blank">DAMADoctrineTestBundle</a>.</p>
+<span id="doctrine-fixtures"></span>
+</div>
+<div class="section">
+<h4 id="load-dummy-data-fixtures">
+    Load Dummy Data Fixtures
+    <a class="headerlink" href="#load-dummy-data-fixtures" title="Permalink to this headline">¶</a>
+</h4>
+<p>Instead of using the real data from the production database, it's common to
+use fake or dummy data in the test database. This is usually called
+<em>&quot;fixtures data&quot;</em> and Doctrine provides a library to create and load them.
+Install it with:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require --dev doctrine/doctrine-fixtures-bundle</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, use the <code translate="no" class="notranslate">make:fixtures</code> command of the <a href="https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html" class="reference external">SymfonyMakerBundle</a> to
+generate an empty fixture class:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console make:fixtures
+
+The class name of the fixtures to create (e.g. AppFixtures):
+&gt; ProductFixture</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then you modify and use this class to load new entities in the database. For
+instance, to load <code translate="no" class="notranslate">Product</code> objects into Doctrine, use:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/DataFixtures/ProductFixture.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">DataFixtures</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">Product</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FixturesBundle</span>\<span class="hljs-title">Fixture</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Doctrine</span>\<span class="hljs-title">Persistence</span>\<span class="hljs-title">ObjectManager</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProductFixture</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Fixture</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">load</span><span class="hljs-params">(ObjectManager <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>manager</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span> = <span class="hljs-keyword">new</span> Product();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>setName(<span class="hljs-string">'Priceless widget'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>setPrice(<span class="hljs-number">14.50</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span><span class="hljs-operator">-&gt;</span>setDescription(<span class="hljs-string">'Ok, I guess it *does* have a price'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>manager</span><span class="hljs-operator">-&gt;</span>persist(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>product</span>);
+
+        <span class="hljs-comment">// add more products</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>manager</span><span class="hljs-operator">-&gt;</span>flush();
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Empty the database and reload <em>all</em> the fixture classes with:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console --env=<span class="hljs-built_in">test</span> doctrine:fixtures:load</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>For more information, read the <a href="https://symfony.com/doc/current/bundles/DoctrineFixturesBundle/index.html" class="reference external">DoctrineFixturesBundle documentation</a>.</p>
+<span id="functional-tests"></span>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="application-tests">
+    Application Tests
+    <a class="headerlink" href="#application-tests" title="Permalink to this headline">¶</a>
+</h2>
+<p>Application tests check the integration of all the different layers of the
+application (from the routing to the views). They are no different from
+unit tests or integration tests as far as PHPUnit is concerned, but they
+have a very specific workflow:</p>
+<ol class="arabic">
+    <li><a href="testing.html#testing-applications-arrange" class="reference internal">Make a request</a>;</li>
+<li><a href="testing.html#testing-applications-act" class="reference internal">Interact with the page</a> (e.g. click on a link or submit a form);</li>
+<li><a href="testing.html#testing-application-assertions" class="reference internal">Test the response</a>;</li>
+<li>Rinse and repeat.</li>
+</ol>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The tools used in this section can be installed via the <code translate="no" class="notranslate">symfony/test-pack</code>,
+use <code translate="no" class="notranslate">composer require symfony/test-pack</code> if you haven't done so already.</p>
+</div>
+<div class="section">
+<h3 id="write-your-first-application-test">
+    Write Your First Application Test
+    <a class="headerlink" href="#write-your-first-application-test" title="Permalink to this headline">¶</a>
+</h3>
+<p>Application tests are PHP files that typically live in the <code translate="no" class="notranslate">tests/Controller/</code>
+directory of your application. They often extend
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Test/WebTestCase.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Test\WebTestCase" rel="external noopener noreferrer" target="_blank">WebTestCase</a>. This class
+adds special logic on top of the <code translate="no" class="notranslate">KernelTestCase</code>. You can read more
+about that in the above <a href="testing.html#integration-tests" class="reference internal">section on integration tests</a>.</p>
+<p>If you want to test the pages handled by your
+<code translate="no" class="notranslate">PostController</code> class, start by creating a new <code translate="no" class="notranslate">PostControllerTest</code>
+using the <code translate="no" class="notranslate">make:test</code> command of the <a href="https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html" class="reference external">SymfonyMakerBundle</a>:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console make:<span class="hljs-built_in">test</span>
+
+ Which <span class="hljs-built_in">test</span> <span class="hljs-built_in">type</span> would you like?:
+ &gt; WebTestCase
+
+ The name of the <span class="hljs-built_in">test</span> class (e.g. BlogPostTest):
+ &gt; Controller\PostControllerTest</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This creates the following test class:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// tests/Controller/PostControllerTest.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Test</span>\<span class="hljs-title">WebTestCase</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostControllerTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">WebTestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testSomething</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// This calls KernelTestCase::bootKernel(), and creates a</span>
+        <span class="hljs-comment">// "client" that is acting as the browser</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>createClient();
+
+        <span class="hljs-comment">// Request a specific page</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>request(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/'</span>);
+
+        <span class="hljs-comment">// Validate a successful response and some content</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertResponseIsSuccessful();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertSelectorTextContains(<span class="hljs-string">'h1'</span>, <span class="hljs-string">'Hello World'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In the above example, the test validates that the HTTP response was successful
+and the request body contains a <code translate="no" class="notranslate">&lt;h1&gt;</code> tag with <code translate="no" class="notranslate">&quot;Hello world&quot;</code>.</p>
+<p>The <code translate="no" class="notranslate">request()</code> method also returns a crawler, which you can use to
+create more complex assertions in your tests:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>request(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/post/hello-world'</span>);
+
+<span class="hljs-comment">// for instance, count the number of ``.comment`` elements on the page</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertCount(<span class="hljs-number">4</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span><span class="hljs-operator">-&gt;</span>filter(<span class="hljs-string">'.comment'</span>));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can learn more about the crawler in <a href="testing/dom_crawler.html" class="reference internal">The DOM Crawler</a>.</p>
+<span id="testing-applications-arrange"></span>
+</div>
+<div class="section">
+<h3 id="making-requests">
+    Making Requests
+    <a class="headerlink" href="#making-requests" title="Permalink to this headline">¶</a>
+</h3>
+<p>The test client simulates an HTTP client like a browser and makes requests
+into your Symfony application:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>request(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/post/hello-world'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/BrowserKit/AbstractBrowser.php#method_request" class="reference external" title="Symfony\Component\BrowserKit\AbstractBrowser::request()" rel="external noopener noreferrer" target="_blank">request()</a> method takes the HTTP method and a URL as arguments and
+returns a <code translate="no" class="notranslate">Crawler</code> instance.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Hardcoding the request URLs is a best practice for application tests.
+If the test generates URLs using the Symfony router, it won't detect
+any change made to the application URLs which may impact the end users.</p>
+</div>
+<p>The full signature of the <code translate="no" class="notranslate">request()</code> method is:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">request(
+    string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>method</span>,
+    string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>uri</span>,
+    <span class="hljs-keyword">array</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>parameters</span> = [],
+    <span class="hljs-keyword">array</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>files</span> = [],
+    <span class="hljs-keyword">array</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>server</span> = [],
+    string <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>content</span> = <span class="hljs-keyword">null</span>,
+    bool <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>changeHistory</span> = <span class="hljs-keyword">true</span>
+): Crawler</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This allows you to create all types of requests you can think of:</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The test client is available as the <code translate="no" class="notranslate">test.client</code> service in the
+container in the <code translate="no" class="notranslate">test</code> environment (or wherever the
+<a href="reference/configuration/framework.html#reference-framework-test" class="reference internal">framework.test</a> option is enabled).
+This means you can override the service entirely if you need to.</p>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>Before each request, the client reboots the kernel, recreating
+the container from scratch.
+This ensures that every requests are &quot;isolated&quot; using &quot;new&quot; service objects.
+Also, it means that entities loaded by Doctrine repositories will
+be &quot;detached&quot;, so they will need to be refreshed by the manager or
+queried again from a repository.</p>
+</div>
+<div class="section">
+<h4 id="browsing-the-site">
+    Browsing the Site
+    <a class="headerlink" href="#browsing-the-site" title="Permalink to this headline">¶</a>
+</h4>
+<p>The Client supports many operations that can be done in a real browser:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>back();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>forward();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>reload();
+
+<span class="hljs-comment">// clears all cookies and the history</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>restart();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The <code translate="no" class="notranslate">back()</code> and <code translate="no" class="notranslate">forward()</code> methods skip the redirects that may have
+occurred when requesting a URL, as normal browsers do.</p>
+</div>
+</div>
+<div class="section">
+<h4 id="redirecting">
+    Redirecting
+    <a class="headerlink" href="#redirecting" title="Permalink to this headline">¶</a>
+</h4>
+<p>When a request returns a redirect response, the client does not follow
+it automatically. You can examine the response and force a redirection
+afterwards with the <code translate="no" class="notranslate">followRedirect()</code> method:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>followRedirect();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you want the client to automatically follow all redirects, you can
+force them by calling the <code translate="no" class="notranslate">followRedirects()</code> method before performing the request:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>followRedirects();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you pass <code translate="no" class="notranslate">false</code> to the <code translate="no" class="notranslate">followRedirects()</code> method, the redirects
+will no longer be followed:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>followRedirects(<span class="hljs-keyword">false</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="testing_logging_in_users"></span>
+</div>
+<div class="section">
+<h4 id="logging-in-users-authentication">
+    Logging in Users (Authentication)
+    <a class="headerlink" href="#logging-in-users-authentication" title="Permalink to this headline">¶</a>
+</h4>
+<p>When you want to add application tests for protected pages, you have to
+first &quot;login&quot; as a user. Reproducing the actual steps - such as
+submitting a login form - makes a test very slow. For this reason, Symfony
+provides a <code translate="no" class="notranslate">loginUser()</code> method to simulate logging in your functional
+tests.</p>
+<p>Instead of logging in with real users, it's recommended to create a user
+only for tests. You can do that with <a href="https://symfony.com/doc/current/bundles/DoctrineFixturesBundle/index.html" class="reference external">Doctrine data fixtures</a> to load the
+testing users only in the test database.</p>
+<p>After loading users in your database, use your user repository to fetch
+this user and use
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/KernelBrowser.php#method_loginUser" class="reference external" title="Symfony\Bundle\FrameworkBundle\KernelBrowser::loginUser()" rel="external noopener noreferrer" target="_blank">$client->loginUser()</a>
+to simulate a login request:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// tests/Controller/ProfileControllerTest.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Tests</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repository</span>\<span class="hljs-title">UserRepository</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Test</span>\<span class="hljs-title">WebTestCase</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProfileControllerTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">WebTestCase</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testVisitingWhileLoggedIn</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>createClient();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userRepository</span> = <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>getContainer()<span class="hljs-operator">-&gt;</span>get(UserRepository<span class="hljs-operator">::</span>class);
+
+        <span class="hljs-comment">// retrieve the test user</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>testUser</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>userRepository</span><span class="hljs-operator">-&gt;</span>findOneByEmail(<span class="hljs-string">'john.doe@example.com'</span>);
+
+        <span class="hljs-comment">// simulate $testUser being logged in</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>loginUser(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>testUser</span>);
+
+        <span class="hljs-comment">// test e.g. the profile page</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>request(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/profile'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertResponseIsSuccessful();
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertSelectorTextContains(<span class="hljs-string">'h1'</span>, <span class="hljs-string">'Hello John!'</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can pass any
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Core/User/UserInterface.php" class="reference external" title="Symfony\Component\Security\Core\User\UserInterface" rel="external noopener noreferrer" target="_blank">UserInterface</a> instance to
+<code translate="no" class="notranslate">loginUser()</code>. This method creates a special
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Bundle/FrameworkBundle/Test/TestBrowserToken.php" class="reference external" title="Symfony\Bundle\FrameworkBundle\Test\TestBrowserToken" rel="external noopener noreferrer" target="_blank">TestBrowserToken</a> object and
+stores in the session of the test client.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>By design, the <code translate="no" class="notranslate">loginUser()</code> method doesn't work when using stateless firewalls.
+Instead, add the appropriate token/header in each <code translate="no" class="notranslate">request()</code> call.</p>
+</div>
+</div>
+<div class="section">
+<h4 id="making-ajax-requests">
+    Making AJAX Requests
+    <a class="headerlink" href="#making-ajax-requests" title="Permalink to this headline">¶</a>
+</h4>
+<p>The client provides an
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/BrowserKit/AbstractBrowser.php#method_xmlHttpRequest" class="reference external" title="Symfony\Component\BrowserKit\AbstractBrowser::xmlHttpRequest()" rel="external noopener noreferrer" target="_blank">xmlHttpRequest()</a>
+method, which has the same arguments as the <code translate="no" class="notranslate">request()</code> method and is
+a shortcut to make AJAX requests:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// the required HTTP_X_REQUESTED_WITH header is added automatically</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>xmlHttpRequest(<span class="hljs-string">'POST'</span>, <span class="hljs-string">'/submit'</span>, [<span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Fabien'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h4 id="sending-custom-headers">
+    Sending Custom Headers
+    <a class="headerlink" href="#sending-custom-headers" title="Permalink to this headline">¶</a>
+</h4>
+<p>If your application behaves according to some HTTP headers, pass them as the
+second argument of <code translate="no" class="notranslate">createClient()</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>createClient([], [
+    <span class="hljs-string">'HTTP_HOST'</span>       =&gt; <span class="hljs-string">'en.example.com'</span>,
+    <span class="hljs-string">'HTTP_USER_AGENT'</span> =&gt; <span class="hljs-string">'MySuperBrowser/1.0'</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also override HTTP headers on a per request basis:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>request(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/'</span>, [], [], [
+    <span class="hljs-string">'HTTP_HOST'</span>       =&gt; <span class="hljs-string">'en.example.com'</span>,
+    <span class="hljs-string">'HTTP_USER_AGENT'</span> =&gt; <span class="hljs-string">'MySuperBrowser/1.0'</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>The name of your custom headers must follow the syntax defined in the
+<a href="https://tools.ietf.org/html/rfc3875#section-4.1.18" class="reference external" rel="external noopener noreferrer" target="_blank">section 4.1.18 of RFC 3875</a>: replace <code translate="no" class="notranslate">-</code> by <code translate="no" class="notranslate">_</code>, transform it into
+uppercase and prefix the result with <code translate="no" class="notranslate">HTTP_</code>. For example, if your
+header name is <code translate="no" class="notranslate">X-Session-Token</code>, pass <code translate="no" class="notranslate">HTTP_X_SESSION_TOKEN</code>.</p>
+</div>
+</div>
+<div class="section">
+<h4 id="reporting-exceptions">
+    Reporting Exceptions
+    <a class="headerlink" href="#reporting-exceptions" title="Permalink to this headline">¶</a>
+</h4>
+<p>Debugging exceptions in application tests may be difficult because by default
+they are caught and you need to look at the logs to see which exception was
+thrown. Disabling catching of exceptions in the test client allows the exception
+to be reported by PHPUnit:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>catchExceptions(<span class="hljs-keyword">false</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h4 id="accessing-internal-objects">
+    Accessing Internal Objects
+    <a class="headerlink" href="#accessing-internal-objects" title="Permalink to this headline">¶</a>
+</h4>
+<p>If you use the client to test your application, you might want to access the
+client's internal objects:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>history</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>getHistory();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cookieJar</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>getCookieJar();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can also get the objects related to the latest request:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// the HttpKernel request instance</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>getRequest();
+
+<span class="hljs-comment">// the BrowserKit request instance</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>getInternalRequest();
+
+<span class="hljs-comment">// the HttpKernel response instance</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>getResponse();
+
+<span class="hljs-comment">// the BrowserKit response instance</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>getInternalResponse();
+
+<span class="hljs-comment">// the Crawler instance</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>getCrawler();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h4 id="accessing-the-profiler-data">
+    Accessing the Profiler Data
+    <a class="headerlink" href="#accessing-the-profiler-data" title="Permalink to this headline">¶</a>
+</h4>
+<p>On each request, you can enable the Symfony profiler to collect data about the
+internal handling of that request. For example, the profiler could be used to
+verify that a given page runs less than a certain number of database
+queries when loading.</p>
+<p>To get the profiler for the last request, do the following:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// enables the profiler for the very next request</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>enableProfiler();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>request(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/profiler'</span>);
+
+<span class="hljs-comment">// gets the profile</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>profile</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>getProfile();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>For specific details on using the profiler inside a test, see the
+<a href="testing/profiling.html" class="reference internal">How to Use the Profiler in a Functional Test</a> article.</p>
+<span id="testing-applications-act"></span>
+</div>
+</div>
+<div class="section">
+<h3 id="interacting-with-the-response">
+    Interacting with the Response
+    <a class="headerlink" href="#interacting-with-the-response" title="Permalink to this headline">¶</a>
+</h3>
+<p>Like a real browser, the Client and Crawler objects can be used to interact
+with the page you're served:</p>
+<span id="testing-links"></span>
+<div class="section">
+<h4 id="clicking-on-links">
+    Clicking on Links
+    <a class="headerlink" href="#clicking-on-links" title="Permalink to this headline">¶</a>
+</h4>
+<p>Use the <code translate="no" class="notranslate">clickLink()</code> method to click on the first link that contains the
+given text (or the first clickable image with that <code translate="no" class="notranslate">alt</code> attribute):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>createClient();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>request(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/post/hello-world'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>clickLink(<span class="hljs-string">'Click here'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you need access to the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DomCrawler/Link.php" class="reference external" title="Symfony\Component\DomCrawler\Link" rel="external noopener noreferrer" target="_blank">Link</a> object
+that provides helpful methods specific to links (such as <code translate="no" class="notranslate">getMethod()</code> and
+<code translate="no" class="notranslate">getUri()</code>), use the <code translate="no" class="notranslate">Crawler::selectLink()</code> method instead:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>createClient();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>request(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/post/hello-world'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>link</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span><span class="hljs-operator">-&gt;</span>selectLink(<span class="hljs-string">'Click here'</span>)<span class="hljs-operator">-&gt;</span>link();
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-comment">// use click() if you want to click the selected link</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>click(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>link</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="testing-forms"></span>
+</div>
+<div class="section">
+<h4 id="submitting-forms">
+    Submitting Forms
+    <a class="headerlink" href="#submitting-forms" title="Permalink to this headline">¶</a>
+</h4>
+<p>Use the <code translate="no" class="notranslate">submitForm()</code> method to submit the form that contains the given button:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>createClient();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>request(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/post/hello-world'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>submitForm(<span class="hljs-string">'Add comment'</span>, [
+    <span class="hljs-string">'comment_form[content]'</span> =&gt; <span class="hljs-string">'...'</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The first argument of <code translate="no" class="notranslate">submitForm()</code> is the text content, <code translate="no" class="notranslate">id</code>, <code translate="no" class="notranslate">value</code> or
+<code translate="no" class="notranslate">name</code> of any <code translate="no" class="notranslate">&lt;button&gt;</code> or <code translate="no" class="notranslate">&lt;input type=&quot;submit&quot;&gt;</code> included in the form.
+The second optional argument is used to override the default form field values.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>Notice that you select form buttons and not forms, as a form can have several
+buttons. If you use the traversing API, keep in mind that you must look for a
+button.</p>
+</div>
+<p>If you need access to the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DomCrawler/Form.php" class="reference external" title="Symfony\Component\DomCrawler\Form" rel="external noopener noreferrer" target="_blank">Form</a> object
+that provides helpful methods specific to forms (such as <code translate="no" class="notranslate">getUri()</code>,
+<code translate="no" class="notranslate">getValues()</code> and <code translate="no" class="notranslate">getFields()</code>) use the <code translate="no" class="notranslate">Crawler::selectButton()</code> method instead:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = <span class="hljs-keyword">static</span><span class="hljs-operator">::</span>createClient();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>request(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/post/hello-world'</span>);
+
+<span class="hljs-comment">// select the button</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>buttonCrawlerNode</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>crawler</span><span class="hljs-operator">-&gt;</span>selectButton(<span class="hljs-string">'submit'</span>);
+
+<span class="hljs-comment">// retrieve the Form object for the form belonging to this button</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>buttonCrawlerNode</span><span class="hljs-operator">-&gt;</span>form();
+
+<span class="hljs-comment">// set values on a form object</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>[<span class="hljs-string">'my_form[name]'</span>] = <span class="hljs-string">'Fabien'</span>;
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>[<span class="hljs-string">'my_form[subject]'</span>] = <span class="hljs-string">'Symfony rocks!'</span>;
+
+<span class="hljs-comment">// submit the Form object</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>submit(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>);
+
+<span class="hljs-comment">// optionally, you can combine the last 2 steps by passing an array of</span>
+<span class="hljs-comment">// field values while submitting the form:</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>submit(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>, [
+    <span class="hljs-string">'my_form[name]'</span>    =&gt; <span class="hljs-string">'Fabien'</span>,
+    <span class="hljs-string">'my_form[subject]'</span> =&gt; <span class="hljs-string">'Symfony rocks!'</span>,
+]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Based on the form type, you can use different methods to fill in the
+input:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// selects an option or a radio</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>[<span class="hljs-string">'my_form[country]'</span>]<span class="hljs-operator">-&gt;</span>select(<span class="hljs-string">'France'</span>);
+
+<span class="hljs-comment">// ticks a checkbox</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>[<span class="hljs-string">'my_form[like_symfony]'</span>]<span class="hljs-operator">-&gt;</span>tick();
+
+<span class="hljs-comment">// uploads a file</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>[<span class="hljs-string">'my_form[photo]'</span>]<span class="hljs-operator">-&gt;</span>upload(<span class="hljs-string">'/path/to/lucas.jpg'</span>);
+
+<span class="hljs-comment">// In the case of a multiple file upload</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>[<span class="hljs-string">'my_form[field][0]'</span>]<span class="hljs-operator">-&gt;</span>upload(<span class="hljs-string">'/path/to/lucas.jpg'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>[<span class="hljs-string">'my_form[field][1]'</span>]<span class="hljs-operator">-&gt;</span>upload(<span class="hljs-string">'/path/to/lisa.jpg'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Instead of hardcoding the form name as part of the field names (e.g.
+<code translate="no" class="notranslate">my_form[...]</code> in previous examples), you can use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/DomCrawler/Form.php#method_getName" class="reference external" title="Symfony\Component\DomCrawler\Form::getName()" rel="external noopener noreferrer" target="_blank">getName()</a> method to get the
+form name.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you purposefully want to select &quot;invalid&quot; select/radio values, see
+<a href="components/dom_crawler.html#components-dom-crawler-invalid" class="reference internal">The DomCrawler Component</a>.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You can get the values that will be submitted by calling the <code translate="no" class="notranslate">getValues()</code>
+method on the <code translate="no" class="notranslate">Form</code> object. The uploaded files are available in a
+separate array returned by <code translate="no" class="notranslate">getFiles()</code>. The <code translate="no" class="notranslate">getPhpValues()</code> and
+<code translate="no" class="notranslate">getPhpFiles()</code> methods also return the submitted values, but in the
+PHP format (it converts the keys with square brackets notation - e.g.
+<code translate="no" class="notranslate">my_form[subject]</code> - to PHP arrays).</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The <code translate="no" class="notranslate">submit()</code> and <code translate="no" class="notranslate">submitForm()</code> methods define optional arguments to
+add custom server parameters and HTTP headers when submitting the form:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>submit(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>form</span>, [], [<span class="hljs-string">'HTTP_ACCEPT_LANGUAGE'</span> =&gt; <span class="hljs-string">'es'</span>]);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span><span class="hljs-operator">-&gt;</span>submitForm(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>button</span>, [], <span class="hljs-string">'POST'</span>, [<span class="hljs-string">'HTTP_ACCEPT_LANGUAGE'</span> =&gt; <span class="hljs-string">'es'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<span id="testing-application-assertions"></span>
+</div>
+</div>
+<div class="section">
+<h3 id="testing-the-response-assertions">
+    Testing the Response (Assertions)
+    <a class="headerlink" href="#testing-the-response-assertions" title="Permalink to this headline">¶</a>
+</h3>
+<p>Now that the tests have visited a page and interacted with it (e.g. filled
+in a form), it is time to verify that the expected output is shown.</p>
+<p>As all tests are based on PHPUnit, you can use any <a href="https://phpunit.readthedocs.io/en/9.5/assertions.html" class="reference external" rel="external noopener noreferrer" target="_blank">PHPUnit Assertion</a> in
+your tests. Combined with test Client and the Crawler, this allows you to
+check anything you want.</p>
+<p>However, Symfony provides useful shortcut methods for the most common cases:</p>
+<div class="section">
+<h4 id="response-assertions">
+    Response Assertions
+    <a class="headerlink" href="#response-assertions" title="Permalink to this headline">¶</a>
+</h4>
+<dl>
+                        <dt><code translate="no" class="notranslate">assertResponseIsSuccessful(string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the response was successful (HTTP status is 2xx).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertResponseStatusCodeSame(int $expectedCode, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts a specific HTTP status code.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertResponseRedirects(string $expectedLocation = null, int $expectedCode = null, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts the response is a redirect response (optionally, you can check
+the target location and status code).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertResponseHasHeader(string $headerName, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertResponseNotHasHeader(string $headerName, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts the given header is (not) available on the response.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertResponseHeaderSame(string $headerName, string $expectedValue, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertResponseHeaderNotSame(string $headerName, string $expectedValue, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts the given header does (not) contain the expected value on the
+response.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertResponseHasCookie(string $name, string $path = &#039;/&#039;, string $domain = null, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertResponseNotHasCookie(string $name, string $path = &#039;/&#039;, string $domain = null, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts the given cookie is present in the response (optionally
+checking for a specific cookie path or domain).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertResponseCookieValueSame(string $name, string $expectedValue, string $path = &#039;/&#039;, string $domain = null, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts the given cookie is present and set to the expected value.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertResponseFormatSame(?string $expectedFormat, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts the response format returned by the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpFoundation/Response.php#method_getFormat" class="reference external" title="Symfony\Component\HttpFoundation\Response::getFormat()" rel="external noopener noreferrer" target="_blank">getFormat()</a> method
+is the same as the expected value.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertResponseIsUnprocessable(string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts the response is unprocessable (HTTP status is 422)
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h4 id="request-assertions">
+    Request Assertions
+    <a class="headerlink" href="#request-assertions" title="Permalink to this headline">¶</a>
+</h4>
+<dl>
+                        <dt><code translate="no" class="notranslate">assertRequestAttributeValueSame(string $name, string $expectedValue, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts the given <a href="components/http_foundation.html#component-foundation-attributes" class="reference internal">request attribute</a>
+is set to the expected value.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertRouteSame($expectedRoute, array $parameters = [], string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts the request matches the given route and optionally route parameters.
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h4 id="browser-assertions">
+    Browser Assertions
+    <a class="headerlink" href="#browser-assertions" title="Permalink to this headline">¶</a>
+</h4>
+<dl>
+                        <dt><code translate="no" class="notranslate">assertBrowserHasCookie(string $name, string $path = &#039;/&#039;, string $domain = null, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertBrowserNotHasCookie(string $name, string $path = &#039;/&#039;, string $domain = null, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the test Client does (not) have the given cookie set
+(meaning, the cookie was set by any response in the test).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertBrowserCookieValueSame(string $name, string $expectedValue, string $path = &#039;/&#039;, string $domain = null, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts the given cookie in the test Client is set to the expected
+value.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertThatForClient(Constraint $constraint, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            <p class="first">Asserts the given Constraint in the Client. Useful for using your custom asserts
+in the same way as built-in asserts (i.e. without passing the Client as argument):</p>
+                            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// add this method in some custom class imported in your tests</span>
+<span class="hljs-keyword">protected</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">assertMyOwnCustomAssert</span><span class="hljs-params">()</span>: <span class="hljs-title">void</span>
+</span>{
+    <span class="hljs-keyword">self</span><span class="hljs-operator">::</span>assertThatForClient(<span class="hljs-keyword">new</span> SomeCustomConstraint());
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h4 id="crawler-assertions">
+    Crawler Assertions
+    <a class="headerlink" href="#crawler-assertions" title="Permalink to this headline">¶</a>
+</h4>
+<dl>
+                        <dt><code translate="no" class="notranslate">assertSelectorExists(string $selector, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertSelectorNotExists(string $selector, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the given selector does (not) match at least one element
+in the response.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertSelectorCount(int $expectedCount, string $selector, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the expected number of selector elements are in the response
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertSelectorTextContains(string $selector, string $text, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertSelectorTextNotContains(string $selector, string $text, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the first element matching the given selector does (not)
+contain the expected text.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertSelectorTextSame(string $selector, string $text, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the contents of the first element matching the given
+selector does (not) equal the expected text.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertPageTitleSame(string $expectedTitle, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the <code translate="no" class="notranslate">&lt;title&gt;</code> element is equal to the given title.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertPageTitleContains(string $expectedTitle, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the <code translate="no" class="notranslate">&lt;title&gt;</code> element contains the given title.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertInputValueSame(string $fieldName, string $expectedValue, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertInputValueNotSame(string $fieldName, string $expectedValue, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that value of the form input with the given name does (not)
+equal the expected value.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertCheckboxChecked(string $fieldName, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertCheckboxNotChecked(string $fieldName, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the checkbox with the given name is (not) checked.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertFormValue(string $formSelector, string $fieldName, string $value, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertNoFormValue(string $formSelector, string $fieldName, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that value of the field of the first form matching the given
+selector does (not) equal the expected value.
+                    </dd>
+    </dl>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>The <code translate="no" class="notranslate">assertSelectorCount()</code> method was introduced in Symfony 6.3.</p>
+</div>
+<span id="mailer-assertions"></span>
+</div>
+<div class="section">
+<h4 id="mailer-assertions">
+    Mailer Assertions
+    <a class="headerlink" href="#mailer-assertions" title="Permalink to this headline">¶</a>
+</h4>
+<dl>
+                        <dt><code translate="no" class="notranslate">assertEmailCount(int $count, string $transport = null, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the expected number of emails was sent.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertQueuedEmailCount(int $count, string $transport = null, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the expected number of emails was queued (e.g. using the
+Messenger component).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertEmailIsQueued(MessageEvent $event, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertEmailIsNotQueued(MessageEvent $event, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the given mailer event is (not) queued. Use
+<code translate="no" class="notranslate">getMailerEvent(int $index = 0, string $transport = null)</code> to
+retrieve a mailer event by index.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertEmailAttachmentCount(RawMessage $email, int $count, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the given email has the expected number of attachments. Use
+<code translate="no" class="notranslate">getMailerMessage(int $index = 0, string $transport = null)</code> to
+retrieve a specific email by index.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertEmailTextBodyContains(RawMessage $email, string $text, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertEmailTextBodyNotContains(RawMessage $email, string $text, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the text body of the given email does (not) contain the
+expected text.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertEmailHtmlBodyContains(RawMessage $email, string $text, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertEmailHtmlBodyNotContains(RawMessage $email, string $text, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the HTML body of the given email does (not) contain the
+expected text.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertEmailHasHeader(RawMessage $email, string $headerName, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertEmailNotHasHeader(RawMessage $email, string $headerName, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the given email does (not) have the expected header set.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertEmailHeaderSame(RawMessage $email, string $headerName, string $expectedValue, string $message = &#039;&#039;)</code>/<code translate="no" class="notranslate">assertEmailHeaderNotSame(RawMessage $email, string $headerName, string $expectedValue, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the given email does (not) have the expected header set to
+the expected value.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertEmailAddressContains(RawMessage $email, string $headerName, string $expectedValue, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the given address header equals the expected e-mail
+address. This assertion normalizes addresses like <code translate="no" class="notranslate">Jane Smith
+&lt;jane@example.com&gt;</code> into <code translate="no" class="notranslate">jane@example.com</code>.
+                    </dd>
+    </dl>
+</div>
+<div class="section">
+<h4 id="notifier-assertions">
+    Notifier Assertions
+    <a class="headerlink" href="#notifier-assertions" title="Permalink to this headline">¶</a>
+</h4>
+<dl>
+                        <dt><code translate="no" class="notranslate">assertNotificationCount(int $count, string $transportName = null, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the given number of notifications has been created
+(in total or for the given transport).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertQueuedNotificationCount(int $count, string $transportName = null, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the given number of notifications are queued
+(in total or for the given transport).
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertNotificationIsQueued(MessageEvent $event, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the given notification is queued.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertNotificationIsNotQueued(MessageEvent $event, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the given notification is not queued.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertNotificationSubjectContains(MessageInterface $notification, string $text, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the given text is included in the subject of
+the given notification.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertNotificationSubjectNotContains(MessageInterface $notification, string $text, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the given text is not included in the subject of
+the given notification.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertNotificationTransportIsEqual(MessageInterface $notification, string $transportName, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the name of the transport for the given notification
+is the same as the given text.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">assertNotificationTransportIsNotEqual(MessageInterface $notification, string $transportName, string $message = &#039;&#039;)</code></dt>
+        
+        <dd>
+                            Asserts that the name of the transport for the given notification
+is not the same as the given text.
+                    </dd>
+    </dl>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The Notifier assertions were introduced in Symfony 6.2.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="learn-more">
+    Learn more
+    <a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a>
+</h2>
+<div class="toctree-wrapper toc-size-md"><ul class="toctree toctree-level-1 toctree-length-8"><li><a href="testing/bootstrap.html">How to Customize the Bootstrap Process before Running Tests</a></li><li><a href="testing/database.html">How to Test A Doctrine Repository</a></li><li><a href="testing/dom_crawler.html">The DOM Crawler</a></li><li><a href="testing/http_authentication.html">How to Simulate HTTP Authentication in a Functional Test</a></li><li><a href="testing/insulating_clients.html">How to Test the Interaction of several Clients</a></li><li><a href="testing/profiling.html">How to Use the Profiler in a Functional Test</a></li><li><a href="components/dom_crawler.html">The DomCrawler Component</a></li><li><a href="components/css_selector.html">The CssSelector Component</a></li></ul></div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

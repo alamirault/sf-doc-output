@@ -1,0 +1,517 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="unit-testing">
+    Unit Testing
+    <a class="headerlink" href="#unit-testing" title="Permalink to this headline">¶</a>
+</h1>
+<p>You might have noticed some subtle but nonetheless important bugs in the
+framework we built in the previous chapter. When creating a framework, you
+must be sure that it behaves as advertised. If not, all the applications based
+on it will exhibit the same bugs. The good news is that whenever you fix a
+bug, you are fixing a bunch of applications too.</p>
+<p>Today's mission is to write unit tests for the framework we have created by
+using <a href="https://phpunit.readthedocs.io/en/9.5/" class="reference external" rel="external noopener noreferrer" target="_blank">PHPUnit</a>. At first, install PHPUnit as a development dependency:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require --dev phpunit/phpunit</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, create a PHPUnit configuration file in <code translate="no" class="notranslate">example.com/phpunit.xml.dist</code>:</p>
+<div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">phpunit</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:noNamespaceSchemaLocation</span>=<span class="hljs-string">"https://schema.phpunit.de/9.3/phpunit.xsd"</span>
+    <span class="hljs-attr">backupGlobals</span>=<span class="hljs-string">"false"</span>
+    <span class="hljs-attr">colors</span>=<span class="hljs-string">"true"</span>
+    <span class="hljs-attr">bootstrap</span>=<span class="hljs-string">"vendor/autoload.php"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">coverage</span> <span class="hljs-attr">processUncoveredFiles</span>=<span class="hljs-string">"true"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">include</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">directory</span> <span class="hljs-attr">suffix</span>=<span class="hljs-string">".php"</span>&gt;</span>./src<span class="hljs-tag">&lt;/<span class="hljs-name">directory</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">include</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">coverage</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">testsuites</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">testsuite</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Test Suite"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">directory</span>&gt;</span>./tests<span class="hljs-tag">&lt;/<span class="hljs-name">directory</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">testsuite</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">testsuites</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">phpunit</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This configuration defines sensible defaults for most PHPUnit settings; more
+interesting, the autoloader is used to bootstrap the tests, and tests will be
+stored under the <code translate="no" class="notranslate">example.com/tests/</code> directory.</p>
+<p>Now, let's write a test for &quot;not found&quot; resources. To avoid the creation of
+all dependencies when writing tests and to really just unit-test what we want,
+we are going to use <a href="https://phpunit.readthedocs.io/en/9.5/test-doubles.html" class="reference external" rel="external noopener noreferrer" target="_blank">test doubles</a>. Test doubles are easier to create when we
+rely on interfaces instead of concrete classes. Fortunately, Symfony provides
+such interfaces for core objects like the URL matcher and the controller
+resolver. Modify the framework to make use of them:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// example.com/src/Simplex/Framework.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Simplex</span>;
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Calendar</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">LeapYearController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">ArgumentResolverInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">ControllerResolverInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Matcher</span>\<span class="hljs-title">UrlMatcherInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Framework</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private UrlMatcherInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span>,
+        private ControllerResolverInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>resolver</span>,
+        private ArgumentResolverInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentResolver</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>We are now ready to write our first test:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// example.com/tests/Simplex/Tests/FrameworkTest.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Simplex</span>\<span class="hljs-title">Tests</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">PHPUnit</span>\<span class="hljs-title">Framework</span>\<span class="hljs-title">TestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Simplex</span>\<span class="hljs-title">Framework</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">ArgumentResolverInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">ControllerResolverInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">ResourceNotFoundException</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FrameworkTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testNotFoundHandling</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getFrameworkForException(<span class="hljs-keyword">new</span> ResourceNotFoundException());
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-keyword">new</span> Request());
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertEquals(<span class="hljs-number">404</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>getStatusCode());
+    }
+
+    <span class="hljs-keyword">private</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getFrameworkForException</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createMock(Routing\Matcher\UrlMatcherInterface<span class="hljs-operator">::</span>class);
+        <span class="hljs-comment">// use getMock() on PHPUnit 5.3 or below</span>
+        <span class="hljs-comment">// $matcher = $this-&gt;getMock(Routing\Matcher\UrlMatcherInterface::class);</span>
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span>
+            <span class="hljs-operator">-&gt;</span>expects(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>once())
+            <span class="hljs-operator">-&gt;</span>method(<span class="hljs-string">'match'</span>)
+            <span class="hljs-operator">-&gt;</span>will(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>throwException(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>))
+        ;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span>
+            <span class="hljs-operator">-&gt;</span>expects(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>once())
+            <span class="hljs-operator">-&gt;</span>method(<span class="hljs-string">'getContext'</span>)
+            <span class="hljs-operator">-&gt;</span>will(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>returnValue(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createMock(Routing\RequestContext<span class="hljs-operator">::</span>class)))
+        ;
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controllerResolver</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createMock(ControllerResolverInterface<span class="hljs-operator">::</span>class);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentResolver</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createMock(ArgumentResolverInterface<span class="hljs-operator">::</span>class);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Framework(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controllerResolver</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentResolver</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This test simulates a request that does not match any route. As such, the
+<code translate="no" class="notranslate">match()</code> method returns a <code translate="no" class="notranslate">ResourceNotFoundException</code> exception and we
+are testing that our framework converts this exception to a 404 response.</p>
+<p>Execute this test by running <code translate="no" class="notranslate">phpunit</code> in the <code translate="no" class="notranslate">example.com</code> directory:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>./vendor/bin/phpunit</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you don't understand what the hell is going on in the code, read the
+PHPUnit documentation on <a href="https://phpunit.readthedocs.io/en/9.5/test-doubles.html" class="reference external" rel="external noopener noreferrer" target="_blank">test doubles</a>.</p>
+</div>
+<p>After the test ran, you should see a green bar. If not, you have a bug
+either in the test or in the framework code!</p>
+<p>Adding a unit test for any exception thrown in a controller:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testErrorHandling</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>getFrameworkForException(<span class="hljs-keyword">new</span> \RuntimeException());
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-keyword">new</span> Request());
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertEquals(<span class="hljs-number">500</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>getStatusCode());
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Last, but not the least, let's write a test for when we actually have a proper
+Response:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">ArgumentResolver</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">ControllerResolver</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testControllerResponse</span><span class="hljs-params">()</span>
+</span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createMock(Routing\Matcher\UrlMatcherInterface<span class="hljs-operator">::</span>class);
+    <span class="hljs-comment">// use getMock() on PHPUnit 5.3 or below</span>
+    <span class="hljs-comment">// $matcher = $this-&gt;getMock(Routing\Matcher\UrlMatcherInterface::class);</span>
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span>
+        <span class="hljs-operator">-&gt;</span>expects(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>once())
+        <span class="hljs-operator">-&gt;</span>method(<span class="hljs-string">'match'</span>)
+        <span class="hljs-operator">-&gt;</span>will(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>returnValue([
+            <span class="hljs-string">'_route'</span> =&gt; <span class="hljs-string">'is_leap_year/{year}'</span>,
+            <span class="hljs-string">'year'</span> =&gt; <span class="hljs-string">'2000'</span>,
+            <span class="hljs-string">'_controller'</span> =&gt; [<span class="hljs-keyword">new</span> LeapYearController(), <span class="hljs-string">'index'</span>],
+        ]))
+    ;
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span>
+        <span class="hljs-operator">-&gt;</span>expects(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>once())
+        <span class="hljs-operator">-&gt;</span>method(<span class="hljs-string">'getContext'</span>)
+        <span class="hljs-operator">-&gt;</span>will(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>returnValue(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>createMock(Routing\RequestContext<span class="hljs-operator">::</span>class)))
+    ;
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controllerResolver</span> = <span class="hljs-keyword">new</span> ControllerResolver();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentResolver</span> = <span class="hljs-keyword">new</span> ArgumentResolver();
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span> = <span class="hljs-keyword">new</span> Framework(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>matcher</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>controllerResolver</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>argumentResolver</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>handle(<span class="hljs-keyword">new</span> Request());
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertEquals(<span class="hljs-number">200</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>getStatusCode());
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>assertStringContainsString(<span class="hljs-string">'Yep, this is a leap year!'</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>getContent());
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In this test, we simulate a route that matches and returns a simple
+controller. We check that the response status is 200 and that its content is
+the one we have set in the controller.</p>
+<p>To check that we have covered all possible use cases, run the PHPUnit test
+coverage feature (you need to enable <a href="https://xdebug.org/" class="reference external" rel="external noopener noreferrer" target="_blank">XDebug</a> first):</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>./vendor/bin/phpunit --coverage-html=cov/</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Open <code translate="no" class="notranslate">example.com/cov/src/Simplex/Framework.php.html</code> in a browser and check
+that all the lines for the Framework class are green (it means that they have
+been visited when the tests were executed).</p>
+<p>Alternatively you can output the result directly to the console:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>./vendor/bin/phpunit --coverage-text</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Thanks to the clean object-oriented code that we have written so far, we have
+been able to write unit-tests to cover all possible use cases of our
+framework; test doubles ensured that we were actually testing our code and not
+Symfony code.</p>
+<p>Now that we are confident (again) about the code we have written, we can
+safely think about the next batch of features we want to add to our framework.</p>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,1277 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-filesystem-component">
+    The Filesystem Component
+    <a class="headerlink" href="#the-filesystem-component" title="Permalink to this headline">¶</a>
+</h1>
+<blockquote><p>The Filesystem component provides platform-independent utilities for
+filesystem operations and for file/directory paths manipulation.</p>
+</blockquote>
+<div class="section">
+<h2 id="installation">
+    Installation
+    <a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+</h2>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer require symfony/filesystem</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you install this component outside of a Symfony application, you must
+require the <code translate="no" class="notranslate">vendor/autoload.php</code> file in your code to enable the class
+autoloading mechanism provided by Composer. Read
+<a href="using_components.html" class="reference internal">this article</a> for more details.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="usage">
+    Usage
+    <a class="headerlink" href="#usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>The component contains two main classes called <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php" class="reference external" title="Symfony\Component\Filesystem\Filesystem" rel="external noopener noreferrer" target="_blank">Filesystem</a>
+and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php" class="reference external" title="Symfony\Component\Filesystem\Path" rel="external noopener noreferrer" target="_blank">Path</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Filesystem</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">IOExceptionInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Filesystem</span>\<span class="hljs-title">Filesystem</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Filesystem</span>\<span class="hljs-title">Path</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span> = <span class="hljs-keyword">new</span> Filesystem();
+
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>mkdir(
+        Path<span class="hljs-operator">::</span>normalize(sys_get_temp_dir().<span class="hljs-string">'/'</span>.random_int(<span class="hljs-number">0</span>, <span class="hljs-number">1000</span>)),
+    );
+} <span class="hljs-keyword">catch</span> (IOExceptionInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span>) {
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">"An error occurred while creating your directory at "</span>.<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span><span class="hljs-operator">-&gt;</span>getPath();
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="filesystem-utilities">
+    Filesystem Utilities
+    <a class="headerlink" href="#filesystem-utilities" title="Permalink to this headline">¶</a>
+</h2>
+<div class="section">
+<h3 id="mkdir">
+    <code translate="no" class="notranslate">mkdir</code>
+    <a class="headerlink" href="#mkdir" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_mkdir" class="reference external" title="Symfony\Component\Filesystem\Filesystem::mkdir()" rel="external noopener noreferrer" target="_blank">mkdir()</a> creates a directory recursively.
+On POSIX filesystems, directories are created with a default mode value
+<code translate="no" class="notranslate">0777</code>. You can use the second argument to set your own mode:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>mkdir(<span class="hljs-string">'/tmp/photos'</span>, <span class="hljs-number">0700</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>You can pass an array or any <a href="https://secure.php.net/manual/en/class.traversable.php" class="reference external" title="Traversable" rel="external noopener noreferrer" target="_blank">Traversable</a> object as the first
+argument.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>This function ignores already existing directories.</p>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The directory permissions are affected by the current <a href="https://en.wikipedia.org/wiki/Umask" class="reference external" rel="external noopener noreferrer" target="_blank">umask</a>.
+Set the <code translate="no" class="notranslate">umask</code> for your webserver, use PHP's <a href="https://secure.php.net/manual/en/function.umask.php" class="reference external" title="umask" rel="external noopener noreferrer" target="_blank">umask</a>
+function or use the <a href="https://secure.php.net/manual/en/function.chmod.php" class="reference external" title="chmod" rel="external noopener noreferrer" target="_blank">chmod</a> function after the
+directory has been created.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="exists">
+    <code translate="no" class="notranslate">exists</code>
+    <a class="headerlink" href="#exists" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_exists" class="reference external" title="Symfony\Component\Filesystem\Filesystem::exists()" rel="external noopener noreferrer" target="_blank">exists()</a> checks for the
+presence of one or more files or directories and returns <code translate="no" class="notranslate">false</code> if any of
+them is missing:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// if this absolute directory exists, returns true</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>exists(<span class="hljs-string">'/tmp/photos'</span>);
+
+<span class="hljs-comment">// if rabbit.jpg exists and bottle.png does not exist, returns false</span>
+<span class="hljs-comment">// non-absolute paths are relative to the directory where the running PHP script is stored</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>exists([<span class="hljs-string">'rabbit.jpg'</span>, <span class="hljs-string">'bottle.png'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>You can pass an array or any <a href="https://secure.php.net/manual/en/class.traversable.php" class="reference external" title="Traversable" rel="external noopener noreferrer" target="_blank">Traversable</a> object as the first
+argument.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="copy">
+    <code translate="no" class="notranslate">copy</code>
+    <a class="headerlink" href="#copy" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_copy" class="reference external" title="Symfony\Component\Filesystem\Filesystem::copy()" rel="external noopener noreferrer" target="_blank">copy()</a> makes a copy of a
+single file (use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_mirror" class="reference external" title="Symfony\Component\Filesystem\Filesystem::mirror()" rel="external noopener noreferrer" target="_blank">mirror()</a> to
+copy directories). If the target already exists, the file is copied only if the
+source modification date is later than the target. This behavior can be overridden
+by the third boolean argument:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// works only if image-ICC has been modified after image.jpg</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>copy(<span class="hljs-string">'image-ICC.jpg'</span>, <span class="hljs-string">'image.jpg'</span>);
+
+<span class="hljs-comment">// image.jpg will be overridden</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>copy(<span class="hljs-string">'image-ICC.jpg'</span>, <span class="hljs-string">'image.jpg'</span>, <span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="touch">
+    <code translate="no" class="notranslate">touch</code>
+    <a class="headerlink" href="#touch" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_touch" class="reference external" title="Symfony\Component\Filesystem\Filesystem::touch()" rel="external noopener noreferrer" target="_blank">touch()</a> sets access and
+modification time for a file. The current time is used by default. You can set
+your own with the second argument. The third argument is the access time:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// sets modification time to the current timestamp</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>touch(<span class="hljs-string">'file.txt'</span>);
+<span class="hljs-comment">// sets modification time 10 seconds in the future</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>touch(<span class="hljs-string">'file.txt'</span>, time() + <span class="hljs-number">10</span>);
+<span class="hljs-comment">// sets access time 10 seconds in the past</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>touch(<span class="hljs-string">'file.txt'</span>, time(), time() - <span class="hljs-number">10</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>You can pass an array or any <a href="https://secure.php.net/manual/en/class.traversable.php" class="reference external" title="Traversable" rel="external noopener noreferrer" target="_blank">Traversable</a> object as the first
+argument.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="chown">
+    <code translate="no" class="notranslate">chown</code>
+    <a class="headerlink" href="#chown" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_chown" class="reference external" title="Symfony\Component\Filesystem\Filesystem::chown()" rel="external noopener noreferrer" target="_blank">chown()</a> changes the owner of
+a file. The third argument is a boolean recursive option:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// sets the owner of the lolcat video to www-data</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>chown(<span class="hljs-string">'lolcat.mp4'</span>, <span class="hljs-string">'www-data'</span>);
+<span class="hljs-comment">// changes the owner of the video directory recursively</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>chown(<span class="hljs-string">'/video'</span>, <span class="hljs-string">'www-data'</span>, <span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>You can pass an array or any <a href="https://secure.php.net/manual/en/class.traversable.php" class="reference external" title="Traversable" rel="external noopener noreferrer" target="_blank">Traversable</a> object as the first
+argument.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="chgrp">
+    <code translate="no" class="notranslate">chgrp</code>
+    <a class="headerlink" href="#chgrp" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_chgrp" class="reference external" title="Symfony\Component\Filesystem\Filesystem::chgrp()" rel="external noopener noreferrer" target="_blank">chgrp()</a> changes the group of
+a file. The third argument is a boolean recursive option:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// sets the group of the lolcat video to nginx</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>chgrp(<span class="hljs-string">'lolcat.mp4'</span>, <span class="hljs-string">'nginx'</span>);
+<span class="hljs-comment">// changes the group of the video directory recursively</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>chgrp(<span class="hljs-string">'/video'</span>, <span class="hljs-string">'nginx'</span>, <span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>You can pass an array or any <a href="https://secure.php.net/manual/en/class.traversable.php" class="reference external" title="Traversable" rel="external noopener noreferrer" target="_blank">Traversable</a> object as the first
+argument.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="chmod">
+    <code translate="no" class="notranslate">chmod</code>
+    <a class="headerlink" href="#chmod" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_chmod" class="reference external" title="Symfony\Component\Filesystem\Filesystem::chmod()" rel="external noopener noreferrer" target="_blank">chmod()</a> changes the mode or
+permissions of a file. The fourth argument is a boolean recursive option:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// sets the mode of the video to 0600</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>chmod(<span class="hljs-string">'video.ogg'</span>, <span class="hljs-number">0600</span>);
+<span class="hljs-comment">// changes the mode of the src directory recursively</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>chmod(<span class="hljs-string">'src'</span>, <span class="hljs-number">0700</span>, <span class="hljs-number">0000</span>, <span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>You can pass an array or any <a href="https://secure.php.net/manual/en/class.traversable.php" class="reference external" title="Traversable" rel="external noopener noreferrer" target="_blank">Traversable</a> object as the first
+argument.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="remove">
+    <code translate="no" class="notranslate">remove</code>
+    <a class="headerlink" href="#remove" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_remove" class="reference external" title="Symfony\Component\Filesystem\Filesystem::remove()" rel="external noopener noreferrer" target="_blank">remove()</a> deletes files,
+directories and symlinks:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>remove([<span class="hljs-string">'symlink'</span>, <span class="hljs-string">'/path/to/directory'</span>, <span class="hljs-string">'activity.log'</span>]);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>You can pass an array or any <a href="https://secure.php.net/manual/en/class.traversable.php" class="reference external" title="Traversable" rel="external noopener noreferrer" target="_blank">Traversable</a> object as the first
+argument.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="rename">
+    <code translate="no" class="notranslate">rename</code>
+    <a class="headerlink" href="#rename" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_rename" class="reference external" title="Symfony\Component\Filesystem\Filesystem::rename()" rel="external noopener noreferrer" target="_blank">rename()</a> changes the name
+of a single file or directory:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// renames a file</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>rename(<span class="hljs-string">'/tmp/processed_video.ogg'</span>, <span class="hljs-string">'/path/to/store/video_647.ogg'</span>);
+<span class="hljs-comment">// renames a directory</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>rename(<span class="hljs-string">'/tmp/files'</span>, <span class="hljs-string">'/path/to/store/files'</span>);
+<span class="hljs-comment">// if the target already exists, a third boolean argument is available to overwrite.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>rename(<span class="hljs-string">'/tmp/processed_video2.ogg'</span>, <span class="hljs-string">'/path/to/store/video_647.ogg'</span>, <span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="symlink">
+    <code translate="no" class="notranslate">symlink</code>
+    <a class="headerlink" href="#symlink" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_symlink" class="reference external" title="Symfony\Component\Filesystem\Filesystem::symlink()" rel="external noopener noreferrer" target="_blank">symlink()</a> creates a
+symbolic link from the target to the destination. If the filesystem does not
+support symbolic links, a third boolean argument is available:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// creates a symbolic link</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>symlink(<span class="hljs-string">'/path/to/source'</span>, <span class="hljs-string">'/path/to/destination'</span>);
+<span class="hljs-comment">// duplicates the source directory if the filesystem</span>
+<span class="hljs-comment">// does not support symbolic links</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>symlink(<span class="hljs-string">'/path/to/source'</span>, <span class="hljs-string">'/path/to/destination'</span>, <span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="readlink">
+    <code translate="no" class="notranslate">readlink</code>
+    <a class="headerlink" href="#readlink" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_readlink" class="reference external" title="Symfony\Component\Filesystem\Filesystem::readlink()" rel="external noopener noreferrer" target="_blank">readlink()</a> read links targets.</p>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_readlink" class="reference external" title="Symfony\Component\Filesystem\Filesystem::readlink()" rel="external noopener noreferrer" target="_blank">readlink()</a> method
+provided by the Filesystem component behaves in the same way on all operating
+systems (unlike PHP's <a href="https://secure.php.net/manual/en/function.readlink.php" class="reference external" title="readlink" rel="external noopener noreferrer" target="_blank">readlink</a> function):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// returns the next direct target of the link without considering the existence of the target</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>readlink(<span class="hljs-string">'/path/to/link'</span>);
+
+<span class="hljs-comment">// returns its absolute fully resolved final version of the target (if there are nested links, they are resolved)</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>readlink(<span class="hljs-string">'/path/to/link'</span>, <span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Its behavior is the following:</p>
+<ul>
+    <li><p>When <code translate="no" class="notranslate">$canonicalize</code> is <code translate="no" class="notranslate">false</code>:</p>
+<ul>
+    <li>if <code translate="no" class="notranslate">$path</code> does not exist or is not a link, it returns <code translate="no" class="notranslate">null</code>.</li>
+<li>if <code translate="no" class="notranslate">$path</code> is a link, it returns the next direct target of the link without considering the existence of the target.</li>
+</ul></li>
+<li><p>When <code translate="no" class="notranslate">$canonicalize</code> is <code translate="no" class="notranslate">true</code>:</p>
+<ul>
+    <li>if <code translate="no" class="notranslate">$path</code> does not exist, it returns null.</li>
+<li>if <code translate="no" class="notranslate">$path</code> exists, it returns its absolute fully resolved final version.</li>
+</ul></li>
+</ul>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you wish to canonicalize the path without checking its existence, you can
+use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_canonicalize" class="reference external" title="Symfony\Component\Filesystem\Path::canonicalize()" rel="external noopener noreferrer" target="_blank">canonicalize()</a> method instead.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="makepathrelative">
+    <code translate="no" class="notranslate">makePathRelative</code>
+    <a class="headerlink" href="#makepathrelative" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_makePathRelative" class="reference external" title="Symfony\Component\Filesystem\Filesystem::makePathRelative()" rel="external noopener noreferrer" target="_blank">makePathRelative()</a> takes two
+absolute paths and returns the relative path from the second path to the first one:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// returns '../'</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>makePathRelative(
+    <span class="hljs-string">'/var/lib/symfony/src/Symfony/'</span>,
+    <span class="hljs-string">'/var/lib/symfony/src/Symfony/Component'</span>
+);
+<span class="hljs-comment">// returns 'videos/'</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>makePathRelative(<span class="hljs-string">'/tmp/videos'</span>, <span class="hljs-string">'/tmp'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="mirror">
+    <code translate="no" class="notranslate">mirror</code>
+    <a class="headerlink" href="#mirror" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_mirror" class="reference external" title="Symfony\Component\Filesystem\Filesystem::mirror()" rel="external noopener noreferrer" target="_blank">mirror()</a> copies all the
+contents of the source directory into the target one (use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_copy" class="reference external" title="Symfony\Component\Filesystem\Filesystem::copy()" rel="external noopener noreferrer" target="_blank">copy()</a> method to copy single
+files):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>mirror(<span class="hljs-string">'/path/to/source'</span>, <span class="hljs-string">'/path/to/target'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="isabsolutepath">
+    <code translate="no" class="notranslate">isAbsolutePath</code>
+    <a class="headerlink" href="#isabsolutepath" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_isAbsolutePath" class="reference external" title="Symfony\Component\Filesystem\Filesystem::isAbsolutePath()" rel="external noopener noreferrer" target="_blank">isAbsolutePath()</a> returns
+<code translate="no" class="notranslate">true</code> if the given path is absolute, <code translate="no" class="notranslate">false</code> otherwise:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// returns true</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>isAbsolutePath(<span class="hljs-string">'/tmp'</span>);
+<span class="hljs-comment">// returns true</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>isAbsolutePath(<span class="hljs-string">'c:\\Windows'</span>);
+<span class="hljs-comment">// returns false</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>isAbsolutePath(<span class="hljs-string">'tmp'</span>);
+<span class="hljs-comment">// returns false</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>isAbsolutePath(<span class="hljs-string">'../dir'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="tempnam">
+    <code translate="no" class="notranslate">tempnam</code>
+    <a class="headerlink" href="#tempnam" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_tempnam" class="reference external" title="Symfony\Component\Filesystem\Filesystem::tempnam()" rel="external noopener noreferrer" target="_blank">tempnam()</a> creates a
+temporary file with a unique filename, and returns its path, or throw an
+exception on failure:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// returns a path like : /tmp/prefix_wyjgtF</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>tempnam(<span class="hljs-string">'/tmp'</span>, <span class="hljs-string">'prefix_'</span>);
+<span class="hljs-comment">// returns a path like : /tmp/prefix_wyjgtF.png</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>tempnam(<span class="hljs-string">'/tmp'</span>, <span class="hljs-string">'prefix_'</span>, <span class="hljs-string">'.png'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="filesystem-dumpfile"></span>
+</div>
+<div class="section">
+<h3 id="dumpfile">
+    <code translate="no" class="notranslate">dumpFile</code>
+    <a class="headerlink" href="#dumpfile" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_dumpFile" class="reference external" title="Symfony\Component\Filesystem\Filesystem::dumpFile()" rel="external noopener noreferrer" target="_blank">dumpFile()</a> saves the given
+contents into a file (creating the file and its directory if they don't exist).
+It does this in an atomic manner: it writes a temporary file first and then moves
+it to the new file location when it's finished. This means that the user will
+always see either the complete old file or complete new file (but never a
+partially-written file):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>dumpFile(<span class="hljs-string">'file.txt'</span>, <span class="hljs-string">'Hello World'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The <code translate="no" class="notranslate">file.txt</code> file contains <code translate="no" class="notranslate">Hello World</code> now.</p>
+</div>
+<div class="section">
+<h3 id="appendtofile">
+    <code translate="no" class="notranslate">appendToFile</code>
+    <a class="headerlink" href="#appendtofile" title="Permalink to this headline">¶</a>
+</h3>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Filesystem.php#method_appendToFile" class="reference external" title="Symfony\Component\Filesystem\Filesystem::appendToFile()" rel="external noopener noreferrer" target="_blank">appendToFile()</a> adds new
+contents at the end of some file:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>appendToFile(<span class="hljs-string">'logs.txt'</span>, <span class="hljs-string">'Email sent to user@example.com'</span>);
+<span class="hljs-comment">// the third argument tells whether the file should be locked when writing to it</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>filesystem</span><span class="hljs-operator">-&gt;</span>appendToFile(<span class="hljs-string">'logs.txt'</span>, <span class="hljs-string">'Email sent to user@example.com'</span>, <span class="hljs-keyword">true</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If either the file or its containing directory doesn't exist, this method
+creates them before appending the contents.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="path-manipulation-utilities">
+    Path Manipulation Utilities
+    <a class="headerlink" href="#path-manipulation-utilities" title="Permalink to this headline">¶</a>
+</h2>
+<p>Dealing with file paths usually involves some difficulties:</p>
+<ul>
+    <li>Platform differences: file paths look different on different platforms. UNIX
+file paths start with a slash (&quot;/&quot;), while Windows file paths start with a
+system drive (&quot;C:&quot;). UNIX uses forward slashes, while Windows uses backslashes
+by default.</li>
+<li>Absolute/relative paths: web applications frequently need to deal with absolute
+and relative paths. Converting one to the other properly is tricky and repetitive.</li>
+</ul>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php" class="reference external" title="Symfony\Component\Filesystem\Path" rel="external noopener noreferrer" target="_blank">Path</a> provides utility methods to tackle
+those issues.</p>
+<div class="section">
+<h3 id="canonicalization">
+    Canonicalization
+    <a class="headerlink" href="#canonicalization" title="Permalink to this headline">¶</a>
+</h3>
+<p>Returns the shortest path name equivalent to the given path. It applies the
+following rules iteratively until no further processing can be done:</p>
+<ul>
+    <li>&quot;.&quot; segments are removed;</li>
+<li>&quot;..&quot; segments are resolved;</li>
+<li>backslashes (&quot;\&quot;) are converted into forward slashes (&quot;/&quot;);</li>
+<li>root paths (&quot;/&quot; and &quot;C:/&quot;) always terminate with a slash;</li>
+<li>non-root paths never terminate with a slash;</li>
+<li>schemes (such as &quot;phar://&quot;) are kept;</li>
+<li>replace <code translate="no" class="notranslate">~</code> with the user's home directory.</li>
+</ul>
+<p>You can canonicalize a path with <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_canonicalize" class="reference external" title="Symfony\Component\Filesystem\Path::canonicalize()" rel="external noopener noreferrer" target="_blank">canonicalize()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">echo</span> Path<span class="hljs-operator">::</span>canonicalize(<span class="hljs-string">'/var/www/vhost/webmozart/../config.ini'</span>);
+<span class="hljs-comment">// =&gt; /var/www/vhost/config.ini</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>You can pass absolute paths and relative paths to the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_canonicalize" class="reference external" title="Symfony\Component\Filesystem\Path::canonicalize()" rel="external noopener noreferrer" target="_blank">canonicalize()</a> method. When a
+relative path is passed, &quot;..&quot; segments at the beginning of the path are kept:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">echo</span> Path<span class="hljs-operator">::</span>canonicalize(<span class="hljs-string">'../uploads/../config/config.yaml'</span>);
+<span class="hljs-comment">// =&gt; ../config/config.yaml</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Malformed paths are returned unchanged:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">echo</span> Path<span class="hljs-operator">::</span>canonicalize(<span class="hljs-string">'C:Programs/PHP/php.ini'</span>);
+<span class="hljs-comment">// =&gt; C:Programs/PHP/php.ini</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="converting-absolute-relative-paths">
+    Converting Absolute/Relative Paths
+    <a class="headerlink" href="#converting-absolute-relative-paths" title="Permalink to this headline">¶</a>
+</h3>
+<p>Absolute/relative paths can be converted with the methods
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_makeAbsolute" class="reference external" title="Symfony\Component\Filesystem\Path::makeAbsolute()" rel="external noopener noreferrer" target="_blank">makeAbsolute()</a>
+and <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_makeRelative" class="reference external" title="Symfony\Component\Filesystem\Path::makeRelative()" rel="external noopener noreferrer" target="_blank">makeRelative()</a>.</p>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_makeAbsolute" class="reference external" title="Symfony\Component\Filesystem\Path::makeAbsolute()" rel="external noopener noreferrer" target="_blank">makeAbsolute()</a> method expects a
+relative path and a base path to base that relative path upon:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">echo</span> Path<span class="hljs-operator">::</span>makeAbsolute(<span class="hljs-string">'config/config.yaml'</span>, <span class="hljs-string">'/var/www/project'</span>);
+<span class="hljs-comment">// =&gt; /var/www/project/config/config.yaml</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If an absolute path is passed in the first argument, the absolute path is
+returned unchanged:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">echo</span> Path<span class="hljs-operator">::</span>makeAbsolute(<span class="hljs-string">'/usr/share/lib/config.ini'</span>, <span class="hljs-string">'/var/www/project'</span>);
+<span class="hljs-comment">// =&gt; /usr/share/lib/config.ini</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The method resolves &quot;..&quot; segments, if there are any:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">echo</span> Path<span class="hljs-operator">::</span>makeAbsolute(<span class="hljs-string">'../config/config.yaml'</span>, <span class="hljs-string">'/var/www/project/uploads'</span>);
+<span class="hljs-comment">// =&gt; /var/www/project/config/config.yaml</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>This method is very useful if you want to be able to accept relative paths (for
+example, relative to the root directory of your project) and absolute paths at
+the same time.</p>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_makeRelative" class="reference external" title="Symfony\Component\Filesystem\Path::makeRelative()" rel="external noopener noreferrer" target="_blank">makeRelative()</a> is the inverse
+operation to <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_makeAbsolute" class="reference external" title="Symfony\Component\Filesystem\Path::makeAbsolute()" rel="external noopener noreferrer" target="_blank">makeAbsolute()</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">echo</span> Path<span class="hljs-operator">::</span>makeRelative(<span class="hljs-string">'/var/www/project/config/config.yaml'</span>, <span class="hljs-string">'/var/www/project'</span>);
+<span class="hljs-comment">// =&gt; config/config.yaml</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If the path is not within the base path, the method will prepend &quot;..&quot; segments
+as necessary:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">echo</span> Path<span class="hljs-operator">::</span>makeRelative(<span class="hljs-string">'/var/www/project/config/config.yaml'</span>, <span class="hljs-string">'/var/www/project/uploads'</span>);
+<span class="hljs-comment">// =&gt; ../config/config.yaml</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_isAbsolute" class="reference external" title="Symfony\Component\Filesystem\Path::isAbsolute()" rel="external noopener noreferrer" target="_blank">isAbsolute()</a> and
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_isRelative" class="reference external" title="Symfony\Component\Filesystem\Path::isRelative()" rel="external noopener noreferrer" target="_blank">isRelative()</a> to check whether a
+path is absolute or relative:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">Path<span class="hljs-operator">::</span>isAbsolute(<span class="hljs-string">'C:\Programs\PHP\php.ini'</span>)
+<span class="hljs-comment">// =&gt; true</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>All four methods internally canonicalize the passed path.</p>
+</div>
+<div class="section">
+<h3 id="finding-longest-common-base-paths">
+    Finding Longest Common Base Paths
+    <a class="headerlink" href="#finding-longest-common-base-paths" title="Permalink to this headline">¶</a>
+</h3>
+<p>When you store absolute file paths on the file system, this leads to a lot of
+duplicated information:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">return</span> [
+    <span class="hljs-string">'/var/www/vhosts/project/httpdocs/config/config.yaml'</span>,
+    <span class="hljs-string">'/var/www/vhosts/project/httpdocs/config/routing.yaml'</span>,
+    <span class="hljs-string">'/var/www/vhosts/project/httpdocs/config/services.yaml'</span>,
+    <span class="hljs-string">'/var/www/vhosts/project/httpdocs/images/banana.gif'</span>,
+    <span class="hljs-string">'/var/www/vhosts/project/httpdocs/uploads/images/nicer-banana.gif'</span>,
+];</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Especially when storing many paths, the amount of duplicated information is
+noticeable. You can use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_getLongestCommonBasePath" class="reference external" title="Symfony\Component\Filesystem\Path::getLongestCommonBasePath()" rel="external noopener noreferrer" target="_blank">getLongestCommonBasePath()</a>
+to check a list of paths for a common base path:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">Path<span class="hljs-operator">::</span>getLongestCommonBasePath(
+    <span class="hljs-string">'/var/www/vhosts/project/httpdocs/config/config.yaml'</span>,
+    <span class="hljs-string">'/var/www/vhosts/project/httpdocs/config/routing.yaml'</span>,
+    <span class="hljs-string">'/var/www/vhosts/project/httpdocs/config/services.yaml'</span>,
+    <span class="hljs-string">'/var/www/vhosts/project/httpdocs/images/banana.gif'</span>,
+    <span class="hljs-string">'/var/www/vhosts/project/httpdocs/uploads/images/nicer-banana.gif'</span>
+);
+<span class="hljs-comment">// =&gt; /var/www/vhosts/project/httpdocs</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Use this path together with <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_makeRelative" class="reference external" title="Symfony\Component\Filesystem\Path::makeRelative()" rel="external noopener noreferrer" target="_blank">makeRelative()</a>
+to shorten the stored paths:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bp</span> = <span class="hljs-string">'/var/www/vhosts/project/httpdocs'</span>;
+
+<span class="hljs-keyword">return</span> [
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bp</span>.<span class="hljs-string">'/config/config.yaml'</span>,
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bp</span>.<span class="hljs-string">'/config/routing.yaml'</span>,
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bp</span>.<span class="hljs-string">'/config/services.yaml'</span>,
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bp</span>.<span class="hljs-string">'/images/banana.gif'</span>,
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>bp</span>.<span class="hljs-string">'/uploads/images/nicer-banana.gif'</span>,
+];</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_getLongestCommonBasePath" class="reference external" title="Symfony\Component\Filesystem\Path::getLongestCommonBasePath()" rel="external noopener noreferrer" target="_blank">getLongestCommonBasePath()</a> always
+returns canonical paths.</p>
+<p>Use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_isBasePath" class="reference external" title="Symfony\Component\Filesystem\Path::isBasePath()" rel="external noopener noreferrer" target="_blank">isBasePath()</a> to test whether a
+path is a base path of another path:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">Path<span class="hljs-operator">::</span>isBasePath(<span class="hljs-string">"/var/www"</span>, <span class="hljs-string">"/var/www/project"</span>);
+<span class="hljs-comment">// =&gt; true</span>
+
+Path<span class="hljs-operator">::</span>isBasePath(<span class="hljs-string">"/var/www"</span>, <span class="hljs-string">"/var/www/project/.."</span>);
+<span class="hljs-comment">// =&gt; true</span>
+
+Path<span class="hljs-operator">::</span>isBasePath(<span class="hljs-string">"/var/www"</span>, <span class="hljs-string">"/var/www/project/../.."</span>);
+<span class="hljs-comment">// =&gt; false</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="finding-directories-root-directories">
+    Finding Directories/Root Directories
+    <a class="headerlink" href="#finding-directories-root-directories" title="Permalink to this headline">¶</a>
+</h3>
+<p>PHP offers the function <a href="https://secure.php.net/manual/en/function.dirname.php" class="reference external" title="dirname" rel="external noopener noreferrer" target="_blank">dirname</a> to obtain the directory path of a
+file path. This method has a few quirks:</p>
+<ul>
+    <li>`dirname()` does not accept backslashes on UNIX</li>
+<li>`dirname(&quot;C:/Programs&quot;)` returns &quot;C:&quot;, not &quot;C:/&quot;</li>
+<li>`dirname(&quot;C:/&quot;)` returns &quot;.&quot;, not &quot;C:/&quot;</li>
+<li>`dirname(&quot;C:&quot;)` returns &quot;.&quot;, not &quot;C:/&quot;</li>
+<li>`dirname(&quot;Programs&quot;)` returns &quot;.&quot;, not &quot;&quot;</li>
+<li>`dirname()` does not canonicalize the result</li>
+</ul>
+<p><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_getDirectory" class="reference external" title="Symfony\Component\Filesystem\Path::getDirectory()" rel="external noopener noreferrer" target="_blank">getDirectory()</a> fixes these
+shortcomings:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">echo</span> Path<span class="hljs-operator">::</span>getDirectory(<span class="hljs-string">"C:\Programs"</span>);
+<span class="hljs-comment">// =&gt; C:/</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Additionally, you can use <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Path.php#method_getRoot" class="reference external" title="Symfony\Component\Filesystem\Path::getRoot()" rel="external noopener noreferrer" target="_blank">getRoot()</a>
+to obtain the root of a path:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">echo</span> Path<span class="hljs-operator">::</span>getRoot(<span class="hljs-string">"/etc/apache2/sites-available"</span>);
+<span class="hljs-comment">// =&gt; /</span>
+
+<span class="hljs-keyword">echo</span> Path<span class="hljs-operator">::</span>getRoot(<span class="hljs-string">"C:\Programs\Apache\Config"</span>);
+<span class="hljs-comment">// =&gt; C:/</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="error-handling">
+    Error Handling
+    <a class="headerlink" href="#error-handling" title="Permalink to this headline">¶</a>
+</h2>
+<p>Whenever something wrong happens, an exception implementing
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Exception/ExceptionInterface.php" class="reference external" title="Symfony\Component\Filesystem\Exception\ExceptionInterface" rel="external noopener noreferrer" target="_blank">ExceptionInterface</a> or
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Exception/IOExceptionInterface.php" class="reference external" title="Symfony\Component\Filesystem\Exception\IOExceptionInterface" rel="external noopener noreferrer" target="_blank">IOExceptionInterface</a> is thrown.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>An <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Filesystem/Exception/IOException.php" class="reference external" title="Symfony\Component\Filesystem\Exception\IOException" rel="external noopener noreferrer" target="_blank">IOException</a> is
+thrown if directory creation fails.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,174 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="discord-notifier">
+    Discord Notifier
+    <a class="headerlink" href="#discord-notifier" title="Permalink to this headline">¶</a>
+</h1>
+<p>The Discord Notifier package allows to use Discord via the Symfony Notifier
+component. Read the <a href="../notifier.html" class="reference internal">main Notifier docs</a> to learn about installing
+and configuring that component.</p>
+<div class="section">
+<h2 id="adding-interactions-to-a-message">
+    Adding Interactions to a Message
+    <a class="headerlink" href="#adding-interactions-to-a-message" title="Permalink to this headline">¶</a>
+</h2>
+<p>With a Discord message, you can use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Notifier/Bridge/Discord/DiscordOptions.php" class="reference external" title="Symfony\Component\Notifier\Bridge\Discord\DiscordOptions" rel="external noopener noreferrer" target="_blank">DiscordOptions</a> class
+to add some interactive options called <a href="https://discord.com/developers/docs/resources/webhook" class="reference external" rel="external noopener noreferrer" target="_blank">Embed elements</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Discord</span>\<span class="hljs-title">DiscordOptions</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Discord</span>\<span class="hljs-title">Embeds</span>\<span class="hljs-title">DiscordEmbed</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Discord</span>\<span class="hljs-title">Embeds</span>\<span class="hljs-title">DiscordFieldEmbedObject</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Discord</span>\<span class="hljs-title">Embeds</span>\<span class="hljs-title">DiscordFooterEmbedObject</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">Discord</span>\<span class="hljs-title">Embeds</span>\<span class="hljs-title">DiscordMediaEmbedObject</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Notifier</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">ChatMessage</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatMessage</span> = <span class="hljs-keyword">new</span> ChatMessage(<span class="hljs-string">''</span>);
+
+<span class="hljs-comment">// Create Discord Embed</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>discordOptions</span> = (<span class="hljs-keyword">new</span> DiscordOptions())
+    <span class="hljs-operator">-&gt;</span>username(<span class="hljs-string">'connor bot'</span>)
+    <span class="hljs-operator">-&gt;</span>addEmbed((<span class="hljs-keyword">new</span> DiscordEmbed())
+        <span class="hljs-operator">-&gt;</span>color(<span class="hljs-number">2021216</span>)
+        <span class="hljs-operator">-&gt;</span>title(<span class="hljs-string">'New song added!'</span>)
+        <span class="hljs-operator">-&gt;</span>thumbnail((<span class="hljs-keyword">new</span> DiscordMediaEmbedObject())
+        <span class="hljs-operator">-&gt;</span>url(<span class="hljs-string">'https://i.scdn.co/image/ab67616d0000b2735eb27502aa5cb1b4c9db426b'</span>))
+        <span class="hljs-operator">-&gt;</span>addField((<span class="hljs-keyword">new</span> DiscordFieldEmbedObject())
+            <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'Track'</span>)
+            <span class="hljs-operator">-&gt;</span>value(<span class="hljs-string">'[Common Ground](https://open.spotify.com/track/36TYfGWUhIRlVjM8TxGUK6)'</span>)
+            <span class="hljs-operator">-&gt;</span>inline(<span class="hljs-keyword">true</span>)
+        )
+        <span class="hljs-operator">-&gt;</span>addField((<span class="hljs-keyword">new</span> DiscordFieldEmbedObject())
+            <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'Artist'</span>)
+            <span class="hljs-operator">-&gt;</span>value(<span class="hljs-string">'Alasdair Fraser'</span>)
+            <span class="hljs-operator">-&gt;</span>inline(<span class="hljs-keyword">true</span>)
+        )
+        <span class="hljs-operator">-&gt;</span>addField((<span class="hljs-keyword">new</span> DiscordFieldEmbedObject())
+            <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'Album'</span>)
+            <span class="hljs-operator">-&gt;</span>value(<span class="hljs-string">'Dawn Dance'</span>)
+            <span class="hljs-operator">-&gt;</span>inline(<span class="hljs-keyword">true</span>)
+        )
+        <span class="hljs-operator">-&gt;</span>footer((<span class="hljs-keyword">new</span> DiscordFooterEmbedObject())
+            <span class="hljs-operator">-&gt;</span>text(<span class="hljs-string">'Added ...'</span>)
+            <span class="hljs-operator">-&gt;</span>iconUrl(<span class="hljs-string">'https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/200px-Spotify_logo_without_text.svg.png'</span>)
+        )
+    )
+;
+
+<span class="hljs-comment">// Add the custom options to the chat message and send the message</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatMessage</span><span class="hljs-operator">-&gt;</span>options(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>discordOptions</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatter</span><span class="hljs-operator">-&gt;</span>send(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>chatMessage</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,479 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-configure-and-use-flex-private-recipe-repositories">
+    How To Configure and Use Flex Private Recipe Repositories
+    <a class="headerlink" href="#how-to-configure-and-use-flex-private-recipe-repositories" title="Permalink to this headline">¶</a>
+</h1>
+<p>Since the <a href="https://github.com/symfony/cli" class="reference external" rel="external noopener noreferrer" target="_blank">release of version 1.16</a> of <code translate="no" class="notranslate">symfony/flex</code>, you can build your own
+private Symfony Flex recipe repositories, and seamlessly integrate them into the
+<code translate="no" class="notranslate">composer</code> package installation and maintenance process.</p>
+<p>This is particularly useful when you have private bundles or packages that must
+perform their own installation tasks. To do this, you need to complete several steps:</p>
+<ul>
+    <li>Create a private GitHub repository;</li>
+<li>Create your private recipes;</li>
+<li>Create an index to the recipes;</li>
+<li>Store your recipes in the private repository;</li>
+<li>Grant <code translate="no" class="notranslate">composer</code> access to the private repository;</li>
+<li>Configure your project's <code translate="no" class="notranslate">composer.json</code> file; and</li>
+<li>Install the recipes in your project.</li>
+</ul>
+<div class="section">
+<h2 id="create-a-private-github-repository">
+    Create a Private GitHub Repository
+    <a class="headerlink" href="#create-a-private-github-repository" title="Permalink to this headline">¶</a>
+</h2>
+<p>Log in to your GitHub.com account, click your account icon in the top-right
+corner, and select <strong>Your Repositories</strong>. Then click the <strong>New</strong> button, fill in
+the <strong>repository name</strong>, select the <strong>Private</strong> radio button, and click the
+<strong>Create Repository</strong> button.</p>
+</div>
+<div class="section">
+<h2 id="create-your-private-recipes">
+    Create Your Private Recipes
+    <a class="headerlink" href="#create-your-private-recipes" title="Permalink to this headline">¶</a>
+</h2>
+<p>A <code translate="no" class="notranslate">symfony/flex</code> recipe is a JSON file that has the following structure:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"manifests"</span>: {
+        <span class="hljs-attr">"acme/package-name"</span>: {
+            <span class="hljs-attr">"manifest"</span>: {
+            },
+            <span class="hljs-attr">"ref"</span>: <span class="hljs-string">"7405f3af1312d1f9121afed4dddef636c6c7ff00"</span>
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If your package is a private Symfony bundle, you will have the following in the recipe:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"manifests"</span>: {
+        <span class="hljs-attr">"acme/private-bundle"</span>: {
+            <span class="hljs-attr">"manifest"</span>: {
+                <span class="hljs-attr">"bundles"</span>: {
+                    <span class="hljs-attr">"Acme\\PrivateBundle\\AcmePrivateBundle"</span>: [
+                        <span class="hljs-string">"all"</span>
+                    ]
+                }
+            },
+            <span class="hljs-attr">"ref"</span>: <span class="hljs-string">"7405f3af1312d1f9121afed4dddef636c6c7ff00"</span>
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Replace <code translate="no" class="notranslate">acme</code> and <code translate="no" class="notranslate">private-bundle</code> with your own private bundle details.
+The <code translate="no" class="notranslate">&quot;ref&quot;</code> entry is a random 40-character string used by <code translate="no" class="notranslate">composer</code> to
+determine if your recipe was modified. Every time that you make changes to your
+recipe, you also need to generate a new <code translate="no" class="notranslate">&quot;ref&quot;</code> value.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Use the following PHP script to generate a random <code translate="no" class="notranslate">&quot;ref&quot;</code> value:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">echo</span> bin2hex(random_bytes(<span class="hljs-number">20</span>));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<p>The <code translate="no" class="notranslate">&quot;all&quot;</code> entry tells <code translate="no" class="notranslate">symfony/flex</code> to create an entry in your project's
+<code translate="no" class="notranslate">bundles.php</code> file for all environments. To load your bundle only for the
+<code translate="no" class="notranslate">dev</code> environment, replace <code translate="no" class="notranslate">&quot;all&quot;</code> with <code translate="no" class="notranslate">&quot;dev&quot;</code>.</p>
+<p>The name of your recipe JSON file must conform to the following convention,
+where <code translate="no" class="notranslate">1.0</code> is the version number of your bundle (replace <code translate="no" class="notranslate">acme</code> and
+<code translate="no" class="notranslate">private-bundle</code> with your own private bundle or package details):</p>
+<blockquote><p><code translate="no" class="notranslate">acme.private-bundle.1.0.json</code></p>
+</blockquote>
+<p>You will probably also want <code translate="no" class="notranslate">symfony/flex</code> to create configuration files for
+your bundle or package in the project's <code translate="no" class="notranslate">/config/packages</code> directory. To do
+that, change the recipe JSON file as follows:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"manifests"</span>: {
+        <span class="hljs-attr">"acme/private-bundle"</span>: {
+            <span class="hljs-attr">"manifest"</span>: {
+                <span class="hljs-attr">"bundles"</span>: {
+                    <span class="hljs-attr">"Acme\\PrivateBundle\\AcmePrivateBundle"</span>: [
+                        <span class="hljs-string">"all"</span>
+                    ]
+                },
+                <span class="hljs-attr">"copy-from-recipe"</span>: {
+                    <span class="hljs-attr">"config/"</span>: <span class="hljs-string">"%CONFIG_DIR%"</span>
+                }
+            },
+            <span class="hljs-attr">"files"</span>: {
+                <span class="hljs-attr">"config/packages/acme_private.yaml"</span>: {
+                    <span class="hljs-attr">"contents"</span>: [
+                        <span class="hljs-string">"acme_private:"</span>,
+                        <span class="hljs-string">"    encode: true"</span>,
+                        <span class="hljs-string">""</span>
+                    ],
+                    <span class="hljs-attr">"executable"</span>: <span class="hljs-literal">false</span>
+                }
+            },
+            <span class="hljs-attr">"ref"</span>: <span class="hljs-string">"7405f3af1312d1f9121afed4dddef636c6c7ff00"</span>
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>For more examples of what you can include in a recipe file, browse the
+<a href="https://github.com/symfony/recipes/tree/flex/main" class="reference external" rel="external noopener noreferrer" target="_blank">Symfony recipe files</a>.</p>
+</div>
+<div class="section">
+<h2 id="create-an-index-to-the-recipes">
+    Create an Index to the Recipes
+    <a class="headerlink" href="#create-an-index-to-the-recipes" title="Permalink to this headline">¶</a>
+</h2>
+<p>The next step is to create an <code translate="no" class="notranslate">index.json</code> file, which will contain entries
+for all your private recipes, and other general configuration information.</p>
+<p>The <code translate="no" class="notranslate">index.json</code> file has the following format:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"recipes"</span>: {
+        <span class="hljs-attr">"acme/private-bundle"</span>: [
+            <span class="hljs-string">"1.0"</span>
+        ]
+    },
+    <span class="hljs-attr">"branch"</span>: <span class="hljs-string">"master"</span>,
+    <span class="hljs-attr">"is_contrib"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"_links"</span>: {
+        <span class="hljs-attr">"repository"</span>: <span class="hljs-string">"github.com/your-github-account-name/your-recipes-repository"</span>,
+        <span class="hljs-attr">"origin_template"</span>: <span class="hljs-string">"{package}:{version}@github.com/your-github-account-name/your-recipes-repository:master"</span>,
+        <span class="hljs-attr">"recipe_template"</span>: <span class="hljs-string">"https://api.github.com/repos/your-github-account-name/your-recipes-repository/contents/{package_dotted}.{version}.json"</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Create an entry in <code translate="no" class="notranslate">&quot;recipes&quot;</code> for each of your bundle recipes. Replace
+<code translate="no" class="notranslate">your-github-account-name</code> and <code translate="no" class="notranslate">your-recipes-repository</code> with your own details.</p>
+</div>
+<div class="section">
+<h2 id="store-your-recipes-in-the-private-repository">
+    Store Your Recipes in the Private Repository
+    <a class="headerlink" href="#store-your-recipes-in-the-private-repository" title="Permalink to this headline">¶</a>
+</h2>
+<p>Upload the recipe <code translate="no" class="notranslate">.json</code> file(s) and the <code translate="no" class="notranslate">index.json</code> file into the root
+directory of your private GitHub repository.</p>
+</div>
+<div class="section">
+<h2 id="grant-composer-access-to-the-private-repository">
+    Grant <code translate="no" class="notranslate">composer</code> Access to the Private Repository
+    <a class="headerlink" href="#grant-composer-access-to-the-private-repository" title="Permalink to this headline">¶</a>
+</h2>
+<p>In your GitHub account, click your account icon in the top-right corner, select
+<code translate="no" class="notranslate">Settings</code> and <code translate="no" class="notranslate">Developer Settings</code>. Then select <code translate="no" class="notranslate">Personal Access Tokens</code>.</p>
+<p>Generate a new access token with <code translate="no" class="notranslate">Full control of private repositories</code>
+privileges. Copy the access token value, switch to the terminal of your local
+computer, and execute the following command:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer config --global --auth github-oauth.github.com [token]</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Replace <code translate="no" class="notranslate">[token]</code> with the value of your GitHub personal access token.</p>
+</div>
+<div class="section">
+<h2 id="configure-your-project-s-composer-json-file">
+    Configure Your Project's <code translate="no" class="notranslate">composer.json</code> File
+    <a class="headerlink" href="#configure-your-project-s-composer-json-file" title="Permalink to this headline">¶</a>
+</h2>
+<p>Add the following to your project's <code translate="no" class="notranslate">composer.json</code> file:</p>
+<div translate="no" class="highlight-json notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs json">{
+    <span class="hljs-attr">"extra"</span>: {
+        <span class="hljs-attr">"symfony"</span>: {
+            <span class="hljs-attr">"endpoint"</span>: [
+                <span class="hljs-string">"https://api.github.com/repos/your-github-account-name/your-recipes-repository/contents/index.json"</span>,
+                <span class="hljs-string">"flex://defaults"</span>
+            ]
+        }
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Replace <code translate="no" class="notranslate">your-github-account-name</code> and <code translate="no" class="notranslate">your-recipes-repository</code> with your own details.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The <code translate="no" class="notranslate">extra.symfony</code> key will most probably already exist in your
+<code translate="no" class="notranslate">composer.json</code>. In that case, add the <code translate="no" class="notranslate">&quot;endpoint&quot;</code> key to the existing
+<code translate="no" class="notranslate">extra.symfony</code> entry.</p>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>The <code translate="no" class="notranslate">endpoint</code> URL <strong>must</strong> point to <code translate="no" class="notranslate">https://api.github.com/repos</code> and
+<strong>not</strong> to <code translate="no" class="notranslate">https://www.github.com</code>.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="install-the-recipes-in-your-project">
+    Install the Recipes in Your Project
+    <a class="headerlink" href="#install-the-recipes-in-your-project" title="Permalink to this headline">¶</a>
+</h2>
+<p>If your private bundles/packages have not yet been installed in your project,
+run the following command:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer update</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If the private bundles/packages have already been installed and you just want to
+install the new private recipes, run the following command:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>composer recipes</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

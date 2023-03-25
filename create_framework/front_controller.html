@@ -1,0 +1,551 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="the-front-controller">
+    The Front Controller
+    <a class="headerlink" href="#the-front-controller" title="Permalink to this headline">¶</a>
+</h1>
+<p>Up until now, our application is simplistic as there is only one page. To
+spice things up a little bit, let's go crazy and add another page that says
+goodbye:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// framework/bye.php</span>
+<span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response(<span class="hljs-string">'Goodbye!'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>As you can see for yourself, much of the code is exactly the same as the one
+we have written for the first page. Let's extract the common code that we can
+share between all our pages. Code sharing sounds like a good plan to create
+our first &quot;real&quot; framework!</p>
+<p>The PHP way of doing the refactoring would probably be the creation of an
+include file:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// framework/init.php</span>
+<span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Let's see it in action:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// framework/index.php</span>
+<span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/init.php'</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>query<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'name'</span>, <span class="hljs-string">'World'</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setContent(sprintf(<span class="hljs-string">'Hello %s'</span>, htmlspecialchars(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>, ENT_QUOTES, <span class="hljs-string">'UTF-8'</span>)));
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>And for the &quot;Goodbye&quot; page:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// framework/bye.php</span>
+<span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/init.php'</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setContent(<span class="hljs-string">'Goodbye!'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>We have indeed moved most of the shared code into a central place, but it does
+not feel like a good abstraction, does it? We still have the <code translate="no" class="notranslate">send()</code> method
+for all pages, our pages do not look like templates and we are still not able
+to test this code properly.</p>
+<p>Moreover, adding a new page means that we need to create a new PHP script, the name of
+which is exposed to the end user via the URL
+(<code translate="no" class="notranslate">http://127.0.0.1:4321/bye.php</code>). There is a direct mapping between the PHP
+script name and the client URL. This is because the dispatching of the request
+is done by the web server directly. It might be a good idea to move this
+dispatching to our code for better flexibility. This can be achieved by routing
+all client requests to a single PHP script.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Exposing a single PHP script to the end user is a design pattern called
+the &quot;<a href="../introduction/from_flat_php_to_symfony.html#from_flat_php-front-controller" class="reference internal">front controller</a>&quot;.</p>
+</div>
+<p>Such a script might look like the following:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// framework/front.php</span>
+<span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/vendor/autoload.php'</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>map</span> = [
+    <span class="hljs-string">'/hello'</span> =&gt; <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/hello.php'</span>,
+    <span class="hljs-string">'/bye'</span>   =&gt; <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/bye.php'</span>,
+];
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo();
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>map</span>[<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>])) {
+    <span class="hljs-keyword">require</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>map</span>[<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>];
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setStatusCode(<span class="hljs-number">404</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setContent(<span class="hljs-string">'Not Found'</span>);
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>And here is for instance the new <code translate="no" class="notranslate">hello.php</code> script:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// framework/hello.php</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>query<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'name'</span>, <span class="hljs-string">'World'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setContent(sprintf(<span class="hljs-string">'Hello %s'</span>, htmlspecialchars(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>, ENT_QUOTES, <span class="hljs-string">'UTF-8'</span>)));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>In the <code translate="no" class="notranslate">front.php</code> script, <code translate="no" class="notranslate">$map</code> associates URL paths with their
+corresponding PHP script paths.</p>
+<p>As a bonus, if the client asks for a path that is not defined in the URL map,
+we return a custom 404 page. You are now in control of your website.</p>
+<p>To access a page, you must now use the <code translate="no" class="notranslate">front.php</code> script:</p>
+<ul>
+    <li><code translate="no" class="notranslate">http://127.0.0.1:4321/front.php/hello?name=Fabien</code></li>
+<li><code translate="no" class="notranslate">http://127.0.0.1:4321/front.php/bye</code></li>
+</ul>
+<p><code translate="no" class="notranslate">/hello</code> and <code translate="no" class="notranslate">/bye</code> are the page <em>paths</em>.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Most web servers like Apache or nginx are able to rewrite the incoming URLs
+and remove the front controller script so that your users will be able to
+type <code translate="no" class="notranslate">http://127.0.0.1:4321/hello?name=Fabien</code>, which looks much better.</p>
+</div>
+<p>The trick is the usage of the <code translate="no" class="notranslate">Request::getPathInfo()</code> method which returns
+the path of the Request by removing the front controller script name including
+its sub-directories (only if needed -- see above tip).</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>You don't even need to set up a web server to test the code. Instead,
+replace the <code translate="no" class="notranslate">$request = Request::createFromGlobals();</code> call to something
+like <code translate="no" class="notranslate">$request = Request::create(&#039;/hello?name=Fabien&#039;);</code> where the
+argument is the URL path you want to simulate.</p>
+</div>
+<p>Now that the web server always accesses the same script (<code translate="no" class="notranslate">front.php</code>) for all
+pages, we can secure the code further by moving all other PHP files outside of the
+web root directory:</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">example.com
+├── composer.json
+├── composer.lock
+├── src
+│   └── pages
+│       ├── hello.php
+│       └── bye.php
+├── vendor
+│   └── autoload.php
+└── web
+    └── front.php</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Now, configure your web server root directory to point to <code translate="no" class="notranslate">web/</code> and all
+other files will no longer be accessible from the client.</p>
+<p>To test your changes in a browser (<code translate="no" class="notranslate">http://localhost:4321/hello?name=Fabien</code>),
+run the <a href="../setup/symfony_server.html" class="reference internal">Symfony Local Web Server</a>:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>symfony server:start --port=4321 --passthru=front.php</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>For this new structure to work, you will have to adjust some paths in
+various PHP files; the changes are left as an exercise for the reader.</p>
+</div>
+<p>The last thing that is repeated in each page is the call to <code translate="no" class="notranslate">setContent()</code>.
+We can convert all pages to &quot;templates&quot; by echoing the content and calling
+the <code translate="no" class="notranslate">setContent()</code> directly from the front controller script:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// example.com/web/front.php</span>
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo();
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>map</span>[<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>])) {
+    ob_start();
+    <span class="hljs-keyword">include</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>map</span>[<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>];
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setContent(ob_get_clean());
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setStatusCode(<span class="hljs-number">404</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setContent(<span class="hljs-string">'Not Found'</span>);
+}
+
+<span class="hljs-comment">// ...</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>And the <code translate="no" class="notranslate">hello.php</code> script can now be converted to a template:</p>
+<div translate="no" class="highlight-html+php highlight-html notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs html+php html"><span class="hljs-comment">&lt;!-- example.com/src/pages/hello.php --&gt;</span>
+<span class="php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>query<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'name'</span>, <span class="hljs-string">'World'</span>) <span class="hljs-meta">?&gt;</span></span>
+
+Hello <span class="php"><span class="hljs-meta">&lt;?</span>= htmlspecialchars(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>name</span>, ENT_QUOTES, <span class="hljs-string">'UTF-8'</span>) <span class="hljs-meta">?&gt;</span></span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>We have the first version of our framework:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// example.com/web/front.php</span>
+<span class="hljs-keyword">require_once</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../vendor/autoload.php'</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span> = Request<span class="hljs-operator">::</span>createFromGlobals();
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span> = <span class="hljs-keyword">new</span> Response();
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>map</span> = [
+    <span class="hljs-string">'/hello'</span> =&gt; <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../src/pages/hello.php'</span>,
+    <span class="hljs-string">'/bye'</span>   =&gt; <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../src/pages/bye.php'</span>,
+];
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getPathInfo();
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>map</span>[<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>])) {
+    ob_start();
+    <span class="hljs-keyword">include</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>map</span>[<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>path</span>];
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setContent(ob_get_clean());
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setStatusCode(<span class="hljs-number">404</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>setContent(<span class="hljs-string">'Not Found'</span>);
+}
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>response</span><span class="hljs-operator">-&gt;</span>send();</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Adding a new page is a two-step process: add an entry in the map and create a
+PHP template in <code translate="no" class="notranslate">src/pages/</code>. From a template, get the Request data via the
+<code translate="no" class="notranslate">$request</code> variable and tweak the Response headers via the <code translate="no" class="notranslate">$response</code>
+variable.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>If you decide to stop here, you can probably enhance your framework by
+extracting the URL map to a configuration file.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

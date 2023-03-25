@@ -1,0 +1,593 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="how-to-customize-access-denied-responses">
+    How to Customize Access Denied Responses
+    <a class="headerlink" href="#how-to-customize-access-denied-responses" title="Permalink to this headline">¶</a>
+</h1>
+<p>In Symfony, you can throw an
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Core/Exception/AccessDeniedException.php" class="reference external" title="Symfony\Component\Security\Core\Exception\AccessDeniedException" rel="external noopener noreferrer" target="_blank">AccessDeniedException</a>
+to disallow access to the user. Symfony will handle this exception and
+generates a response based on the authentication state:</p>
+<ul>
+    <li><strong>If the user is not authenticated</strong> (or authenticated anonymously), an
+authentication entry point is used to generate a response (typically
+a redirect to the login page or an <em>401 Unauthorized</em> response);</li>
+<li><strong>If the user is authenticated, but does not have the required
+permissions</strong>, a <em>403 Forbidden</em> response is generated.</li>
+</ul>
+<span id="security-entry-point"></span>
+<div class="section">
+<h2 id="customize-the-unauthorized-response">
+    Customize the Unauthorized Response
+    <a class="headerlink" href="#customize-the-unauthorized-response" title="Permalink to this headline">¶</a>
+</h2>
+<p>You need to create a class that implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/EntryPoint/AuthenticationEntryPointInterface.php" class="reference external" title="Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface" rel="external noopener noreferrer" target="_blank">AuthenticationEntryPointInterface</a>.
+This interface has one method (<code translate="no" class="notranslate">start()</code>) that is called whenever an
+unauthenticated user tries to access a protected resource:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Security/AuthenticationEntryPoint.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">RedirectResponse</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Generator</span>\<span class="hljs-title">UrlGeneratorInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">AuthenticationException</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">EntryPoint</span>\<span class="hljs-title">AuthenticationEntryPointInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AuthenticationEntryPoint</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">AuthenticationEntryPointInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        UrlGeneratorInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>urlGenerator</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">start</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, AuthenticationException <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>authException</span> = null)</span>: <span class="hljs-title">RedirectResponse</span>
+    </span>{
+        <span class="hljs-comment">// add a custom flash message and redirect to the login page</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span><span class="hljs-operator">-&gt;</span>getSession()<span class="hljs-operator">-&gt;</span>getFlashBag()<span class="hljs-operator">-&gt;</span>add(<span class="hljs-string">'note'</span>, <span class="hljs-string">'You have to login in order to access this page.'</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> RedirectResponse(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>urlGenerator<span class="hljs-operator">-&gt;</span>generate(<span class="hljs-string">'security_login'</span>));
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>That's it if you're using the <a href="../service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>.
+Otherwise, you have to register this service in the container.</p>
+<p>Now, configure this service ID as the entry point for the firewall:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-1732a28bfe694b3ef22dac90328fb29a41556fef" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-c3cf8f8a0febfe0c3cde3fdfa8d310c7531694d7" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-363b7d277f84f4dc7660c940cb0cb0340882954c" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-1732a28bfe694b3ef22dac90328fb29a41556fef" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">firewalls:</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-attr">main:</span>
+        <span class="hljs-comment"># ...</span>
+        <span class="hljs-attr">entry_point:</span> <span class="hljs-string">App\Security\AuthenticationEntryPoint</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-c3cf8f8a0febfe0c3cde3fdfa8d310c7531694d7" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">firewall</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span>
+            <span class="hljs-attr">entry-point</span>=<span class="hljs-string">"App\Security\AuthenticationEntryPoint"</span>
+        &gt;</span>
+            <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">firewall</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-363b7d277f84f4dc7660c940cb0cb0340882954c" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">AuthenticationEntryPoint</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>firewall(<span class="hljs-string">'main'</span>)
+        <span class="hljs-comment">// ....</span>
+        <span class="hljs-operator">-&gt;</span>entryPoint(AuthenticationEntryPoint<span class="hljs-operator">::</span>class)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h2 id="customize-the-forbidden-response">
+    Customize the Forbidden Response
+    <a class="headerlink" href="#customize-the-forbidden-response" title="Permalink to this headline">¶</a>
+</h2>
+<p>Create a class that implements
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Security/Http/Authorization/AccessDeniedHandlerInterface.php" class="reference external" title="Symfony\Component\Security\Http\Authorization\AccessDeniedHandlerInterface" rel="external noopener noreferrer" target="_blank">AccessDeniedHandlerInterface</a>.
+This interface defines one method called <code translate="no" class="notranslate">handle()</code> where you can
+implement whatever logic that should execute when access is denied for the
+current user (e.g. send a mail, log a message, or generally return a custom
+response):</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Security/AccessDeniedHandler.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">AccessDeniedException</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Authorization</span>\<span class="hljs-title">AccessDeniedHandlerInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AccessDeniedHandler</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">AccessDeniedHandlerInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle</span><span class="hljs-params">(Request <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>request</span>, AccessDeniedException <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>accessDeniedException</span>)</span>: ?<span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Response(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>content</span>, <span class="hljs-number">403</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>If you're using the <a href="../service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>,
+you're done! Symfony will automatically know about your new service. You can then
+configure it under your firewall:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-0c39ce3246d8ce5c0b7d3116b57c00623be24991" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-05a76a7101221dd2e82cd2978be87230beccabff" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-ede7f8089a73158b9f171b9c376a4e6781d8e375" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-0c39ce3246d8ce5c0b7d3116b57c00623be24991" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">firewalls:</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-attr">main:</span>
+        <span class="hljs-comment"># ...</span>
+        <span class="hljs-attr">access_denied_handler:</span> <span class="hljs-string">App\Security\AccessDeniedHandler</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-05a76a7101221dd2e82cd2978be87230beccabff" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/security.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">srv:container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/security"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:srv</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">firewall</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"main"</span>
+            <span class="hljs-attr">access-denied-handler</span>=<span class="hljs-string">"App\Security\AccessDeniedHandler"</span>
+        &gt;</span>
+            <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">firewall</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">srv:container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-ede7f8089a73158b9f171b9c376a4e6781d8e375" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/security.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">AccessDeniedHandler</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">SecurityConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(SecurityConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>security</span><span class="hljs-operator">-&gt;</span>firewall(<span class="hljs-string">'main'</span>)
+        <span class="hljs-comment">// ....</span>
+        <span class="hljs-operator">-&gt;</span>accessDeniedHandler(AccessDeniedHandler<span class="hljs-operator">::</span>class)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h2 id="customizing-all-access-denied-responses">
+    Customizing All Access Denied Responses
+    <a class="headerlink" href="#customizing-all-access-denied-responses" title="Permalink to this headline">¶</a>
+</h2>
+<p>In some cases, you might want to customize both responses or do a specific
+action (e.g. logging) for each <code translate="no" class="notranslate">AccessDeniedException</code>. In this case,
+configure a <a href="../controller/error_pages.html#use-kernel-exception-event" class="reference internal">kernel.exception listener</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/EventListener/AccessDeniedListener.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">EventListener</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">EventSubscriberInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ExceptionEvent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">KernelEvents</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Security</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">AccessDeniedException</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AccessDeniedListener</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">EventSubscriberInterface</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSubscribedEvents</span><span class="hljs-params">()</span>: <span class="hljs-title">array</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-comment">// the priority must be greater than the Security HTTP</span>
+            <span class="hljs-comment">// ExceptionListener, to make sure it's called before</span>
+            <span class="hljs-comment">// the default exception listener</span>
+            KernelEvents<span class="hljs-operator">::</span><span class="hljs-keyword">EXCEPTION</span> =&gt; [<span class="hljs-string">'onKernelException'</span>, <span class="hljs-number">2</span>],
+        ];
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onKernelException</span><span class="hljs-params">(ExceptionEvent <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span>)</span>: <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>getThrowable();
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>exception</span> <span class="hljs-keyword">instanceof</span> AccessDeniedException) {
+            <span class="hljs-keyword">return</span>;
+        }
+
+        <span class="hljs-comment">// ... perform some action (e.g. logging)</span>
+
+        <span class="hljs-comment">// optionally set the custom response</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>event</span><span class="hljs-operator">-&gt;</span>setResponse(<span class="hljs-keyword">new</span> Response(<span class="hljs-keyword">null</span>, <span class="hljs-number">403</span>));
+
+        <span class="hljs-comment">// or stop propagation (prevents the next exception listeners from being called)</span>
+        <span class="hljs-comment">//$event-&gt;stopPropagation();</span>
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

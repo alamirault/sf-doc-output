@@ -1,0 +1,378 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="configuring-in-the-kernel">
+    Configuring in the Kernel
+    <a class="headerlink" href="#configuring-in-the-kernel" title="Permalink to this headline">¶</a>
+</h1>
+<p>Some configuration can be done on the kernel class itself (located by default at
+<code translate="no" class="notranslate">src/Kernel.php</code>). You can do this by overriding specific methods of
+the parent <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php" class="reference external" title="Symfony\Component\HttpKernel\Kernel" rel="external noopener noreferrer" target="_blank">Kernel</a> class.</p>
+<div class="section">
+<h2 id="configuration">
+    Configuration
+    <a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a>
+</h2>
+<p>In previous Symfony versions there was another configuration option to define
+the &quot;kernel name&quot;, which is only important when
+<a href="../../configuration/multiple_kernels.html" class="reference internal">using applications with multiple kernels</a>.
+If you need a unique ID for your kernels use the <code translate="no" class="notranslate">kernel.container_class</code>
+parameter or the <code translate="no" class="notranslate">Kernel::getContainerClass()</code> method.</p>
+<span id="configuration-kernel-charset"></span>
+<div class="section">
+<h3 id="charset">
+    Charset
+    <a class="headerlink" href="#charset" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">string</code> <strong>default</strong>: <code translate="no" class="notranslate">UTF-8</code></p>
+<p>This option defines the charset that is used in the application. This value is
+exposed via the <code translate="no" class="notranslate">kernel.charset</code> configuration parameter and the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php#method_getCharset" class="reference external" title="Symfony\Component\HttpKernel\Kernel::getCharset()" rel="external noopener noreferrer" target="_blank">getCharset()</a> method.</p>
+<p>To change this value, override the <code translate="no" class="notranslate">getCharset()</code> method and return another
+charset:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Kernel.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Kernel</span> <span class="hljs-title">as</span> <span class="hljs-title">BaseKernel</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Kernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseKernel</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getCharset</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'ISO-8859-1'</span>;
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<span id="configuration-kernel-project-directory"></span>
+</div>
+<div class="section">
+<h3 id="project-directory">
+    Project Directory
+    <a class="headerlink" href="#project-directory" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">string</code> <strong>default</strong>: the directory of the project <code translate="no" class="notranslate">composer.json</code></p>
+<p>This returns the absolute path of the root directory of your Symfony project,
+which is used by applications to perform operations with file paths relative to
+the project's root directory.</p>
+<p>By default, its value is calculated automatically as the directory where the
+main <code translate="no" class="notranslate">composer.json</code> file is stored. This value is exposed via the
+<code translate="no" class="notranslate">kernel.project_dir</code> configuration parameter and the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php#method_getProjectDir" class="reference external" title="Symfony\Component\HttpKernel\Kernel::getProjectDir()" rel="external noopener noreferrer" target="_blank">getProjectDir()</a> method.</p>
+<p>If you don't use Composer, or have moved the <code translate="no" class="notranslate">composer.json</code> file location or
+have deleted it entirely (for example in the production servers), you can
+override the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php#method_getProjectDir" class="reference external" title="Symfony\Component\HttpKernel\Kernel::getProjectDir()" rel="external noopener noreferrer" target="_blank">getProjectDir()</a>
+method to return the right project directory:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Kernel.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpKernel</span>\<span class="hljs-title">Kernel</span> <span class="hljs-title">as</span> <span class="hljs-title">BaseKernel</span>;
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Kernel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseKernel</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getProjectDir</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> \dirname(<span class="hljs-keyword">__DIR__</span>);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h3 id="cache-directory">
+    Cache Directory
+    <a class="headerlink" href="#cache-directory" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">string</code> <strong>default</strong>: <code translate="no" class="notranslate">$this-&gt;getProjectDir()/var/cache/$this-&gt;environment</code></p>
+<p>This returns the absolute path of the cache directory of your Symfony project.
+It's calculated automatically based on the current
+<a href="../../configuration.html#configuration-environments" class="reference internal">environment</a>. Data might be written to this
+path at runtime.</p>
+<p>This value is exposed via the <code translate="no" class="notranslate">kernel.cache_dir</code> configuration parameter and
+the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php#method_getCacheDir" class="reference external" title="Symfony\Component\HttpKernel\Kernel::getCacheDir()" rel="external noopener noreferrer" target="_blank">getCacheDir()</a> method. To
+change this setting, override the <code translate="no" class="notranslate">getCacheDir()</code> method to return the correct
+cache directory.</p>
+<span id="configuration-kernel-build-directory"></span>
+</div>
+<div class="section">
+<h3 id="build-directory">
+    Build Directory
+    <a class="headerlink" href="#build-directory" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">string</code> <strong>default</strong>: <code translate="no" class="notranslate">$this-&gt;getCacheDir()</code></p>
+<p>This returns the absolute path of a build directory of your Symfony project. This
+directory can be used to separate read-only cache (i.e. the compiled container)
+from read-write cache (i.e. <a href="../../cache.html" class="reference internal">cache pools</a>). Specify a non-default
+value when the application is deployed in a read-only filesystem like a Docker
+container or AWS Lambda.</p>
+<p>This value is exposed via the <code translate="no" class="notranslate">kernel.build_dir</code> configuration parameter and
+the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php#method_getBuildDir" class="reference external" title="Symfony\Component\HttpKernel\Kernel::getBuildDir()" rel="external noopener noreferrer" target="_blank">getBuildDir()</a> method. To
+change this setting, override the <code translate="no" class="notranslate">getBuildDir()</code> method to return the correct
+build directory.</p>
+</div>
+<div class="section">
+<h3 id="log-directory">
+    Log Directory
+    <a class="headerlink" href="#log-directory" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">string</code> <strong>default</strong>: <code translate="no" class="notranslate">$this-&gt;getProjectDir()/var/log</code></p>
+<p>This returns the absolute path of the log directory of your Symfony project.
+It's calculated automatically based on the current
+<a href="../../configuration.html#configuration-environments" class="reference internal">environment</a>.</p>
+<p>This value is exposed via the <code translate="no" class="notranslate">kernel.logs_dir</code> configuration parameter and
+the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/HttpKernel/Kernel.php#method_getLogDir" class="reference external" title="Symfony\Component\HttpKernel\Kernel::getLogDir()" rel="external noopener noreferrer" target="_blank">getLogDir()</a> method. To
+change this setting, override the <code translate="no" class="notranslate">getLogDir()</code> method to return the right
+log directory.</p>
+</div>
+<div class="section">
+<h3 id="container-build-time">
+    Container Build Time
+    <a class="headerlink" href="#container-build-time" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">string</code> <strong>default</strong>: the result of executing <code translate="no" class="notranslate">time()</code></p>
+<p>Symfony follows the <a href="https://en.wikipedia.org/wiki/Reproducible_builds" class="reference external" rel="external noopener noreferrer" target="_blank">reproducible builds</a> philosophy, which ensures that the
+result of compiling the exact same source code doesn't produce different
+results. This helps checking that a given binary or executable code was compiled
+from some trusted source code.</p>
+<p>In practice, the compiled <a href="../../service_container.html" class="reference internal">service container</a> of your
+application will always be the same if you don't change its source code. This is
+exposed via these configuration parameters:</p>
+<ul>
+    <li><code translate="no" class="notranslate">container.build_hash</code>, a hash of the contents of all your source files;</li>
+<li><code translate="no" class="notranslate">container.build_time</code>, a timestamp of the moment when the container was
+built (the result of executing PHP's <a href="https://secure.php.net/manual/en/function.time.php" class="reference external" title="time" rel="external noopener noreferrer" target="_blank">time</a> function);</li>
+<li><code translate="no" class="notranslate">container.build_id</code>, the result of merging the two previous parameters and
+encoding the result using CRC32.</li>
+</ul>
+<p>Since the <code translate="no" class="notranslate">container.build_time</code> value will change every time you compile the
+application, the build will not be strictly reproducible. If you care about
+this, the solution is to use another configuration parameter called
+<code translate="no" class="notranslate">kernel.container_build_time</code> and set it to a non-changing build time to
+achieve a strict reproducible build:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-9308a6df8e361dcfd8df22e1b0840bbd897b041e" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-626e86b46942ad709938159c27135785c1df1c61" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-eed86f1d226dabfb3ac41088e5d8d7df9d3bf3a1" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-9308a6df8e361dcfd8df22e1b0840bbd897b041e" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">parameters:</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-attr">kernel.container_build_time:</span> <span class="hljs-string">'1234567890'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-626e86b46942ad709938159c27135785c1df1c61" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">parameters</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">parameter</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"kernel.container_build_time"</span>&gt;</span>1234567890<span class="hljs-tag">&lt;/<span class="hljs-name">parameter</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">parameters</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-eed86f1d226dabfb3ac41088e5d8d7df9d3bf3a1" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>setParameter(<span class="hljs-string">'kernel.container_build_time'</span>, <span class="hljs-string">'1234567890'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

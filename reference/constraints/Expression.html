@@ -1,0 +1,930 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="expression">
+    Expression
+    <a class="headerlink" href="#expression" title="Permalink to this headline">¶</a>
+</h1>
+<p>This constraint allows you to use an <a href="../../components/expression_language.html#component-expression-language-examples" class="reference internal">expression</a>
+for more complex, dynamic validation. See <a href="Expression.html#basic-usage" class="reference internal">Basic Usage</a> for an example.
+See <a href="Callback.html" class="reference internal">Callback</a> for a different constraint that
+gives you similar flexibility.</p>
+<div class="table-wrapper">
+<table>
+        <tbody>
+                    <tr>
+                                    <td>Applies to</td>
+                                    <td><a href="../../validation.html#validation-class-target" class="reference internal">class</a>
+or <a href="../../validation.html#validation-property-target" class="reference internal">property/method</a></td>
+                            </tr>
+                    <tr>
+                                    <td>Class</td>
+                                    <td><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/Constraints/Expression.php" class="reference external" title="Symfony\Component\Validator\Constraints\Expression" rel="external noopener noreferrer" target="_blank">Expression</a></td>
+                            </tr>
+                    <tr>
+                                    <td>Validator</td>
+                                    <td><a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Validator/Constraints/ExpressionValidator.php" class="reference external" title="Symfony\Component\Validator\Constraints\ExpressionValidator" rel="external noopener noreferrer" target="_blank">ExpressionValidator</a></td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+<div class="section">
+<h2 id="basic-usage">
+    Basic Usage
+    <a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a>
+</h2>
+<p>Imagine you have a class <code translate="no" class="notranslate">BlogPost</code> with <code translate="no" class="notranslate">category</code> and <code translate="no" class="notranslate">isTechnicalPost</code>
+properties:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Model/BlogPost.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Model</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlogPost</span>
+</span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>category</span>;
+
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isTechnicalPost</span>;
+
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getCategory</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>category;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setIsTechnicalPost</span><span class="hljs-params">(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isTechnicalPost</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>isTechnicalPost = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isTechnicalPost</span>;
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>To validate the object, you have some special requirements:</p>
+<dl>
+                        <dt>A) If <code translate="no" class="notranslate">isTechnicalPost</code> is true, then <code translate="no" class="notranslate">category</code> must be either <code translate="no" class="notranslate">php</code></dt>
+        
+        <dd>
+                            or <code translate="no" class="notranslate">symfony</code>;
+                    </dd>
+    </dl>
+<p>B) If <code translate="no" class="notranslate">isTechnicalPost</code> is false, then <code translate="no" class="notranslate">category</code> can be anything.</p>
+<p>One way to accomplish this is with the Expression constraint:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-4">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-54fc7315ad7bc99b0d35c0ea838a578fd655d937" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-9397882504232a4a89e0899b7033079fbc3dec78" aria-selected="false"
+                 tabindex="-1">
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-2d13048bb9384353689ee81982cda1432040f3c1" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-f360d9842f9789277cb5ed3a3333e2250618362f" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-54fc7315ad7bc99b0d35c0ea838a578fd655d937" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Model/BlogPost.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Model</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+
+<span class="hljs-comment">#[Assert\Expression(</span>
+    <span class="hljs-string">"this.getCategory() in ['php', 'symfony'] or !this.isTechnicalPost()"</span>,
+    message: <span class="hljs-string">'If this is a tech post, the category should be either php or symfony!'</span>,
+)]
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlogPost</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-9397882504232a4a89e0899b7033079fbc3dec78" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="display: none">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/validator/validation.yaml</span>
+<span class="hljs-string">App\Model\BlogPost:</span>
+    <span class="hljs-attr">constraints:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">Expression:</span>
+            <span class="hljs-attr">expression:</span> <span class="hljs-string">"this.getCategory() in ['php', 'symfony'] or !this.isTechnicalPost()"</span>
+            <span class="hljs-attr">message:</span> <span class="hljs-string">"If this is a tech post, the category should be either php or symfony!"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-2d13048bb9384353689ee81982cda1432040f3c1" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/validator/validation.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">constraint-mapping</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/constraint-mapping"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/constraint-mapping https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">class</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"App\Model\BlogPost"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">constraint</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Expression"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"expression"</span>&gt;</span>
+                this.getCategory() in ['php', 'symfony'] or !this.isTechnicalPost()
+            <span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"message"</span>&gt;</span>
+                If this is a tech post, the category should be either php or symfony!
+            <span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">constraint</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">class</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">constraint-mapping</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-f360d9842f9789277cb5ed3a3333e2250618362f" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Model/BlogPost.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Model</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Mapping</span>\<span class="hljs-title">ClassMetadata</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlogPost</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadValidatorMetadata</span><span class="hljs-params">(ClassMetadata <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addConstraint(<span class="hljs-keyword">new</span> Assert\Expression([
+            <span class="hljs-string">'expression'</span> =&gt; <span class="hljs-string">'this.getCategory() in ["php", "symfony"] or !this.isTechnicalPost()'</span>,
+            <span class="hljs-string">'message'</span> =&gt; <span class="hljs-string">'If this is a tech post, the category should be either php or symfony!'</span>,
+        ]));
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>The <a href="Expression.html#reference-constraint-expression-option" class="reference internal">expression</a> option is the
+expression that must return true in order for validation to pass. Learn more
+about the <a href="../../reference/formats/expression_language.html" class="reference internal">expression language syntax</a>.</p>
+<p>Alternatively, you can set the <code translate="no" class="notranslate">negate</code> option to <code translate="no" class="notranslate">false</code> in order to
+assert that the expression must return <code translate="no" class="notranslate">true</code> for validation to fail.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">negate</code> option was introduced in Symfony 6.2.</p>
+</div>
+<div class="admonition-wrapper"><div class="admonition admonition-sidebar"><p class="sidebar-title"><span>Mapping the Error to a Specific Field</span></p><p>You can also attach the constraint to a specific property and still validate
+based on the values of the entire entity. This is handy if you want to attach
+the error to a specific field. In this context, <code translate="no" class="notranslate">value</code> represents the value
+of <code translate="no" class="notranslate">isTechnicalPost</code>.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-4">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-8dd4473a6ddafa3cac0009024d6b5bb8513d2e30" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-1336dec3a158dff25d2e35293d77d86e1c3689dc" aria-selected="false"
+                 tabindex="-1">
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-0fe273c8f1625697ca9698ae3d685ff9e657160e" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-430861d4ce028e4beceb8c2264527d43596a2ecc" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-8dd4473a6ddafa3cac0009024d6b5bb8513d2e30" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Model/BlogPost.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Model</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlogPost</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+
+    <span class="hljs-comment">#[Assert\Expression(</span>
+        <span class="hljs-string">"this.getCategory() in ['php', 'symfony'] or value == false"</span>,
+        message: <span class="hljs-string">'If this is a tech post, the category should be either php or symfony!'</span>,
+    )]
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>isTechnicalPost</span>;
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-1336dec3a158dff25d2e35293d77d86e1c3689dc" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="display: none">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/validator/validation.yaml</span>
+<span class="hljs-string">App\Model\BlogPost:</span>
+    <span class="hljs-attr">properties:</span>
+        <span class="hljs-attr">isTechnicalPost:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-attr">Expression:</span>
+                <span class="hljs-attr">expression:</span> <span class="hljs-string">"this.getCategory() in ['php', 'symfony'] or value == false"</span>
+                <span class="hljs-attr">message:</span> <span class="hljs-string">"If this is a tech post, the category should be either php or symfony!"</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-0fe273c8f1625697ca9698ae3d685ff9e657160e" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/validator/validation.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">constraint-mapping</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/constraint-mapping"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/constraint-mapping https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">class</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"App\Model\BlogPost"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"isTechnicalPost"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">constraint</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Expression"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"expression"</span>&gt;</span>
+                    this.getCategory() in ['php', 'symfony'] or value == false
+                <span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"message"</span>&gt;</span>
+                    If this is a tech post, the category should be either php or symfony!
+                <span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">constraint</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">class</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">constraint-mapping</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-430861d4ce028e4beceb8c2264527d43596a2ecc" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Model/BlogPost.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Model</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Mapping</span>\<span class="hljs-title">ClassMetadata</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlogPost</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadValidatorMetadata</span><span class="hljs-params">(ClassMetadata <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addPropertyConstraint(<span class="hljs-string">'isTechnicalPost'</span>, <span class="hljs-keyword">new</span> Assert\Expression([
+            <span class="hljs-string">'expression'</span> =&gt; <span class="hljs-string">'this.getCategory() in ["php", "symfony"] or value == false'</span>,
+            <span class="hljs-string">'message'</span> =&gt; <span class="hljs-string">'If this is a tech post, the category should be either php or symfony!'</span>,
+        ]));
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div></div>
+<p>For more information about the expression and what variables are available
+to you, see the <a href="Expression.html#reference-constraint-expression-option" class="reference internal">expression</a>
+option details below.</p>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>Internally, this expression validator constraint uses a service called
+<code translate="no" class="notranslate">validator.expression_language</code> to evaluate the expressions. You can
+decorate or extend that service to fit your own needs.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="options">
+    Options
+    <a class="headerlink" href="#options" title="Permalink to this headline">¶</a>
+</h2>
+<span id="reference-constraint-expression-option"></span>
+<div class="section">
+<h3 id="expression">
+    <code translate="no" class="notranslate">expression</code>
+    <a class="headerlink" href="#expression" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">string</code> [<a href="../../validation.html#validation-default-option" class="reference internal">default option</a>]</p>
+<p>The expression that will be evaluated. If the expression evaluates to a false
+value (using <code translate="no" class="notranslate">==</code>, not <code translate="no" class="notranslate">===</code>), validation will fail. Learn more about the
+<a href="../../reference/formats/expression_language.html" class="reference internal">expression language syntax</a>.</p>
+<p>Depending on how you use the constraint, you have access to different variables
+in your expression:</p>
+<ul>
+    <li><code translate="no" class="notranslate">this</code>: The object being validated (e.g. an instance of BlogPost);</li>
+<li><code translate="no" class="notranslate">value</code>: The value of the property being validated (only available when
+the constraint is applied directly to a property);</li>
+</ul>
+</div>
+<div class="section">
+<h3 id="groups">
+    <code translate="no" class="notranslate">groups</code>
+    <a class="headerlink" href="#groups" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">array</code> | <code translate="no" class="notranslate">string</code> <strong>default</strong>: <code translate="no" class="notranslate">null</code></p>
+<p>It defines the validation group or groups of this constraint. Read more
+about <a href="../../validation/groups.html" class="reference internal">validation groups</a>.</p>
+</div>
+<div class="section">
+<h3 id="message">
+    <code translate="no" class="notranslate">message</code>
+    <a class="headerlink" href="#message" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">string</code> <strong>default</strong>: <code translate="no" class="notranslate">This value is not valid.</code></p>
+<p>The default message supplied when the expression evaluates to false.</p>
+<p>You can use the following parameters in this message:</p>
+<div class="table-wrapper">
+<table>
+            <thead>
+                            <tr>
+                                            <th>Parameter</th>
+                                            <th>Description</th>
+                                    </tr>
+                    </thead>
+        <tbody>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">{{ value }}</code></td>
+                                    <td>The current (invalid) value</td>
+                            </tr>
+                    <tr>
+                                    <td><code translate="no" class="notranslate">{{ label }}</code></td>
+                                    <td>Corresponding form field label</td>
+                            </tr>
+            </tbody>
+</table>
+</div>
+</div>
+<div class="section">
+<h3 id="negate">
+    <code translate="no" class="notranslate">negate</code>
+    <a class="headerlink" href="#negate" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">boolean</code> <strong>default</strong>: <code translate="no" class="notranslate">true</code></p>
+<p>If <code translate="no" class="notranslate">false</code>, the validation fails when expression returns <code translate="no" class="notranslate">true</code>.</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.2</span>
+    </p><p>The <code translate="no" class="notranslate">negate</code> option was introduced in Symfony 6.2.</p>
+</div>
+</div>
+<div class="section">
+<h3 id="payload">
+    <code translate="no" class="notranslate">payload</code>
+    <a class="headerlink" href="#payload" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">mixed</code> <strong>default</strong>: <code translate="no" class="notranslate">null</code></p>
+<p>This option can be used to attach arbitrary domain-specific data to a constraint.
+The configured payload is not used by the Validator component, but its processing
+is completely up to you.</p>
+<p>For example, you may want to use
+<a href="../../validation/severity.html" class="reference internal">several error levels</a> to present failed
+constraints differently in the front-end depending on the severity of the
+error.</p>
+</div>
+<div class="section">
+<h3 id="values">
+    <code translate="no" class="notranslate">values</code>
+    <a class="headerlink" href="#values" title="Permalink to this headline">¶</a>
+</h3>
+<p><strong>type</strong>: <code translate="no" class="notranslate">array</code> <strong>default</strong>: <code translate="no" class="notranslate">[]</code></p>
+<p>The values of the custom variables used in the expression. Values can be of any
+type (numeric, boolean, strings, null, etc.)</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-4">
+                    <button role="tab" type="button" data-language="php-attributes"
+                aria-controls="configuration-block-tabpanel-08c0dda841463658747ddf0d7ef3dd5b1551a93d" aria-selected="true"
+                data-active="true" >
+                <span>Attributes</span>
+            </button>
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-20b2ef5825e1bcc7fd941817e942506d125619b3" aria-selected="false"
+                 tabindex="-1">
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-7e3857679dbfce4b3e94c34339c192bf8d231341" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-46ad424ed3af32e94b24e092118ca56f658016e1" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-08c0dda841463658747ddf0d7ef3dd5b1551a93d" aria-label="Attributes" class="configuration-codeblock" data-language="php-attributes" style="">
+            <div translate="no" class="highlight-php-attributes highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php-attributes php"><span class="hljs-comment">// src/Model/Analysis.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Model</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Analysis</span>
+</span>{
+    <span class="hljs-comment">#[Assert\Expression(</span>
+        <span class="hljs-string">'value + error_margin &lt; threshold'</span>,
+        values: [<span class="hljs-string">'error_margin'</span> =&gt; <span class="hljs-number">0.25</span>, <span class="hljs-string">'threshold'</span> =&gt; <span class="hljs-number">1.5</span>],
+    )]
+    <span class="hljs-keyword">private</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metric</span>;
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-20b2ef5825e1bcc7fd941817e942506d125619b3" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="display: none">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/validator/validation.yaml</span>
+<span class="hljs-string">App\Model\Analysis:</span>
+    <span class="hljs-attr">properties:</span>
+        <span class="hljs-attr">metric:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-attr">Expression:</span>
+                <span class="hljs-attr">expression:</span> <span class="hljs-string">"value + error_margin &lt; threshold"</span>
+                <span class="hljs-attr">values:</span>     <span class="hljs-string">{</span> <span class="hljs-attr">error_margin:</span> <span class="hljs-number">0.25</span><span class="hljs-string">,</span> <span class="hljs-attr">threshold:</span> <span class="hljs-number">1.5</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-7e3857679dbfce4b3e94c34339c192bf8d231341" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/validator/validation.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">constraint-mapping</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/constraint-mapping"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/constraint-mapping https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">class</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"App\Model\Analysis"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"metric"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">constraint</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Expression"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"expression"</span>&gt;</span>
+                    value + error_margin <span class="hljs-symbol">&amp;lt;</span> threshold
+                <span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"values"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">value</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"error_margin"</span>&gt;</span>0.25<span class="hljs-tag">&lt;/<span class="hljs-name">value</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">value</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"threshold"</span>&gt;</span>1.5<span class="hljs-tag">&lt;/<span class="hljs-name">value</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">constraint</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">class</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">constraint-mapping</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-46ad424ed3af32e94b24e092118ca56f658016e1" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// src/Model/Analysis.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Model</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Constraints</span> <span class="hljs-title">as</span> <span class="hljs-title">Assert</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">Mapping</span>\<span class="hljs-title">ClassMetadata</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Analysis</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadValidatorMetadata</span><span class="hljs-params">(ClassMetadata <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>metadata</span><span class="hljs-operator">-&gt;</span>addPropertyConstraint(<span class="hljs-string">'metric'</span>, <span class="hljs-keyword">new</span> Assert\Expression([
+            <span class="hljs-string">'expression'</span> =&gt; <span class="hljs-string">'value + error_margin &lt; threshold'</span>,
+            <span class="hljs-string">'values'</span> =&gt; [<span class="hljs-string">'error_margin'</span> =&gt; <span class="hljs-number">0.25</span>, <span class="hljs-string">'threshold'</span> =&gt; <span class="hljs-number">1.5</span>],
+        ]));
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

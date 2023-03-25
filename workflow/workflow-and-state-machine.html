@@ -1,0 +1,733 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="workflows-and-state-machines">
+    Workflows and State Machines
+    <a class="headerlink" href="#workflows-and-state-machines" title="Permalink to this headline">¶</a>
+</h1>
+<div class="section">
+<h2 id="workflows">
+    Workflows
+    <a class="headerlink" href="#workflows" title="Permalink to this headline">¶</a>
+</h2>
+<p>A workflow is a model of a process in your application. It may be the process of
+how a blog post goes from draft to review and publish. Another example is when a
+user submits a series of different forms to complete a task. Such processes are
+best kept away from your models and should be defined in configuration.</p>
+<p>A <strong>definition</strong> of a workflow consists of places and actions to get from one
+place to another. The actions are called <strong>transitions</strong>. A workflow also needs to
+know each object's position in the workflow. The <strong>marking store</strong> writes
+the current place to a property on the object.</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The terminology above is commonly used when discussing workflows and
+<a href="https://en.wikipedia.org/wiki/Petri_net" class="reference external" rel="external noopener noreferrer" target="_blank">Petri nets</a></p>
+</div>
+<div class="section">
+<h3 id="examples">
+    Examples
+    <a class="headerlink" href="#examples" title="Permalink to this headline">¶</a>
+</h3>
+<p>The simplest workflow looks like this. It contains two places and one transition.</p>
+<img src="_images/simple.png" />
+<p>Workflows could be more complicated when they describe a real business case. The
+workflow below describes the process to fill in a job application.</p>
+<img src="_images/job_application.png" />
+<p>When you fill in a job application in this example there are 4 to 7 steps
+depending on the job you are applying for. Some jobs require personality
+tests, logic tests and/or formal requirements to be answered by the user. Some
+jobs don't. The <code translate="no" class="notranslate">GuardEvent</code> is used to decide what next steps are allowed for
+a specific application.</p>
+<p>By defining a workflow like this, there is an overview how the process looks
+like. The process logic is not mixed with the controllers, models or view. The
+order of the steps can be changed by changing the configuration only.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="state-machines">
+    State Machines
+    <a class="headerlink" href="#state-machines" title="Permalink to this headline">¶</a>
+</h2>
+<p>A state machine is a subset of a workflow and its purpose is to hold a state of
+your model. The most important differences between them are:</p>
+<ul>
+    <li>Workflows can be in more than one place at the same time, whereas state
+machines can't;</li>
+<li>In order to apply a transition, workflows require that the object is in all
+the previous places of the transition, whereas state machines only require
+that the object is at least in one of those places.</li>
+</ul>
+<div class="section">
+<h3 id="example">
+    Example
+    <a class="headerlink" href="#example" title="Permalink to this headline">¶</a>
+</h3>
+<p>A pull request starts in an initial &quot;start&quot; state, then a state &quot;test&quot; for e.g. running
+tests on continuous integration stack. When this is finished, the pull request is in the &quot;review&quot;
+state, where contributors can require changes, reject or accept the
+pull request. At any time, you can also &quot;update&quot; the pull request, which
+will result in another continuous integration run.</p>
+<img src="_images/pull_request.png" />
+<p>Below is the configuration for the pull request state machine.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-07931a4a1fec800409ac7ab2d919a67760ee800d" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-c18d38cefea2608185b157a317303a09f391621e" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-f682f44bd2944301f0b5e4b52a89f5adf03f4170" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-07931a4a1fec800409ac7ab2d919a67760ee800d" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/workflow.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">workflows:</span>
+        <span class="hljs-attr">pull_request:</span>
+            <span class="hljs-attr">type:</span> <span class="hljs-string">'state_machine'</span>
+            <span class="hljs-attr">marking_store:</span>
+                 <span class="hljs-attr">type:</span> <span class="hljs-string">'method'</span>
+                 <span class="hljs-attr">property:</span> <span class="hljs-string">'currentPlace'</span>
+            <span class="hljs-attr">supports:</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-string">App\Entity\PullRequest</span>
+            <span class="hljs-attr">initial_marking:</span> <span class="hljs-string">start</span>
+            <span class="hljs-attr">places:</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-string">start</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-string">coding</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-string">test</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-string">review</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-string">merged</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-string">closed</span>
+            <span class="hljs-attr">transitions:</span>
+                <span class="hljs-attr">submit:</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">start</span>
+                    <span class="hljs-attr">to:</span> <span class="hljs-string">test</span>
+                <span class="hljs-attr">update:</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">[coding,</span> <span class="hljs-string">test,</span> <span class="hljs-string">review]</span>
+                    <span class="hljs-attr">to:</span> <span class="hljs-string">test</span>
+                <span class="hljs-attr">wait_for_review:</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">test</span>
+                    <span class="hljs-attr">to:</span> <span class="hljs-string">review</span>
+                <span class="hljs-attr">request_change:</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">review</span>
+                    <span class="hljs-attr">to:</span> <span class="hljs-string">coding</span>
+                <span class="hljs-attr">accept:</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">review</span>
+                    <span class="hljs-attr">to:</span> <span class="hljs-string">merged</span>
+                <span class="hljs-attr">reject:</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">review</span>
+                    <span class="hljs-attr">to:</span> <span class="hljs-string">closed</span>
+                <span class="hljs-attr">reopen:</span>
+                    <span class="hljs-attr">from:</span> <span class="hljs-string">closed</span>
+                    <span class="hljs-attr">to:</span> <span class="hljs-string">review</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-c18d38cefea2608185b157a317303a09f391621e" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/workflow.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>
+&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:workflow</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"pull_request"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"state_machine"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:marking-store</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:type</span>&gt;</span>method<span class="hljs-tag">&lt;/<span class="hljs-name">framework:type</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:property</span>&gt;</span>currentPlace<span class="hljs-tag">&lt;/<span class="hljs-name">framework:property</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:marking-store</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:support</span>&gt;</span>App\Entity\PullRequest<span class="hljs-tag">&lt;/<span class="hljs-name">framework:support</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:initial_marking</span>&gt;</span>start<span class="hljs-tag">&lt;/<span class="hljs-name">framework:initial_marking</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:place</span>&gt;</span>start<span class="hljs-tag">&lt;/<span class="hljs-name">framework:place</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:place</span>&gt;</span>coding<span class="hljs-tag">&lt;/<span class="hljs-name">framework:place</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:place</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">framework:place</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:place</span>&gt;</span>review<span class="hljs-tag">&lt;/<span class="hljs-name">framework:place</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:place</span>&gt;</span>merged<span class="hljs-tag">&lt;/<span class="hljs-name">framework:place</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:place</span>&gt;</span>closed<span class="hljs-tag">&lt;/<span class="hljs-name">framework:place</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"submit"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>start<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"update"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>coding<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>review<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"wait_for_review"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>review<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"request_change"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>review<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>coding<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"accept"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>review<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>merged<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"reject"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>review<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>closed<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:transition</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"reopen"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:from</span>&gt;</span>closed<span class="hljs-tag">&lt;/<span class="hljs-name">framework:from</span>&gt;</span>
+
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:to</span>&gt;</span>review<span class="hljs-tag">&lt;/<span class="hljs-name">framework:to</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:transition</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:workflow</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-f682f44bd2944301f0b5e4b52a89f5adf03f4170" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/workflow.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>workflows()<span class="hljs-operator">-&gt;</span>workflows(<span class="hljs-string">'pull_request'</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span>
+        <span class="hljs-operator">-&gt;</span>type(<span class="hljs-string">'state_machine'</span>)
+        <span class="hljs-operator">-&gt;</span>supports([<span class="hljs-string">'App\Entity\PullRequest'</span>])
+        <span class="hljs-operator">-&gt;</span>initialMarking([<span class="hljs-string">'start'</span>]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>markingStore()
+        <span class="hljs-operator">-&gt;</span>type(<span class="hljs-string">'method'</span>)
+        <span class="hljs-operator">-&gt;</span>property(<span class="hljs-string">'currentPlace'</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>place()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'start'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>place()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'coding'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>place()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'test'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>place()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'review'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>place()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'merged'</span>);
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>place()<span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'closed'</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'submit'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'start'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'test'</span>]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'update'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'coding'</span>, <span class="hljs-string">'test'</span>, <span class="hljs-string">'review'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'test'</span>]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'wait_for_review'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'test'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'review'</span>]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'request_change'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'review'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'coding'</span>]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'accept'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'review'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'merged'</span>]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'reject'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'review'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'closed'</span>]);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span><span class="hljs-operator">-&gt;</span>transition()
+        <span class="hljs-operator">-&gt;</span>name(<span class="hljs-string">'reopen'</span>)
+            <span class="hljs-operator">-&gt;</span>from([<span class="hljs-string">'closed'</span>])
+            <span class="hljs-operator">-&gt;</span>to([<span class="hljs-string">'review'</span>]);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>In a Symfony application using the
+<a href="../service_container.html#service-container-services-load-example" class="reference internal">default services.yaml configuration</a>,
+you can get this state machine by injecting the Workflow registry service:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">PullRequest</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">Registry</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SomeService</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private Registry <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>workflows</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">someMethod</span><span class="hljs-params">(PullRequest <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stateMachine</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>workflows<span class="hljs-operator">-&gt;</span>get(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span>, <span class="hljs-string">'pull_request'</span>);
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stateMachine</span><span class="hljs-operator">-&gt;</span>apply(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span>, <span class="hljs-string">'wait_for_review'</span>);
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Symfony automatically creates a service for each workflow (<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Workflow.php" class="reference external" title="Symfony\Component\Workflow\Workflow" rel="external noopener noreferrer" target="_blank">Workflow</a>)
+or state machine (<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/StateMachine.php" class="reference external" title="Symfony\Component\Workflow\StateMachine" rel="external noopener noreferrer" target="_blank">StateMachine</a>) you
+have defined in your configuration. This means that you can use <code translate="no" class="notranslate">workflow.pull_request</code>
+or <code translate="no" class="notranslate">state_machine.pull_request</code> respectively in your service definitions
+to access the proper service:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Entity</span>\<span class="hljs-title">PullRequest</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">StateMachine</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SomeService</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private StateMachine <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stateMachine</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">someMethod</span><span class="hljs-params">(PullRequest <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span>)</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>stateMachine<span class="hljs-operator">-&gt;</span>apply(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pullRequest</span>, <span class="hljs-string">'wait_for_review'</span>, [
+            <span class="hljs-string">'log_comment'</span> =&gt; <span class="hljs-string">'My logging comment for the wait for review transition.'</span>,
+        ]);
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 id="automatic-and-manual-validation">
+    Automatic and Manual Validation
+    <a class="headerlink" href="#automatic-and-manual-validation" title="Permalink to this headline">¶</a>
+</h2>
+<p>During cache warmup, Symfony validates the workflows and state machines that are
+defined in configuration files. If your workflows or state machines are defined
+programmatically instead of in a configuration file, you can validate them with
+the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Validator/WorkflowValidator.php" class="reference external" title="Symfony\Component\Workflow\Validator\WorkflowValidator" rel="external noopener noreferrer" target="_blank">WorkflowValidator</a> and
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Workflow/Validator/StateMachineValidator.php" class="reference external" title="Symfony\Component\Workflow\Validator\StateMachineValidator" rel="external noopener noreferrer" target="_blank">StateMachineValidator</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">Definition</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">StateMachine</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Workflow</span>\<span class="hljs-title">Validator</span>\<span class="hljs-title">StateMachineValidator</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>states</span> = [<span class="hljs-string">'created'</span>, <span class="hljs-string">'activated'</span>, <span class="hljs-string">'deleted'</span>];
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stateTransitions</span> = [
+    <span class="hljs-keyword">new</span> Transition(<span class="hljs-string">'activate'</span>, <span class="hljs-string">'created'</span>, <span class="hljs-string">'activated'</span>),
+    <span class="hljs-comment">// This duplicate event "from" the "created" state is invalid</span>
+    <span class="hljs-keyword">new</span> Transition(<span class="hljs-string">'activate'</span>, <span class="hljs-string">'created'</span>, <span class="hljs-string">'deleted'</span>),
+    <span class="hljs-keyword">new</span> Transition(<span class="hljs-string">'delete'</span>, <span class="hljs-string">'activated'</span>, <span class="hljs-string">'deleted'</span>),
+];
+
+<span class="hljs-comment">// No validation is done upon initialization</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span> = <span class="hljs-keyword">new</span> Definition(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>states</span>, <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>stateTransitions</span>);
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span> = <span class="hljs-keyword">new</span> StateMachineValidator();
+<span class="hljs-comment">// Throws InvalidDefinitionException in case of an invalid definition</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>validator</span><span class="hljs-operator">-&gt;</span>validate(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>definition</span>, <span class="hljs-string">'My First StateMachine'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

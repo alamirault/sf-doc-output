@@ -1,0 +1,578 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <span id="redis-adapter"></span>
+<div class="section">
+<h1 id="redis-cache-adapter">
+    Redis Cache Adapter
+    <a class="headerlink" href="#redis-cache-adapter" title="Permalink to this headline">¶</a>
+</h1>
+<div class="admonition admonition-seealso ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                <span>See also</span>
+    </p><p>This article explains how to configure the Redis adapter when using the
+Cache as an independent component in any PHP application. Read the
+<a href="../../../cache.html#cache-configuration-with-frameworkbundle" class="reference internal">Symfony Cache configuration</a>
+article if you are using it in a Symfony application.</p>
+</div>
+<p>This adapter stores the values in-memory using one (or more) <a href="https://redis.io/" class="reference external" rel="external noopener noreferrer" target="_blank">Redis server</a> instances.</p>
+<p>Unlike the <a href="apcu_adapter.html#apcu-adapter" class="reference internal">APCu adapter</a>, and similarly to the
+<a href="memcached_adapter.html#memcached-adapter" class="reference internal">Memcached adapter</a>, it is not limited to the current server's
+shared memory; you can store contents independent of your PHP environment. The ability
+to utilize a cluster of servers to provide redundancy and/or fail-over is also available.</p>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p><strong>Requirements:</strong> At least one <a href="https://redis.io/" class="reference external" rel="external noopener noreferrer" target="_blank">Redis server</a> must be installed and running to use this
+adapter. Additionally, this adapter requires a compatible extension or library that implements
+<code translate="no" class="notranslate">\Redis</code>, <code translate="no" class="notranslate">\RedisArray</code>, <code translate="no" class="notranslate">RedisCluster</code>, <code translate="no" class="notranslate">\Relay\Relay</code> or <code translate="no" class="notranslate">\Predis</code>.</p>
+</div>
+<p>This adapter expects a <a href="https://github.com/phpredis/phpredis" class="reference external" rel="external noopener noreferrer" target="_blank">Redis</a>, <a href="https://github.com/phpredis/phpredis/blob/master/arrays.markdown#readme" class="reference external" rel="external noopener noreferrer" target="_blank">RedisArray</a>, <a href="https://github.com/phpredis/phpredis/blob/master/cluster.markdown#readme" class="reference external" rel="external noopener noreferrer" target="_blank">RedisCluster</a>, <a href="https://relay.so/" class="reference external" rel="external noopener noreferrer" target="_blank">Relay</a> or <a href="https://packagist.org/packages/predis/predis" class="reference external" rel="external noopener noreferrer" target="_blank">Predis</a> instance to be
+passed as the first parameter. A namespace and default cache lifetime can optionally be passed
+as the second and third parameters:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">RedisAdapter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span> = <span class="hljs-keyword">new</span> RedisAdapter(
+
+    <span class="hljs-comment">// the object that stores a valid connection to your Redis system</span>
+    \Redis <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>redisConnection</span>,
+
+    <span class="hljs-comment">// the string prefixed to the keys of the items stored in this cache</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>namespace</span> = <span class="hljs-string">''</span>,
+
+    <span class="hljs-comment">// the default lifetime (in seconds) for cache items that do not define their</span>
+    <span class="hljs-comment">// own lifetime, with a value 0 causing items to be stored indefinitely (i.e.</span>
+    <span class="hljs-comment">// until RedisAdapter::clear() is invoked or the server(s) are purged)</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>defaultLifetime</span> = <span class="hljs-number">0</span>
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p>Support for <a href="https://relay.so/" class="reference external" rel="external noopener noreferrer" target="_blank">Relay</a> was introduced in Symfony 6.3.</p>
+</div>
+<div class="section">
+<h2 id="configure-the-connection">
+    Configure the Connection
+    <a class="headerlink" href="#configure-the-connection" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/RedisAdapter.php#method_createConnection" class="reference external" title="Symfony\Component\Cache\Adapter\RedisAdapter::createConnection()" rel="external noopener noreferrer" target="_blank">createConnection()</a>
+helper method allows creating and configuring the Redis client class instance using a
+<a href="https://en.wikipedia.org/wiki/Data_source_name" class="reference external" rel="external noopener noreferrer" target="_blank">Data Source Name (DSN)</a>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">RedisAdapter</span>;
+
+<span class="hljs-comment">// pass a single DSN string to register a single server with the client</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = RedisAdapter<span class="hljs-operator">::</span>createConnection(
+    <span class="hljs-string">'redis://localhost'</span>
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The DSN can specify either an IP/host (and an optional port) or a socket path, as well as a
+password and a database index. To enable TLS for connections, the scheme <code translate="no" class="notranslate">redis</code> must be
+replaced by <code translate="no" class="notranslate">rediss</code> (the second <code translate="no" class="notranslate">s</code> means &quot;secure&quot;).</p>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>A <a href="https://en.wikipedia.org/wiki/Data_source_name" class="reference external" rel="external noopener noreferrer" target="_blank">Data Source Name (DSN)</a> for this adapter must use either one of the following formats.</p>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">redis[s]://[pass@][ip|host|socket[:port]][/db-index]</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div translate="no" class="highlight-text notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs text">redis[s]:[[user]:pass@]?[ip|host|socket[:port]][&amp;params]</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Values for placeholders <code translate="no" class="notranslate">[user]</code>, <code translate="no" class="notranslate">[:port]</code>, <code translate="no" class="notranslate">[/db-index]</code> and <code translate="no" class="notranslate">[&amp;params]</code> are optional.</p>
+</div>
+<p>Below are common examples of valid DSNs showing a combination of available values:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">RedisAdapter</span>;
+
+<span class="hljs-comment">// host "my.server.com" and port "6379"</span>
+RedisAdapter<span class="hljs-operator">::</span>createConnection(<span class="hljs-string">'redis://my.server.com:6379'</span>);
+
+<span class="hljs-comment">// host "my.server.com" and port "6379" and database index "20"</span>
+RedisAdapter<span class="hljs-operator">::</span>createConnection(<span class="hljs-string">'redis://my.server.com:6379/20'</span>);
+
+<span class="hljs-comment">// host "localhost", auth "abcdef" and timeout 5 seconds</span>
+RedisAdapter<span class="hljs-operator">::</span>createConnection(<span class="hljs-string">'redis://abcdef@localhost?timeout=5'</span>);
+
+<span class="hljs-comment">// socket "/var/run/redis.sock" and auth "bad-pass"</span>
+RedisAdapter<span class="hljs-operator">::</span>createConnection(<span class="hljs-string">'redis://bad-pass@/var/run/redis.sock'</span>);
+
+<span class="hljs-comment">// host "redis1" (docker container) with alternate DSN syntax and selecting database index "3"</span>
+RedisAdapter<span class="hljs-operator">::</span>createConnection(<span class="hljs-string">'redis:?host[redis1:6379]&amp;dbindex=3'</span>);
+
+<span class="hljs-comment">// providing credentials with alternate DSN syntax</span>
+RedisAdapter<span class="hljs-operator">::</span>createConnection(<span class="hljs-string">'redis:default:verysecurepassword@?host[redis1:6379]&amp;dbindex=3'</span>);
+
+<span class="hljs-comment">// a single DSN can also define multiple servers</span>
+RedisAdapter<span class="hljs-operator">::</span>createConnection(
+    <span class="hljs-string">'redis:?host[localhost]&amp;host[localhost:6379]&amp;host[/var/run/redis.sock:]&amp;auth=my-password&amp;redis_cluster=1'</span>
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p><a href="https://redis.io/topics/sentinel" class="reference external" rel="external noopener noreferrer" target="_blank">Redis Sentinel</a>, which provides high availability for Redis, is also supported
+when using the PHP Redis Extension v5.2+ or the Predis library. Use the <code translate="no" class="notranslate">redis_sentinel</code>
+parameter to set the name of your service group:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php">RedisAdapter<span class="hljs-operator">::</span>createConnection(
+    <span class="hljs-string">'redis:?host[redis1:26379]&amp;host[redis2:26379]&amp;host[redis3:26379]&amp;redis_sentinel=mymaster'</span>
+);
+
+<span class="hljs-comment">// providing credentials</span>
+RedisAdapter<span class="hljs-operator">::</span>createConnection(
+    <span class="hljs-string">'redis:default:verysecurepassword@?host[redis1:26379]&amp;host[redis2:26379]&amp;host[redis3:26379]&amp;redis_sentinel=mymaster'</span>
+);
+
+<span class="hljs-comment">// providing credentials and selecting database index "3"</span>
+RedisAdapter<span class="hljs-operator">::</span>createConnection(
+    <span class="hljs-string">'redis:default:verysecurepassword@?host[redis1:26379]&amp;host[redis2:26379]&amp;host[redis3:26379]&amp;redis_sentinel=mymaster&amp;dbindex=3'</span>
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>See the <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Traits/RedisTrait.php" class="reference external" title="Symfony\Component\Cache\Traits\RedisTrait" rel="external noopener noreferrer" target="_blank">RedisTrait</a> for more options
+you can pass as DSN parameters.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="configure-the-options">
+    Configure the Options
+    <a class="headerlink" href="#configure-the-options" title="Permalink to this headline">¶</a>
+</h2>
+<p>The <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/RedisAdapter.php#method_createConnection" class="reference external" title="Symfony\Component\Cache\Adapter\RedisAdapter::createConnection()" rel="external noopener noreferrer" target="_blank">createConnection()</a> helper method
+also accepts an array of options as its second argument. The expected format is an associative
+array of <code translate="no" class="notranslate">key =&gt; value</code> pairs representing option names and their respective values:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">RedisAdapter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = RedisAdapter<span class="hljs-operator">::</span>createConnection(
+
+    <span class="hljs-comment">// provide a string dsn</span>
+    <span class="hljs-string">'redis://localhost:6379'</span>,
+
+    <span class="hljs-comment">// associative array of configuration options</span>
+    [
+        <span class="hljs-string">'class'</span> =&gt; <span class="hljs-keyword">null</span>,
+        <span class="hljs-string">'persistent'</span> =&gt; <span class="hljs-number">0</span>,
+        <span class="hljs-string">'persistent_id'</span> =&gt; <span class="hljs-keyword">null</span>,
+        <span class="hljs-string">'timeout'</span> =&gt; <span class="hljs-number">30</span>,
+        <span class="hljs-string">'read_timeout'</span> =&gt; <span class="hljs-number">0</span>,
+        <span class="hljs-string">'retry_interval'</span> =&gt; <span class="hljs-number">0</span>,
+        <span class="hljs-string">'tcp_keepalive'</span> =&gt; <span class="hljs-number">0</span>,
+        <span class="hljs-string">'lazy'</span> =&gt; <span class="hljs-keyword">null</span>,
+        <span class="hljs-string">'redis_cluster'</span> =&gt; <span class="hljs-keyword">false</span>,
+        <span class="hljs-string">'redis_sentinel'</span> =&gt; <span class="hljs-keyword">null</span>,
+        <span class="hljs-string">'dbindex'</span> =&gt; <span class="hljs-number">0</span>,
+        <span class="hljs-string">'failover'</span> =&gt; <span class="hljs-string">'none'</span>,
+        <span class="hljs-string">'ssl'</span> =&gt; <span class="hljs-keyword">null</span>,
+    ]
+
+);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="available-options">
+    Available Options
+    <a class="headerlink" href="#available-options" title="Permalink to this headline">¶</a>
+</h3>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.3</span>
+    </p><p><code translate="no" class="notranslate">\Relay\Relay</code> support was introduced in Symfony 6.3.</p>
+</div>
+<dl>
+                        <dt><code translate="no" class="notranslate">class</code> (type: <code translate="no" class="notranslate">string</code>, default: <code translate="no" class="notranslate">null</code>)</dt>
+        
+        <dd>
+                            Specifies the connection library to return, either <code translate="no" class="notranslate">\Redis</code>, <code translate="no" class="notranslate">\Relay\Relay</code> or <code translate="no" class="notranslate">\Predis\Client</code>.
+If none is specified, fallback value is in following order, depending which one is available first:
+<code translate="no" class="notranslate">\Redis</code>, <code translate="no" class="notranslate">\Relay\Relay</code>, <code translate="no" class="notranslate">\Predis\Client</code>. Explicitly set this to <code translate="no" class="notranslate">\Predis\Client</code> for Sentinel if you are
+running into issues when retrieving master information.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">persistent</code> (type: <code translate="no" class="notranslate">int</code>, default: <code translate="no" class="notranslate">0</code>)</dt>
+        
+        <dd>
+                            Enables or disables use of persistent connections. A value of <code translate="no" class="notranslate">0</code> disables persistent
+connections, and a value of <code translate="no" class="notranslate">1</code> enables them.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">persistent_id</code> (type: <code translate="no" class="notranslate">string|null</code>, default: <code translate="no" class="notranslate">null</code>)</dt>
+        
+        <dd>
+                            Specifies the persistent id string to use for a persistent connection.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">timeout</code> (type: <code translate="no" class="notranslate">int</code>, default: <code translate="no" class="notranslate">30</code>)</dt>
+        
+        <dd>
+                            Specifies the time (in seconds) used to connect to a Redis server before the
+connection attempt times out.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">read_timeout</code> (type: <code translate="no" class="notranslate">int</code>, default: <code translate="no" class="notranslate">0</code>)</dt>
+        
+        <dd>
+                            Specifies the time (in seconds) used when performing read operations on the underlying
+network resource before the operation times out.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">retry_interval</code> (type: <code translate="no" class="notranslate">int</code>, default: <code translate="no" class="notranslate">0</code>)</dt>
+        
+        <dd>
+                            Specifies the delay (in milliseconds) between reconnection attempts in case the client
+loses connection with the server.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">tcp_keepalive</code> (type: <code translate="no" class="notranslate">int</code>, default: <code translate="no" class="notranslate">0</code>)</dt>
+        
+        <dd>
+                            Specifies the <a href="https://redis.io/topics/clients#tcp-keepalive" class="reference external" rel="external noopener noreferrer" target="_blank">TCP-keepalive</a> timeout (in seconds) of the connection. This
+requires phpredis v4 or higher and a TCP-keepalive enabled server.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">lazy</code> (type: <code translate="no" class="notranslate">bool</code>, default: <code translate="no" class="notranslate">null</code>)</dt>
+        
+        <dd>
+                            Enables or disables lazy connections to the backend. It's <code translate="no" class="notranslate">false</code> by
+default when using this as a stand-alone component and <code translate="no" class="notranslate">true</code> by default
+when using it inside a Symfony application.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">redis_cluster</code> (type: <code translate="no" class="notranslate">bool</code>, default: <code translate="no" class="notranslate">false</code>)</dt>
+        
+        <dd>
+                            Enables or disables redis cluster. The actual value passed is irrelevant as long as it passes loose comparison
+checks: `redis_cluster=1` will suffice.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">redis_sentinel</code> (type: <code translate="no" class="notranslate">string</code>, default: <code translate="no" class="notranslate">null</code>)</dt>
+        
+        <dd>
+                            Specifies the master name connected to the sentinels.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">dbindex</code> (type: <code translate="no" class="notranslate">int</code>, default: <code translate="no" class="notranslate">0</code>)</dt>
+        
+        <dd>
+                            Specifies the database index to select.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">failover</code> (type: <code translate="no" class="notranslate">string</code>, default: <code translate="no" class="notranslate">none</code>)</dt>
+        
+        <dd>
+                            Specifies failover for cluster implementations. For <code translate="no" class="notranslate">\RedisCluster</code> valid options are <code translate="no" class="notranslate">none</code> (default),
+<code translate="no" class="notranslate">error</code>, <code translate="no" class="notranslate">distribute</code> or <code translate="no" class="notranslate">slaves</code>.  For <code translate="no" class="notranslate">\Predis\ClientInterface</code> valid options are <code translate="no" class="notranslate">slaves</code>
+or <code translate="no" class="notranslate">distribute</code>.
+                    </dd>
+                        <dt><code translate="no" class="notranslate">ssl</code> (type: <code translate="no" class="notranslate">bool</code>, default: <code translate="no" class="notranslate">null</code>)</dt>
+        
+        <dd>
+                            SSL context options. See <a href="https://php.net/context.ssl" class="reference external" rel="external noopener noreferrer" target="_blank">php.net/context.ssl</a> for more information.
+                    </dd>
+    </dl>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>When using the <a href="https://packagist.org/packages/predis/predis" class="reference external" rel="external noopener noreferrer" target="_blank">Predis</a> library some additional Predis-specific options are available.
+Reference the <a href="https://github.com/nrk/predis/wiki/Connection-Parameters#list-of-connection-parameters" class="reference external" rel="external noopener noreferrer" target="_blank">Predis Connection Parameters</a> documentation for more information.</p>
+</div>
+<span id="redis-tag-aware-adapter"></span>
+</div>
+</div>
+<div class="section">
+<h2 id="working-with-tags">
+    Working with Tags
+    <a class="headerlink" href="#working-with-tags" title="Permalink to this headline">¶</a>
+</h2>
+<p>In order to use tag-based invalidation, you can wrap your adapter in <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/TagAwareAdapter.php" class="reference external" title="Symfony\Component\Cache\Adapter\TagAwareAdapter" rel="external noopener noreferrer" target="_blank">TagAwareAdapter</a>, but when Redis is used as backend, it's often more interesting to use the dedicated <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Adapter/RedisTagAwareAdapter.php" class="reference external" title="Symfony\Component\Cache\Adapter\RedisTagAwareAdapter" rel="external noopener noreferrer" target="_blank">RedisTagAwareAdapter</a>. Since tag invalidation logic is implemented in Redis itself, this adapter offers better performance when using tag-based invalidation:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">RedisAdapter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">RedisTagAwareAdapter</span>;
+
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span> = RedisAdapter<span class="hljs-operator">::</span>createConnection(<span class="hljs-string">'redis://localhost'</span>);
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span> = <span class="hljs-keyword">new</span> RedisTagAwareAdapter(<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>client</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="section">
+<h3 id="configuring-redis">
+    Configuring Redis
+    <a class="headerlink" href="#configuring-redis" title="Permalink to this headline">¶</a>
+</h3>
+<p>When using Redis as cache, you should configure the <code translate="no" class="notranslate">maxmemory</code> and <code translate="no" class="notranslate">maxmemory-policy</code>
+settings. By setting <code translate="no" class="notranslate">maxmemory</code>, you limit how much memory Redis is allowed to consume.
+If the amount is too low, Redis will drop entries that would still be useful and you benefit
+less from your cache. Setting the <code translate="no" class="notranslate">maxmemory-policy</code> to <code translate="no" class="notranslate">allkeys-lru</code> tells Redis that
+it is ok to drop data when it runs out of memory, and to first drop the oldest entries (least
+recently used). If you do not allow Redis to drop entries, it will return an error when you
+try to add data when no memory is available. An example setting could look as follows:</p>
+<div translate="no" class="highlight-ini notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs ini">maxmemory 100mb
+maxmemory-policy allkeys-lru</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Read more about this topic in the official <a href="https://redis.io/topics/lru-cache" class="reference external" rel="external noopener noreferrer" target="_blank">Redis LRU Cache Documentation</a>.</p>
+</div>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,2121 @@
+        
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head><base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+                                
+    
+    <link rel="stylesheet" href="assets/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/highlightjs.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/badge_only.css" type="text/css" />
+
+</head>
+
+<body class="wy-body-for-nav">
+ <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
+                
+                                                                                                    
+                                                                                                                                                                        </div>
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                                                                                                                                                                                                                                                                                                                            </div>
+        </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                                                        
+
+        <div class="wy-nav-content">                <div class="rst-content">
+                                        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">                            <div itemprop="articleBody">
+                                    <div class="section">
+<h1 id="cache">
+    Cache
+    <a class="headerlink" href="#cache" title="Permalink to this headline">¶</a>
+</h1>
+<p>Using a cache is a great way of making your application run quicker. The Symfony cache
+component ships with many adapters to different storages. Every adapter is
+developed for high performance.</p>
+<p>The following example shows a typical usage of the cache:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">ItemInterface</span>;
+
+<span class="hljs-comment">// The callable will only be executed on a cache miss.</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pool</span><span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'my_cache_key'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ItemInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>item</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>item</span><span class="hljs-operator">-&gt;</span>expiresAfter(<span class="hljs-number">3600</span>);
+
+    <span class="hljs-comment">// ... do some HTTP request or heavy computations</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>computedValue</span> = <span class="hljs-string">'foobar'</span>;
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>computedValue</span>;
+});
+
+<span class="hljs-keyword">echo</span> <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value</span>; <span class="hljs-comment">// 'foobar'</span>
+
+<span class="hljs-comment">// ... and to remove the cache key</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>pool</span><span class="hljs-operator">-&gt;</span>delete(<span class="hljs-string">'my_cache_key'</span>);</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Symfony supports Cache Contracts and PSR-6/16 interfaces.
+You can read more about these at the <a href="components/cache.html" class="reference internal">component documentation</a>.</p>
+<span id="cache-configuration-with-frameworkbundle"></span>
+<div class="section">
+<h2 id="configuring-cache-with-frameworkbundle">
+    Configuring Cache with FrameworkBundle
+    <a class="headerlink" href="#configuring-cache-with-frameworkbundle" title="Permalink to this headline">¶</a>
+</h2>
+<p>When configuring the cache component there are a few concepts you should know
+of:</p>
+<dl>
+                        <dt><strong>Pool</strong></dt>
+        
+        <dd>
+                            This is a service that you will interact with. Each pool will always have
+its own namespace and cache items. There is never a conflict between pools.
+                    </dd>
+                        <dt><strong>Adapter</strong></dt>
+        
+        <dd>
+                            An adapter is a <em>template</em> that you use to create pools.
+                    </dd>
+                        <dt><strong>Provider</strong></dt>
+        
+        <dd>
+                            A provider is a service that some adapters use to connect to the storage.
+Redis and Memcached are examples of such adapters. If a DSN is used as the
+provider then a service is automatically created.
+                    </dd>
+    </dl>
+<p>There are two pools that are always enabled by default. They are <code translate="no" class="notranslate">cache.app</code> and
+<code translate="no" class="notranslate">cache.system</code>. The system cache is used for things like annotations, serializer,
+and validation. The <code translate="no" class="notranslate">cache.app</code> can be used in your code. You can configure which
+adapter (template) they use by using the <code translate="no" class="notranslate">app</code> and <code translate="no" class="notranslate">system</code> key like:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-e69cbe66b9758be1591a4d2073f881e6661b17b3" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-1ec697c2d3760c8ea1c792c9dbdcfd3d16a9d6d8" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-aaf056009971f8bd13711e9c961d62d741bd5807" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-e69cbe66b9758be1591a4d2073f881e6661b17b3" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/cache.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">cache:</span>
+        <span class="hljs-attr">app:</span> <span class="hljs-string">cache.adapter.filesystem</span>
+        <span class="hljs-attr">system:</span> <span class="hljs-string">cache.adapter.system</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-1ec697c2d3760c8ea1c792c9dbdcfd3d16a9d6d8" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/cache.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:cache</span>
+            <span class="hljs-attr">app</span>=<span class="hljs-string">"cache.adapter.filesystem"</span>
+            <span class="hljs-attr">system</span>=<span class="hljs-string">"cache.adapter.system"</span>
+        /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-aaf056009971f8bd13711e9c961d62d741bd5807" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/cache.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>cache()
+        <span class="hljs-operator">-&gt;</span>app(<span class="hljs-string">'cache.adapter.filesystem'</span>)
+        <span class="hljs-operator">-&gt;</span>system(<span class="hljs-string">'cache.adapter.system'</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>While it is possible to reconfigure the <code translate="no" class="notranslate">system</code> cache, it's recommended
+to keep the default configuration applied to it by Symfony.</p>
+</div>
+<p>The Cache component comes with a series of adapters pre-configured:</p>
+<ul>
+    <li><a href="components/cache/adapters/apcu_adapter.html" class="reference internal">cache.adapter.apcu</a></li>
+<li><a href="components/cache/adapters/array_cache_adapter.html" class="reference internal">cache.adapter.array</a></li>
+<li><a href="components/cache/adapters/filesystem_adapter.html" class="reference internal">cache.adapter.filesystem</a></li>
+<li><a href="components/cache/adapters/memcached_adapter.html" class="reference internal">cache.adapter.memcached</a></li>
+<li><a href="components/cache/adapters/pdo_doctrine_dbal_adapter.html" class="reference internal">cache.adapter.pdo</a></li>
+<li><a href="components/cache/adapters/proxy_adapter.html" class="reference internal">cache.adapter.psr6</a></li>
+<li><a href="components/cache/adapters/redis_adapter.html" class="reference internal">cache.adapter.redis</a></li>
+<li><a href="components/cache/adapters/redis_adapter.html#redis-tag-aware-adapter" class="reference internal">cache.adapter.redis_tag_aware</a> (Redis adapter optimized to work with tags)</li>
+</ul>
+<p>Some of these adapters could be configured via shortcuts. Using these shortcuts
+will create pools with service IDs that follow the pattern <code translate="no" class="notranslate">cache.[type]</code>.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-9b1b8a14e617de1b5497579a4257777b2516a910" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-97da5ebeeeac9562181a91bcdc7969c304db3b39" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-11704e22691847275b1b31c58add7e620dc5b07e" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-9b1b8a14e617de1b5497579a4257777b2516a910" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/cache.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">cache:</span>
+        <span class="hljs-attr">directory:</span> <span class="hljs-string">'%kernel.cache_dir%/pools'</span> <span class="hljs-comment"># Only used with cache.adapter.filesystem</span>
+
+        <span class="hljs-comment"># service: cache.psr6</span>
+        <span class="hljs-attr">default_psr6_provider:</span> <span class="hljs-string">'app.my_psr6_service'</span>
+        <span class="hljs-comment"># service: cache.redis</span>
+        <span class="hljs-attr">default_redis_provider:</span> <span class="hljs-string">'redis://localhost'</span>
+        <span class="hljs-comment"># service: cache.memcached</span>
+        <span class="hljs-attr">default_memcached_provider:</span> <span class="hljs-string">'memcached://localhost'</span>
+        <span class="hljs-comment"># service: cache.pdo</span>
+        <span class="hljs-attr">default_pdo_provider:</span> <span class="hljs-string">'doctrine.dbal.default_connection'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-97da5ebeeeac9562181a91bcdc7969c304db3b39" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/cache.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-comment">&lt;!--
+        default_psr6_provider: Service: cache.psr6
+        default_redis_provider: Service: cache.redis
+        default_memcached_provider: Service: cache.memcached
+        default_pdo_provider: Service: cache.pdo
+        --&gt;</span>
+        <span class="hljs-comment">&lt;!-- "directory" attribute is only used with cache.adapter.filesystem --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:cache</span> <span class="hljs-attr">directory</span>=<span class="hljs-string">"%kernel.cache_dir%/pools"</span>
+            <span class="hljs-attr">default_psr6_provider</span>=<span class="hljs-string">"app.my_psr6_service"</span>
+            <span class="hljs-attr">default_redis_provider</span>=<span class="hljs-string">"redis://localhost"</span>
+            <span class="hljs-attr">default_memcached_provider</span>=<span class="hljs-string">"memcached://localhost"</span>
+            <span class="hljs-attr">default_pdo_provider</span>=<span class="hljs-string">"doctrine.dbal.default_connection"</span>
+        /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-11704e22691847275b1b31c58add7e620dc5b07e" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/cache.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>cache()
+        <span class="hljs-comment">// Only used with cache.adapter.filesystem</span>
+        <span class="hljs-operator">-&gt;</span>directory(<span class="hljs-string">'%kernel.cache_dir%/pools'</span>)
+        <span class="hljs-comment">// Service: cache.psr6</span>
+        <span class="hljs-operator">-&gt;</span>defaultPsr6Provider(<span class="hljs-string">'app.my_psr6_service'</span>)
+        <span class="hljs-comment">// Service: cache.redis</span>
+        <span class="hljs-operator">-&gt;</span>defaultRedisProvider(<span class="hljs-string">'redis://localhost'</span>)
+        <span class="hljs-comment">// Service: cache.memcached</span>
+        <span class="hljs-operator">-&gt;</span>defaultMemcachedProvider(<span class="hljs-string">'memcached://localhost'</span>)
+        <span class="hljs-comment">// Service: cache.pdo</span>
+        <span class="hljs-operator">-&gt;</span>defaultPdoProvider(<span class="hljs-string">'doctrine.dbal.default_connection'</span>)
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<span id="cache-create-pools"></span>
+</div>
+<div class="section">
+<h2 id="creating-custom-namespaced-pools">
+    Creating Custom (Namespaced) Pools
+    <a class="headerlink" href="#creating-custom-namespaced-pools" title="Permalink to this headline">¶</a>
+</h2>
+<p>You can also create more customized pools:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-f7aa55c3913ee68cc9abe91fd940c6a681fbda0a" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-f58d4888a45cc2de59f2dcbd9d7cd476b19f1825" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-23bcd6d2e1f30a47941d7624cd5ae52c5aaa10a3" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-f7aa55c3913ee68cc9abe91fd940c6a681fbda0a" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/cache.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">cache:</span>
+        <span class="hljs-attr">default_memcached_provider:</span> <span class="hljs-string">'memcached://localhost'</span>
+
+        <span class="hljs-attr">pools:</span>
+            <span class="hljs-comment"># creates a "custom_thing.cache" service</span>
+            <span class="hljs-comment"># autowireable via "CacheInterface $customThingCache"</span>
+            <span class="hljs-comment"># uses the "app" cache configuration</span>
+            <span class="hljs-attr">custom_thing.cache:</span>
+                <span class="hljs-attr">adapter:</span> <span class="hljs-string">cache.app</span>
+
+            <span class="hljs-comment"># creates a "my_cache_pool" service</span>
+            <span class="hljs-comment"># autowireable via "CacheInterface $myCachePool"</span>
+            <span class="hljs-attr">my_cache_pool:</span>
+                <span class="hljs-attr">adapter:</span> <span class="hljs-string">cache.adapter.filesystem</span>
+
+            <span class="hljs-comment"># uses the default_memcached_provider from above</span>
+            <span class="hljs-attr">acme.cache:</span>
+                <span class="hljs-attr">adapter:</span> <span class="hljs-string">cache.adapter.memcached</span>
+
+            <span class="hljs-comment"># control adapter's configuration</span>
+            <span class="hljs-attr">foobar.cache:</span>
+                <span class="hljs-attr">adapter:</span> <span class="hljs-string">cache.adapter.memcached</span>
+                <span class="hljs-attr">provider:</span> <span class="hljs-string">'memcached://user:password@example.com'</span>
+
+            <span class="hljs-comment"># uses the "foobar.cache" pool as its backend but controls</span>
+            <span class="hljs-comment"># the lifetime and (like all pools) has a separate cache namespace</span>
+            <span class="hljs-attr">short_cache:</span>
+                <span class="hljs-attr">adapter:</span> <span class="hljs-string">foobar.cache</span>
+                <span class="hljs-attr">default_lifetime:</span> <span class="hljs-number">60</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-f58d4888a45cc2de59f2dcbd9d7cd476b19f1825" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/cache.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:cache</span> <span class="hljs-attr">default-memcached-provider</span>=<span class="hljs-string">"memcached://localhost"</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- creates a "custom_thing.cache" service
+                 autowireable via "CacheInterface $customThingCache"
+                 uses the "app" cache configuration --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:pool</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"custom_thing.cache"</span> <span class="hljs-attr">adapter</span>=<span class="hljs-string">"cache.app"</span>/&gt;</span>
+
+            <span class="hljs-comment">&lt;!-- creates a "my_cache_pool" service
+                 autowireable via "CacheInterface $myCachePool" --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:pool</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"my_cache_pool"</span> <span class="hljs-attr">adapter</span>=<span class="hljs-string">"cache.adapter.filesystem"</span>/&gt;</span>
+
+            <span class="hljs-comment">&lt;!-- uses the default_memcached_provider from above --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:pool</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"acme.cache"</span> <span class="hljs-attr">adapter</span>=<span class="hljs-string">"cache.adapter.memcached"</span>/&gt;</span>
+
+            <span class="hljs-comment">&lt;!-- control adapter's configuration --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:pool</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"foobar.cache"</span> <span class="hljs-attr">adapter</span>=<span class="hljs-string">"cache.adapter.memcached"</span>
+                <span class="hljs-attr">provider</span>=<span class="hljs-string">"memcached://user:password@example.com"</span>
+            /&gt;</span>
+
+            <span class="hljs-comment">&lt;!-- uses the "foobar.cache" pool as its backend but controls
+                 the lifetime and (like all pools) has a separate cache namespace --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:pool</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"short_cache"</span> <span class="hljs-attr">adapter</span>=<span class="hljs-string">"foobar.cache"</span> <span class="hljs-attr">default-lifetime</span>=<span class="hljs-string">"60"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:cache</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-23bcd6d2e1f30a47941d7624cd5ae52c5aaa10a3" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/cache.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>cache();
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>defaultMemcachedProvider(<span class="hljs-string">'memcached://localhost'</span>);
+
+    <span class="hljs-comment">// creates a "custom_thing.cache" service</span>
+    <span class="hljs-comment">// autowireable via "CacheInterface $customThingCache"</span>
+    <span class="hljs-comment">// uses the "app" cache configuration</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>pool(<span class="hljs-string">'custom_thing.cache'</span>)
+        <span class="hljs-operator">-&gt;</span>adapters([<span class="hljs-string">'cache.app'</span>]);
+
+    <span class="hljs-comment">// creates a "my_cache_pool" service</span>
+    <span class="hljs-comment">// autowireable via "CacheInterface $myCachePool"</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>pool(<span class="hljs-string">'my_cache_pool'</span>)
+        <span class="hljs-operator">-&gt;</span>adapters([<span class="hljs-string">'cache.adapter.filesystem'</span>]);
+
+    <span class="hljs-comment">// uses the default_memcached_provider from above</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>pool(<span class="hljs-string">'acme.cache'</span>)
+        <span class="hljs-operator">-&gt;</span>adapters([<span class="hljs-string">'cache.adapter.memcached'</span>]);
+
+     <span class="hljs-comment">// control adapter's configuration</span>
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>pool(<span class="hljs-string">'foobar.cache'</span>)
+        <span class="hljs-operator">-&gt;</span>adapters([<span class="hljs-string">'cache.adapter.memcached'</span>])
+        <span class="hljs-operator">-&gt;</span>provider(<span class="hljs-string">'memcached://user:password@example.com'</span>);
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>cache</span><span class="hljs-operator">-&gt;</span>pool(<span class="hljs-string">'short_cache'</span>)
+        <span class="hljs-operator">-&gt;</span>adapters([<span class="hljs-string">'foobar.cache'</span>])
+        <span class="hljs-operator">-&gt;</span>defaultLifetime(<span class="hljs-number">60</span>);
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Each pool manages a set of independent cache keys: keys from different pools
+<em>never</em> collide, even if they share the same backend. This is achieved by prefixing
+keys with a namespace that's generated by hashing the name of the pool, the name
+of the cache adapter class and a <a href="reference/configuration/framework.html#reference-cache-prefix-seed" class="reference internal">configurable seed</a>
+that defaults to the project directory and compiled container class.</p>
+<p>Each custom pool becomes a service whose service ID is the name of the pool
+(e.g. <code translate="no" class="notranslate">custom_thing.cache</code>). An autowiring alias is also created for each pool
+using the camel case version of its name - e.g. <code translate="no" class="notranslate">custom_thing.cache</code> can be
+injected automatically by naming the argument <code translate="no" class="notranslate">$customThingCache</code> and type-hinting it
+with either <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Contracts/Cache/CacheInterface.php" class="reference external" title="Symfony\Contracts\Cache\CacheInterface" rel="external noopener noreferrer" target="_blank">CacheInterface</a> or
+<code translate="no" class="notranslate">Psr\Cache\CacheItemPoolInterface</code>:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">CacheInterface</span>;
+
+<span class="hljs-comment">// from a controller method</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">listProducts</span><span class="hljs-params">(CacheInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>customThingCache</span>)</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// in a service</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(CacheInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>customThingCache</span>)</span>
+</span>{
+    <span class="hljs-comment">// ...</span>
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="admonition admonition-tip ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Tip</span>
+    </p><p>If you need the namespace to be interoperable with a third-party app,
+you can take control over auto-generation by setting the <code translate="no" class="notranslate">namespace</code>
+attribute of the <code translate="no" class="notranslate">cache.pool</code> service tag. For example, you can
+override the service definition of the adapter:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-45839512dd26235b7e1de2a4496a22faa475a4ad" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-035db5afb4da4c5104a1fdbd5f4bd32218817d2c" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-d78bf8a64894eea95295c355b15a1caa0ff9b945" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-45839512dd26235b7e1de2a4496a22faa475a4ad" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/services.yaml</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-attr">app.cache.adapter.redis:</span>
+        <span class="hljs-attr">parent:</span> <span class="hljs-string">'cache.adapter.redis'</span>
+        <span class="hljs-attr">tags:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">name:</span> <span class="hljs-string">'cache.pool'</span><span class="hljs-string">,</span> <span class="hljs-attr">namespace:</span> <span class="hljs-string">'my_custom_namespace'</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-035db5afb4da4c5104a1fdbd5f4bd32218817d2c" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/services.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"app.cache.adapter.redis"</span> <span class="hljs-attr">parent</span>=<span class="hljs-string">"cache.adapter.redis"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tag</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"cache.pool"</span> <span class="hljs-attr">namespace</span>=<span class="hljs-string">"my_custom_namespace"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-d78bf8a64894eea95295c355b15a1caa0ff9b945" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/services.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(ContainerConfigurator <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerConfigurator</span><span class="hljs-operator">-&gt;</span>services()
+        <span class="hljs-comment">// ...</span>
+
+        <span class="hljs-operator">-&gt;</span>set(<span class="hljs-string">'app.cache.adapter.redis'</span>)
+            <span class="hljs-operator">-&gt;</span><span class="hljs-keyword">parent</span>(<span class="hljs-string">'cache.adapter.redis'</span>)
+            <span class="hljs-operator">-&gt;</span>tag(<span class="hljs-string">'cache.pool'</span>, [<span class="hljs-string">'namespace'</span> =&gt; <span class="hljs-string">'my_custom_namespace'</span>])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="section">
+<h2 id="custom-provider-options">
+    Custom Provider Options
+    <a class="headerlink" href="#custom-provider-options" title="Permalink to this headline">¶</a>
+</h2>
+<p>Some providers have specific options that can be configured. The
+<a href="components/cache/adapters/redis_adapter.html" class="reference internal">RedisAdapter</a> allows you to
+create providers with the options <code translate="no" class="notranslate">timeout</code>, <code translate="no" class="notranslate">retry_interval</code>. etc. To use these
+options with non-default values you need to create your own <code translate="no" class="notranslate">\Redis</code> provider
+and use that when configuring the pool.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-a9d87c9f41b69f5baa4d84eea2cd641d600a947c" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-29fd1f5a07d9ab462b50f9271df44edb33e61b7f" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-ca7f2537c7c659d27a2c7596a9d446b96fa5d39a" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-a9d87c9f41b69f5baa4d84eea2cd641d600a947c" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/cache.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">cache:</span>
+        <span class="hljs-attr">pools:</span>
+            <span class="hljs-attr">cache.my_redis:</span>
+                <span class="hljs-attr">adapter:</span> <span class="hljs-string">cache.adapter.redis</span>
+                <span class="hljs-attr">provider:</span> <span class="hljs-string">app.my_custom_redis_provider</span>
+
+<span class="hljs-attr">services:</span>
+    <span class="hljs-attr">app.my_custom_redis_provider:</span>
+        <span class="hljs-attr">class:</span> <span class="hljs-string">\Redis</span>
+        <span class="hljs-attr">factory:</span> <span class="hljs-string">['Symfony\Component\Cache\Adapter\RedisAdapter',</span> <span class="hljs-string">'createConnection'</span><span class="hljs-string">]</span>
+        <span class="hljs-attr">arguments:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">'redis://localhost'</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">{</span> <span class="hljs-attr">retry_interval:</span> <span class="hljs-number">2</span><span class="hljs-string">,</span> <span class="hljs-attr">timeout:</span> <span class="hljs-number">10</span> <span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-29fd1f5a07d9ab462b50f9271df44edb33e61b7f" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/cache.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:cache</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:pool</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"cache.my_redis"</span>
+                <span class="hljs-attr">adapter</span>=<span class="hljs-string">"cache.adapter.redis"</span>
+                <span class="hljs-attr">provider</span>=<span class="hljs-string">"app.my_custom_redis_provider"</span>
+            /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:cache</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"app.my_custom_redis_provider"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"\Redis"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">factory</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"Symfony\Component\Cache\Adapter\RedisAdapter"</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"createConnection"</span>/&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">argument</span>&gt;</span>redis://localhost<span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">argument</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"collection"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">argument</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"retry_interval"</span>&gt;</span>2<span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">argument</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"timeout"</span>&gt;</span>10<span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-ca7f2537c7c659d27a2c7596a9d446b96fa5d39a" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/cache.php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Loader</span>\<span class="hljs-title">Configurator</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Adapter</span>\<span class="hljs-title">RedisAdapter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ContainerBuilder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ContainerBuilder <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span>, FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>cache()
+        <span class="hljs-operator">-&gt;</span>pool(<span class="hljs-string">'cache.my_redis'</span>)
+            <span class="hljs-operator">-&gt;</span>adapters([<span class="hljs-string">'cache.adapter.redis'</span>])
+            <span class="hljs-operator">-&gt;</span>provider(<span class="hljs-string">'app.my_custom_redis_provider'</span>);
+
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>containerBuilder</span><span class="hljs-operator">-&gt;</span>register(<span class="hljs-string">'app.my_custom_redis_provider'</span>, \Redis<span class="hljs-operator">::</span>class)
+        <span class="hljs-operator">-&gt;</span>setFactory([RedisAdapter<span class="hljs-operator">::</span>class, <span class="hljs-string">'createConnection'</span>])
+        <span class="hljs-operator">-&gt;</span>addArgument(<span class="hljs-string">'redis://localhost'</span>)
+        <span class="hljs-operator">-&gt;</span>addArgument([
+            <span class="hljs-string">'retry_interval'</span> =&gt; <span class="hljs-number">2</span>,
+            <span class="hljs-string">'timeout'</span> =&gt; <span class="hljs-number">10</span>
+        ])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h2 id="creating-a-cache-chain">
+    Creating a Cache Chain
+    <a class="headerlink" href="#creating-a-cache-chain" title="Permalink to this headline">¶</a>
+</h2>
+<p>Different cache adapters have different strengths and weaknesses. Some might be
+really quick but optimized to store small items and some may be able to contain
+a lot of data but are quite slow. To get the best of both worlds you may use a
+chain of adapters.</p>
+<p>A cache chain combines several cache pools into a single one. When storing an
+item in a cache chain, Symfony stores it in all pools sequentially. When
+retrieving an item, Symfony tries to get it from the first pool. If it's not
+found, it tries the next pools until the item is found or an exception is thrown.
+Because of this behavior, it's recommended to define the adapters in the chain
+in order from fastest to slowest.</p>
+<p>If an error happens when storing an item in a pool, Symfony stores it in the
+other pools and no exception is thrown. Later, when the item is retrieved,
+Symfony stores the item automatically in all the missing pools.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-343c278d5c4eb6834287592e15cc7408ce3f1e1b" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-05c0b1c0890b459c871451c0846ecbd8cff76c72" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-7497d6261f15044579082e15e72b7cdba1f6129b" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-343c278d5c4eb6834287592e15cc7408ce3f1e1b" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/cache.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">cache:</span>
+        <span class="hljs-attr">pools:</span>
+            <span class="hljs-attr">my_cache_pool:</span>
+                <span class="hljs-attr">default_lifetime:</span> <span class="hljs-number">31536000</span>  <span class="hljs-comment"># One year</span>
+                <span class="hljs-attr">adapters:</span>
+                  <span class="hljs-bullet">-</span> <span class="hljs-string">cache.adapter.array</span>
+                  <span class="hljs-bullet">-</span> <span class="hljs-string">cache.adapter.apcu</span>
+                  <span class="hljs-bullet">-</span> <span class="hljs-string">{name:</span> <span class="hljs-string">cache.adapter.redis,</span> <span class="hljs-attr">provider:</span> <span class="hljs-string">'redis://user:password@example.com'</span><span class="hljs-string">}</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-05c0b1c0890b459c871451c0846ecbd8cff76c72" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/cache.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:cache</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:pool</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"my_cache_pool"</span>
+                <span class="hljs-attr">default-lifetime</span>=<span class="hljs-string">"31536000"</span>&gt;</span> <span class="hljs-comment">&lt;!-- One year --&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:adapter</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"cache.adapter.array"</span>/&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:adapter</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"cache.adapter.apcu"</span>/&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">framework:adapter</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"cache.adapter.redis"</span> <span class="hljs-attr">provider</span>=<span class="hljs-string">"redis://user:password@example.com"</span>/&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">framework:pool</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:cache</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-7497d6261f15044579082e15e72b7cdba1f6129b" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/cache.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>cache()
+        <span class="hljs-operator">-&gt;</span>pool(<span class="hljs-string">'my_cache_pool'</span>)
+            <span class="hljs-operator">-&gt;</span>defaultLifetime(<span class="hljs-number">31536000</span>) <span class="hljs-comment">// One year</span>
+            <span class="hljs-operator">-&gt;</span>adapters([
+                <span class="hljs-string">'cache.adapter.array'</span>,
+                <span class="hljs-string">'cache.adapter.apcu'</span>,
+                [<span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'cache.adapter.redis'</span>, <span class="hljs-string">'provider'</span> =&gt; <span class="hljs-string">'redis://user:password@example.com'</span>],
+            ])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+<div class="section">
+<h2 id="using-cache-tags">
+    Using Cache Tags
+    <a class="headerlink" href="#using-cache-tags" title="Permalink to this headline">¶</a>
+</h2>
+<p>In applications with many cache keys it could be useful to organize the data stored
+to be able to invalidate the cache more efficiently. One way to achieve that is to
+use cache tags. One or more tags could be added to the cache item. All items with
+the same key could be invalidated with one function call:</p>
+<div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">ItemInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">TagAwareCacheInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SomeClass</span>
+</span>{
+    <span class="hljs-comment">// using autowiring to inject the cache pool</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(
+        private TagAwareCacheInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>myCachePool</span>,
+    )</span> </span>{
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">someMethod</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value0</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>myCachePool<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'item_0'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ItemInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>item</span>)</span> </span>{
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>item</span><span class="hljs-operator">-&gt;</span>tag([<span class="hljs-string">'foo'</span>, <span class="hljs-string">'bar'</span>]);
+
+            <span class="hljs-keyword">return</span> <span class="hljs-string">'debug'</span>;
+        });
+
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>value1</span> = <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>myCachePool<span class="hljs-operator">-&gt;</span>get(<span class="hljs-string">'item_1'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(ItemInterface <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>item</span>)</span> </span>{
+            <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>item</span><span class="hljs-operator">-&gt;</span>tag(<span class="hljs-string">'foo'</span>);
+
+            <span class="hljs-keyword">return</span> <span class="hljs-string">'debug'</span>;
+        });
+
+        <span class="hljs-comment">// Remove all cache keys tagged with "bar"</span>
+        <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>this</span><span class="hljs-operator">-&gt;</span>myCachePool<span class="hljs-operator">-&gt;</span>invalidateTags([<span class="hljs-string">'bar'</span>]);
+    }
+}</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>The cache adapter needs to implement <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Contracts/Cache/TagAwareCacheInterface.php" class="reference external" title="Symfony\Contracts\Cache\TagAwareCacheInterface" rel="external noopener noreferrer" target="_blank">TagAwareCacheInterface</a>
+to enable this feature. This could be added by using the following configuration.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-4a6f8230359f9fc727ccfdec937df418f0714e93" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-0a653892ba52005d127341a8131ed8be48495ad4" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-768bfae8a342ff360a298d90880494435e76f306" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-4a6f8230359f9fc727ccfdec937df418f0714e93" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/cache.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">cache:</span>
+        <span class="hljs-attr">pools:</span>
+            <span class="hljs-attr">my_cache_pool:</span>
+                <span class="hljs-attr">adapter:</span> <span class="hljs-string">cache.adapter.redis</span>
+                <span class="hljs-attr">tags:</span> <span class="hljs-literal">true</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-0a653892ba52005d127341a8131ed8be48495ad4" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/cache.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:cache</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:pool</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"my_cache_pool"</span>
+                <span class="hljs-attr">adapter</span>=<span class="hljs-string">"cache.adapter.redis"</span>
+                <span class="hljs-attr">tags</span>=<span class="hljs-string">"true"</span>
+            /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:cache</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-768bfae8a342ff360a298d90880494435e76f306" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/cache.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>cache()
+        <span class="hljs-operator">-&gt;</span>pool(<span class="hljs-string">'my_cache_pool'</span>)
+            <span class="hljs-operator">-&gt;</span>tags(<span class="hljs-keyword">true</span>)
+            <span class="hljs-operator">-&gt;</span>adapters([<span class="hljs-string">'cache.adapter.redis'</span>])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<p>Tags are stored in the same pool by default. This is good in most scenarios. But
+sometimes it might be better to store the tags in a different pool. That could be
+achieved by specifying the adapter.</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-0e66964a87f344f921c26a8a218ca3e356b6322a" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-4d8d14c14509cdec33247f5c14d6fa2276c2b539" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-b9e8c277bd501f45cb8acd539bf98b4506c247c2" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-0e66964a87f344f921c26a8a218ca3e356b6322a" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/cache.yaml</span>
+<span class="hljs-attr">framework:</span>
+    <span class="hljs-attr">cache:</span>
+        <span class="hljs-attr">pools:</span>
+            <span class="hljs-attr">my_cache_pool:</span>
+                <span class="hljs-attr">adapter:</span> <span class="hljs-string">cache.adapter.redis</span>
+                <span class="hljs-attr">tags:</span> <span class="hljs-string">tag_pool</span>
+            <span class="hljs-attr">tag_pool:</span>
+                <span class="hljs-attr">adapter:</span> <span class="hljs-string">cache.adapter.apcu</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-4d8d14c14509cdec33247f5c14d6fa2276c2b539" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/cache.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>
+&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">framework:config</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">framework:cache</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:pool</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"my_cache_pool"</span>
+                <span class="hljs-attr">adapter</span>=<span class="hljs-string">"cache.adapter.redis"</span>
+                <span class="hljs-attr">tags</span>=<span class="hljs-string">"tag_pool"</span>
+            /&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">framework:pool</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"tag_pool"</span> <span class="hljs-attr">adapter</span>=<span class="hljs-string">"cache.adapter.apcu"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">framework:cache</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">framework:config</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-b9e8c277bd501f45cb8acd539bf98b4506c247c2" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/cache.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Config</span>\<span class="hljs-title">FrameworkConfig</span>;
+
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(FrameworkConfig <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span>)</span> </span>{
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>cache()
+        <span class="hljs-operator">-&gt;</span>pool(<span class="hljs-string">'my_cache_pool'</span>)
+            <span class="hljs-operator">-&gt;</span>tags(<span class="hljs-string">'tag_pool'</span>)
+            <span class="hljs-operator">-&gt;</span>adapters([<span class="hljs-string">'cache.adapter.redis'</span>])
+    ;
+
+    <span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>framework</span><span class="hljs-operator">-&gt;</span>cache()
+        <span class="hljs-operator">-&gt;</span>pool(<span class="hljs-string">'tag_pool'</span>)
+            <span class="hljs-operator">-&gt;</span>adapters([<span class="hljs-string">'cache.adapter.apcu'</span>])
+    ;
+};</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-note ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <span>Note</span>
+    </p><p>The interface <a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Contracts/Cache/TagAwareCacheInterface.php" class="reference external" title="Symfony\Contracts\Cache\TagAwareCacheInterface" rel="external noopener noreferrer" target="_blank">TagAwareCacheInterface</a> is
+autowired to the <code translate="no" class="notranslate">cache.app</code> service.</p>
+</div>
+</div>
+<div class="section">
+<h2 id="clearing-the-cache">
+    Clearing the Cache
+    <a class="headerlink" href="#clearing-the-cache" title="Permalink to this headline">¶</a>
+</h2>
+<p>To clear the cache you can use the <code translate="no" class="notranslate">bin/console cache:pool:clear [pool]</code> command.
+That will remove all the entries from your storage and you will have to recalculate
+all the values. You can also group your pools into &quot;cache clearers&quot;. There are 3 cache
+clearers by default:</p>
+<ul>
+    <li><code translate="no" class="notranslate">cache.global_clearer</code></li>
+<li><code translate="no" class="notranslate">cache.system_clearer</code></li>
+<li><code translate="no" class="notranslate">cache.app_clearer</code></li>
+</ul>
+<p>The global clearer clears all the cache items in every pool. The system cache clearer
+is used in the <code translate="no" class="notranslate">bin/console cache:clear</code> command. The app clearer is the default
+clearer.</p>
+<p>To see all available cache pools:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console cache:pool:list</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Clear one pool:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console cache:pool:clear my_cache_pool</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Clear all custom pools:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console cache:pool:clear cache.app_clearer</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Clear all caches everywhere:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php bin/console cache:pool:clear cache.global_clearer</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Clear cache by tag(s):</p>
+<div class="admonition admonition-versionadded ">
+    <p class="admonition-title">
+                                    <span>6.1</span>
+    </p><p>The <code translate="no" class="notranslate">cache:pool:invalidate-tags</code> command was introduced in Symfony 6.1.</p>
+</div>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-comment"># invalidate tag1 from all taggable pools</span>
+<span class="hljs-prompt">$ </span>php bin/console cache:pool:invalidate-tags tag1
+
+<span class="hljs-comment"># invalidate tag1 &amp; tag2 from all taggable pools</span>
+<span class="hljs-prompt">$ </span>php bin/console cache:pool:invalidate-tags tag1 tag2
+
+<span class="hljs-comment"># invalidate tag1 &amp; tag2 from cache.app pool</span>
+<span class="hljs-prompt">$ </span>php bin/console cache:pool:invalidate-tags tag1 tag2 --pool=cache.app
+
+<span class="hljs-comment"># invalidate tag1 &amp; tag2 from cache1 &amp; cache2 pools</span>
+<span class="hljs-prompt">$ </span>php bin/console cache:pool:invalidate-tags tag1 tag2 -p cache1 -p cache2</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="section">
+<h2 id="encrypting-the-cache">
+    Encrypting the Cache
+    <a class="headerlink" href="#encrypting-the-cache" title="Permalink to this headline">¶</a>
+</h2>
+<p>To encrypt the cache using <code translate="no" class="notranslate">libsodium</code>, you can use the
+<a href="https://github.com/symfony/symfony/blob/5.4/src/Symfony/Component/Cache/Marshaller/SodiumMarshaller.php" class="reference external" title="Symfony\Component\Cache\Marshaller\SodiumMarshaller" rel="external noopener noreferrer" target="_blank">SodiumMarshaller</a>.</p>
+<p>First, you need to generate a secure key and add it to your <a href="configuration/secrets.html" class="reference internal">secret
+store</a> as <code translate="no" class="notranslate">CACHE_DECRYPTION_KEY</code>:</p>
+<div translate="no" class="highlight-terminal highlight-bash notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs terminal bash"><span class="hljs-prompt">$ </span>php -r <span class="hljs-string">'echo base64_encode(sodium_crypto_box_keypair());'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>Then, register the <code translate="no" class="notranslate">SodiumMarshaller</code> service using this key:</p>
+<div class="configuration-block">
+    <div role="tablist" aria-label="Configuration formats" class="configuration-tabs configuration-tabs-length-3">
+                    <button role="tab" type="button" data-language="yaml"
+                aria-controls="configuration-block-tabpanel-56c650ed6cd41032004c0e7d2dc590d5a4b6b722" aria-selected="true"
+                data-active="true" >
+                <span>YAML</span>
+            </button>
+                    <button role="tab" type="button" data-language="xml"
+                aria-controls="configuration-block-tabpanel-5454794991e6a3e50a795a5d06360a5d35bc5cde" aria-selected="false"
+                 tabindex="-1">
+                <span>XML</span>
+            </button>
+                    <button role="tab" type="button" data-language="php"
+                aria-controls="configuration-block-tabpanel-511c842ee5f9a4a8d5e38a4948ef0be7d9cbc109" aria-selected="false"
+                 tabindex="-1">
+                <span>PHP</span>
+            </button>
+            </div>
+
+            <div role="tabpanel" id="configuration-block-tabpanel-56c650ed6cd41032004c0e7d2dc590d5a4b6b722" aria-label="YAML" class="configuration-codeblock" data-language="yaml" style="">
+            <div translate="no" class="highlight-yaml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs yaml"><span class="hljs-comment"># config/packages/cache.yaml</span>
+
+<span class="hljs-comment"># ...</span>
+<span class="hljs-attr">services:</span>
+    <span class="hljs-string">Symfony\Component\Cache\Marshaller\SodiumMarshaller:</span>
+        <span class="hljs-attr">decorates:</span> <span class="hljs-string">cache.default_marshaller</span>
+        <span class="hljs-attr">arguments:</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">['%env(base64:CACHE_DECRYPTION_KEY)%']</span>
+            <span class="hljs-comment"># use multiple keys in order to rotate them</span>
+            <span class="hljs-comment">#- ['%env(base64:CACHE_DECRYPTION_KEY)%', '%env(base64:OLD_CACHE_DECRYPTION_KEY)%']</span>
+            <span class="hljs-bullet">-</span> <span class="hljs-string">'@Symfony\Component\Cache\Marshaller\SodiumMarshaller.inner'</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-5454794991e6a3e50a795a5d06360a5d35bc5cde" aria-label="XML" class="configuration-codeblock" data-language="xml" style="display: none">
+            <div translate="no" class="highlight-xml notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs xml"><span class="hljs-comment">&lt;!-- config/packages/cache.xml --&gt;</span>
+<span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">container</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services"</span>
+    <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">"http://www.w3.org/2001/XMLSchema-instance"</span>
+    <span class="hljs-attr">xmlns:framework</span>=<span class="hljs-string">"http://symfony.com/schema/dic/symfony"</span>
+    <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">"http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd
+        http://symfony.com/schema/dic/symfony
+        https://symfony.com/schema/dic/symfony/symfony-1.0.xsd"</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">services</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">service</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"Symfony\Component\Cache\Marshaller\SodiumMarshaller"</span> <span class="hljs-attr">decorates</span>=<span class="hljs-string">"cache.default_marshaller"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">argument</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"collection"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">argument</span>&gt;</span>env(base64:CACHE_DECRYPTION_KEY)<span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+                <span class="hljs-comment">&lt;!-- use multiple keys in order to rotate them --&gt;</span>
+                <span class="hljs-comment">&lt;!-- &lt;argument&gt;env(base64:OLD_CACHE_DECRYPTION_KEY)&lt;/argument&gt; --&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">argument</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">argument</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"service"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"Symfony\Component\Cache\Marshaller\SodiumMarshaller.inner"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">service</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">services</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">container</span>&gt;</span></pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+            <div role="tabpanel" id="configuration-block-tabpanel-511c842ee5f9a4a8d5e38a4948ef0be7d9cbc109" aria-label="PHP" class="configuration-codeblock" data-language="php" style="display: none">
+            <div translate="no" class="highlight-php notranslate">
+    <table class="highlighttable">
+        <tbody>
+            <tr>
+                <td class="linenos">
+                    <div class="linenodiv">
+                        <pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre>
+                    </div>
+                </td>
+                <td class="code">
+                    <div class="highlight">
+                        <pre class="hljs php"><span class="hljs-comment">// config/packages/cache.php</span>
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Marshaller</span>\<span class="hljs-title">SodiumMarshaller</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">ChildDefinition</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">DependencyInjection</span>\<span class="hljs-title">Reference</span>;
+
+<span class="hljs-comment">// ...</span>
+<span class="hljs-variable"><span class="hljs-variable-other-marker">$</span>container</span><span class="hljs-operator">-&gt;</span>setDefinition(SodiumMarshaller<span class="hljs-operator">::</span>class, <span class="hljs-keyword">new</span> ChildDefinition(<span class="hljs-string">'cache.default_marshaller'</span>))
+    <span class="hljs-operator">-&gt;</span>addArgument([<span class="hljs-string">'env(base64:CACHE_DECRYPTION_KEY)'</span>])
+    <span class="hljs-comment">// use multiple keys in order to rotate them</span>
+    <span class="hljs-comment">//-&gt;addArgument(['env(base64:CACHE_DECRYPTION_KEY)', 'env(base64:OLD_CACHE_DECRYPTION_KEY)'])</span>
+    <span class="hljs-operator">-&gt;</span>addArgument(<span class="hljs-keyword">new</span> Reference(SodiumMarshaller<span class="hljs-operator">::</span>class.<span class="hljs-string">'.inner'</span>));</pre>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<div class="admonition admonition-caution ">
+    <p class="admonition-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>Caution</span>
+    </p><p>This will encrypt the values of the cache items, but not the cache keys. Be
+careful not to leak sensitive data in the keys.</p>
+</div>
+<p>When configuring multiple keys, the first key will be used for reading and
+writing, and the additional key(s) will only be used for reading. Once all
+cache items encrypted with the old key have expired, you can completely remove
+<code translate="no" class="notranslate">OLD_CACHE_DECRYPTION_KEY</code>.</p>
+</div>
+</div>
+
+                            </div>                    </div>
+                                    </div>        </div>
+
+    </section>
+
+</div>
+
+
+<script type="text/javascript" src="assets/js/theme.js"></script>
+<script type="text/javascript" src="assets/js/badge_only.js"></script>
+
+ 
+</body>
+</html>
